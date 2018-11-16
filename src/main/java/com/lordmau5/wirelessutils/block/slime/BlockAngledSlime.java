@@ -142,6 +142,17 @@ public class BlockAngledSlime extends BlockBase {
         if ( MinecraftForge.EVENT_BUS.post(event) || event.getResult() == Event.Result.DENY )
             return false;
 
+        /*ItemStack stack = player.getHeldItem(hand);
+        if ( stack.getItem() == Items.BED && stack.getDisplayName().equalsIgnoreCase("debug") ) {
+            if ( world.isRemote ) {
+                state = getActualState(state, world, pos);
+                drawRays(state, world, pos, side);
+                drawCube(state, world, pos);
+            }
+
+            return true;
+        }*/
+
         if ( WrenchHelper.isHoldingUsableWrench(player, ray) )
             return false;
 
@@ -204,6 +215,10 @@ public class BlockAngledSlime extends BlockBase {
         Vector3d cornerH = new Vector3d(bb.maxX, bb.maxY, bb.maxZ);
 
         Matrix4d transformation = getTransformation(state);
+        if ( transformation == null )
+            return;
+
+        transformation.invert();
 
         transformation.transform(cornerA);
         transformation.transform(cornerB);
@@ -338,19 +353,35 @@ public class BlockAngledSlime extends BlockBase {
         double rotationY = 0;
         double rotationZ = 0;
 
-        if ( rotState == 0 ) {
+        if ( rotState == 0 || rotState > 3 ) {
             Matrix4d out = new Matrix4d();
             out.setIdentity();
             return out;
+        }
 
-        } else if ( rotState == 1 ) {
-            rotation = Math.toRadians(67.5);
+        if ( attachment == EnumOmniFacing.EAST || attachment == EnumOmniFacing.EAST_ROT || attachment == EnumOmniFacing.SOUTH_ROT || attachment == EnumOmniFacing.WEST_ROT || attachment == EnumOmniFacing.NORTH_ROT ) {
+            if ( rotState == 1 )
+                rotation = 22.5;
+            else if ( rotState == 2 )
+                rotation = 45;
+            else
+                rotation = 67.5;
 
-        } else if ( rotState == 2 ) {
-            rotation = Math.toRadians(45);
+        } else if ( attachment == EnumOmniFacing.SOUTH || attachment == EnumOmniFacing.WEST || attachment == EnumOmniFacing.DOWN_ROT || attachment == EnumOmniFacing.UP_ROT ) {
+            if ( rotState == 1 )
+                rotation = -22.5;
+            else if ( rotState == 2 )
+                rotation = -45;
+            else
+                rotation = -67.5;
 
-        } else if ( rotState == 3 ) {
-            rotation = Math.toRadians(22.5);
+        } else if ( attachment == EnumOmniFacing.NORTH || attachment == EnumOmniFacing.DOWN || attachment == EnumOmniFacing.UP ) {
+            if ( rotState == 1 )
+                rotation = -22.5;
+            else if ( rotState == 2 )
+                rotation = 45;
+            else
+                rotation = -67.5;
 
         } else
             return null;
@@ -359,11 +390,11 @@ public class BlockAngledSlime extends BlockBase {
                 q1 = new Quat4d();
 
         if ( axis == EnumFacing.Axis.X )
-            rotationX = rotation;
+            rotationX = Math.toRadians(rotation);
         else if ( axis == EnumFacing.Axis.Y )
-            rotationY = rotation;
+            rotationY = Math.toRadians(rotation);
         else if ( axis == EnumFacing.Axis.Z )
-            rotationZ = rotation;
+            rotationZ = Math.toRadians(rotation);
 
         q1.set(0, Math.sin(rotationY / 2), 0, Math.cos(rotationY / 2));
         quat.mul(q1);
@@ -417,6 +448,9 @@ public class BlockAngledSlime extends BlockBase {
         Vec3d alignedPos = new Vec3d(tPosition.x, tPosition.y, tPosition.z);
         Vec3d alignedSecond = new Vec3d(tPosition.x + tVelocity.x, tPosition.y + tVelocity.y, tPosition.z + tVelocity.z);
 
+        /*if ( world != null && world.isRemote )
+            drawParticleLine(EnumParticleTypes.CLOUD, world, alignedPos.add(offsetX, offsetY, offsetZ), alignedSecond.add(offsetX, offsetY, offsetZ), 10);*/
+
         RayTraceResult result = INTERNAL_BOX.calculateIntercept(alignedPos, alignedSecond);
         if ( result == null )
             return null;
@@ -444,6 +478,9 @@ public class BlockAngledSlime extends BlockBase {
 
         // Finally, now that we've bounced, apply the inverse of our transformation
         // matrix to the results to put them back into world space. Then, return them!
+
+        /*if ( world != null && world.isRemote )
+            drawParticleLine(EnumParticleTypes.FLAME, world, new Vec3d(tPosition.x + offsetX, tPosition.y + offsetY, tPosition.z + offsetZ), new Vec3d(tPosition.x + offsetX + tVelocity.x, tPosition.y + offsetY + tVelocity.y, tPosition.z + offsetZ + tVelocity.z), 10);*/
 
         transformation.invert();
 

@@ -7,10 +7,7 @@ import com.lordmau5.wirelessutils.item.ItemGlasses;
 import com.lordmau5.wirelessutils.item.ItemMachinePanel;
 import com.lordmau5.wirelessutils.item.ItemPositionalCard;
 import com.lordmau5.wirelessutils.item.augment.*;
-import com.lordmau5.wirelessutils.item.pearl.ItemChargedPearl;
-import com.lordmau5.wirelessutils.item.pearl.ItemFluxedPearl;
-import com.lordmau5.wirelessutils.item.pearl.ItemQuenchedPearl;
-import com.lordmau5.wirelessutils.item.pearl.ItemScorchedPearl;
+import com.lordmau5.wirelessutils.item.pearl.*;
 import com.lordmau5.wirelessutils.item.upgrade.ItemConversionUpgrade;
 import com.lordmau5.wirelessutils.item.upgrade.ItemLevelUpgrade;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
@@ -50,6 +47,9 @@ public class ModItems {
 
     @GameRegistry.ObjectHolder("wirelessutils:scorched_pearl")
     public static ItemScorchedPearl itemScorchedPearl;
+
+    @GameRegistry.ObjectHolder("wirelessutils:stabilized_ender_pearl")
+    public static ItemStabilizedEnderPearl itemStabilizedEnderPearl;
 
     @GameRegistry.ObjectHolder("wirelessutils:base_augment")
     public static ItemBaseAugment itemBaseAugment;
@@ -142,6 +142,7 @@ public class ModItems {
         itemChargedPearl.initModel();
         itemQuenchedPearl.initModel();
         itemScorchedPearl.initModel();
+        itemStabilizedEnderPearl.initModel();
         itemRangeAugment.initModel();
         itemSlotAugment.initModel();
         itemInventoryAugment.initModel();

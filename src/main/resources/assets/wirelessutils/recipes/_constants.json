@@ -33,6 +33,20 @@
 		}
 	},
 	{
+		"name": "STICK",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "stickWood"
+		}
+	},
+	{
+		"name": "STONE",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "stone"
+		}
+	},
+	{
 		"name": "STICKY_PISTON",
 		"ingredient": {
 			"item": "minecraft:sticky_piston"

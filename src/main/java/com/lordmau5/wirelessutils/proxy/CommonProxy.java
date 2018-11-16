@@ -13,17 +13,11 @@ import com.lordmau5.wirelessutils.block.redstone.BlockPoweredRedstoneWire;
 import com.lordmau5.wirelessutils.block.slime.BlockAngledSlime;
 import com.lordmau5.wirelessutils.commands.DebugCommand;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
-import com.lordmau5.wirelessutils.entity.pearl.EntityChargedPearl;
-import com.lordmau5.wirelessutils.entity.pearl.EntityFluxedPearl;
-import com.lordmau5.wirelessutils.entity.pearl.EntityQuenchedPearl;
-import com.lordmau5.wirelessutils.entity.pearl.EntityScorchedPearl;
+import com.lordmau5.wirelessutils.entity.pearl.*;
 import com.lordmau5.wirelessutils.item.*;
 import com.lordmau5.wirelessutils.item.augment.*;
 import com.lordmau5.wirelessutils.item.base.IEnhancedItem;
-import com.lordmau5.wirelessutils.item.pearl.ItemChargedPearl;
-import com.lordmau5.wirelessutils.item.pearl.ItemFluxedPearl;
-import com.lordmau5.wirelessutils.item.pearl.ItemQuenchedPearl;
-import com.lordmau5.wirelessutils.item.pearl.ItemScorchedPearl;
+import com.lordmau5.wirelessutils.item.pearl.*;
 import com.lordmau5.wirelessutils.item.upgrade.ItemConversionUpgrade;
 import com.lordmau5.wirelessutils.item.upgrade.ItemLevelUpgrade;
 import com.lordmau5.wirelessutils.plugins.PluginRegistry;
@@ -61,6 +55,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +71,9 @@ public class CommonProxy {
 
     public void init(FMLInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(WirelessUtils.instance, new GuiHandler());
+
+        if ( ModItems.itemStabilizedEnderPearl != null )
+            OreDictionary.registerOre("enderpearl", ModItems.itemStabilizedEnderPearl);
 
         EntityFluxedPearl.initReactions();
         ModAdvancements.initTriggers();
@@ -162,6 +160,13 @@ public class CommonProxy {
                 .name("scorched_pearl")
                 .tracker(64, 20, true)
                 .build());
+
+        event.getRegistry().register(EntityEntryBuilder.create()
+                .entity(EntityStabilizedEnderPearl.class)
+                .id(new ResourceLocation(WirelessUtils.MODID, "stabilized_ender_pearl"), id++)
+                .name("stabilized_ender_pearl")
+                .tracker(64, 20, true)
+                .build());
     }
 
     @SuppressWarnings("unused")
@@ -225,6 +230,7 @@ public class CommonProxy {
         event.getRegistry().register(new ItemChargedPearl());
         event.getRegistry().register(new ItemQuenchedPearl());
         event.getRegistry().register(new ItemScorchedPearl());
+        event.getRegistry().register(new ItemStabilizedEnderPearl());
 
         event.getRegistry().register(new ItemPositionalCard());
         event.getRegistry().register(new ItemGlasses());

@@ -6,7 +6,7 @@
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "https://minecraft.curseforge.com/projects/wireless-utilities",
-  "updateJSON": "",
+  "updateJSON": "https://raw.github.com/sirstendec/wirelessutilities/master/update.json",
   "authorList": ["Stendec", "Lordmau5"],
   "logoFile": "assets/wirelessutils/textures/logo.png",
   "screenshots": [],

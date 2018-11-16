@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"APA"
+	],
+	"key": {
+		"A": {
+			"item": "minecraft:arrow"
+		},
+		"P": {
+			"item": "minecraft:ender_pearl"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:stabilized_ender_pearl",
+		"data": 0,
+		"count": 1
+	}
+}
