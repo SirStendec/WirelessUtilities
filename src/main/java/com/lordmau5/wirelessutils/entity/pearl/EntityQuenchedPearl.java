@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
@@ -38,6 +39,14 @@ public class EntityQuenchedPearl extends EntityBaseThrowable {
 
     public EntityQuenchedPearl(World world, double x, double y, double z, ItemStack stack) {
         super(world, x, y, z, stack);
+    }
+
+    @Override
+    public void onUpdate() {
+        super.onUpdate();
+
+        if ( world.isRemote && !isDead )
+            world.spawnParticle(EnumParticleTypes.WATER_SPLASH, posX, posY, posZ, rand.nextGaussian(), rand.nextGaussian(), rand.nextGaussian());
     }
 
     @Override

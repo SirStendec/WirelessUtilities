@@ -85,7 +85,7 @@ public class EntityChargedPearl extends EntityBaseThrowable {
     public void onUpdate() {
         super.onUpdate();
 
-        if ( world.isRemote || !(isInWater() || isInLava()) )
+        if ( world.isRemote || !(isInLava() || isInWater()) )
             return;
 
         BlockPos pos = getPosition();

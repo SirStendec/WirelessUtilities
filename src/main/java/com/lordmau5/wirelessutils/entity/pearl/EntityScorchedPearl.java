@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
@@ -40,6 +41,14 @@ public class EntityScorchedPearl extends EntityBaseThrowable {
 
     public EntityScorchedPearl(World world, double x, double y, double z, ItemStack stack) {
         super(world, x, y, z, stack);
+    }
+
+    @Override
+    public void onUpdate() {
+        super.onUpdate();
+
+        if ( world.isRemote && !isDead )
+            world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, posX, posY, posZ, 0.2 * motionX, 0.2 * motionY, 0.2 * motionZ);
     }
 
     @Override

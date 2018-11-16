@@ -91,6 +91,9 @@ public class EntityFluxedPearl extends EntityBaseThrowable {
     public void onUpdate() {
         super.onUpdate();
 
+        if ( world.isRemote && !isDead )
+            world.spawnParticle(EnumParticleTypes.REDSTONE, posX, posY, posZ, 0, 0, 0);
+
         if ( isDead || world.isRemote || spawnedLightning || !canAttractLightning() )
             return;
 
