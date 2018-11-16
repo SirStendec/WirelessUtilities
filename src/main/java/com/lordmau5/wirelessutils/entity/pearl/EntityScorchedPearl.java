@@ -7,7 +7,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
@@ -43,6 +45,10 @@ public class EntityScorchedPearl extends EntityBaseThrowable {
     @Override
     protected void onImpact(RayTraceResult result) {
         if ( !world.isRemote ) {
+            BlockPos pos = result.getBlockPos().offset(result.sideHit);
+            if ( world.isAirBlock(pos) )
+                world.setBlockState(pos, Blocks.FIRE.getDefaultState());
+
             dropItemWithMeta(ModItems.itemScorchedPearl, 1);
             setDead();
         }
