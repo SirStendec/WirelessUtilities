@@ -11,8 +11,7 @@ import com.lordmau5.wirelessutils.block.desublimator.BlockPositionalDesublimator
 import com.lordmau5.wirelessutils.block.redstone.BlockPoweredAir;
 import com.lordmau5.wirelessutils.block.redstone.BlockPoweredRedstoneWire;
 import com.lordmau5.wirelessutils.block.slime.BlockAngledSlime;
-import com.lordmau5.wirelessutils.commands.RecipesCommand;
-import com.lordmau5.wirelessutils.commands.TestCommand;
+import com.lordmau5.wirelessutils.commands.DebugCommand;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.entity.pearl.EntityChargedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityFluxedPearl;
