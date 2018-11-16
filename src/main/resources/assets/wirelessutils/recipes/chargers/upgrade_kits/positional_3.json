@@ -1,0 +1,18 @@
+{
+	"type": "wirelessutils:copy_nbt_shapeless",
+	"ingredients": [
+		{
+			"item": "wirelessutils:positional_charger",
+			"data": 2
+		},
+		{
+			"item": "wirelessutils:level_upgrade",
+			"data": 3
+		}
+	],
+	"result": {
+		"item": "wirelessutils:positional_charger",
+		"data": 3,
+		"count": 1
+	}
+}

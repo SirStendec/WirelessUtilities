@@ -1,0 +1,26 @@
+{
+	"parent": "wirelessutils:charged_pearl",
+	"display": {
+		"icon": {
+			"item": "wirelessutils:directional_charger"
+		},
+		"title": {
+			"translate": "advancements.wirelessutils.this_way.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.this_way.description"
+		}
+	},
+	"criteria": {
+		"has_charger": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"item": "wirelessutils:directional_charger"
+					}
+				]
+			}
+		}
+	}
+}

@@ -1,0 +1,338 @@
+#en_US
+
+itemGroup.wirelessutils=Wireless Utilities
+
+tile.wirelessutils.angled_slime.name=Angled Slime
+
+tile.wirelessutils.chunk_charger.name=Chunk Charger
+tile.wirelessutils.chunk_charger.info.0=The Chunk Charger charges things
+tile.wirelessutils.chunk_charger.info.1=in a chunk! A whole chunk. One
+tile.wirelessutils.chunk_charger.info.2=single chunk. No more, no less.
+
+tile.wirelessutils.directional_charger.name=Directional Charger
+tile.wirelessutils.directional_charger.info.0=The Directional Charger charges things
+tile.wirelessutils.directional_charger.info.1=in a direction! Given a Range Augment,
+tile.wirelessutils.directional_charger.info.2=the machine will empower a custom
+tile.wirelessutils.directional_charger.info.3=rectangular region.
+
+tile.wirelessutils.positional_charger.name=Positional Charger
+tile.wirelessutils.positional_charger.info.0=The Positional Charger charges things
+tile.wirelessutils.positional_charger.info.1=at set positions, as specified by
+tile.wirelessutils.positional_charger.info.2=Positional Cards.
+
+tile.wirelessutils.directional_condenser.name=Directional Condenser
+tile.wirelessutils.directional_condenser.info.0=The Directional Condenser transmits
+tile.wirelessutils.directional_condenser.info.1=fluids in a direction.
+
+tile.wirelessutils.positional_condenser.name=Positional Condenser
+tile.wirelessutils.positional_condenser.info.0=The Positional Condenser transmits
+tile.wirelessutils.positional_condenser.info.1=fluids to set positions, as
+tile.wirelessutils.positional_condenser.info.2=specified by Positional Cards.
+
+tile.wirelessutils.directional_desublimator.name=Directional Desublimator
+tile.wirelessutils.directional_desublimator.info.0=The Directional Desublimator transmits
+tile.wirelessutils.directional_desublimator.info.1=items in a direction.
+
+tile.wirelessutils.positional_desublimator.name=Positional Desublimator
+tile.wirelessutils.positional_desublimator.info.0=The Positional Desublimator transmits
+tile.wirelessutils.positional_desublimator.info.1=items to set positions, as specified
+tile.wirelessutils.positional_desublimator.info.2=by Positional Cards.
+
+tile.wirelessutils.infinite_wireless_transmitter.name=Infinite Wireless Transmitter
+
+tile.wirelessutils.directional_rs_network.name=Directional RS Network
+tile.wirelessutils.directional_rs_network.info.0=The Directional RS Network get's
+tile.wirelessutils.directional_rs_network.info.1=your network connected wirelessly in
+tile.wirelessutils.directional_rs_network.info.2=a direction! Given a Range Augment, it
+tile.wirelessutils.directional_rs_network.info.3=will connect a custom rectangular region.
+
+tile.wirelessutils.positional_rs_network.name=Positional RS Network
+tile.wirelessutils.positional_rs_network.info.0=The Positional RS Network get's
+tile.wirelessutils.positional_rs_network.info.1=your network connected wirelessly at
+tile.wirelessutils.positional_rs_network.info.2=set positions, as specified by
+tile.wirelessutils.positional_rs_network.info.3=Positional Cards.
+
+tile.wirelessutils.directional_ae_network.name=Directional AE Network
+tile.wirelessutils.directional_ae_network.info.0=The Directional AE Network get's
+tile.wirelessutils.directional_ae_network.info.1=your network connected wirelessly in
+tile.wirelessutils.directional_ae_network.info.2=a direction! Given a Range Augment, it
+tile.wirelessutils.directional_ae_network.info.3=will connect a custom rectangular region.
+
+tile.wirelessutils.positional_ae_network.name=Positional AE Network
+tile.wirelessutils.positional_ae_network.info.0=The Positional AE Network get's
+tile.wirelessutils.positional_ae_network.info.1=your network connected wirelessly at
+tile.wirelessutils.positional_ae_network.info.2=set positions, as specified by
+tile.wirelessutils.positional_ae_network.info.3=Positional Cards.
+
+item.wirelessutils.glasses.name=Work Glasses
+item.wirelessutils.glasses.info.0=Work Glasses allow you to see the working
+item.wirelessutils.glasses.info.1=areas of machines and Positional Cards
+item.wirelessutils.glasses.info.2=through walls.
+
+item.wirelessutils.accurate_pearl.name=Stabilized %s
+item.wirelessutils.accurate_pearl.info.0=Flies accurately and consistently
+item.wirelessutils.accurate_pearl.info.1=when shot from a Dispenser.
+
+item.wirelessutils.positional_card.name=Positional Card
+item.wirelessutils.positional_card.info.0=Sneak-Use this item on a block to
+item.wirelessutils.positional_card.info.1=store its position and side.
+item.wirelessutils.positional_card.highlight=%s (%s)
+item.wirelessutils.positional_card.distance=Distance: %s
+item.wirelessutils.positional_card.invalid.range=The target location is not within range.
+item.wirelessutils.positional_card.invalid.unset=No target has been set.
+
+item.wirelessutils.fluxed_pearl.name=Fluxed Pearl
+item.wirelessutils.fluxed_pearl.weather.0=The pearl seems to be reacting
+item.wirelessutils.fluxed_pearl.weather.1=to the clouds above.
+item.wirelessutils.fluxed_pearl.info.0=Adding redstone to an Ender Pearl
+item.wirelessutils.fluxed_pearl.info.1=seems to have reduced its capability
+item.wirelessutils.fluxed_pearl.info.2=for teleportation but given it
+item.wirelessutils.fluxed_pearl.info.3=strange powers over flux.
+
+item.wirelessutils.charged_pearl.name=Charged Pearl
+
+item.wirelessutils.quenched_pearl.name=Quenched Pearl
+item.wirelessutils.scorched_pearl.name=Scorched Pearl
+
+item.wirelessutils.ender_coil.name=Ender Coil
+item.wirelessutils.machine_panel.name=Machine Panel
+
+item.wirelessutils.level_upgrade.name=Upgrade Kit
+item.wirelessutils.conversion_upgrade.name=Conversion Kit
+
+item.wirelessutils.base_augment.name=Augment Base
+
+item.wirelessutils.world_augment.name=World Augment
+item.wirelessutils.world_augment.info.0=This augment allows certain machines
+item.wirelessutils.world_augment.info.1=to modify the world directly, such
+item.wirelessutils.world_augment.info.2=as by placing a fluid.
+
+item.wirelessutils.invert_augment.name=Invert Augment
+item.wirelessutils.invert_augment.info.0=This augment allows certain machines
+item.wirelessutils.invert_augment.info.1=to behave in an inverted way, such as by
+item.wirelessutils.invert_augment.info.2=extracting fluids instead of inserting them.
+
+item.wirelessutils.inventory_augment.name=Inventory Augment
+item.wirelessutils.inventory_augment.info.0=This augment allows a machine to
+item.wirelessutils.inventory_augment.info.1=operate on items within the inventories
+item.wirelessutils.inventory_augment.info.2=of blocks in addition to the blocks
+item.wirelessutils.inventory_augment.info.3=themselves.
+
+item.wirelessutils.slot_augment.name=Target Slot Augment
+item.wirelessutils.slot_augment.info.0=This augment increases the number of
+item.wirelessutils.slot_augment.info.1=slots available for Positional Cards
+item.wirelessutils.slot_augment.info.2=in Positional machines.
+item.wirelessutils.slot_augment.lock.0=Slot Augments cannot be removed
+item.wirelessutils.slot_augment.lock.1=while cards are stored in the
+item.wirelessutils.slot_augment.lock.2=slots they added.
+
+item.wirelessutils.range_augment.name=Range Augment
+item.wirelessutils.range_augment.info.0=This augment increases the maximum
+item.wirelessutils.range_augment.info.1=distance that a machine can affect.
+item.wirelessutils.range_augment.interdimensional=Interdimensional
+item.wirelessutils.range_augment.lock.0=Range Augments cannot be removed
+item.wirelessutils.range_augment.lock.1=when a target requires the Range
+item.wirelessutils.range_augment.lock.2=Augment to be within range.
+
+item.wirelessutils.disabled=This item is disabled in configuration.
+
+item.wirelessutils.augment_ctrl.inactive=Hold §e§oCtrl§r§7 for Valid Machines
+item.wirelessutils.augment_ctrl.active=Valid Machines:
+item.wirelessutils.augment_ctrl.entry=- %s
+item.wirelessutils.augment_ctrl.none=None
+
+item.wirelessutils.capacity_augment.name=Capacity Augment
+item.wirelessutils.capacity_augment.info.0=This augment greatly increases the
+item.wirelessutils.capacity_augment.info.1=quantity of resources that a machine
+item.wirelessutils.capacity_augment.info.2=can store in its internal buffer.
+item.wirelessutils.capacity_augment.lock.condenser.0=This augment cannot be removed when
+item.wirelessutils.capacity_augment.lock.condenser.1=doing so would make the fluid tank
+item.wirelessutils.capacity_augment.lock.condenser.2=too small to hold its contents.
+item.wirelessutils.capacity_augment.lock.desublimator.0=This augment cannot be removed when
+item.wirelessutils.capacity_augment.lock.desublimator.1=doing so would make the item buffer
+item.wirelessutils.capacity_augment.lock.desublimator.2=too small to hold its contents.
+
+item.wirelessutils.transfer_augment.name=Transfer Augment
+item.wirelessutils.transfer_augment.info.0=This augment greatly increases the
+item.wirelessutils.transfer_augment.info.1=rate at which a machine can transfer
+item.wirelessutils.transfer_augment.info.2=power into its targets.
+
+item.wirelessutils.range_augment.tip.directional=Directional Range: %sx%sx%s
+item.wirelessutils.range_augment.tip.positional=Positional Range: %s
+item.wirelessutils.range_augment.tip.range_positional=%s Blocks
+item.wirelessutils.range_augment.tip.interdimensional=Interdimensional
+
+tab.wirelessutils.directional_charger.0=The Directional Charger charges things in a direction.
+tab.wirelessutils.directional_charger.1=Initially, the Directional Charger only charges one block in front of it in the direction it's facing.
+tab.wirelessutils.directional_charger.2=Using augments, it's possible to wirelessly charge a large area!
+tab.wirelessutils.directional_charger.3=An augment can also be used to allow the Directional Charger to charge items inside of chests, drawers, and other such blocks.
+
+tab.wirelessutils.positional_charger.0=The Positional Charger charges things in specific positions.
+tab.wirelessutils.positional_charger.1=Place a Positional Card in one of the Positional Charger's slots to tell it to charge that block.
+tab.wirelessutils.positional_charger.2=Using augments, it's possible to add more than one Positional Card.
+tab.wirelessutils.positional_charger.3=Augments can also help you charge blocks farther away from the Positional Charger. Eventually, even across dimensions!
+tab.wirelessutils.positional_charger.4=An augment can also be used to allow the Positional Charger to charge items inside of chests, drawers, and other such blocks.
+
+tab.wirelessutils.directional_condenser.0=The Directional Condenser transfers fluids in a direction.
+tab.wirelessutils.directional_condenser.1=Initially, the Directional Condenser only condenses fluid into the block directly in front of it.
+tab.wirelessutils.directional_condenser.2=Using augments, it's possible to wirelessly send fluids to a large area!
+tab.wirelessutils.directional_condenser.3=Augments can also be used to send fluids into items in inventories or to place fluids directly in the world.
+tab.wirelessutils.directional_condenser.4=When an Invert Augment is present it will extract fluids instead of sending them.
+
+tab.wirelessutils.positional_condenser.0=The Positional Condenser transfers fluids to specific positions.
+tab.wirelessutils.positional_condenser.1=Place a Positional Card in one of the Positional Condenser's slots to tell it to send fluid to that block.
+tab.wirelessutils.positional_condenser.2=Using augments, it's possible to add more than one Positional Card.
+tab.wirelessutils.positional_condenser.3=Augments can also let you send fluids farther away or at a greater rate.
+tab.wirelessutils.positional_condenser.4=Augments can also be used to send fluids into items in inventories or to place fluids directly in the world.
+tab.wirelessutils.positional_condenser.5=When an Invert Augment is present it will extract fluids instead of sending them.
+
+tab.wirelessutils.directional_desublimator.0=The Directional Desublimator transfers items in a direction.
+tab.wirelessutils.directional_desublimator.1=Initially, the Directional Desublimator only transfers items into the block directly in front of it.
+tab.wirelessutils.directional_desublimator.2=Using augments, it's possible to transfer items wirelessly to a large area!
+tab.wirelessutils.directional_desublimator.3=Augments can also let you send items farther away or at a greater rate.
+tab.wirelessutils.directional_desublimator.4=Capacity Augments will increase the size of the internal item buffer.
+tab.wirelessutils.directional_desublimator.5=When an Invert Augment is present, the Desublimator will extract items from its targets rather than inserting them.
+
+tab.wirelessutils.positional_desublimator.0=The Positional Desublimator transfers items to specific positions.
+tab.wirelessutils.positional_desublimator.1=Place a Positional Card in one of the Positional Desublimator's slots to tell it to send items to that block.
+tab.wirelessutils.positional_desublimator.2=Using augments, it's possible to add more than one Positional Card.
+tab.wirelessutils.positional_desublimator.3=Augments can also let you send items farther away or at a greater rate.
+tab.wirelessutils.positional_desublimator.4=Capacity Augments will increase the size of the internal item buffer.
+tab.wirelessutils.positional_desublimator.5=When an Invert Augment is present, the Desublimator will extract items from its targets rather than inserting them.
+
+tab.wirelessutils.directional_rs_network.0=The Directional RS Network connects your network in a direction.
+tab.wirelessutils.directional_rs_network.1=Initially, the Directional RS Network only connects one block in front of it in the direction it's facing.
+tab.wirelessutils.directional_rs_network.2=Using augments, it's possible to wirelessly connect a large area!
+
+tab.wirelessutils.positional_rs_network.0=The Positional RS Network connects specific positions.
+tab.wirelessutils.positional_rs_network.1=Place a Positional Card in one of the Positional RS Network's slots to tell it to connect that block.
+tab.wirelessutils.positional_rs_network.2=Using augments, it's possible to add more than one Positional Card.
+tab.wirelessutils.positional_rs_network.3=Augments can also help you connect blocks farther away from the Positional RS Network. Eventually, even across dimensions!
+
+tab.wirelessutils.directional_ae_network.0=The Directional AE Network connects your network in a direction.
+tab.wirelessutils.directional_ae_network.1=Initially, the Directional AE Network only connects one block in front of it in the direction it's facing.
+tab.wirelessutils.directional_ae_network.2=Using augments, it's possible to wirelessly connect a large area!
+
+tab.wirelessutils.positional_ae_network.0=The Positional AE Network connects specific positions.
+tab.wirelessutils.positional_ae_network.1=Place a Positional Card in one of the Positional AE Network's slots to tell it to connect that block.
+tab.wirelessutils.positional_ae_network.2=Using augments, it's possible to add more than one Positional Card.
+tab.wirelessutils.positional_ae_network.3=Augments can also help you connect blocks farther away from the Positional AE Network. Eventually, even across dimensions!
+
+btn.wirelessutils.dec_area.one=Decrease by %s
+btn.wirelessutils.dec_area.all=Decrease all by %s
+btn.wirelessutils.inc_area.one=Increase by %s
+btn.wirelessutils.inc_area.all=Increase all by %s
+
+info.wirelessutils.round_robin.name=Round Robin
+info.wirelessutils.round_robin.per_target=Per Target:
+info.wirelessutils.round_robin.maximum=Maximum
+
+info.wirelessutils.work_info.name=Work
+info.wirelessutils.work_info.tooltip.rate=Rate: %s
+info.wirelessutils.work_info.tooltip.targets=Targets: %s of %s
+info.wirelessutils.work_info.current=Current Rate:
+info.wirelessutils.work_info.maximum=Maximum Rate:
+info.wirelessutils.work_info.targets.name=Active Targets:
+info.wirelessutils.work_info.targets.info=%s of %s
+
+info.wirelessutils.item_rate=Items/t
+info.wirelessutils.buffer=Buffer
+
+btn.wirelessutils.edit=Edit
+btn.wirelessutils.save=Save
+
+btn.wirelessutils.slot_locks.lock=Lock Slots
+btn.wirelessutils.slot_locks.unlock=Clear Slot Locks
+
+btn.wirelessutils.lock.lock=Lock
+btn.wirelessutils.lock.unlock=Unlock
+btn.wirelessutils.lock.with=Lock with %s
+btn.wirelessutils.lock.current=Lock: %s
+
+btn.wirelessutils.mode.range=Range
+btn.wirelessutils.mode.offset=Offset
+
+btn.wirelessutils.show_area=Show Working Area
+btn.wirelessutils.hide_area=Hide Working Area
+btn.wirelessutils.area_scroll=Scroll to change colors.
+btn.wirelessutils.range=Range:
+
+btn.wirelessutils.offset.vertical=Vertical:
+btn.wirelessutils.offset.horizontal=Horizontal:
+
+btn.wirelessutils.range.height=Height:
+btn.wirelessutils.range.length=Length:
+btn.wirelessutils.range.width=Width:
+
+info.wirelessutils.slot_lock=This item cannot be removed.
+info.wirelessutils.max=Max: %s
+
+info.wirelessutils.blockpos.full=X: %s Y: %s Z: %s D: %s
+info.wirelessutils.blockpos.basic=X: %s Y: %s Z: %s
+info.wirelessutils.blockpos.side=Side: %s
+info.wirelessutils.blockpos.dimension.simple=Dim: %s
+info.wirelessutils.blockpos.dimension.named=Dim: %s (%s)
+
+info.wirelessutils.configured=%s (Configured)
+
+info.wirelessutils.tiered.name=%s (%s)
+info.wirelessutils.tiered.tier=Tier %s
+info.wirelessutils.tiered.level.5=Creative
+
+info.wirelessutils.tiered.upgrade.info.0=This item will upgrade machines
+info.wirelessutils.tiered.upgrade.info.1=from %s to %s.
+
+info.wirelessutils.tiered.conversion.info.0=This item will upgrade any
+info.wirelessutils.tiered.conversion.info.1=machine to %s in one step.
+
+info.wirelessutils.tiered.required.higher.0=This item cannot be removed until
+info.wirelessutils.tiered.required.higher.1=all higher tiers of the item have
+info.wirelessutils.tiered.required.higher.2=also been removed.
+
+info.wirelessutils.tiered.required.lower.0=This item cannot be installed until
+info.wirelessutils.tiered.required.lower.1=all lower tiers of the item have
+info.wirelessutils.tiered.required.lower.2=been installed.
+
+info.wirelessutils.voiding_fluids=Voiding Fluids
+
+chat.wirelessutils.upgrade.success=Installed %s into %s.
+chat.wirelessutils.upgrade.failed=Could not install %s into %s.
+
+advancements.wirelessutils.root.title=Wireless Utilities
+advancements.wirelessutils.root.description=Because wires just get in the way.
+
+advancements.wirelessutils.fluxed_pearl.title=Get Fluxed
+advancements.wirelessutils.fluxed_pearl.description=Infuse an Ender Pearl with Redstone's potential energy.
+
+advancements.wirelessutils.charged_pearl.title=Charged Pearl
+advancements.wirelessutils.charged_pearl.description=Find a way to energize a Fluxed Pearl.
+
+advancements.wirelessutils.storm_chaser.title=Storm Chaser
+advancements.wirelessutils.storm_chaser.description=Toss a Fluxed Pearl into the sky when the time is right.
+
+advancements.wirelessutils.this_way.title=This Way!
+advancements.wirelessutils.this_way.description=Construct a Directional Charger.
+
+advancements.wirelessutils.augmented.title=My Machine is Augmented
+advancements.wirelessutils.augmented.description=Install an augment.
+
+advancements.wirelessutils.getting_an_upgrade.title=Getting an Upgrade
+advancements.wirelessutils.getting_an_upgrade.description=Upgrade a machine.
+
+advancements.wirelessutils.gps.title=GPS
+advancements.wirelessutils.gps.description=Store a position within a Positional Card.
+
+advancements.wirelessutils.locked_on.title=Locked On!
+advancements.wirelessutils.locked_on.description=Construct a Positional Charger.
+
+advancements.wirelessutils.repulsion.title=Repulsion
+advancements.wirelessutils.repulsion.description=Throw a pearl that bounces 10 times before stopping.
+
+advancements.wirelessutils.long_distance.title=Long Distance Runaround
+advancements.wirelessutils.long_distance.description=Throw a pearl that travels at least 300 blocks (horizontally) before stopping.
+
+advancements.wirelessutils.roundabout.title=Roundabout
+advancements.wirelessutils.roundabout.description=Throw a pearl that travels at least 200 blocks (horizontally), but that stops within 10 blocks of where it started.
+
+advancements.wirelessutils.enlightened.title=Enlightened
+advancements.wirelessutils.enlightened.description=Toss a Fluxed Pearl against a Redstone Lamp.

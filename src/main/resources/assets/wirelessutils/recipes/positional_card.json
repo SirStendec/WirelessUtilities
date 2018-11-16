@@ -1,0 +1,30 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"PPP",
+		"CLE",
+		"PG "
+	],
+	"key": {
+		"P": {
+			"item": "#PAPER"
+		},
+		"L": {
+			"item": "#LAPIS"
+		},
+		"C": {
+			"item": "minecraft:compass"
+		},
+		"E": {
+			"item": "#FLUXED_PEARL"
+		},
+		"G": {
+			"item": "#GOLD_INGOT"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:positional_card",
+		"count": 1
+	}
+}

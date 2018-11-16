@@ -1,0 +1,31 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"ICI",
+		"RMR",
+		"IPI"
+	],
+	"key": {
+		"I": {
+			"item": "#IRON_INGOT"
+		},
+		"C": {
+			"item": "#SCORCHED_PEARL"
+		},
+		"P": {
+			"item": "minecraft:piston"
+		},
+		"M": {
+			"item": "wirelessutils:machine_panel"
+		},
+		"R": {
+			"item": "#REDSTONE"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_desublimator",
+		"count": 1,
+		"data": 0
+	}
+}

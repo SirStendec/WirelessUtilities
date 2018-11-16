@@ -1,0 +1,32 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"HEH",
+		"PCP",
+		"EBE"
+	],
+	"key": {
+		"P": {
+			"item": "#SCORCHED_PEARL"
+		},
+		"H": {
+			"item": "minecraft:hopper"
+		},
+		"C": {
+			"item": "wirelessutils:positional_desublimator",
+			"data": 2
+		},
+		"E": {
+			"item": "#EMERALD"
+		},
+		"B": {
+			"item": "#DIAMOND_BLOCK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:positional_desublimator",
+		"count": 1,
+		"data": 3
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"GEG",
+		"PCP",
+		"GEG"
+	],
+	"key": {
+		"P": {
+			"item": "#QUENCHED_PEARL"
+		},
+		"C": {
+			"item": "wirelessutils:positional_condenser",
+			"data": 3
+		},
+		"E": {
+			"item": "minecraft:end_rod"
+		},
+		"G": {
+			"item": "#GOLD_INGOT"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:positional_condenser",
+		"count": 1,
+		"data": 4
+	}
+}

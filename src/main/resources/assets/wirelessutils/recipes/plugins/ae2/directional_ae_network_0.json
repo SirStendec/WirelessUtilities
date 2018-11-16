@@ -1,0 +1,37 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "appliedenergistics2"
+		}
+	],
+	"pattern": [
+		"ICI",
+		"RMR",
+		"IPI"
+	],
+	"key": {
+		"I": {
+			"item": "#IRON_INGOT"
+		},
+		"C": {
+			"item": "#AE_ENGINEERING_PROCESSOR"
+		},
+		"P": {
+			"item": "minecraft:piston"
+		},
+		"M": {
+			"item": "wirelessutils:machine_panel"
+		},
+		"R": {
+			"item": "#REDSTONE"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_ae_network",
+		"count": 1,
+		"data": 0
+	}
+}

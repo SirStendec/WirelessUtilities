@@ -1,0 +1,36 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "wirelessutils:overlay_facing_block",
+		"textures": {
+			"base": "wirelessutils:block/machine_base",
+			"overlay": "wirelessutils:block/overlay",
+			"mark": "wirelessutils:block/charger_mark"
+		}
+	},
+	"variants": {
+		"inventory": {
+			"model": "wirelessutils:overlay_facing_block"
+		},
+		"level": {
+			"0": {},
+			"1": {},
+			"2": {},
+			"3": {},
+			"4": {},
+			"5": {},
+			"6": {},
+			"7": {},
+			"8": {},
+			"9": {}
+		},
+		"active": {
+			"false": {},
+			"true": {
+				"textures": {
+					"mark": "wirelessutils:block/charger_mark_active"
+				}
+			}
+		}
+	}
+}

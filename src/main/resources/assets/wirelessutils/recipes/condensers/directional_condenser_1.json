@@ -1,0 +1,29 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"NBN",
+		"PCP",
+		"NBN"
+	],
+	"key": {
+		"P": {
+			"item": "#QUENCHED_PEARL"
+		},
+		"C": {
+			"item": "wirelessutils:directional_condenser",
+			"data": 0
+		},
+		"B": {
+			"item": "#BLAZE_ROD"
+		},
+		"N": {
+			"item": "#NETHER_BRICK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_condenser",
+		"count": 1,
+		"data": 1
+	}
+}

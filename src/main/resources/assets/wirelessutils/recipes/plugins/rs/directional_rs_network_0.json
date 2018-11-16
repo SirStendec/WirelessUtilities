@@ -1,0 +1,37 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "refinedstorage"
+		}
+	],
+	"pattern": [
+		"ICI",
+		"RMR",
+		"IPI"
+	],
+	"key": {
+		"I": {
+			"item": "#IRON_INGOT"
+		},
+		"C": {
+			"item": "#RS_ADVANCED_PROCESSOR"
+		},
+		"P": {
+			"item": "minecraft:piston"
+		},
+		"M": {
+			"item": "wirelessutils:machine_panel"
+		},
+		"R": {
+			"item": "#REDSTONE"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_rs_network",
+		"count": 1,
+		"data": 0
+	}
+}

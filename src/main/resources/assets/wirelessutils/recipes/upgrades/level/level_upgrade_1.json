@@ -1,0 +1,28 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"NBN",
+		"PCP",
+		"NBN"
+	],
+	"key": {
+		"P": {
+			"item": "#CHARGED_PEARL"
+		},
+		"C": {
+			"item": "wirelessutils:machine_panel"
+		},
+		"B": {
+			"item": "#BLAZE_ROD"
+		},
+		"N": {
+			"item": "#NETHER_BRICK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:level_upgrade",
+		"count": 1,
+		"data": 1
+	}
+}

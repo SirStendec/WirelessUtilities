@@ -1,0 +1,28 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		" C ",
+		"QAQ",
+		" E "
+	],
+	"key": {
+		"Q": {
+			"item": "#QUARTZ"
+		},
+		"C": {
+			"item": "#CHARGED_PEARL"
+		},
+		"A": {
+			"item": "wirelessutils:base_augment"
+		},
+		"E": {
+			"item": "#ENDER_PEARL"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:range_augment",
+		"data": 0,
+		"count": 1
+	}
+}

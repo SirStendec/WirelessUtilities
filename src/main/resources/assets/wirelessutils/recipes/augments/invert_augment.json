@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		" T ",
+		"QAQ",
+		" R "
+	],
+	"key": {
+		"T": {
+			"item": "#REDSTONE_TORCH"
+		},
+		"R": {
+			"item": "#REDSTONE"
+		},
+		"Q": {
+			"item": "#QUARTZ"
+		},
+		"A": {
+			"item": "wirelessutils:base_augment"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:invert_augment",
+		"count": 1
+	}
+}

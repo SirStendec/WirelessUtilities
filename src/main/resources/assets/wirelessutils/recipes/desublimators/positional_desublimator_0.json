@@ -1,0 +1,34 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"ICI",
+		"OME",
+		"IPI"
+	],
+	"key": {
+		"I": {
+			"item": "#IRON_INGOT"
+		},
+		"C": {
+			"item": "#SCORCHED_PEARL"
+		},
+		"P": {
+			"item": "minecraft:piston"
+		},
+		"M": {
+			"item": "wirelessutils:machine_panel"
+		},
+		"O": {
+			"item": "wirelessutils:positional_card"
+		},
+		"E": {
+			"item": "#EYE_OF_ENDER"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:positional_desublimator",
+		"count": 1,
+		"data": 0
+	}
+}

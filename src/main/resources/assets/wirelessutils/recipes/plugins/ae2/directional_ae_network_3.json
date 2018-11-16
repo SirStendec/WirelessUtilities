@@ -1,0 +1,35 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "appliedenergistics2"
+		}
+	],
+	"pattern": [
+		"PEP",
+		"PCP",
+		"EBE"
+	],
+	"key": {
+		"P": {
+			"item": "#AE_ENGINEERING_PROCESSOR"
+		},
+		"C": {
+			"item": "wirelessutils:directional_ae_network",
+			"data": 2
+		},
+		"E": {
+			"item": "#EMERALD"
+		},
+		"B": {
+			"item": "#DIAMOND_BLOCK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_ae_network",
+		"count": 1,
+		"data": 3
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"PEP",
+		"PCP",
+		"EBE"
+	],
+	"key": {
+		"P": {
+			"item": "#CHARGED_PEARL"
+		},
+		"C": {
+			"item": "wirelessutils:positional_charger",
+			"data": 2
+		},
+		"E": {
+			"item": "#EMERALD"
+		},
+		"B": {
+			"item": "#DIAMOND_BLOCK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:positional_charger",
+		"count": 1,
+		"data": 3
+	}
+}

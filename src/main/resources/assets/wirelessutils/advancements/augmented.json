@@ -1,0 +1,20 @@
+{
+	"parent": "wirelessutils:this_way",
+	"display": {
+		"icon": {
+			"item": "wirelessutils:base_augment"
+		},
+		"frame": "goal",
+		"title": {
+			"translate": "advancements.wirelessutils.augmented.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.augmented.description"
+		}
+	},
+	"criteria": {
+		"installed_augment": {
+			"trigger": "wirelessutils:augmented"
+		}
+	}
+}

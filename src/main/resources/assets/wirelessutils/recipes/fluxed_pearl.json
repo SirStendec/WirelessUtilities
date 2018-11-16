@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"group": "wirelessutils",
+	"ingredients": [
+		{
+			"item": "#REDSTONE"
+		},
+		{
+			"item": "#REDSTONE"
+		},
+		{
+			"item": "#ENDER_PEARL"
+		}
+	],
+	"result": {
+		"item": "wirelessutils:fluxed_pearl",
+		"data": 0,
+		"count": 1
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"GEG",
+		"PCP",
+		"GEG"
+	],
+	"key": {
+		"P": {
+			"item": "#CHARGED_PEARL"
+		},
+		"C": {
+			"item": "wirelessutils:machine_panel"
+		},
+		"E": {
+			"item": "minecraft:end_rod"
+		},
+		"G": {
+			"item": "#GOLD_INGOT"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:level_upgrade",
+		"count": 1,
+		"data": 4
+	}
+}

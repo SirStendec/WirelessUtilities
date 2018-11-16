@@ -1,0 +1,29 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"RER",
+		"RAR",
+		"EBE"
+	],
+	"key": {
+		"R": {
+			"item": "#REDSTONE_BLOCK"
+		},
+		"A": {
+			"item": "wirelessutils:capacity_augment",
+			"data": 2
+		},
+		"E": {
+			"item": "#EMERALD"
+		},
+		"B": {
+			"item": "#DIAMOND_BLOCK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:capacity_augment",
+		"data": 3,
+		"count": 1
+	}
+}

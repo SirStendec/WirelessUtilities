@@ -1,0 +1,29 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"DMD",
+		"PCP",
+		"DMD"
+	],
+	"key": {
+		"P": {
+			"item": "#CHARGED_PEARL"
+		},
+		"C": {
+			"item": "wirelessutils:level_upgrade",
+			"data": 1
+		},
+		"M": {
+			"item": "#PRISMARINE"
+		},
+		"D": {
+			"item": "#DIAMOND"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:conversion_upgrade",
+		"count": 1,
+		"data": 2
+	}
+}

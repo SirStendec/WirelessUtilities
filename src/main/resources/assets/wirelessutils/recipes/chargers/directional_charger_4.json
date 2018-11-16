@@ -1,0 +1,29 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"GEG",
+		"PCP",
+		"GEG"
+	],
+	"key": {
+		"P": {
+			"item": "#CHARGED_PEARL"
+		},
+		"C": {
+			"item": "wirelessutils:directional_charger",
+			"data": 3
+		},
+		"E": {
+			"item": "minecraft:end_rod"
+		},
+		"G": {
+			"item": "#GOLD_INGOT"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_charger",
+		"count": 1,
+		"data": 4
+	}
+}

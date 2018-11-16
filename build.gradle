@@ -1,0 +1,92 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
+}
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+version = "1.1"
+group = "com.lordmau5"
+archivesBaseName = "wirelessutils"
+
+sourceCompatibility = targetCompatibility = '1.8'
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
+
+// Define properties file
+ext.configFile = file "build.properties"
+
+configFile.withReader {
+    // Load config. It shall from now be referenced as simply config or project.config
+    def prop = new Properties()
+    prop.load(it)
+    project.ext.config = new ConfigSlurper().parse prop
+}
+
+repositories {
+    maven {
+        name = "CoFH Maven"
+        url = "http://maven.covers1624.net"
+    }
+    maven {
+        name = "JEI Maven"
+        url = "http://dvs1.progwml6.com/files/maven"
+    }
+    maven {
+        name = "CraftTweaker Maven"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
+        name = "Raoulvdberge Maven"
+        url = "https://repo.raoulvdberge.com"
+    }
+    maven {
+        name = "CurseForge"
+        url = "https://minecraft.curseforge.com/api/maven/"
+    }
+    maven {
+        name = "mcjty"
+        url = "http://maven.k-4u.nl"
+    }
+    maven {
+        name = "oc"
+        url = "http://maven.cil.li/"
+    }
+}
+
+minecraft {
+    version = config.mc_version + "-" + config.forge_version
+    runDir = "run"
+    mappings = config.mappings
+}
+
+dependencies {
+    deobfCompile "cofh:RedstoneFlux:${config.rf_mc_version}-${config.rf_version}:universal"
+    deobfCompile "cofh:CoFHCore:${config.mc_version}-${config.cofh_core_version}:universal"
+    deobfCompile "refinedstorage:refinedstorage:${config.rs_version}"
+    deobfCompile "applied-energistics-2:appliedenergistics2-${config.ae2_version}"
+    compile "com.github.mcjty:mcjtylib:${config.mcjtylib_version}"
+    compile "com.github.mcjty:xnet:${config.xnet_version}"
+    deobfProvided "CraftTweaker2:CraftTweaker2-API:${config.ct_api_version}"
+    runtime "CraftTweaker2:CraftTweaker2-MC1120-Main:${config.ct_version}"
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}

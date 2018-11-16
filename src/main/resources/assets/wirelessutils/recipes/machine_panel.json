@@ -1,0 +1,21 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"III",
+		"IEI",
+		"III"
+	],
+	"key": {
+		"I": {
+			"item": "#IRON_INGOT"
+		},
+		"E": {
+			"item": "wirelessutils:ender_coil"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:machine_panel",
+		"count": 1
+	}
+}

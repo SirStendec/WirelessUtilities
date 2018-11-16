@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		" C ",
+		"EAE",
+		" R "
+	],
+	"key": {
+		"R": {
+			"item": "#REDSTONE"
+		},
+		"C": {
+			"item": "#CHEST"
+		},
+		"A": {
+			"item": "wirelessutils:base_augment"
+		},
+		"E": {
+			"item": "#ENDER_PEARL"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:inventory_augment",
+		"count": 1
+	}
+}

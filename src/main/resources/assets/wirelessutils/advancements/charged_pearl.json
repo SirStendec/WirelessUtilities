@@ -1,0 +1,26 @@
+{
+	"parent": "wirelessutils:fluxed_pearl",
+	"display": {
+		"icon": {
+			"item": "wirelessutils:charged_pearl"
+		},
+		"title": {
+			"translate": "advancements.wirelessutils.charged_pearl.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.charged_pearl.description"
+		}
+	},
+	"criteria": {
+		"has_pearl": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"item": "wirelessutils:charged_pearl"
+					}
+				]
+			}
+		}
+	}
+}

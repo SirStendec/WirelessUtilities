@@ -1,0 +1,20 @@
+{
+	"parent": "wirelessutils:long_distance",
+	"display": {
+		"icon": {
+			"item": "minecraft:compass"
+		},
+		"frame": "challenge",
+		"title": {
+			"translate": "advancements.wirelessutils.roundabout.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.roundabout.description"
+		}
+	},
+	"criteria": {
+		"roundabout": {
+			"trigger": "wirelessutils:roundabout"
+		}
+	}
+}

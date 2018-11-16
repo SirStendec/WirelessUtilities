@@ -1,0 +1,7 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "wirelessutils:item/positional_card",
+		"layer1": "wirelessutils:item/positional_card/n_ne"
+	}
+}

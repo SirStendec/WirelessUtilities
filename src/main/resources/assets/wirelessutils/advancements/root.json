@@ -1,0 +1,28 @@
+{
+	"display": {
+		"icon": {
+			"item": "wirelessutils:directional_charger"
+		},
+		"title": {
+			"translate": "advancements.wirelessutils.root.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.root.description"
+		},
+		"background": "minecraft:textures/blocks/concrete_gray.png",
+		"show_toast": false,
+		"announce_to_chat": false
+	},
+	"criteria": {
+		"has_pearl": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"item": "wirelessutils:fluxed_pearl"
+					}
+				]
+			}
+		}
+	}
+}

@@ -1,0 +1,16 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "wirelessutils:air"
+	},
+	"variants": {
+		"facing": {
+			"north": {},
+			"south": {},
+			"east": {},
+			"west": {},
+			"up": {},
+			"down": {}
+		}
+	}
+}

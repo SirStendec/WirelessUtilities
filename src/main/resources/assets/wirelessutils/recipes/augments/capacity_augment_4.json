@@ -1,0 +1,29 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"GRG",
+		"EAE",
+		"GRG"
+	],
+	"key": {
+		"R": {
+			"item": "#REDSTONE_BLOCK"
+		},
+		"A": {
+			"item": "wirelessutils:capacity_augment",
+			"data": 3
+		},
+		"E": {
+			"item": "minecraft:end_rod"
+		},
+		"G": {
+			"item": "#GOLD_INGOT"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:capacity_augment",
+		"data": 4,
+		"count": 1
+	}
+}

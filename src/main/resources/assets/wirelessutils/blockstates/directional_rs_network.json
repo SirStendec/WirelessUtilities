@@ -1,0 +1,65 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "wirelessutils:overlay_facing_block",
+		"textures": {
+			"base": "wirelessutils:block/machine_base",
+			"overlay": "wirelessutils:block/overlay",
+			"side": "wirelessutils:block/machine_side",
+			"front": "wirelessutils:block/rs/rs_network",
+			"mark_front": "refinedstorage:blocks/controller/cutouts/off"
+		},
+		"uvlock": false
+	},
+	"variants": {
+		"inventory": {
+			"model": "wirelessutils:overlay_facing_block"
+		},
+		"level": {
+			"0": {},
+			"1": {},
+			"2": {},
+			"3": {},
+			"4": {},
+			"5": {},
+			"6": {},
+			"7": {},
+			"8": {},
+			"9": {}
+		},
+		"active": {
+			"false": {},
+			"true": {
+				"textures": {
+					"mark_front": "refinedstorage:blocks/controller/cutouts/on"
+				}
+			}
+		},
+		"facing": {
+			"north": {},
+			"south": {
+				"y": 180
+			},
+			"east": {
+				"y": 90
+			},
+			"west": {
+				"y": 270
+			},
+			"up_x": {
+				"x": -90,
+				"y": 90
+			},
+			"down_x": {
+				"x": 90,
+				"y": 90
+			},
+			"up_z": {
+				"x": -90
+			},
+			"down_z": {
+				"x": 90
+			}
+		}
+	}
+}

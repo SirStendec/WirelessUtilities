@@ -1,0 +1,33 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:not",
+			"value": {
+				"type": "wirelessutils:ore_exists",
+				"ore": "ingotCopper"
+			}
+		}
+	],
+	"pattern": [
+		"ISI",
+		"SES",
+		"ISI"
+	],
+	"key": {
+		"E": {
+			"item": "#ENDER_PEARL"
+		},
+		"S": {
+			"item": "#STRING"
+		},
+		"I": {
+			"item": "#IRON_INGOT"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:ender_coil",
+		"count": 1
+	}
+}

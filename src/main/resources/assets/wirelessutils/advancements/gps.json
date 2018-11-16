@@ -1,0 +1,19 @@
+{
+	"parent": "wirelessutils:this_way",
+	"display": {
+		"icon": {
+			"item": "wirelessutils:positional_card"
+		},
+		"title": {
+			"translate": "advancements.wirelessutils.gps.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.gps.description"
+		}
+	},
+	"criteria": {
+		"used_card": {
+			"trigger": "wirelessutils:set_positional_card"
+		}
+	}
+}

@@ -1,0 +1,127 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "forge:multi-layer",
+		"custom": {
+			"base": "wirelessutils:angled_slime#base",
+			"Solid": "wirelessutils:angled_slime#base",
+			"Translucent": "wirelessutils:angled_slime#slime_45"
+		},
+		"transform": "forge:default-block",
+		"textures": {
+			"base": "minecraft:blocks/stone",
+			"slime": "minecraft:blocks/slime",
+			"shaft": "minecraft:blocks/planks_oak",
+			"particle": "#slime"
+		}
+	},
+	"variants": {
+		"base": [
+			{
+				"model": "wirelessutils:angled_slime_base"
+			}
+		],
+		"slime_0": [
+			{
+				"model": "wirelessutils:angled_slime_0"
+			}
+		],
+		"slime_22": [
+			{
+				"model": "wirelessutils:angled_slime_22"
+			}
+		],
+		"slime_45": [
+			{
+				"model": "wirelessutils:angled_slime_45"
+			}
+		],
+		"slime_67": [
+			{
+				"model": "wirelessutils:angled_slime_67"
+			}
+		],
+		"inventory": [{}],
+		"attached": {
+			"down": {},
+			"down_rot": {
+				"y": 90
+			},
+			"up": {
+				"x": 180
+			},
+			"up_rot": {
+				"x": 180,
+				"y": 90
+			},
+			"north": {
+				"x": -90
+			},
+			"north_rot": {
+				"transform": {
+					"rotation": [0.5, -0.5, -0.5, 0.5]
+				}
+			},
+			"east": {
+				"x": 90,
+				"y": 270
+			},
+			"east_rot": {
+				"transform": {
+					"rotation": [0.7071068, -0.7071068, 0, 0]
+				}
+			},
+			"south": {
+				"x": 90
+			},
+			"south_rot": {
+				"transform": {
+					"rotation": [-0.5, 0.5, -0.5, 0.5]
+				}
+			},
+			"west": {
+				"x": 90,
+				"y": 90
+			},
+			"west_rot": {
+				"transform": {
+					"rotation": [0, 0, -0.7071068, 0.7071068]
+				}
+			}
+		},
+		"rotation": {
+			"0": {
+				"model": "forge:multi-layer",
+				"custom": {
+					"base": "wirelessutils:angled_slime#base",
+					"Solid": "wirelessutils:angled_slime#base",
+					"Translucent": "wirelessutils:angled_slime#slime_0"
+				}
+			},
+			"1": {
+				"model": "forge:multi-layer",
+				"custom": {
+					"base": "wirelessutils:angled_slime#base",
+					"Solid": "wirelessutils:angled_slime#base",
+					"Translucent": "wirelessutils:angled_slime#slime_22"
+				}
+			},
+			"2": {
+				"model": "forge:multi-layer",
+				"custom": {
+					"base": "wirelessutils:angled_slime#base",
+					"Solid": "wirelessutils:angled_slime#base",
+					"Translucent": "wirelessutils:angled_slime#slime_45"
+				}
+			},
+			"3": {
+				"model": "forge:multi-layer",
+				"custom": {
+					"base": "wirelessutils:angled_slime#base",
+					"Solid": "wirelessutils:angled_slime#base",
+					"Translucent": "wirelessutils:angled_slime#slime_67"
+				}
+			}
+		}
+	}
+}

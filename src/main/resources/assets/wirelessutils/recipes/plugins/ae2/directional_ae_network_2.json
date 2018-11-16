@@ -1,0 +1,35 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "appliedenergistics2"
+		}
+	],
+	"pattern": [
+		"DMD",
+		"PCP",
+		"DMD"
+	],
+	"key": {
+		"P": {
+			"item": "#AE_ENGINEERING_PROCESSOR"
+		},
+		"C": {
+			"item": "wirelessutils:directional_ae_network",
+			"data": 1
+		},
+		"M": {
+			"item": "#PRISMARINE"
+		},
+		"D": {
+			"item": "#DIAMOND"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_ae_network",
+		"count": 1,
+		"data": 2
+	}
+}

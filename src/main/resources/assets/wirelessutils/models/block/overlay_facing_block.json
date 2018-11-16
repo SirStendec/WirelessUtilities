@@ -1,0 +1,153 @@
+{
+	"parent": "block/cube",
+	"textures": {
+		"front": "#base",
+		"side": "#base",
+		"back": "#base",
+		"particle": "#base",
+		"overlay_front": "#overlay",
+		"overlay_side": "#overlay",
+		"overlay_back": "#overlay",
+		"mark": "wirelessutils:block/blank",
+		"mark_side": "#mark",
+		"mark_front": "#mark",
+		"mark_back": "#mark"
+	},
+	"elements": [
+		{
+			"from": [
+				0,
+				0,
+				0
+			],
+			"to": [
+				16,
+				16,
+				16
+			],
+			"faces": {
+				"down": {
+					"texture": "#side",
+					"cullface": "down",
+					"rotation": 270
+				},
+				"up": {
+					"texture": "#side",
+					"cullface": "up",
+					"rotation": 90
+				},
+				"north": {
+					"texture": "#front",
+					"cullface": "north"
+				},
+				"south": {
+					"texture": "#back",
+					"cullface": "south"
+				},
+				"west": {
+					"texture": "#side",
+					"cullface": "west"
+				},
+				"east": {
+					"texture": "#side",
+					"cullface": "east",
+					"rotation": 180
+				}
+			}
+		},
+		{
+			"from": [
+				0,
+				0,
+				0
+			],
+			"to": [
+				16,
+				16,
+				16
+			],
+			"faces": {
+				"down": {
+					"texture": "#mark_side",
+					"cullface": "down",
+					"rotation": 270,
+					"tintindex": 1
+				},
+				"up": {
+					"texture": "#mark_side",
+					"cullface": "up",
+					"rotation": 90,
+					"tintindex": 1
+				},
+				"north": {
+					"texture": "#mark_front",
+					"cullface": "north",
+					"tintindex": 1
+				},
+				"south": {
+					"texture": "#mark_back",
+					"cullface": "south",
+					"tintindex": 1
+				},
+				"west": {
+					"texture": "#mark_side",
+					"cullface": "west",
+					"tintindex": 1
+				},
+				"east": {
+					"texture": "#mark_side",
+					"cullface": "east",
+					"rotation": 180,
+					"tintindex": 1
+				}
+			}
+		},
+		{
+			"from": [
+				0,
+				0,
+				0
+			],
+			"to": [
+				16,
+				16,
+				16
+			],
+			"faces": {
+				"down": {
+					"texture": "#overlay_side",
+					"cullface": "down",
+					"rotation": 270,
+					"tintindex": 2
+				},
+				"up": {
+					"texture": "#overlay_side",
+					"cullface": "up",
+					"rotation": 90,
+					"tintindex": 2
+				},
+				"north": {
+					"texture": "#overlay_front",
+					"cullface": "north",
+					"tintindex": 2
+				},
+				"south": {
+					"texture": "#overlay_back",
+					"cullface": "south",
+					"tintindex": 2
+				},
+				"west": {
+					"texture": "#overlay_side",
+					"cullface": "west",
+					"tintindex": 2
+				},
+				"east": {
+					"texture": "#overlay_side",
+					"cullface": "east",
+					"rotation": 180,
+					"tintindex": 2
+				}
+			}
+		}
+	]
+}

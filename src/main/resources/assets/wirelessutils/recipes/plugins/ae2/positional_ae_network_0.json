@@ -1,0 +1,40 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "appliedenergistics2"
+		}
+	],
+	"pattern": [
+		"ICI",
+		"OME",
+		"IPI"
+	],
+	"key": {
+		"I": {
+			"item": "#IRON_INGOT"
+		},
+		"C": {
+			"item": "#AE_ENGINEERING_PROCESSOR"
+		},
+		"P": {
+			"item": "minecraft:piston"
+		},
+		"M": {
+			"item": "wirelessutils:machine_panel"
+		},
+		"O": {
+			"item": "wirelessutils:positional_card"
+		},
+		"E": {
+			"item": "#EYE_OF_ENDER"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:positional_ae_network",
+		"count": 1,
+		"data": 0
+	}
+}

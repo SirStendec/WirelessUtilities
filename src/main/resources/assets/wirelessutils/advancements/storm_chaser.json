@@ -1,0 +1,20 @@
+{
+	"parent": "wirelessutils:fluxed_pearl",
+	"display": {
+		"icon": {
+			"item": "wirelessutils:charged_pearl"
+		},
+		"frame": "challenge",
+		"title": {
+			"translate": "advancements.wirelessutils.storm_chaser.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.storm_chaser.description"
+		}
+	},
+	"criteria": {
+		"chased_storm": {
+			"trigger": "wirelessutils:storm_chaser"
+		}
+	}
+}

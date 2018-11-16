@@ -1,0 +1,19 @@
+{
+	"parent": "wirelessutils:fluxed_pearl",
+	"display": {
+		"icon": {
+			"item": "minecraft:slime"
+		},
+		"title": {
+			"translate": "advancements.wirelessutils.repulsion.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.repulsion.description"
+		}
+	},
+	"criteria": {
+		"repulsion": {
+			"trigger": "wirelessutils:repulsion"
+		}
+	}
+}

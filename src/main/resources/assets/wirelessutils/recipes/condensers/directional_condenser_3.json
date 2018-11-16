@@ -1,0 +1,29 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"PEP",
+		"PCP",
+		"EBE"
+	],
+	"key": {
+		"P": {
+			"item": "#QUENCHED_PEARL"
+		},
+		"C": {
+			"item": "wirelessutils:directional_condenser",
+			"data": 2
+		},
+		"E": {
+			"item": "#EMERALD"
+		},
+		"B": {
+			"item": "#DIAMOND_BLOCK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_condenser",
+		"count": 1,
+		"data": 3
+	}
+}

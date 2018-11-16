@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"GRG",
+		"E S",
+		"S S"
+	],
+	"key": {
+		"G": {
+			"item": "#GLASS_PANE"
+		},
+		"R": {
+			"item": "#REDSTONE"
+		},
+		"E": {
+			"item": "#ENDER_PEARL"
+		},
+		"S": {
+			"item": "#COBBLESTONE"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:glasses",
+		"count": 1
+	}
+}

@@ -1,0 +1,32 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"GEG",
+		"PCH",
+		"GEG"
+	],
+	"key": {
+		"P": {
+			"item": "#SCORCHED_PEARL"
+		},
+		"H": {
+			"item": "minecraft:hopper"
+		},
+		"C": {
+			"item": "wirelessutils:directional_desublimator",
+			"data": 3
+		},
+		"E": {
+			"item": "minecraft:end_rod"
+		},
+		"G": {
+			"item": "#GOLD_INGOT"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_desublimator",
+		"count": 1,
+		"data": 4
+	}
+}

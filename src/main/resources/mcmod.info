@@ -1,0 +1,17 @@
+[
+{
+  "modid": "wirelessutils",
+  "name": "Wireless Utilities",
+  "description": "Because wires just get in the way.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "https://minecraft.curseforge.com/projects/wireless-utilities",
+  "updateJSON": "",
+  "authorList": ["Stendec", "Lordmau5"],
+  "logoFile": "assets/wirelessutils/textures/logo.png",
+  "screenshots": [],
+  "dependencies": [
+    "forge,cofhcore"
+  ]
+}
+]

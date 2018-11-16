@@ -1,0 +1,29 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"DMD",
+		"PCP",
+		"DMD"
+	],
+	"key": {
+		"P": {
+			"item": "#QUENCHED_PEARL"
+		},
+		"C": {
+			"item": "wirelessutils:positional_condenser",
+			"data": 1
+		},
+		"M": {
+			"item": "#PRISMARINE"
+		},
+		"D": {
+			"item": "#DIAMOND"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:positional_condenser",
+		"count": 1,
+		"data": 2
+	}
+}

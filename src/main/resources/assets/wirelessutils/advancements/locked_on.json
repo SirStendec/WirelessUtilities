@@ -1,0 +1,26 @@
+{
+	"parent": "wirelessutils:gps",
+	"display": {
+		"icon": {
+			"item": "wirelessutils:positional_charger"
+		},
+		"title": {
+			"translate": "advancements.wirelessutils.locked_on.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.locked_on.description"
+		}
+	},
+	"criteria": {
+		"has_charger": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"item": "wirelessutils:positional_charger"
+					}
+				]
+			}
+		}
+	}
+}

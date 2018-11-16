@@ -1,0 +1,20 @@
+{
+	"parent": "wirelessutils:this_way",
+	"display": {
+		"icon": {
+			"item": "wirelessutils:level_upgrade"
+		},
+		"frame": "goal",
+		"title": {
+			"translate": "advancements.wirelessutils.getting_an_upgrade.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.getting_an_upgrade.description"
+		}
+	},
+	"criteria": {
+		"upgraded": {
+			"trigger": "wirelessutils:upgraded"
+		}
+	}
+}

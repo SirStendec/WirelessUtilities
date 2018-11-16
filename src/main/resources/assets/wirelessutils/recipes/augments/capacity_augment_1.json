@@ -1,0 +1,29 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"NRN",
+		"BAB",
+		"NRN"
+	],
+	"key": {
+		"R": {
+			"item": "#REDSTONE_BLOCK"
+		},
+		"A": {
+			"item": "wirelessutils:capacity_augment",
+			"data": 0
+		},
+		"B": {
+			"item": "#BLAZE_ROD"
+		},
+		"N": {
+			"item": "#NETHER_BRICK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:capacity_augment",
+		"data": 1,
+		"count": 1
+	}
+}

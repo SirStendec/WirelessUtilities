@@ -1,0 +1,19 @@
+{
+	"parent": "wirelessutils:fluxed_pearl",
+	"display": {
+		"icon": {
+			"item": "minecraft:redstone_lamp"
+		},
+		"title": {
+			"translate": "advancements.wirelessutils.enlightened.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.enlightened.description"
+		}
+	},
+	"criteria": {
+		"enlightened": {
+			"trigger": "wirelessutils:enlightened"
+		}
+	}
+}

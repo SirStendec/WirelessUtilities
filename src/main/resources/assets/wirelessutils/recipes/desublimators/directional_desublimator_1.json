@@ -1,0 +1,32 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"NBN",
+		"PCH",
+		"NBN"
+	],
+	"key": {
+		"P": {
+			"item": "#SCORCHED_PEARL"
+		},
+		"H": {
+			"item": "minecraft:hopper"
+		},
+		"C": {
+			"item": "wirelessutils:directional_desublimator",
+			"data": 0
+		},
+		"B": {
+			"item": "#BLAZE_ROD"
+		},
+		"N": {
+			"item": "#NETHER_BRICK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_desublimator",
+		"count": 1,
+		"data": 1
+	}
+}

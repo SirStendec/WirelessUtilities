@@ -1,0 +1,8 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "wirelessutils:item/augment_base",
+		"layer1": "wirelessutils:item/slot_augment_symbol",
+		"layer2": "wirelessutils:item/slot_augment_mark"
+	}
+}

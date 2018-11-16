@@ -1,0 +1,35 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "refinedstorage"
+		}
+	],
+	"pattern": [
+		"NBN",
+		"PCP",
+		"NBN"
+	],
+	"key": {
+		"P": {
+			"item": "#RS_ADVANCED_PROCESSOR"
+		},
+		"C": {
+			"item": "wirelessutils:directional_rs_network",
+			"data": 0
+		},
+		"B": {
+			"item": "#BLAZE_ROD"
+		},
+		"N": {
+			"item": "#NETHER_BRICK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_rs_network",
+		"count": 1,
+		"data": 1
+	}
+}

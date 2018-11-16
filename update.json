@@ -1,0 +1,10 @@
+{
+    "homepage": "https://minecraft.curseforge.com/projects/wireless-utilities",
+    "1.12.2": {
+        "1.1": "See GitHub commits for changelog"
+    },
+    "promos": {
+        "1.12.2-latest": "1.1",
+        "1.12.2-recommended": "1.1"
+    }
+}

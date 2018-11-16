@@ -1,0 +1,28 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"SRS",
+		"QAQ",
+		"SRS"
+	],
+	"key": {
+		"S": {
+			"item": "minecraft:sugar"
+		},
+		"Q": {
+			"item": "#QUARTZ"
+		},
+		"A": {
+			"item": "wirelessutils:base_augment"
+		},
+		"R": {
+			"item": "#REDSTONE"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:transfer_augment",
+		"data": 0,
+		"count": 1
+	}
+}

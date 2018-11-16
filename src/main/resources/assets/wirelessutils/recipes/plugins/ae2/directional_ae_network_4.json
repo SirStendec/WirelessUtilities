@@ -1,0 +1,35 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "appliedenergistics2"
+		}
+	],
+	"pattern": [
+		"GEG",
+		"PCP",
+		"GEG"
+	],
+	"key": {
+		"P": {
+			"item": "#AE_ENGINEERING_PROCESSOR"
+		},
+		"C": {
+			"item": "wirelessutils:directional_ae_network",
+			"data": 3
+		},
+		"E": {
+			"item": "minecraft:end_rod"
+		},
+		"G": {
+			"item": "#GOLD_INGOT"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_ae_network",
+		"count": 1,
+		"data": 4
+	}
+}

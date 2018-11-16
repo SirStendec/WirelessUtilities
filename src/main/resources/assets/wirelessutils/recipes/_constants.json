@@ -1,0 +1,232 @@
+[
+	{
+		"name": "IRON_INGOT",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "ingotIron"
+		}
+	},
+	{
+		"name": "GOLD_INGOT",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "ingotGold"
+		}
+	},
+	{
+		"name": "ENDER_PEARL",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "enderpearl"
+		}
+	},
+	{
+		"name": "EYE_OF_ENDER",
+		"ingredient": {
+			"item": "minecraft:ender_eye"
+		}
+	},
+	{
+		"name": "PISTON",
+		"ingredient": {
+			"item": "minecraft:piston"
+		}
+	},
+	{
+		"name": "STICKY_PISTON",
+		"ingredient": {
+			"item": "minecraft:sticky_piston"
+		}
+	},
+	{
+		"name": "SLIME_BLOCK",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "blockSlime"
+		}
+	},
+	{
+		"name": "HOPPER",
+		"ingredient": {
+			"item": "minecraft:hopper"
+		}
+	},
+	{
+		"name": "STRING",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "string"
+		}
+	},
+	{
+		"name": "REDSTONE",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "dustRedstone"
+		}
+	},
+	{
+		"name": "REDSTONE_TORCH",
+		"ingredient": {
+			"item": "minecraft:redstone_torch"
+		}
+	},
+	{
+		"name": "CHEST",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "chest"
+		}
+	},
+	{
+		"name": "COBBLESTONE",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "cobblestone"
+		}
+	},
+	{
+		"name": "CHARGED_PEARL",
+		"ingredient": {
+			"item": "wirelessutils:charged_pearl",
+			"data": 32767
+		}
+	},
+	{
+		"name": "QUENCHED_PEARL",
+		"ingredient": {
+			"item": "wirelessutils:quenched_pearl",
+			"data": 32767
+		}
+	},
+	{
+		"name": "SCORCHED_PEARL",
+		"ingredient": {
+			"item": "wirelessutils:scorched_pearl",
+			"data": 32767
+		}
+	},
+	{
+		"name": "FLUXED_PEARL",
+		"ingredient": {
+			"item": "wirelessutils:fluxed_pearl",
+			"data": 32767
+		}
+	},
+	{
+		"name": "PAPER",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "paper"
+		}
+	},
+	{
+		"name": "LAPIS",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "gemLapis"
+		}
+	},
+	{
+		"name": "EMERALD",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "gemEmerald"
+		}
+	},
+	{
+		"name": "EMERALD_BLOCK",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "blockEmerald"
+		}
+	},
+	{
+		"name": "DIAMOND",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "gemDiamond"
+		}
+	},
+	{
+		"name": "DIAMOND_BLOCK",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "blockDiamond"
+		}
+	},
+	{
+		"name": "QUARTZ",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "gemQuartz"
+		}
+	},
+	{
+		"name": "PRISMARINE",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "gemPrismarine"
+		}
+	},
+	{
+		"name": "BLAZE_ROD",
+		"ingredient": {
+			"item": "minecraft:blaze_rod"
+		}
+	},
+	{
+		"name": "NETHER_BRICK",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "ingotBrickNether"
+		}
+	},
+	{
+		"name": "NETHER_STAR",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "netherStar"
+		}
+	},
+	{
+		"name": "GLASS_PANE",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "paneGlass"
+		}
+	},
+	{
+		"name": "REDSTONE_BLOCK",
+		"ingredient": {
+			"type": "forge:ore_dict",
+			"ore": "blockRedstone"
+		}
+	},
+	{
+		"name": "AE_ENGINEERING_PROCESSOR",
+		"ingredient": {
+			"item": "appliedenergistics2:material",
+			"data": 24
+		},
+		"conditions": [
+			{
+				"type": "forge:mod_loaded",
+				"modid": "appliedenergistics2"
+			}
+		]
+	},
+	{
+		"name": "RS_ADVANCED_PROCESSOR",
+		"ingredient": {
+			"item": "refinedstorage:processor",
+			"data": 5
+		},
+		"conditions": [
+			{
+				"type": "forge:mod_loaded",
+				"modid": "appliedenergistics2"
+			}
+		]
+	}
+]

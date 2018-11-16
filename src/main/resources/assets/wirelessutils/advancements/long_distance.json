@@ -1,0 +1,20 @@
+{
+	"parent": "wirelessutils:repulsion",
+	"display": {
+		"icon": {
+			"item": "minecraft:minecart"
+		},
+		"frame": "challenge",
+		"title": {
+			"translate": "advancements.wirelessutils.long_distance.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.long_distance.description"
+		}
+	},
+	"criteria": {
+		"long_distance": {
+			"trigger": "wirelessutils:long_distance"
+		}
+	}
+}

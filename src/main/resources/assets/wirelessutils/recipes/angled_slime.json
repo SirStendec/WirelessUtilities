@@ -1,0 +1,23 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"N N",
+		"WSW",
+		"NNN"
+	],
+	"key": {
+		"W": {
+			"item": "#STICK"
+		},
+		"S": {
+			"item": "#SLIME_BLOCK"
+		},
+		"N": {
+			"item": "#STONE"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:angled_slime"
+	}
+}
