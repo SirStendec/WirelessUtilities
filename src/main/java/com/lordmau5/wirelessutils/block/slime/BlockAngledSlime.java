@@ -296,7 +296,11 @@ public class BlockAngledSlime extends BlockBase {
         if ( entityIn.isSneaking() )
             super.onLanded(worldIn, entityIn);
         else if ( entityIn.motionY < 0 ) {
-            Vec3d entPos = entityIn.getPositionVector();
+            // We need to get the block they landed on. Center the position to the block
+            // the player is in, because our hitbox is smaller than the block but the game
+            // in its infinite wisdom lets us land when not above the hitbox.
+            Vec3d entPos = new Vec3d(Math.floor(entityIn.posX) + .5, entityIn.posY, Math.floor(entityIn.posZ) + .5);
+
             RayTraceResult ray = worldIn.rayTraceBlocks(entPos, entPos.add(0, -5, 0));
             if ( ray == null || ray.typeOfHit != RayTraceResult.Type.BLOCK ) {
                 super.onLanded(worldIn, entityIn);
@@ -319,14 +323,17 @@ public class BlockAngledSlime extends BlockBase {
                     state);
 
             if ( result == null ) {
-                super.onLanded(worldIn, entityIn);
-                return;
-            }
+                entityIn.motionY = -entityIn.motionY;
 
-            // We ignore setting the position and only set the velocity.
-            entityIn.motionX = result.velocity.x;
-            entityIn.motionY = result.velocity.y;
-            entityIn.motionZ = result.velocity.z;
+            } else {
+                // Don't set the position if it's a player, since that can be weird and jarring.
+                if ( !(entityIn instanceof EntityPlayer) )
+                    entityIn.setPosition(result.hitPos.x, result.hitPos.y, result.hitPos.z);
+
+                entityIn.motionX = result.velocity.x;
+                entityIn.motionY = result.velocity.y;
+                entityIn.motionZ = result.velocity.z;
+            }
 
             if ( !(entityIn instanceof EntityLivingBase) )
                 entityIn.motionY *= 0.8D;

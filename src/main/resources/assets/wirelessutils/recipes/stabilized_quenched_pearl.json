@@ -1,0 +1,21 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"APA"
+	],
+	"key": {
+		"A": {
+			"item": "minecraft:arrow"
+		},
+		"P": {
+			"item": "wirelessutils:quenched_pearl",
+			"data": 0
+		}
+	},
+	"result": {
+		"item": "wirelessutils:quenched_pearl",
+		"data": 1,
+		"count": 1
+	}
+}

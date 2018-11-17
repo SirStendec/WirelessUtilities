@@ -31,12 +31,22 @@ public class WirelessUtils {
 
     public static CreativeTabs creativeTabCU = new CreativeTabs(MODID) {
         @Override
+        public int getSearchbarWidth() {
+            return 70;
+        }
+
+        @Override
+        public boolean hasSearchBar() {
+            return true;
+        }
+
+        @Override
         @SideOnly(Side.CLIENT)
         public ItemStack createIcon() {
             Block block = ModBlocks.blockDirectionalCharger;
             return block == null ? null : new ItemStack(block);
         }
-    };
+    }.setBackgroundImageName("wirelessutils.png");
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {

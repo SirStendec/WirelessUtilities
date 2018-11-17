@@ -162,7 +162,11 @@ public class EntityChargedPearl extends EntityBaseThrowable {
             return;
 
         newPearl.setPosition(posX, posY, posZ);
-        newPearl.setVelocity(motionX, motionY, motionZ);
+
+        newPearl.motionX = motionX;
+        newPearl.motionY = motionY;
+        newPearl.motionZ = motionZ;
+
         world.spawnEntity(newPearl);
         world.setBlockToAir(pos);
         setDead();

@@ -344,14 +344,9 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         }
 
         if ( steps > 0 )
-
             markVelocityChanged();
 
-        distance += new
-
-                Vec3d(remainingX, 0, remainingZ).
-
-                length();
+        distance += new Vec3d(remainingX, 0, remainingZ).length();
 
         posX += remainingX;
         posY += remainingY;
@@ -405,9 +400,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         float f1 = 0.99F;
         float f2 = getGravityVelocity();
 
-        if (
-
-                isInWater() ) {
+        if ( isInWater() ) {
             for (int j = 0; j < 4; ++j) {
                 float f3 = 0.25F;
                 world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, posX - motionX * 0.25D, posY - motionY * 0.25D, posZ - motionZ * 0.25D, motionX, motionY, motionZ);
@@ -420,9 +413,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         motionY *= (double) f1;
         motionZ *= (double) f1;
 
-        if ( !
-
-                hasNoGravity() ) {
+        if ( !hasNoGravity() ) {
             if ( isSlowed )
                 f2 *= 0.5D;
 

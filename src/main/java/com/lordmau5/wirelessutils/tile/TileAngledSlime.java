@@ -50,10 +50,11 @@ public class TileAngledSlime extends TileCore implements ITilePacketHandler {
             return;
 
         this.rotation = rotation;
-        if ( world.isRemote ) {
-            markChunkDirty();
-            callBlockUpdate();
-        }
+        markChunkDirty();
+        callBlockUpdate();
+
+        if ( !world.isRemote )
+            sendTilePacket(Side.CLIENT);
     }
 
     public void rotate(int value) {

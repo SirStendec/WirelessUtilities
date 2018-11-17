@@ -3,6 +3,11 @@
 itemGroup.wirelessutils=Wireless Utilities
 
 tile.wirelessutils.angled_slime.name=Angled Slime
+tile.wirelessutils.angled_slime.info.0=Bounces pearls! At angles!
+tile.wirelessutils.angled_slime.info.1=Note: This block is still a
+tile.wirelessutils.angled_slime.info.2=work in progress, and the
+tile.wirelessutils.angled_slime.info.3=physics might not behave how
+tile.wirelessutils.angled_slime.info.4=you would expect.
 
 tile.wirelessutils.chunk_charger.name=Chunk Charger
 tile.wirelessutils.chunk_charger.info.0=The Chunk Charger charges things
@@ -41,25 +46,25 @@ tile.wirelessutils.positional_desublimator.info.2=by Positional Cards.
 tile.wirelessutils.infinite_wireless_transmitter.name=Infinite Wireless Transmitter
 
 tile.wirelessutils.directional_rs_network.name=Directional RS Network
-tile.wirelessutils.directional_rs_network.info.0=The Directional RS Network get's
+tile.wirelessutils.directional_rs_network.info.0=The Directional RS Network gets
 tile.wirelessutils.directional_rs_network.info.1=your network connected wirelessly in
 tile.wirelessutils.directional_rs_network.info.2=a direction! Given a Range Augment, it
 tile.wirelessutils.directional_rs_network.info.3=will connect a custom rectangular region.
 
 tile.wirelessutils.positional_rs_network.name=Positional RS Network
-tile.wirelessutils.positional_rs_network.info.0=The Positional RS Network get's
+tile.wirelessutils.positional_rs_network.info.0=The Positional RS Network gets
 tile.wirelessutils.positional_rs_network.info.1=your network connected wirelessly at
 tile.wirelessutils.positional_rs_network.info.2=set positions, as specified by
 tile.wirelessutils.positional_rs_network.info.3=Positional Cards.
 
 tile.wirelessutils.directional_ae_network.name=Directional AE Network
-tile.wirelessutils.directional_ae_network.info.0=The Directional AE Network get's
+tile.wirelessutils.directional_ae_network.info.0=The Directional AE Network gets
 tile.wirelessutils.directional_ae_network.info.1=your network connected wirelessly in
 tile.wirelessutils.directional_ae_network.info.2=a direction! Given a Range Augment, it
 tile.wirelessutils.directional_ae_network.info.3=will connect a custom rectangular region.
 
 tile.wirelessutils.positional_ae_network.name=Positional AE Network
-tile.wirelessutils.positional_ae_network.info.0=The Positional AE Network get's
+tile.wirelessutils.positional_ae_network.info.0=The Positional AE Network gets
 tile.wirelessutils.positional_ae_network.info.1=your network connected wirelessly at
 tile.wirelessutils.positional_ae_network.info.2=set positions, as specified by
 tile.wirelessutils.positional_ae_network.info.3=Positional Cards.
@@ -155,7 +160,7 @@ item.wirelessutils.capacity_augment.lock.desublimator.2=too small to hold its co
 item.wirelessutils.transfer_augment.name=Transfer Augment
 item.wirelessutils.transfer_augment.info.0=This augment greatly increases the
 item.wirelessutils.transfer_augment.info.1=rate at which a machine can transfer
-item.wirelessutils.transfer_augment.info.2=power into its targets.
+item.wirelessutils.transfer_augment.info.2=resources into its targets.
 
 item.wirelessutils.range_augment.tip.directional=Directional Range: %sx%sx%s
 item.wirelessutils.range_augment.tip.positional=Positional Range: %s

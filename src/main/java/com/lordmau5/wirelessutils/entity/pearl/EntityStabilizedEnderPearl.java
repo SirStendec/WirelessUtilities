@@ -59,8 +59,8 @@ public class EntityStabilizedEnderPearl extends EntityBaseThrowable {
         EntityLivingBase thrower = getThrower();
         if ( !world.isRemote && thrower == null ) {
             List<EntityLivingBase> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(
-                    posX - 10, posY - 10, posZ - 10,
-                    posX + 10, posY + 10, posZ + 10
+                    posX - 16, posY - 16, posZ - 16,
+                    posX + 16, posY + 16, posZ + 16
             ));
 
             double dist = Double.MAX_VALUE;
@@ -106,7 +106,7 @@ public class EntityStabilizedEnderPearl extends EntityBaseThrowable {
                 }
             }
 
-            if ( thrower != null ) {
+            if ( thrower != null && thrower.getEntityWorld() == world ) {
                 float maxDamage = thrower.getHealth() - 1F;
                 if ( maxDamage < 0F )
                     maxDamage = 0F;
