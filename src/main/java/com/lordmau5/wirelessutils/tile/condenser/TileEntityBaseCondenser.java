@@ -124,6 +124,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
                 int filled = tank.fill(resource, doFill);
                 if ( filled > 0 && doFill ) {
+                    markChunkDirty();
                     if ( locked && lockStack == null )
                         setLocked(resource);
 
@@ -162,6 +163,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
                 FluidStack output = tank.drain(maxDrain, doDrain);
                 if ( output != null && doDrain ) {
+                    markChunkDirty();
                     FluidStack tankFluid = tank.getFluid();
                     if ( lockStack != null && !tank.isLocked() && (tankFluid == null || tankFluid.amount == 0) )
                         tank.setLock(lockStack.getFluid());
@@ -194,7 +196,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                         setLocked(resource);
                 }
 
-                return tank.fill(resource, doFill);
+                int out = tank.fill(resource, doFill);
+                if ( out > 0 && doFill )
+                    markChunkDirty();
+
+                return out;
             }
 
             @Nullable
@@ -215,7 +221,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                 if ( !inverted )
                     return null;
 
-                return tank.drain(maxDrain, doDrain);
+                FluidStack out = tank.drain(maxDrain, doDrain);
+                if ( out != null && doDrain )
+                    markChunkDirty();
+
+                return out;
             }
         };
     }

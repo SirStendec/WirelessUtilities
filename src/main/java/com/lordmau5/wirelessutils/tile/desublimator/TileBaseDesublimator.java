@@ -96,11 +96,6 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     @Override
-    public void onContentsChanged(int slot) {
-        super.onContentsChanged(slot);
-    }
-
-    @Override
     public boolean isItemValidForSlot(int slot, @Nonnull ItemStack stack) {
         if ( locks[slot] != null ) {
             ComparableItemStackValidatedNBT compare = new ComparableItemStackValidatedNBT(stack);

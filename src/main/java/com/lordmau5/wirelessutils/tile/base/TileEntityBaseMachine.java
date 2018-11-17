@@ -185,7 +185,7 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     /* Inventory */
 
     public void onContentsChanged(int slot) {
-
+        markChunkDirty();
     }
 
     public int getStackLimit(int slot) {

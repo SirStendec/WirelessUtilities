@@ -131,6 +131,8 @@ public abstract class TileEntityBaseEnergy extends TileEntityBaseMachine impleme
         if ( isCreative )
             return 0;
 
+        if ( !simulate )
+            markChunkDirty();
         return getEnergyStorage().receiveEnergy(maxReceive, simulate);
     }
 
@@ -138,6 +140,9 @@ public abstract class TileEntityBaseEnergy extends TileEntityBaseMachine impleme
     public int extractEnergy(int maxExtract, boolean simulate) {
         if ( isCreative )
             return Math.min(getMaxExtract(), maxExtract);
+
+        if ( !simulate )
+            markChunkDirty();
 
         return getEnergyStorage().extractEnergy(maxExtract, simulate);
     }
