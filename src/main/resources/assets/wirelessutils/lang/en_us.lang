@@ -310,6 +310,12 @@ advancements.wirelessutils.charged_pearl.description=Find a way to energize a Fl
 advancements.wirelessutils.storm_chaser.title=Storm Chaser
 advancements.wirelessutils.storm_chaser.description=Toss a Fluxed Pearl into the sky when the time is right.
 
+advancements.wirelessutils.refreshing.title=Refreshing
+advancements.wirelessutils.refreshing.description=Toss a Charged Pearl into water.
+
+advancements.wirelessutils.so_hot_right_now.title=So Hot Right Now
+advancements.wirelessutils.so_hot_right_now.description=Toss a Charged Pearl into lava.
+
 advancements.wirelessutils.this_way.title=This Way!
 advancements.wirelessutils.this_way.description=Construct a Directional Charger.
 

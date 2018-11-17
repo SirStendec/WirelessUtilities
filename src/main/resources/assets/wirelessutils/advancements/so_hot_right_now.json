@@ -1,0 +1,19 @@
+{
+	"parent": "wirelessutils:charged_pearl",
+	"display": {
+		"icon": {
+			"item": "wirelessutils:scorched_pearl"
+		},
+		"title": {
+			"translate": "advancements.wirelessutils.so_hot_right_now.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.so_hot_right_now.description"
+		}
+	},
+	"criteria": {
+		"refreshing": {
+			"trigger": "wirelessutils:so_hot_right_now"
+		}
+	}
+}

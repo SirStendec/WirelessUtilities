@@ -4,12 +4,14 @@ import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.entity.pearl.EntityFluxedPearl;
 import com.lordmau5.wirelessutils.item.base.ItemBasePearl;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -42,6 +44,14 @@ public class ItemFluxedPearl extends ItemBasePearl {
     @Override
     public boolean shouldItemTakeDamage(EntityItemEnhanced entity, ItemStack stack, DamageSource source, float amount) {
         if ( source == DamageSource.LIGHTNING_BOLT && ModConfig.items.fluxedPearl.enableLightning ) {
+            String thrower = entity.getThrower();
+            World world = entity.getEntityWorld();
+            if ( world != null && thrower != null ) {
+                EntityPlayer player = world.getPlayerEntityByName(thrower);
+                if ( player instanceof EntityPlayerMP )
+                    ModAdvancements.STORM_CHASER.trigger((EntityPlayerMP) player);
+            }
+
             entity.setItem(new ItemStack(ModItems.itemChargedPearl, stack.getCount(), stack.getMetadata()));
             return false;
         }

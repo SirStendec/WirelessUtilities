@@ -1,0 +1,19 @@
+{
+	"parent": "wirelessutils:charged_pearl",
+	"display": {
+		"icon": {
+			"item": "wirelessutils:quenched_pearl"
+		},
+		"title": {
+			"translate": "advancements.wirelessutils.refreshing.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.refreshing.description"
+		}
+	},
+	"criteria": {
+		"refreshing": {
+			"trigger": "wirelessutils:refreshing"
+		}
+	}
+}

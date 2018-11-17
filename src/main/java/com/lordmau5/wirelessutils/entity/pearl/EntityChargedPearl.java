@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.entity.pearl;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
 import com.lordmau5.wirelessutils.render.RenderPearl;
+import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.block.BlockLiquid;
@@ -12,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -133,6 +135,9 @@ public class EntityChargedPearl extends EntityBaseThrowable {
                 ws.spawnParticle(EnumParticleTypes.WATER_SPLASH, posX, posY, posZ, 3, .2D, .2D, .2D, 0D);
             }
 
+            if ( thrower instanceof EntityPlayerMP )
+                ModAdvancements.REFRESHING.trigger((EntityPlayerMP) thrower);
+
             playSound(SoundEvents.ENTITY_GENERIC_SPLASH, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
 
         } else if ( lava && fluid.getFluid() == FluidRegistry.LAVA ) {
@@ -147,6 +152,9 @@ public class EntityChargedPearl extends EntityBaseThrowable {
                 WorldServer ws = (WorldServer) world;
                 ws.spawnParticle(EnumParticleTypes.SMOKE_LARGE, posX, posY, posZ, 3, .2D, .2D, .2D, 0D);
             }
+
+            if ( thrower instanceof EntityPlayerMP )
+                ModAdvancements.SO_HOT_RIGHT_NOW.trigger((EntityPlayerMP) thrower);
 
             playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
 

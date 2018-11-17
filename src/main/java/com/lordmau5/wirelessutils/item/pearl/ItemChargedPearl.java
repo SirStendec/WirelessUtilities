@@ -4,6 +4,7 @@ import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.entity.pearl.EntityChargedPearl;
 import com.lordmau5.wirelessutils.item.base.IGrowableItem;
 import com.lordmau5.wirelessutils.item.base.ItemBasePearl;
+import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.block.BlockLiquid;
@@ -12,6 +13,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
@@ -67,6 +69,10 @@ public class ItemChargedPearl extends ItemBasePearl implements IGrowableItem {
             ws.spawnParticle(EnumParticleTypes.SMOKE_LARGE, entityItem.posX, entityItem.posY, entityItem.posZ, 3, .2D, .2D, .2D, 0D);
         }
 
+        EntityPlayer player = world.getPlayerEntityByName(entityItem.getThrower());
+        if ( player instanceof EntityPlayerMP )
+            ModAdvancements.SO_HOT_RIGHT_NOW.trigger((EntityPlayerMP) player);
+
         world.setBlockToAir(nextPos);
         if ( stack.getCount() > 1 ) {
             world.spawnEntity(new EntityItemEnhanced(world, entityItem.posX, entityItem.posY, entityItem.posZ, newStack));
@@ -108,6 +114,7 @@ public class ItemChargedPearl extends ItemBasePearl implements IGrowableItem {
             return;
 
         Item newItem;
+        EntityPlayer player = world.getPlayerEntityByName(entity.getThrower());
 
         if ( water && fluid.getFluid() == FluidRegistry.WATER ) {
             newItem = ModItems.itemQuenchedPearl;
@@ -117,6 +124,9 @@ public class ItemChargedPearl extends ItemBasePearl implements IGrowableItem {
                 ws.spawnParticle(EnumParticleTypes.WATER_SPLASH, entity.posX, entity.posY, entity.posZ, 3, .2D, .2D, .2D, 0D);
             }
 
+            if ( player instanceof EntityPlayerMP )
+                ModAdvancements.REFRESHING.trigger((EntityPlayerMP) player);
+
         } else if ( lava && fluid.getFluid() == FluidRegistry.LAVA ) {
             newItem = ModItems.itemScorchedPearl;
             entity.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + world.rand.nextFloat() * 0.4F);
@@ -124,6 +134,10 @@ public class ItemChargedPearl extends ItemBasePearl implements IGrowableItem {
                 WorldServer ws = (WorldServer) world;
                 ws.spawnParticle(EnumParticleTypes.SMOKE_LARGE, entity.posX, entity.posY, entity.posZ, 3, .2D, .2D, .2D, 0D);
             }
+
+            if ( player instanceof EntityPlayerMP )
+                ModAdvancements.SO_HOT_RIGHT_NOW.trigger((EntityPlayerMP) player);
+
         } else
             return;
 
