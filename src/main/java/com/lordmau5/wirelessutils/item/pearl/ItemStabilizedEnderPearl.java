@@ -37,7 +37,7 @@ public class ItemStabilizedEnderPearl extends ItemBasePearl {
 
     @Override
     public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
-        if ( ! isInCreativeTab(tab) )
+        if ( !isInCreativeTab(tab) )
             return;
 
         items.add(new ItemStack(this, 1, 0));
@@ -49,7 +49,7 @@ public class ItemStabilizedEnderPearl extends ItemBasePearl {
     }
 
     @Override
-    public String getItemStackDisplayName(ItemStack stack) {
+    public String getItemStackDisplayName(@Nonnull ItemStack stack) {
         return new TextComponentTranslation(
                 "item." + WirelessUtils.MODID + ".accurate_pearl.name",
                 new TextComponentTranslation("item.enderPearl.name")
@@ -57,7 +57,7 @@ public class ItemStabilizedEnderPearl extends ItemBasePearl {
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+    public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         addLocalizedLines(tooltip, "item." + WirelessUtils.MODID + ".accurate_pearl.info", TextHelpers.GREEN);
     }
 
@@ -68,7 +68,7 @@ public class ItemStabilizedEnderPearl extends ItemBasePearl {
 
     @Nonnull
     @Override
-    public EntityThrowable getProjectileEntity(@Nonnull World worldIn, EntityPlayer playerIn, IPosition position, @Nonnull ItemStack stack) {
+    public EntityThrowable getProjectileEntity(@Nonnull World worldIn, @Nullable EntityPlayer playerIn, @Nullable IPosition position, @Nonnull ItemStack stack) {
         if ( playerIn != null )
             return new EntityStabilizedEnderPearl(worldIn, playerIn, stack);
 

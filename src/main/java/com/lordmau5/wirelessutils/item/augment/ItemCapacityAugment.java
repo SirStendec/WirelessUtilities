@@ -24,7 +24,7 @@ public class ItemCapacityAugment extends ItemAugment {
         return Math.min(ModConfig.augments.capacity.availableTiers, Level.values().length);
     }
 
-    public int getCapacityFactor(ItemStack stack) {
+    public int getCapacityFactor(@Nonnull ItemStack stack) {
         if ( stack.isEmpty() || stack.getItem() != this )
             return 0;
 
@@ -32,7 +32,7 @@ public class ItemCapacityAugment extends ItemAugment {
     }
 
     @Override
-    public void addSlotLockExplanation(List<String> tooltip, TileEntity tile, Slot slot, ItemStack stack) {
+    public void addSlotLockExplanation(@Nonnull List<String> tooltip, @Nonnull TileEntity tile, @Nonnull Slot slot, @Nonnull ItemStack stack) {
         super.addSlotLockExplanation(tooltip, tile, slot, stack);
 
         if ( tile instanceof TileEntityBaseCondenser )

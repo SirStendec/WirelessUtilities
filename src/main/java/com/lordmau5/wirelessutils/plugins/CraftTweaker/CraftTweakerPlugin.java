@@ -4,27 +4,45 @@ import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
 import com.lordmau5.wirelessutils.entity.pearl.EntityFluxedPearl;
 import com.lordmau5.wirelessutils.plugins.IPlugin;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
+import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.api.item.IItemStack;
+import crafttweaker.api.liquid.ILiquidStack;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import stanhebben.zenscript.annotations.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
+import javax.annotation.Nonnull;
+
 public class CraftTweakerPlugin implements IPlugin {
     @Override
     public void preInit(FMLPreInitializationEvent event) {
         CraftTweakerAPI.registerClass(ChargerIntegration.class);
+        CraftTweakerAPI.registerClass(CondenserIntegration.class);
         CraftTweakerAPI.registerClass(LevelIntegration.class);
         CraftTweakerAPI.registerClass(PearlReactions.class);
     }
 
+    public static FluidStack getFluidStack(ILiquidStack stack) {
+        if ( stack == null )
+            return null;
+
+        Object internal = stack.getInternal();
+        if ( internal instanceof FluidStack )
+            return (FluidStack) internal;
+
+        return null;
+    }
+
+    @Nonnull
     public static ItemStack getItemStack(IItemStack stack) {
         if ( stack == null )
             return ItemStack.EMPTY;
@@ -48,12 +66,16 @@ public class CraftTweakerPlugin implements IPlugin {
         @ZenMethod
         public static void remove(IItemStack inputIn) {
             ItemStack input = getItemStack(inputIn);
-            if ( input.isEmpty() )
+            if ( input.isEmpty() ) {
+                CraftTweakerAPI.logError("Invalid Remove Pearl Reaction: input is empty");
                 return;
+            }
 
             Block block = Block.getBlockFromItem(input.getItem());
-            if ( block == null || block == Blocks.AIR )
+            if ( block == null || block == Blocks.AIR ) {
+                CraftTweakerAPI.logError("Invalid Remove Pearl Reaction: input has no associated block");
                 return;
+            }
 
             EntityFluxedPearl.removeReaction(block);
         }
@@ -62,16 +84,22 @@ public class CraftTweakerPlugin implements IPlugin {
         @ZenMethod
         public static void add(IItemStack inputIn, String type, @Optional double scale) {
             ItemStack input = getItemStack(inputIn);
-            if ( input.isEmpty() )
+            if ( input.isEmpty() ) {
+                CraftTweakerAPI.logError("Invalid Add Pearl Reaction: input is empty");
                 return;
+            }
 
             Block block = Block.getBlockFromItem(input.getItem());
-            if ( block == null || block == Blocks.AIR )
+            if ( block == null || block == Blocks.AIR ) {
+                CraftTweakerAPI.logError("Invalid Add Pearl Reaction: input has no associated block");
                 return;
+            }
 
             EntityBaseThrowable.HitReactionType hrtype = EntityBaseThrowable.HitReactionType.valueOf(type);
-            if ( hrtype == null )
+            if ( hrtype == null ) {
+                CraftTweakerAPI.logError("Invalid Add Pearl Reaction: hit reaction type is invalid");
                 return;
+            }
 
             if ( scale != 0 )
                 EntityFluxedPearl.addReaction(block, hrtype, scale);
@@ -129,6 +157,93 @@ public class CraftTweakerPlugin implements IPlugin {
         }
     }
 
+    @ZenClass("mods.wirelessutils.condenser")
+    public static class CondenserIntegration {
+        @SuppressWarnings("unused")
+        @ZenMethod
+        public static void addRecipe(ILiquidStack fluidIn, IItemStack inputIn, IItemStack outputIn, @Optional int energyCost, @Optional int craftTicks) {
+            ItemStack input = getItemStack(inputIn);
+            ItemStack output = getItemStack(outputIn);
+            FluidStack fluid = getFluidStack(fluidIn);
+
+            if ( fluid == null ) {
+                CraftTweakerAPI.logError("Invalid Condenser Recipe: fluid is null");
+                return;
+            }
+
+            if ( input.isEmpty() || output.isEmpty() ) {
+                CraftTweakerAPI.logError("Invalid Condenser Recipe: input or output is empty");
+                return;
+            }
+
+            if ( energyCost == 0 )
+                energyCost = 400;
+
+            if ( craftTicks != 0 )
+                CondenserRecipeManager.addRecipe(fluid, input, output, energyCost, craftTicks);
+            else
+                CondenserRecipeManager.addRecipe(fluid, input, output, energyCost);
+        }
+
+        @SuppressWarnings("unused")
+        @ZenMethod
+        public static void blockRecipe(ILiquidStack fluidIn, IItemStack inputIn) {
+            FluidStack fluid = getFluidStack(fluidIn);
+            ItemStack input = getItemStack(inputIn);
+
+            if ( fluid == null ) {
+                CraftTweakerAPI.logError("Invalid Condenser Block: fluid is null");
+                return;
+            }
+
+            if ( input.isEmpty() ) {
+                CraftTweakerAPI.logError("Invalid Condenser Block: input is empty");
+                return;
+            }
+
+            CondenserRecipeManager.addBlock(fluid, input);
+        }
+
+        @SuppressWarnings("unused")
+        @ZenMethod
+        public static void unblockRecipe(ILiquidStack fluidIn, IItemStack inputIn) {
+            FluidStack fluid = getFluidStack(fluidIn);
+            ItemStack input = getItemStack(inputIn);
+
+            if ( fluid == null ) {
+                CraftTweakerAPI.logError("Invalid Condenser Unblock: fluid is null");
+                return;
+            }
+
+            if ( input.isEmpty() ) {
+                CraftTweakerAPI.logError("Invalid Condenser Unblock: input is empty");
+                return;
+            }
+
+            CondenserRecipeManager.removeBlock(fluid, input);
+        }
+
+        @SuppressWarnings("unused")
+        @ZenMethod
+        public static void removeRecipe(ILiquidStack fluidIn, IItemStack inputIn) {
+            FluidStack fluid = getFluidStack(fluidIn);
+            ItemStack input = getItemStack(inputIn);
+
+            if ( fluid == null ) {
+                CraftTweakerAPI.logError("Invalid Condenser Remove Recipe: fluid is null");
+                return;
+            }
+
+            if ( input.isEmpty() ) {
+                CraftTweakerAPI.logError("Invalid Condenser Remove Recipe: input is empty");
+                return;
+            }
+
+            CondenserRecipeManager.removeRecipe(fluid, input);
+        }
+    }
+
+
     @ZenClass("mods.wirelessutils.charger")
     public static class ChargerIntegration {
         @SuppressWarnings("unused")
@@ -137,8 +252,10 @@ public class CraftTweakerPlugin implements IPlugin {
             ItemStack input = getItemStack(inputIn);
             ItemStack output = getItemStack(outputIn);
 
-            if ( input.isEmpty() || output.isEmpty() )
+            if ( input.isEmpty() || output.isEmpty() ) {
+                CraftTweakerAPI.logError("Invalid Charger Recipe: input or output is empty");
                 return;
+            }
 
             if ( energyCost == 0 )
                 energyCost = ModConfig.items.fluxedPearl.chargeEnergy;
@@ -153,8 +270,10 @@ public class CraftTweakerPlugin implements IPlugin {
         @ZenMethod
         public static void blockRecipe(IItemStack inputIn) {
             ItemStack input = getItemStack(inputIn);
-            if ( input.isEmpty() )
+            if ( input.isEmpty() ) {
+                CraftTweakerAPI.logError("Invalid Charger Block: input is empty");
                 return;
+            }
 
             ChargerRecipeManager.addBlock(input);
         }
@@ -163,8 +282,10 @@ public class CraftTweakerPlugin implements IPlugin {
         @ZenMethod
         public static void unblockRecipe(IItemStack inputIn) {
             ItemStack input = getItemStack(inputIn);
-            if ( input.isEmpty() )
+            if ( input.isEmpty() ) {
+                CraftTweakerAPI.logError("Invalid Charger Unblock: input is empty");
                 return;
+            }
 
             ChargerRecipeManager.removeBlock(input);
         }
@@ -173,8 +294,10 @@ public class CraftTweakerPlugin implements IPlugin {
         @ZenMethod
         public static void removeRecipe(IItemStack inputIn) {
             ItemStack input = getItemStack(inputIn);
-            if ( input.isEmpty() )
+            if ( input.isEmpty() ) {
+                CraftTweakerAPI.logError("Invalid Charger Remove Recipe: input is empty");
                 return;
+            }
 
             ChargerRecipeManager.removeRecipe(input);
         }

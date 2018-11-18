@@ -168,6 +168,7 @@ public class RenderManager {
             areas.remove(area.dimension);
     }
 
+    @SuppressWarnings("unused")
     @SubscribeEvent
     public void renderHand(RenderSpecificHandEvent event) {
         int idx = event.getHand() == EnumHand.MAIN_HAND ? 0 : 1;
@@ -192,6 +193,7 @@ public class RenderManager {
         }
     }
 
+    @SuppressWarnings("unused")
     @SubscribeEvent
     public void renderWorldLast(RenderWorldLastEvent event) {
         if ( areas == null || areas.isEmpty() )

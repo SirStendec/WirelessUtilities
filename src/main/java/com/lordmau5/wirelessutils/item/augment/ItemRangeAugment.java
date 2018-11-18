@@ -59,36 +59,36 @@ public class ItemRangeAugment extends ItemAugment {
         return augmentable instanceof IRangeAugmentable;
     }
 
-    public boolean isInterdimensional(ItemStack stack) {
+    public boolean isInterdimensional(@Nonnull ItemStack stack) {
         return stack.getItem() == this && stack.getMetadata() == INTERDIMENSIONAL_VALUE;
     }
 
     @Override
-    public boolean shouldRequireLowerTier(ItemStack stack) {
+    public boolean shouldRequireLowerTier(@Nonnull ItemStack stack) {
         return !isInterdimensional(stack);
     }
 
-    public int getDirectionalRange(ItemStack stack) {
+    public int getDirectionalRange(@Nonnull ItemStack stack) {
         if ( stack.isEmpty() || stack.getItem() != this )
             return 0;
 
         return 3 * (stack.getMetadata() + 1);
     }
 
-    public int getPositionalRange(ItemStack stack) {
+    public int getPositionalRange(@Nonnull ItemStack stack) {
         if ( stack.isEmpty() || stack.getItem() != this )
             return ModConfig.augments.range.blocksPerTier;
 
         return (stack.getMetadata() + 2) * ModConfig.augments.range.blocksPerTier;
     }
 
-    public void addSlotLockExplanation(List<String> tooltip, TileEntity entity, Slot slot, ItemStack stack) {
+    public void addSlotLockExplanation(@Nonnull List<String> tooltip, @Nonnull TileEntity entity, @Nonnull Slot slot, @Nonnull ItemStack stack) {
         super.addSlotLockExplanation(tooltip, entity, slot, stack);
         addLocalizedLines(tooltip, getTranslationKey() + ".lock");
     }
 
     @Override
-    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
+    public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> items) {
         if ( !isInCreativeTab(tab) )
             return;
 
@@ -99,7 +99,8 @@ public class ItemRangeAugment extends ItemAugment {
     }
 
     @Override
-    public String getItemStackDisplayName(ItemStack stack) {
+    @Nonnull
+    public String getItemStackDisplayName(@Nonnull ItemStack stack) {
         String name = getTranslationKey(stack);
 
         return new TextComponentTranslation(
@@ -112,7 +113,7 @@ public class ItemRangeAugment extends ItemAugment {
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+    public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
 
         String name = stack.getTranslationKey();

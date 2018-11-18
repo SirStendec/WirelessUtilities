@@ -55,7 +55,7 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+    public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
 
         if ( StringHelper.isControlKeyDown() ) {
@@ -89,11 +89,12 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
             tooltip.add(StringHelper.localize("item." + WirelessUtils.MODID + ".augment_ctrl.inactive"));
     }
 
-    public Level getLevel(ItemStack stack) {
+    @Nonnull
+    public Level getLevel(@Nonnull ItemStack stack) {
         return Level.fromInt(stack.getMetadata());
     }
 
-    public boolean isUpgrade(ItemStack oldStack, ItemStack newStack) {
+    public boolean isUpgrade(@Nonnull ItemStack oldStack, @Nonnull ItemStack newStack) {
         if ( newStack.getItem() != this )
             return false;
 
@@ -109,7 +110,7 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
 
     public abstract boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable);
 
-    public boolean shouldRequireLowerTier(ItemStack stack) {
+    public boolean shouldRequireLowerTier(@Nonnull ItemStack stack) {
         return true;
     }
 
@@ -127,7 +128,7 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
     }
 
     @Override
-    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
+    public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> items) {
         if ( !isInCreativeTab(tab) )
             return;
 
@@ -137,12 +138,12 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
     }
 
     @Override
-    public void onUpgradeInstalled(EntityPlayer player, World world, BlockPos pos, IUpgradeable tile, EnumFacing side, ItemStack stack) {
+    public void onUpgradeInstalled(@Nullable EntityPlayer player, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull IUpgradeable tile, @Nullable EnumFacing side, @Nonnull ItemStack stack) {
         if ( !world.isRemote && player instanceof EntityPlayerMP )
             ModAdvancements.AUGMENTED.trigger((EntityPlayerMP) player);
     }
 
-    public void addSlotLockExplanation(List<String> tooltip, TileEntity tile, Slot slot, ItemStack stack) {
+    public void addSlotLockExplanation(@Nonnull List<String> tooltip, @Nonnull TileEntity tile, @Nonnull Slot slot, @Nonnull ItemStack stack) {
         if ( !ModConfig.augments.requirePreviousTiers || !(tile instanceof TileEntityBaseMachine) )
             return;
 
@@ -152,7 +153,8 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
     }
 
     @Override
-    public String getItemStackDisplayName(ItemStack stack) {
+    @Nonnull
+    public String getItemStackDisplayName(@Nonnull ItemStack stack) {
         String name = super.getItemStackDisplayName(stack);
         if ( getTiers() > 1 )
             return new TextComponentTranslation(

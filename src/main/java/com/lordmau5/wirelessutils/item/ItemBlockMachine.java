@@ -8,23 +8,28 @@ import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextComponentTranslation;
 
+import javax.annotation.Nonnull;
+
 public class ItemBlockMachine extends ItemBlockExplainable implements IExplainableItem {
 
     public ItemBlockMachine(BlockBaseMachine block) {
         super(block);
     }
 
+    @Nonnull
     public Level getLevel(ItemStack stack) {
         return Level.fromInt(stack.getMetadata());
     }
 
     @Override
+    @Nonnull
     public EnumRarity getRarity(ItemStack stack) {
         return getLevel(stack).rarity;
     }
 
     @Override
-    public String getItemStackDisplayName(ItemStack stack) {
+    @Nonnull
+    public String getItemStackDisplayName(@Nonnull ItemStack stack) {
         String out = new TextComponentTranslation(
                 "info." + WirelessUtils.MODID + ".tiered.name",
                 new TextComponentTranslation(getTranslationKey(stack) + ".name"),

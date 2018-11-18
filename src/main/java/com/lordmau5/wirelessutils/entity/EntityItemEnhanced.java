@@ -10,6 +10,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
+
 public class EntityItemEnhanced extends EntityItem {
     public EntityItemEnhanced(World world) {
         super(world);
@@ -35,7 +37,7 @@ public class EntityItemEnhanced extends EntityItem {
     }
 
     @Override
-    public boolean attackEntityFrom(DamageSource source, float amount) {
+    public boolean attackEntityFrom(@Nullable DamageSource source, float amount) {
         if ( !world.isRemote && !isDead ) {
             ItemStack stack = getItem();
             if ( !stack.isEmpty() ) {

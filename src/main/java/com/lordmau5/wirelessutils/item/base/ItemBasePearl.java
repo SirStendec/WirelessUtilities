@@ -58,7 +58,7 @@ public abstract class ItemBasePearl extends ItemBase implements IEnhancedItem, I
     }
 
     @Override
-    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
+    public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> items) {
         if ( !isInCreativeTab(tab) )
             return;
 
@@ -72,7 +72,7 @@ public abstract class ItemBasePearl extends ItemBase implements IEnhancedItem, I
     }
 
     @Override
-    public boolean shouldItemTakeDamage(EntityItemEnhanced entity, ItemStack stack, DamageSource source, float amount) {
+    public boolean shouldItemTakeDamage(@Nonnull EntityItemEnhanced entity, @Nonnull ItemStack stack, DamageSource source, float amount) {
         if ( source == DamageSource.IN_FIRE || source == DamageSource.LIGHTNING_BOLT )
             return false;
 
@@ -80,7 +80,8 @@ public abstract class ItemBasePearl extends ItemBase implements IEnhancedItem, I
     }
 
     @Override
-    public String getItemStackDisplayName(ItemStack stack) {
+    @Nonnull
+    public String getItemStackDisplayName(@Nonnull ItemStack stack) {
         String name = super.getItemStackDisplayName(stack);
 
         if ( stack.getMetadata() == 1 )
@@ -93,7 +94,7 @@ public abstract class ItemBasePearl extends ItemBase implements IEnhancedItem, I
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+    public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         if ( stack.getMetadata() == 1 )
             addLocalizedLines(
                     tooltip,
@@ -116,9 +117,10 @@ public abstract class ItemBasePearl extends ItemBase implements IEnhancedItem, I
     }
 
     public abstract @Nonnull
-    EntityThrowable getProjectileEntity(@Nonnull World worldIn, EntityPlayer playerIn, IPosition position, @Nonnull ItemStack stack);
+    EntityThrowable getProjectileEntity(@Nonnull World worldIn, @Nullable EntityPlayer playerIn, @Nullable IPosition position, @Nonnull ItemStack stack);
 
     @Override
+    @Nonnull
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         ItemStack stack = playerIn.getHeldItem(handIn);
         if ( !playerIn.capabilities.isCreativeMode )

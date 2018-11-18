@@ -4,8 +4,10 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 public interface ILockExplanation {
-    void addSlotLockExplanation(List<String> tooltip, TileEntity tile, Slot slot, ItemStack stack);
+
+    void addSlotLockExplanation(@Nonnull List<String> tooltip, @Nonnull TileEntity tile, @Nonnull Slot slot, @Nonnull ItemStack stack);
 }

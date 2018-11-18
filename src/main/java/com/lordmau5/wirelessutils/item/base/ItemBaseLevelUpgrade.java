@@ -17,6 +17,9 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public abstract class ItemBaseLevelUpgrade extends ItemBaseUpgrade {
 
     public ItemBaseLevelUpgrade() {
@@ -42,19 +45,21 @@ public abstract class ItemBaseLevelUpgrade extends ItemBaseUpgrade {
     }
 
     @Override
-    public void onUpgradeInstalled(EntityPlayer player, World world, BlockPos pos, IUpgradeable tile, EnumFacing side, ItemStack stack) {
+    public void onUpgradeInstalled(@Nullable EntityPlayer player, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull IUpgradeable tile, @Nullable EnumFacing side, @Nonnull ItemStack stack) {
         super.onUpgradeInstalled(player, world, pos, tile, side, stack);
         if ( !world.isRemote && player instanceof EntityPlayerMP )
             ModAdvancements.UPGRADED.trigger((EntityPlayerMP) player);
     }
 
     @Override
-    public EnumRarity getRarity(ItemStack stack) {
+    @Nonnull
+    public EnumRarity getRarity(@Nonnull ItemStack stack) {
         return getLevel(stack).rarity;
     }
 
     @Override
-    public String getItemStackDisplayName(ItemStack stack) {
+    @Nonnull
+    public String getItemStackDisplayName(@Nonnull ItemStack stack) {
         Level level = getLevel(stack);
 
         return new TextComponentTranslation(
@@ -65,7 +70,7 @@ public abstract class ItemBaseLevelUpgrade extends ItemBaseUpgrade {
     }
 
     @Override
-    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
+    public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> items) {
         if ( !isInCreativeTab(tab) )
             return;
 

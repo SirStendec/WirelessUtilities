@@ -13,6 +13,8 @@ import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nonnull;
+
 @Mod(modid = WirelessUtils.MODID, name = WirelessUtils.NAME, version = WirelessUtils.VERSION, dependencies = WirelessUtils.DEPENDENCIES, updateJSON = WirelessUtils.UPDATE_URL)
 public class WirelessUtils {
     public static final String MODID = "wirelessutils";
@@ -41,13 +43,15 @@ public class WirelessUtils {
         }
 
         @Override
+        @Nonnull
         @SideOnly(Side.CLIENT)
         public ItemStack createIcon() {
             Block block = ModBlocks.blockDirectionalCharger;
-            return block == null ? null : new ItemStack(block);
+            return block == null ? ItemStack.EMPTY : new ItemStack(block);
         }
     }.setBackgroundImageName("wirelessutils.png");
 
+    @SuppressWarnings("unused")
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         proxy.preInit(event);
@@ -58,16 +62,19 @@ public class WirelessUtils {
         proxy.init(event);
     }
 
+    @SuppressWarnings("unused")
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         proxy.postInit(event);
     }
 
+    @SuppressWarnings("unused")
     @EventHandler
     public void handleIdMapping(FMLModIdMappingEvent event) {
         proxy.handleIdMapping(event);
     }
 
+    @SuppressWarnings("unused")
     @EventHandler
     public void serverLoad(FMLServerStartingEvent event) {
         proxy.serverLoad(event);

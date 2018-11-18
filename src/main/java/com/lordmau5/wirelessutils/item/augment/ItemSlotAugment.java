@@ -22,7 +22,7 @@ public class ItemSlotAugment extends ItemAugment {
         return Math.min(ModConfig.augments.slot.availableTiers, Level.values().length);
     }
 
-    public int getAvailableSlots(ItemStack stack) {
+    public int getAvailableSlots(@Nonnull ItemStack stack) {
         int tier = (stack.isEmpty() || stack.getItem() != this) ? 0 : stack.getMetadata() + 1;
         return getAvailableSlots(tier, 1, ModConfig.augments.slot.slotsPerTier);
     }
@@ -35,13 +35,13 @@ public class ItemSlotAugment extends ItemAugment {
     }
 
     @Override
-    public void addSlotLockExplanation(List<String> tooltip, TileEntity tile, Slot slot, ItemStack stack) {
+    public void addSlotLockExplanation(@Nonnull List<String> tooltip, @Nonnull TileEntity tile, @Nonnull Slot slot, @Nonnull ItemStack stack) {
         super.addSlotLockExplanation(tooltip, tile, slot, stack);
         addLocalizedLines(tooltip, getTranslationKey() + ".lock");
     }
 
     @Override
-    public void apply(ItemStack stack, IAugmentable augmentable) {
+    public void apply(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         if ( augmentable instanceof ISlotAugmentable ) {
             ISlotAugmentable slots = (ISlotAugmentable) augmentable;
             int tier = (stack.isEmpty() || stack.getItem() != this) ? 0 : stack.getMetadata() + 1;

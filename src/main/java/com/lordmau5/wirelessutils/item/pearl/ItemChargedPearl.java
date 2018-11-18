@@ -154,7 +154,7 @@ public class ItemChargedPearl extends ItemBasePearl implements IGrowableItem {
 
     @Nonnull
     @Override
-    public EntityThrowable getProjectileEntity(@Nonnull World worldIn, EntityPlayer playerIn, IPosition position, ItemStack stack) {
+    public EntityThrowable getProjectileEntity(@Nonnull World worldIn, EntityPlayer playerIn, IPosition position, @Nonnull ItemStack stack) {
         if ( playerIn != null )
             return new EntityChargedPearl(worldIn, playerIn, stack);
 

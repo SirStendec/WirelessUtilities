@@ -11,6 +11,7 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class ItemQuenchedPearl extends ItemBasePearl {
 
@@ -30,7 +31,7 @@ public class ItemQuenchedPearl extends ItemBasePearl {
 
     @Nonnull
     @Override
-    public EntityThrowable getProjectileEntity(@Nonnull World worldIn, EntityPlayer playerIn, IPosition position, @Nonnull ItemStack stack) {
+    public EntityThrowable getProjectileEntity(@Nonnull World worldIn, @Nullable EntityPlayer playerIn, @Nullable IPosition position, @Nonnull ItemStack stack) {
         if ( playerIn != null )
             return new EntityQuenchedPearl(worldIn, playerIn, stack);
 

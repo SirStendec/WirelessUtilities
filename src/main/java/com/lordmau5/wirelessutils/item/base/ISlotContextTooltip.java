@@ -4,10 +4,11 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 public interface ISlotContextTooltip {
 
-    void addTooltipContext(List<String> tooltip, TileEntity tile, Slot slot, ItemStack stack);
+    void addTooltipContext(@Nonnull List<String> tooltip, @Nonnull TileEntity tile, @Nonnull Slot slot, @Nonnull ItemStack stack);
 
 }

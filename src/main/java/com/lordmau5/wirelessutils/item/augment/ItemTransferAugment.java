@@ -19,7 +19,7 @@ public class ItemTransferAugment extends ItemAugment {
         return Math.min(ModConfig.augments.transfer.availableTiers, Level.values().length);
     }
 
-    public int getTransferFactor(ItemStack stack) {
+    public int getTransferFactor(@Nonnull ItemStack stack) {
         if ( stack.isEmpty() || stack.getItem() != this )
             return 0;
 

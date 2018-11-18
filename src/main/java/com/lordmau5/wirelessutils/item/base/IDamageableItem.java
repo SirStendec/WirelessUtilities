@@ -4,9 +4,12 @@ import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 
-public interface IDamageableItem {
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-    default boolean shouldItemTakeDamage(EntityItemEnhanced entity, ItemStack stack, DamageSource source, float amount) {
+public interface IDamageableItem {
+    
+    default boolean shouldItemTakeDamage(@Nonnull EntityItemEnhanced entity, @Nonnull ItemStack stack, @Nullable DamageSource source, float amount) {
         return true;
     }
 }

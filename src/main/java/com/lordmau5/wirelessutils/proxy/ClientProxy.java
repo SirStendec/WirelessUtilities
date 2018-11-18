@@ -39,11 +39,13 @@ public class ClientProxy extends CommonProxy {
         PluginRegistry.initColors(minecraft.getItemColors());
     }
 
+    @SuppressWarnings("unused")
     @SubscribeEvent
     public static void preStitch(TextureStitchEvent.Pre event) {
         Textures.registerIcons(event.getMap());
     }
 
+    @SuppressWarnings("unused")
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event) {
         ModBlocks.initModels();

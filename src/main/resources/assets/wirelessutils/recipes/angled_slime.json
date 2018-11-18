@@ -18,6 +18,7 @@
 		}
 	},
 	"result": {
-		"item": "wirelessutils:angled_slime"
+		"item": "wirelessutils:angled_slime",
+		"data": 0
 	}
 }

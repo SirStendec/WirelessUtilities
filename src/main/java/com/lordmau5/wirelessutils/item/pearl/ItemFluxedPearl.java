@@ -31,7 +31,8 @@ public class ItemFluxedPearl extends ItemBasePearl {
     }
 
     @Override
-    public EntityThrowable getProjectileEntity(@Nonnull World worldIn, EntityPlayer playerIn, IPosition position, ItemStack stack) {
+    @Nonnull
+    public EntityThrowable getProjectileEntity(@Nonnull World worldIn, @Nullable EntityPlayer playerIn, @Nullable IPosition position, @Nonnull ItemStack stack) {
         if ( playerIn != null )
             return new EntityFluxedPearl(worldIn, playerIn, stack);
 
@@ -42,7 +43,7 @@ public class ItemFluxedPearl extends ItemBasePearl {
     }
 
     @Override
-    public boolean shouldItemTakeDamage(EntityItemEnhanced entity, ItemStack stack, DamageSource source, float amount) {
+    public boolean shouldItemTakeDamage(EntityItemEnhanced entity, @Nonnull ItemStack stack, DamageSource source, float amount) {
         if ( source == DamageSource.LIGHTNING_BOLT && ModConfig.items.fluxedPearl.enableLightning ) {
             String thrower = entity.getThrower();
             World world = entity.getEntityWorld();
@@ -59,9 +60,9 @@ public class ItemFluxedPearl extends ItemBasePearl {
         return super.shouldItemTakeDamage(entity, stack, source, amount);
     }
 
-    @SideOnly(Side.CLIENT)
     @Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+    @SideOnly(Side.CLIENT)
+    public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
         if ( worldIn == null || !ModConfig.items.fluxedPearl.enableLightning )
             return;

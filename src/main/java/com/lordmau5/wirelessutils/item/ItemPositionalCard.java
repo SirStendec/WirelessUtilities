@@ -34,6 +34,7 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
 
         addPropertyOverride(new ResourceLocation("angle"), new IItemPropertyGetter() {
             @SideOnly(Side.CLIENT)
-            public float apply(ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entityIn) {
+            public float apply(@Nonnull ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entityIn) {
                 if ( (entityIn == null && !stack.isOnItemFrame()) || !stack.hasTagCompound() )
                     return -1F;
 
@@ -59,6 +60,8 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
 
                 boolean onEntity = entityIn != null;
                 Entity entity = onEntity ? entityIn : stack.getItemFrame();
+                if ( entity == null )
+                    return -1F;
 
                 if ( world == null )
                     world = entity.world;
@@ -79,18 +82,21 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
 
             @SideOnly(Side.CLIENT)
             private double getFrameRotation(EntityItemFrame frame) {
+                if ( frame == null || frame.facingDirection == null )
+                    return -1D;
+
                 return MathHelper.wrapDegrees(180 + frame.facingDirection.getHorizontalIndex() * 90);
             }
 
             @SideOnly(Side.CLIENT)
-            private double getTargetToAngle(Entity entity, BlockPos target) {
+            private double getTargetToAngle(@Nonnull Entity entity, @Nonnull BlockPos target) {
                 return Math.atan2((double) target.getZ() - entity.posZ, (double) target.getX() - entity.posX);
             }
         });
     }
 
     @Override
-    public int getItemStackLimit(ItemStack stack) {
+    public int getItemStackLimit(@Nonnull ItemStack stack) {
         if ( stack.hasTagCompound() && BlockPosDimension.fromTag(stack.getTagCompound()) != null )
             return 1;
 
@@ -98,12 +104,12 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
     }
 
     @Override
-    public boolean isValidForCraft(IRecipe recipe, InventoryCrafting craft, ItemStack stack, ItemStack output) {
+    public boolean isValidForCraft(@Nonnull IRecipe recipe, @Nonnull InventoryCrafting craft, @Nonnull ItemStack stack, @Nonnull ItemStack output) {
         return output.getItem() == this && stack.hasTagCompound();
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+    public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
 
         if ( stack.hasTagCompound() ) {
@@ -134,7 +140,7 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
     }
 
     @Override
-    public void addTooltipContext(List<String> tooltip, TileEntity tile, Slot slot, ItemStack stack) {
+    public void addTooltipContext(@Nonnull List<String> tooltip, @Nonnull TileEntity tile, @Nonnull Slot slot, @Nonnull ItemStack stack) {
         if ( tile instanceof IPositionalMachine && tile.hasWorld() ) {
             BlockPosDimension target = null;
             if ( stack.hasTagCompound() )
@@ -180,9 +186,10 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
         }
     }
 
-    @SideOnly(Side.CLIENT)
     @Override
-    public String getHighlightTip(ItemStack item, String displayName) {
+    @Nonnull
+    @SideOnly(Side.CLIENT)
+    public String getHighlightTip(@Nonnull ItemStack item, @Nonnull String displayName) {
         displayName = super.getHighlightTip(item, displayName);
 
         if ( item.hasTagCompound() ) {
@@ -209,7 +216,8 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
+    @Nonnull
+    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
         if ( !world.isRemote && player.isSneaking() && hand == EnumHand.MAIN_HAND ) {
             ItemStack stack = player.getHeldItemMainhand();
             RayTraceResult ray = rayTrace(world, player, false);
@@ -241,6 +249,7 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
     }
 
     @Override
+    @Nonnull
     public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand) {
         if ( !world.isRemote && player.isSneaking() && hand == EnumHand.MAIN_HAND ) {
             ItemStack stack = player.getHeldItemMainhand();
