@@ -1,14 +1,5 @@
-Charging-Utils
+# Wireless Utilities
+[![Build Status](https://jenkins.lord.moe/job/Wireless%20Utilities/badge/icon)](https://jenkins.lord.moe/job/Wireless%20Utilities/) [![](https://cf.way2muchnoise.eu/full_wireless-utilities_downloads.svg)](https://minecraft.curseforge.com/projects/wireless-utilities)
+### _Because wires just get in the way_
 
-TODO
-====
-
-1. Vanilla recipes for level upgrades.
-2. More configuration?
-3. Alpha test.
-
-
-Known Bugs
-==========
-
-1. Bouncing pearls can occasionally desync and despawn on the client. Related to slime block pushed by piston.
+![](https://i.imgur.com/tkn7sMn.png)
