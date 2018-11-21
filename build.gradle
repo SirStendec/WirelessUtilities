@@ -9,7 +9,7 @@ buildscript {
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-version = "1.1"
+version = "1.1" + (System.getenv("BUILD_NUMBER") ? "-dev" : ".${System.getenv("BUILD_NUMBER")}") // : "-dev")
 group = "com.lordmau5"
 archivesBaseName = "wirelessutils"
 
@@ -59,12 +59,6 @@ repositories {
     }
 }
 
-minecraft {
-    version = config.mc_version + "-" + config.forge_version
-    runDir = "run"
-    mappings = config.mappings
-}
-
 dependencies {
     deobfCompile "cofh:RedstoneFlux:${config.rf_mc_version}-${config.rf_version}:universal"
     deobfCompile "cofh:CoFHCore:${config.mc_version}-${config.cofh_core_version}:universal"
@@ -74,6 +68,12 @@ dependencies {
     compile "com.github.mcjty:xnet:${config.xnet_version}"
     deobfProvided "CraftTweaker2:CraftTweaker2-API:${config.ct_api_version}"
     runtime "CraftTweaker2:CraftTweaker2-MC1120-Main:${config.ct_version}"
+}
+
+minecraft {
+    version = config.mc_version + "-" + config.forge_version
+    runDir = "run"
+    mappings = config.mappings
 }
 
 processResources {
@@ -89,4 +89,25 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+}
+
+version = "${project.minecraft.version}-${project.version}"
+
+jar {
+	classifier = 'universal'
+}
+
+task deobfJar(type: Jar) {
+	from sourceSets.main.output
+	classifier = 'deobf'
+}
+
+task srcJar(type: Jar) {
+	from sourceSets.main.allSource
+	classifier = 'sources'
+}
+
+artifacts {
+	archives deobfJar
+	archives srcJar
 }
