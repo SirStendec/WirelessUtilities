@@ -11,6 +11,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
@@ -139,6 +140,10 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
             entity = new EntityItemEnhanced(world, posX, posY, posZ, stack);
         else
             entity = new EntityItem(world, posX, posY, posZ, stack);
+
+        EntityLivingBase thrower = getThrower();
+        if ( thrower instanceof EntityPlayer )
+            entity.setThrower(thrower.getName());
 
         entity.setDefaultPickupDelay();
         world.spawnEntity(entity);
