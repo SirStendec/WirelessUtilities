@@ -6,6 +6,7 @@ import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -50,6 +51,11 @@ public class WirelessUtils {
             return block == null ? ItemStack.EMPTY : new ItemStack(block);
         }
     }.setBackgroundImageName("wirelessutils.png");
+
+    static {
+        if ( !FluidRegistry.isUniversalBucketEnabled() )
+            FluidRegistry.enableUniversalBucket();
+    }
 
     @SuppressWarnings("unused")
     @EventHandler

@@ -248,6 +248,7 @@ public class CommonProxy {
         event.getRegistry().register(new ItemTransferAugment());
         event.getRegistry().register(new ItemWorldAugment());
         event.getRegistry().register(new ItemInvertAugment());
+        event.getRegistry().register(new ItemCropAugment());
 
         PluginRegistry.registerItems(event);
     }

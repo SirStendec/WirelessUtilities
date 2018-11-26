@@ -90,6 +90,9 @@ public class ModItems {
     @GameRegistry.ObjectHolder("wirelessutils:invert_augment")
     public static ItemInvertAugment itemInvertAugment;
 
+    @GameRegistry.ObjectHolder("wirelessutils:crop_augment")
+    public static ItemCropAugment itemCropAugment;
+
     public static void initLootTables() {
         LootTableList.register(new ResourceLocation(WirelessUtils.MODID, "charged_pearl_drops"));
     }
@@ -156,6 +159,7 @@ public class ModItems {
         itemMachinePanel.initModel();
         itemWorldAugment.initModel();
         itemInvertAugment.initModel();
+        itemCropAugment.initModel();
     }
 
     @SideOnly(Side.CLIENT)
