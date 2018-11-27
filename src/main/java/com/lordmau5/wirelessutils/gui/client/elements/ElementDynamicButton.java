@@ -10,13 +10,17 @@ public abstract class ElementDynamicButton extends ElementButtonManaged {
     private String label;
     private TextureAtlasSprite icon;
 
-    public ElementDynamicButton(GuiContainerCore container, int posX, int posY, int sizeX, int sizeY, String label) {
+    public ElementDynamicButton(GuiContainerCore container, int posX, int posY, int sizeX, int sizeY) {
         super(container, posX, posY, sizeX, sizeY, null);
+    }
+
+    public ElementDynamicButton(GuiContainerCore container, int posX, int posY, int sizeX, int sizeY, String label) {
+        this(container, posX, posY, sizeX, sizeY);
         this.label = label;
     }
 
     public ElementDynamicButton(GuiContainerCore container, int posX, int posY, int sizeX, int sizeY, TextureAtlasSprite icon) {
-        super(container, posX, posY, sizeX, sizeY, null);
+        this(container, posX, posY, sizeX, sizeY);
         this.icon = icon;
     }
 

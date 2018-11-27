@@ -21,6 +21,8 @@ import net.minecraft.util.ITickable;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
@@ -38,6 +40,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     protected int capacityAugment = 0;
     protected int transferAugment = 0;
 
+    protected IterationMode iterationMode = IterationMode.ROUND_ROBIN;
     protected long roundRobin = -1;
 
     private int craftingEnergy = 0;
@@ -60,6 +63,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         super.debugPrint();
 
         System.out.println(" Transfer Limit: " + transferLimit);
+        System.out.println("     Iter. Mode: " + iterationMode);
         System.out.println("    Round Robin: " + roundRobin);
         System.out.println("       Inverted: " + inverted);
         System.out.println("Capacity Factor: " + capacityAugment);
@@ -244,7 +248,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         if ( storage == null )
             return 0;
 
-        if ( roundRobin != -1 && maxTransfer > roundRobin )
+        if ( iterationMode == IterationMode.ROUND_ROBIN && roundRobin != -1 && maxTransfer > roundRobin )
             maxTransfer = roundRobin;
 
         long transfer = maxTransfer - cost;
@@ -301,6 +305,19 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
 
     /* IWorkProvider */
+
+    public IterationMode getIterationMode() {
+        return iterationMode;
+    }
+
+    public void setIterationMode(IterationMode mode) {
+        if ( mode == iterationMode )
+            return;
+
+        iterationMode = mode;
+        if ( world != null && !world.isRemote )
+            markChunkDirty();
+    }
 
     public BlockPosDimension getPosition() {
         if ( !hasWorld() )
@@ -476,6 +493,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     @Override
     public void readExtraFromNBT(NBTTagCompound tag) {
         super.readExtraFromNBT(tag);
+        iterationMode = IterationMode.fromInt(tag.getByte("IterationMode"));
         roundRobin = tag.hasKey("RoundRobin") ? tag.getLong("RoundRobin") : -1;
         transferLimit = tag.hasKey("TransferLimit") ? tag.getLong("TransferLimit") : -1;
 
@@ -485,6 +503,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     @Override
     public NBTTagCompound writeExtraToNBT(NBTTagCompound tag) {
         super.writeExtraToNBT(tag);
+        tag.setByte("IterationMode", (byte) iterationMode.ordinal());
         if ( transferLimit >= 0 )
             tag.setLong("TransferLimit", transferLimit);
         if ( roundRobin >= 0 )
@@ -524,6 +543,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     public PacketBase getModePacket() {
         PacketBase payload = super.getModePacket();
         payload.addLong(transferLimit);
+        payload.addByte(iterationMode.ordinal());
         payload.addLong(roundRobin);
         return payload;
     }
@@ -532,6 +552,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     protected void handleModePacket(PacketBase payload) {
         super.handleModePacket(payload);
         setTransferLimit(payload.getLong());
+        setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getLong());
     }
 
@@ -539,6 +560,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     public PacketBase getGuiPacket() {
         PacketBase payload = super.getGuiPacket();
         payload.addLong(transferLimit);
+        payload.addByte(iterationMode.ordinal());
         payload.addLong(roundRobin);
         payload.addInt(validTargetsPerTick);
         payload.addInt(activeTargetsPerTick);
@@ -546,9 +568,11 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     protected void handleGuiPacket(PacketBase payload) {
         super.handleGuiPacket(payload);
         setTransferLimit(payload.getLong());
+        setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getLong());
         validTargetsPerTick = payload.getInt();
         activeTargetsPerTick = payload.getInt();

@@ -8,6 +8,7 @@ import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.BaseGuiContainer;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
+import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import com.lordmau5.wirelessutils.utils.Textures;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
@@ -360,6 +361,9 @@ public class TabRoundRobin extends TabBase implements IContainsButtons {
     @Override
     public void update() {
         super.update();
+
+        if ( machine instanceof IWorkProvider )
+            setVisible(((IWorkProvider) machine).getIterationMode() == IWorkProvider.IterationMode.ROUND_ROBIN);
 
         if ( hopping != -1 ) {
             hopping += gui.mc.getRenderPartialTicks();

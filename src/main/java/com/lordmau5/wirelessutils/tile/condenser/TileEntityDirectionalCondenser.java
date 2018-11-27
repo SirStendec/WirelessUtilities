@@ -5,6 +5,7 @@ import com.lordmau5.wirelessutils.gui.client.condenser.GuiDirectionalCondenser;
 import com.lordmau5.wirelessutils.gui.container.condenser.ContainerDirectionalCondenser;
 import com.lordmau5.wirelessutils.item.augment.ItemRangeAugment;
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
+import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
@@ -170,6 +171,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
             validTargets.add(new BlockPosDimension(target, dimension, facing));
         }
 
+        ITargetProvider.sortTargetList(origin, validTargets);
         addRenderArea(corners.getFirst().facing(facing), corners.getSecond());
     }
 

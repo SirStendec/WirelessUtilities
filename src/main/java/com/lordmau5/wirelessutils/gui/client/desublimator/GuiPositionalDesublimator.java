@@ -40,7 +40,8 @@ public class GuiPositionalDesublimator extends BaseGuiPositional {
 
         addElement(new ElementEnergyStored(this, 17, 23, desublimator.getEnergyStorage()).setInfinite(desublimator.isCreative()));
         addElement(new ElementAreaButton(this, desublimator, 152, 72));
-        addElement(new ElementLockControls(this, desublimator, 116, 72));
+        addElement(new ElementLockControls(this, desublimator, 98, 72));
+        addElement(new ElementModeButton(this, desublimator, 134, 72));
 
         addTab(new TabEnergy(this, desublimator, false));
         addTab(new TabWorkInfo(this, desublimator).setItem(CHEST));

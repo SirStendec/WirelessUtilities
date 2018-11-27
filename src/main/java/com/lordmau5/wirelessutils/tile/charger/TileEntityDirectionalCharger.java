@@ -4,6 +4,7 @@ import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.gui.client.charger.GuiDirectionalCharger;
 import com.lordmau5.wirelessutils.gui.container.charger.ContainerDirectionalCharger;
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
+import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
@@ -169,6 +170,7 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
             validTargets.add(new BlockPosDimension(target, dimension, facing));
         }
 
+        ITargetProvider.sortTargetList(origin, validTargets);
         addRenderArea(corners.getFirst().facing(facing), corners.getSecond());
     }
 

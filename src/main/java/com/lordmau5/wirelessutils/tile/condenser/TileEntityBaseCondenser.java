@@ -68,6 +68,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     private int fluidRate;
     private int fluidMaxRate;
+    protected IterationMode iterationMode = IterationMode.ROUND_ROBIN;
     private int roundRobin = -1;
 
     private FluidStack craftingFluid = null;
@@ -244,6 +245,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         super.debugPrint();
         System.out.println("         Locked: " + locked + " [" + debugPrintStack(lockStack) + "]");
         System.out.println("       Inverted: " + inverted);
+        System.out.println("     Iter. Mode: " + iterationMode);
         System.out.println("    Round Robin: " + roundRobin);
         System.out.println(" Max Fluid Rate: " + fluidMaxRate);
         System.out.println(" Fluid per Tick: " + fluidPerTick);
@@ -407,7 +409,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     public int calculateFluidRate(int factor) {
         int rate = calculateMaxFluidRate(factor);
-        if ( roundRobin == -1 || roundRobin > rate )
+        if ( iterationMode != IterationMode.ROUND_ROBIN || roundRobin == -1 || roundRobin > rate )
             return rate;
 
         return roundRobin;
@@ -524,6 +526,22 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
 
     /* IWorkProvider */
+
+    public IterationMode getIterationMode() {
+        return iterationMode;
+    }
+
+    @Override
+    public void setIterationMode(IterationMode mode) {
+        if ( mode == iterationMode )
+            return;
+
+        iterationMode = mode;
+        fluidRate = calculateFluidRate();
+
+        if ( world != null && !world.isRemote )
+            markChunkDirty();
+    }
 
     public CondenserTarget createInfo(@Nonnull BlockPosDimension target) {
         BlockPosDimension worker = getPosition();
@@ -898,6 +916,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     public void readExtraFromNBT(NBTTagCompound tag) {
         super.readExtraFromNBT(tag);
         tank.readFromNBT(tag);
+        iterationMode = IterationMode.fromInt(tag.getByte("IterationMode"));
         roundRobin = tag.hasKey("RoundRobin") ? tag.getInteger("RoundRobin") : -1;
         fluidRate = calculateFluidRate();
 
@@ -920,6 +939,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     public NBTTagCompound writeExtraToNBT(NBTTagCompound tag) {
         tag = super.writeExtraToNBT(tag);
         tank.writeToNBT(tag);
+        tag.setByte("IterationMode", (byte) iterationMode.ordinal());
         if ( roundRobin >= 0 )
             tag.setInteger("RoundRobin", roundRobin);
 
@@ -955,6 +975,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         payload.addInt(maxEnergyPerTick);
         payload.addInt(validTargetsPerTick);
         payload.addInt(activeTargetsPerTick);
+        payload.addByte(iterationMode.ordinal());
         payload.addInt(roundRobin);
         payload.addInt(fluidPerTick);
         payload.addBool(locked);
@@ -970,6 +991,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         maxEnergyPerTick = payload.getInt();
         validTargetsPerTick = payload.getInt();
         activeTargetsPerTick = payload.getInt();
+        setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getInt());
         fluidPerTick = payload.getInt();
 
@@ -986,6 +1008,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         PacketBase payload = super.getModePacket();
         payload.addBool(locked);
         payload.addFluidStack(lockStack);
+        payload.addByte(iterationMode.ordinal());
         payload.addInt(roundRobin);
         return payload;
     }
@@ -1000,6 +1023,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         else
             setLocked(lockStack);
 
+        setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getInt());
     }
 

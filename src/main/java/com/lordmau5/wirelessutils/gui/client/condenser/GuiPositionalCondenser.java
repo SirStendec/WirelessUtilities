@@ -42,6 +42,7 @@ public class GuiPositionalCondenser extends BaseGuiPositional {
 
         addElement(new ElementEnergyStored(this, 10, 26, condenser.getEnergyStorage()).setInfinite(condenser.isCreative()));
         addElement(new ElementAreaButton(this, condenser, 152, 74));
+        addElement(new ElementModeButton(this, condenser, 134, 74));
 
         addTab(new TabEnergy(this, condenser, false));
         workInfo = (TabWorkInfo) addTab(new TabWorkInfo(this, condenser).setItem(BUCKET));
@@ -50,10 +51,8 @@ public class GuiPositionalCondenser extends BaseGuiPositional {
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));
         addTab(new TabRedstoneControl(this, condenser));
         addTab(new TabRoundRobin(this, condenser));
-
-        addElement(new ElementRangeControls(this, condenser, 138, 18));
+        
         addElement(new ElementFluidTankCondenser(this, 34, 22, condenser).setAlwaysShow(true).setSmall().drawTank(true).setInfinite(condenser.isCreative()));
-
         addElement(new ElementFluidLock(this, condenser, 33, 58));
     }
 

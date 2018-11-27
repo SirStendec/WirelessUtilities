@@ -4,6 +4,7 @@ import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.gui.client.charger.GuiPositionalCharger;
 import com.lordmau5.wirelessutils.gui.container.charger.ContainerPositionalCharger;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
+import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
@@ -149,6 +150,8 @@ public class TileEntityPositionalCharger extends TileEntityBaseCharger implement
 
             validTargets.add(target);
         }
+
+        ITargetProvider.sortTargetList(origin, validTargets);
     }
 
     /* Range */

@@ -254,6 +254,11 @@ btn.wirelessutils.lock.unlock=Unlock
 btn.wirelessutils.lock.with=Lock with %s
 btn.wirelessutils.lock.current=Lock: %s
 
+btn.wirelessutils.mode.ROUND_ROBIN.name=Round Robin
+btn.wirelessutils.mode.NEAREST_FIRST.name=Nearest First
+btn.wirelessutils.mode.FURTHEST_FIRST.name=Furthest First
+btn.wirelessutils.mode.RANDOM.name=Random
+
 btn.wirelessutils.mode.range=Range
 btn.wirelessutils.mode.offset=Offset
 
