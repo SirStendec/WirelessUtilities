@@ -13,7 +13,6 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.VanillaDoubleChestItemHandler;
-import sun.plugin.dom.exception.InvalidStateException;
 
 import java.util.List;
 import java.util.Random;
@@ -240,7 +239,7 @@ public class Worker {
         while ( steps > 0 ) {
             loops++;
             if ( loops > 1000000000 )
-                throw new InvalidStateException("Infinite loop in worker.");
+                throw new IllegalStateException("Infinite loop in Worker.");
 
             if ( !cacheInInventory ) {
                 if ( started ) {
