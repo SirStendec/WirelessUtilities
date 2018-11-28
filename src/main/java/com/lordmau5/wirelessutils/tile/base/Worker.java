@@ -306,19 +306,53 @@ public class Worker {
                     continue;
                 }
 
-                int start = 0;
-                if ( cacheInInventory )
-                    start = cacheInvPosition;
-
                 int totalSlots = handler.getSlots();
                 int slots = target.slots.length;
 
+                int start, inc;
+                if ( mode == IWorkProvider.IterationMode.FURTHEST_FIRST ) {
+                    start = slots - 1;
+                    inc = -1;
+                } else if ( mode == IWorkProvider.IterationMode.RANDOM ) {
+                    start = random.nextInt(slots);
+                    inc = random.nextBoolean() ? 1 : -1;
+                } else {
+                    start = 0;
+                    inc = 1;
+                }
+
+                if ( cacheInInventory )
+                    start = cacheInvPosition;
+
                 if ( slots > start ) {
-                    for (int i = 0; i < slots; i++) {
+                    boolean invStarted = false;
+                    boolean invWorked = false;
+                    int i = start;
+                    while ( steps > 0 ) {
+                        loops++;
+                        if ( loops > 1000000000 )
+                            throw new IllegalStateException("Infinite loop in Worker.");
+
+                        if ( invStarted ) {
+                            if ( invWorked && mode != IWorkProvider.IterationMode.ROUND_ROBIN )
+                                break;
+
+                            i += inc;
+                            if ( i < 0 )
+                                i = slots - 1;
+                            else if ( i >= slots )
+                                i = 0;
+
+                            if ( i == start || i >= slots || i < 0 )
+                                break;
+                        } else
+                            invStarted = true;
+
                         int slot = target.slots[i];
                         if ( slot < 0 || slot >= totalSlots )
                             continue;
 
+                        invWorked = false;
                         ItemStack stack = handler.getStackInSlot(slot);
                         IWorkProvider.WorkResult result = provider.performWork(stack, slot, handler, target, world, state, tile);
                         if ( result == null )
@@ -328,6 +362,7 @@ public class Worker {
                         if ( result.success ) {
                             worked = true;
                             didWork = true;
+                            invWorked = true;
                         }
 
                         if ( result.remove ) {

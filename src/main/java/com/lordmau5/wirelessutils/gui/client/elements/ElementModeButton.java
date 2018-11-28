@@ -71,6 +71,7 @@ public class ElementModeButton extends ElementDynamicButton {
 
     @Override
     public void onRightClick() {
+        GuiContainerCore.playClickSound(0.7F);
         provider.setIterationMode(provider.getIterationMode().previous());
         if ( provider instanceof TileEntityBase )
             ((TileEntityBase) provider).sendModePacket();

@@ -113,9 +113,11 @@ public class TabRoundRobin extends TabBase implements IContainsButtons {
                 increment = true;
                 break;
             case "Edit":
+                GuiContainerCore.playClickSound(1F);
                 setEditMode(true);
                 return;
             case "Save":
+                GuiContainerCore.playClickSound(1F);
                 setEditMode(false);
                 return;
             default:
@@ -143,6 +145,7 @@ public class TabRoundRobin extends TabBase implements IContainsButtons {
                 newValue = -1;
         }
 
+        GuiContainerCore.playClickSound(increment ? 1F : 0.7F);
         machine.setRoundRobin(newValue);
         this.machine.sendModePacket();
     }
