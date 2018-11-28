@@ -15,6 +15,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.VanillaDoubleChestItemHandler;
 
 import java.util.List;
+import java.util.Random;
 
 public class Worker {
 
@@ -27,8 +28,11 @@ public class Worker {
     private boolean cacheInInventory = false;
     private int cacheInvPosition = -1;
 
+    private Random random;
+
     public Worker(IWorkProvider provider) {
         this.provider = provider;
+        random = new Random();
     }
 
     public void debugPrint() {
@@ -174,6 +178,37 @@ public class Worker {
         return performWork(ModConfig.performance.stepsPerTick);
     }
 
+    public void incrementTarget(IWorkProvider.IterationMode mode, boolean didWork) {
+        if ( cacheList == null || cacheList.isEmpty() )
+            return;
+
+        int size = cacheList.size();
+        if ( mode == IWorkProvider.IterationMode.RANDOM ) {
+            if ( didWork )
+                cachePosition = random.nextInt(cacheList.size());
+            else
+                cachePosition++;
+
+        } else if ( mode == IWorkProvider.IterationMode.FURTHEST_FIRST ) {
+            if ( didWork )
+                cachePosition = size - 1;
+            else
+                cachePosition--;
+
+        } else if ( mode == IWorkProvider.IterationMode.NEAREST_FIRST ) {
+            if ( didWork )
+                cachePosition = 0;
+            else
+                cachePosition++;
+        } else
+            cachePosition++;
+
+        if ( cachePosition < 0 )
+            cachePosition = size - 1;
+        if ( cachePosition >= size )
+            cachePosition = 0;
+    }
+
     public boolean performWork(int steps) {
         updateTargetCache();
         boolean worked = false;
@@ -181,19 +216,42 @@ public class Worker {
         if ( cacheList == null || cacheList.isEmpty() )
             return worked;
 
-        int startingPosition = -2;
-        int size = cacheList.size();
+        IWorkProvider.IterationMode mode = provider.getIterationMode();
+        if ( !cacheInInventory ) {
+            if ( mode == IWorkProvider.IterationMode.RANDOM )
+                cachePosition = random.nextInt(cacheList.size());
+
+            else if ( mode == IWorkProvider.IterationMode.NEAREST_FIRST )
+                cachePosition = 0;
+
+            else if ( mode == IWorkProvider.IterationMode.FURTHEST_FIRST )
+                cachePosition = cacheList.size() - 1;
+
+            else if ( cachePosition < 0 )
+                cachePosition = 0;
+        }
+
+        int startingPosition = cachePosition;
+        int loops = 0;
+        boolean didWork = false;
+        boolean started = false;
 
         while ( steps > 0 ) {
+            loops++;
+            if ( loops > 1000000000 )
+                throw new IllegalStateException("Infinite loop in Worker.");
+
             if ( !cacheInInventory ) {
-                if ( cachePosition == startingPosition )
-                    return worked;
+                if ( started ) {
+                    incrementTarget(mode, didWork);
 
-                if ( startingPosition == -2 )
-                    startingPosition = cachePosition == -1 ? 0 : cachePosition;
-
-                cachePosition = (cachePosition + 1) < size ? (cachePosition + 1) : 0;
+                    if ( cachePosition == startingPosition )
+                        return worked;
+                } else
+                    started = true;
             }
+
+            didWork = false;
 
             TargetInfo target = cacheList.get(cachePosition);
             if ( cacheInInventory && (target == null || !target.processInventory) ) {
@@ -223,8 +281,10 @@ public class Worker {
                     result = IWorkProvider.WorkResult.SKIPPED;
 
                 steps -= result.cost;
-                if ( result.success )
+                if ( result.success ) {
                     worked = true;
+                    didWork = true;
+                }
 
                 if ( !result.keepProcessing )
                     keepWorking = false;
@@ -246,27 +306,64 @@ public class Worker {
                     continue;
                 }
 
-                int start = 0;
-                if ( cacheInInventory )
-                    start = cacheInvPosition;
-
                 int totalSlots = handler.getSlots();
                 int slots = target.slots.length;
 
+                int start, inc;
+                if ( mode == IWorkProvider.IterationMode.FURTHEST_FIRST ) {
+                    start = slots - 1;
+                    inc = -1;
+                } else if ( mode == IWorkProvider.IterationMode.RANDOM ) {
+                    start = random.nextInt(slots);
+                    inc = random.nextBoolean() ? 1 : -1;
+                } else {
+                    start = 0;
+                    inc = 1;
+                }
+
+                if ( cacheInInventory )
+                    start = cacheInvPosition;
+
                 if ( slots > start ) {
-                    for (int i = 0; i < slots; i++) {
+                    boolean invStarted = false;
+                    boolean invWorked = false;
+                    int i = start;
+                    while ( steps > 0 ) {
+                        loops++;
+                        if ( loops > 1000000000 )
+                            throw new IllegalStateException("Infinite loop in Worker.");
+
+                        if ( invStarted ) {
+                            if ( invWorked && mode != IWorkProvider.IterationMode.ROUND_ROBIN )
+                                break;
+
+                            i += inc;
+                            if ( i < 0 )
+                                i = slots - 1;
+                            else if ( i >= slots )
+                                i = 0;
+
+                            if ( i == start || i >= slots || i < 0 )
+                                break;
+                        } else
+                            invStarted = true;
+
                         int slot = target.slots[i];
                         if ( slot < 0 || slot >= totalSlots )
                             continue;
 
+                        invWorked = false;
                         ItemStack stack = handler.getStackInSlot(slot);
                         IWorkProvider.WorkResult result = provider.performWork(stack, slot, handler, target, world, state, tile);
                         if ( result == null )
                             result = IWorkProvider.WorkResult.SKIPPED;
 
                         steps -= result.cost;
-                        if ( result.success )
+                        if ( result.success ) {
                             worked = true;
+                            didWork = true;
+                            invWorked = true;
+                        }
 
                         if ( result.remove ) {
                             target.slots[i] = -1;

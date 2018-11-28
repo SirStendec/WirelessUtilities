@@ -19,6 +19,11 @@ public class Textures {
     public static TextureAtlasSprite SIZE;
     public static TextureAtlasSprite OFFSET;
 
+    public static TextureAtlasSprite ROUND_ROBIN;
+    public static TextureAtlasSprite NEAREST_FIRST;
+    public static TextureAtlasSprite FURTHEST_FIRST;
+    public static TextureAtlasSprite RANDOM;
+
     private static TextureMap textureMap;
 
     @SideOnly(Side.CLIENT)
@@ -34,6 +39,11 @@ public class Textures {
 
         SIZE = register("size");
         OFFSET = register("offset");
+
+        ROUND_ROBIN = register("round_robin");
+        NEAREST_FIRST = register("nearest_first");
+        FURTHEST_FIRST = register("furthest_first");
+        RANDOM = register("random");
     }
 
     private static TextureAtlasSprite register(String icon) {

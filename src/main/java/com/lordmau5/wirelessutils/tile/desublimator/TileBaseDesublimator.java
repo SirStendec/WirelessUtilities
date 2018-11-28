@@ -53,6 +53,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     private int transferAugment;
     private int capacityAugment;
+    protected IterationMode iterationMode = IterationMode.ROUND_ROBIN;
     private int roundRobin = -1;
     private int itemRate;
     private int itemRatePerTarget;
@@ -88,6 +89,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     public void debugPrint() {
         super.debugPrint();
         System.out.println("Capacity Augment: " + capacityAugment);
+        System.out.println("      Iter. Mode: " + iterationMode);
         System.out.println("     Round Robin: " + roundRobin);
         System.out.println("         Items/t: " + itemRate);
         System.out.println("  Process Blocks: " + processBlocks);
@@ -202,7 +204,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     public int calculateMaxPerTarget() {
         int items = itemRate;
-        if ( roundRobin != -1 && roundRobin < items )
+        if ( iterationMode == IterationMode.ROUND_ROBIN && roundRobin != -1 && roundRobin < items )
             return roundRobin;
 
         return items;
@@ -334,6 +336,22 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     /* IWorkProvider */
+
+    public IterationMode getIterationMode() {
+        return iterationMode;
+    }
+
+    @Override
+    public void setIterationMode(IterationMode mode) {
+        if ( mode == iterationMode )
+            return;
+
+        iterationMode = mode;
+        itemRatePerTarget = calculateMaxPerTarget();
+
+        if ( world != null && !world.isRemote )
+            markChunkDirty();
+    }
 
     public DesublimatorTarget createInfo(@Nonnull BlockPosDimension target) {
         return new DesublimatorTarget(target, getEnergyCost(target));
@@ -821,7 +839,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     @Override
     public void readExtraFromNBT(NBTTagCompound tag) {
         super.readExtraFromNBT(tag);
+        iterationMode = IterationMode.fromInt(tag.getByte("IterationMode"));
         roundRobin = tag.hasKey("RoundRobin") ? tag.getInteger("RoundRobin") : -1;
+        itemRatePerTarget = calculateMaxPerTarget();
 
         NBTTagList locks = tag.getTagList("Locks", 10);
         if ( locks != null && !locks.isEmpty() ) {
@@ -839,6 +859,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     @Override
     public NBTTagCompound writeExtraToNBT(NBTTagCompound tag) {
         tag = super.writeExtraToNBT(tag);
+        tag.setByte("IterationMode", (byte) iterationMode.ordinal());
         if ( roundRobin >= 0 )
             tag.setInteger("RoundRobin", roundRobin);
 
@@ -871,6 +892,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         payload.addInt(maxEnergyPerTick);
         payload.addShort(validTargetsPerTick);
         payload.addShort(activeTargetsPerTick);
+        payload.addByte(iterationMode.ordinal());
         payload.addInt(roundRobin);
         payload.addInt(itemsPerTick);
         return payload;
@@ -888,6 +910,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         maxEnergyPerTick = payload.getInt();
         validTargetsPerTick = payload.getShort();
         activeTargetsPerTick = payload.getShort();
+        setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getInt());
         itemsPerTick = payload.getInt();
     }
@@ -898,6 +921,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         payload.addByte(locks.length);
         for (int i = 0; i < locks.length; i++)
             payload.addItemStack(locks[i] == null ? ItemStack.EMPTY : locks[i].toItemStack());
+        payload.addByte(iterationMode.ordinal());
         payload.addInt(roundRobin);
         return payload;
     }
@@ -908,6 +932,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         int length = Math.min(payload.getByte(), locks.length);
         for (int i = 0; i < length; i++)
             setLock(i, payload.getItemStack());
+        setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getInt());
     }
 

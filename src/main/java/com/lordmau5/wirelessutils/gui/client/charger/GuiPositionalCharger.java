@@ -32,6 +32,7 @@ public class GuiPositionalCharger extends BaseGuiPositional {
 
         addElement(new ElementEnergyStored(this, 17, 23, charger.getEnergyStorage()).setInfinite(charger.isCreative()));
         addElement(new ElementAreaButton(this, charger, 152, 74));
+        addElement(new ElementModeButton(this, charger, 134, 74));
 
         addTab(new TabWorkInfo(this, charger).setIcon(CoreTextures.ICON_ENERGY));
         addTab(new TabChargerConfiguration(this, charger));

@@ -4,6 +4,7 @@ import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.gui.client.desublimator.GuiPositionalDesublimator;
 import com.lordmau5.wirelessutils.gui.container.desublimator.ContainerPositionalDesublimator;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
+import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
@@ -162,6 +163,8 @@ public class TilePositionalDesublimator extends TileBaseDesublimator implements 
 
             validTargets.add(target);
         }
+
+        ITargetProvider.sortTargetList(origin, validTargets);
     }
 
     /* Range and IRangeAugmentable */

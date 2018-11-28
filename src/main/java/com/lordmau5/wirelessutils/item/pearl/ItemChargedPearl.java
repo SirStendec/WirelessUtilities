@@ -69,7 +69,8 @@ public class ItemChargedPearl extends ItemBasePearl implements IGrowableItem {
             ws.spawnParticle(EnumParticleTypes.SMOKE_LARGE, entityItem.posX, entityItem.posY, entityItem.posZ, 3, .2D, .2D, .2D, 0D);
         }
 
-        EntityPlayer player = world.getPlayerEntityByName(entityItem.getThrower());
+        String thrower = entityItem.getThrower();
+        EntityPlayer player = thrower == null ? null : world.getPlayerEntityByName(thrower);
         if ( player instanceof EntityPlayerMP )
             ModAdvancements.SO_HOT_RIGHT_NOW.trigger((EntityPlayerMP) player);
 
@@ -114,7 +115,8 @@ public class ItemChargedPearl extends ItemBasePearl implements IGrowableItem {
             return;
 
         Item newItem;
-        EntityPlayer player = world.getPlayerEntityByName(entity.getThrower());
+        String thrower = entity.getThrower();
+        EntityPlayer player = thrower == null ? null : world.getPlayerEntityByName(thrower);
 
         if ( water && fluid.getFluid() == FluidRegistry.WATER ) {
             newItem = ModItems.itemQuenchedPearl;

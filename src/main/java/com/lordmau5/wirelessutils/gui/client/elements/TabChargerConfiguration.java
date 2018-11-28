@@ -98,9 +98,11 @@ public class TabChargerConfiguration extends TabBase implements IContainsButtons
             case "DecTrans":
                 break;
             case "Edit":
+                GuiContainerCore.playClickSound(1F);
                 setEditMode(true);
                 return;
             case "Save":
+                GuiContainerCore.playClickSound(1F);
                 setEditMode(false);
                 return;
             default:
@@ -122,6 +124,7 @@ public class TabChargerConfiguration extends TabBase implements IContainsButtons
                 newEnergy = -1;
         }
 
+        GuiContainerCore.playClickSound(increment ? 1F : 0.7F);
         charger.setTransferLimit(newEnergy);
         charger.sendModePacket();
     }

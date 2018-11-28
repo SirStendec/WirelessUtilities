@@ -46,6 +46,7 @@ public class GuiDirectionalCondenser extends BaseGuiContainer {
 
         addElement(new ElementEnergyStored(this, 10, 26, condenser.getEnergyStorage()).setInfinite(condenser.isCreative()));
         addElement(new ElementAreaButton(this, condenser, 152, 69));
+        addElement(new ElementModeButton(this, condenser, 134, 69));
 
         addTab(new TabEnergy(this, condenser, false));
         workInfo = (TabWorkInfo) addTab(new TabWorkInfo(this, condenser).setItem(BUCKET));
@@ -55,7 +56,7 @@ public class GuiDirectionalCondenser extends BaseGuiContainer {
         addTab(new TabRedstoneControl(this, condenser));
         addTab(new TabRoundRobin(this, condenser));
 
-        btnMode = new ElementDynamicContainedButton(this, "Mode", 134, 69, 16, 16, Textures.SIZE);
+        btnMode = new ElementDynamicContainedButton(this, "Mode", 116, 69, 16, 16, Textures.SIZE);
         addElement(btnMode);
 
         rangeControls = new ElementRangeControls(this, condenser, 138, 18);

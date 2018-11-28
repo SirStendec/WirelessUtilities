@@ -45,7 +45,8 @@ public class GuiDirectionalDesublimator extends BaseGuiContainer {
 
         addElement(new ElementEnergyStored(this, 17, 20, desublimator.getEnergyStorage()).setInfinite(desublimator.isCreative()));
         addElement(new ElementAreaButton(this, desublimator, 152, 69));
-        addElement(new ElementLockControls(this, desublimator, 98, 69));
+        addElement(new ElementLockControls(this, desublimator, 80, 69));
+        addElement(new ElementModeButton(this, desublimator, 134, 69));
 
         addTab(new TabEnergy(this, desublimator, false));
         addTab(new TabWorkInfo(this, desublimator).setItem(CHEST));
@@ -55,7 +56,7 @@ public class GuiDirectionalDesublimator extends BaseGuiContainer {
         addTab(new TabRedstoneControl(this, desublimator));
         addTab(new TabRoundRobin(this, desublimator));
 
-        btnMode = new ElementDynamicContainedButton(this, "Mode", 134, 69, 16, 16, Textures.SIZE);
+        btnMode = new ElementDynamicContainedButton(this, "Mode", 116, 69, 16, 16, Textures.SIZE);
         addElement(btnMode);
 
         rangeControls = new ElementRangeControls(this, desublimator, 138, 18);

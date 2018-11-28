@@ -38,6 +38,7 @@ public class GuiDirectionalCharger extends BaseGuiContainer {
 
         addElement(new ElementEnergyStored(this, 17, 20, charger.getEnergyStorage()).setInfinite(charger.isCreative()));
         addElement(new ElementAreaButton(this, charger, 152, 69));
+        addElement(new ElementModeButton(this, charger, 134, 69));
 
         addTab(new TabWorkInfo(this, charger).setIcon(CoreTextures.ICON_ENERGY));
         addTab(new TabChargerConfiguration(this, charger));
@@ -47,7 +48,7 @@ public class GuiDirectionalCharger extends BaseGuiContainer {
         addTab(new TabRedstoneControl(this, charger));
         addTab(new TabRoundRobin(this, charger));
 
-        btnMode = new ElementDynamicContainedButton(this, "Mode", 134, 69, 16, 16, Textures.SIZE);
+        btnMode = new ElementDynamicContainedButton(this, "Mode", 116, 69, 16, 16, Textures.SIZE);
         addElement(btnMode);
 
         rangeControls = new ElementRangeControls(this, charger, 138, 18);

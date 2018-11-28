@@ -18,6 +18,18 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
     BlockPosDimension getPosition();
 
     /**
+     * Get the currently configured iteration mode of the work provider.
+     */
+    IterationMode getIterationMode();
+
+    /**
+     * Set the iteration mode of the work provider.
+     *
+     * @param mode The new iteration mode.
+     */
+    void setIterationMode(IterationMode mode);
+
+    /**
      * Whether or not blocks can potentially be handled no
      * matter if they have an associated tile entity or not.
      */
@@ -99,6 +111,44 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
     @Nonnull
     WorkResult performWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull T target, @Nonnull World world, @Nonnull IBlockState state, @Nonnull TileEntity tile);
 
+
+    enum IterationMode {
+        ROUND_ROBIN,
+        NEAREST_FIRST,
+        FURTHEST_FIRST,
+        RANDOM;
+
+        public static IterationMode fromInt(int index) {
+            IterationMode[] values = values();
+            if ( index < 0 )
+                return values[0];
+            if ( index >= values.length )
+                return values[values.length - 1];
+            return values[index];
+        }
+
+        public IterationMode next() {
+            if ( this == ROUND_ROBIN )
+                return NEAREST_FIRST;
+            else if ( this == NEAREST_FIRST )
+                return FURTHEST_FIRST;
+            else if ( this == FURTHEST_FIRST )
+                return RANDOM;
+
+            return ROUND_ROBIN;
+        }
+
+        public IterationMode previous() {
+            if ( this == ROUND_ROBIN )
+                return RANDOM;
+            else if ( this == NEAREST_FIRST )
+                return ROUND_ROBIN;
+            else if ( this == FURTHEST_FIRST )
+                return NEAREST_FIRST;
+
+            return FURTHEST_FIRST;
+        }
+    }
 
     enum WorkResult {
         /**
