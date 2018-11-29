@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		" D ",
+		"EAE",
+		" P "
+	],
+	"key": {
+		"P": {
+			"item": "#STICKY_PISTON"
+		},
+		"D": {
+			"item": "minecraft:diamond_hoe"
+		},
+		"A": {
+			"item": "wirelessutils:base_augment"
+		},
+		"E": {
+			"item": "#ENDER_PEARL"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:crop_augment",
+		"count": 1
+	}
+}

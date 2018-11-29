@@ -11,7 +11,10 @@ import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
 import com.lordmau5.wirelessutils.utils.ItemStackHandler;
+import com.lordmau5.wirelessutils.utils.StackHelper;
 import com.lordmau5.wirelessutils.utils.WUFakePlayer;
+import com.lordmau5.wirelessutils.utils.crops.BehaviorManager;
+import com.lordmau5.wirelessutils.utils.crops.IHarvestBehavior;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.location.TargetInfo;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
@@ -24,11 +27,15 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemDye;
+import net.minecraft.item.ItemSeeds;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ITickable;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.capabilities.Capability;
@@ -50,6 +57,10 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     protected CapabilityHandler capabilityHandler;
 
     private ComparableItemStackValidatedNBT[] locks;
+    private boolean[] plantableSlots;
+    private boolean[] fertilizerSlots;
+    private int plantables = 0;
+    private int fertilizers = 0;
 
     private int transferAugment;
     private int capacityAugment;
@@ -70,6 +81,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     private boolean processBlocks = false;
     private boolean processCrops = false;
     private boolean silkyCrops = false;
+    private int fortuneCrops = 0;
 
     public TileBaseDesublimator() {
         super();
@@ -80,6 +92,14 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     protected void initializeItemStackHandler(int size) {
         super.initializeItemStackHandler(size);
         locks = new ComparableItemStackValidatedNBT[size];
+        plantableSlots = new boolean[size];
+        fertilizerSlots = new boolean[size];
+        Arrays.fill(plantableSlots, false);
+        Arrays.fill(fertilizerSlots, false);
+
+        plantables = 0;
+        fertilizers = 0;
+
         capabilityHandler = new CapabilityHandler(this);
     }
 
@@ -96,6 +116,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         System.out.println("   Process Crops: " + processCrops + (silkyCrops ? " (SILKY)" : ""));
         System.out.println("   Valid Targets: " + validTargetsPerTick);
         System.out.println("  Active Targets: " + activeTargetsPerTick);
+        System.out.println("     Fertilizers: " + fertilizers);
+        System.out.println("      Plantables: " + plantables);
         System.out.println("Locks: " + (locks == null ? "NULL" : locks.length));
         if ( locks != null ) {
             for (int i = 0; i < locks.length; i++)
@@ -127,6 +149,38 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return locks[slot].stackSize;
 
         return super.getStackLimit(slot);
+    }
+
+    @Override
+    public void onContentsChanged(int slot) {
+        updateItemCache(slot);
+        super.onContentsChanged(slot);
+    }
+
+    @Override
+    public void readInventoryFromNBT(NBTTagCompound tag) {
+        super.readInventoryFromNBT(tag);
+        int slots = itemStackHandler.getSlots();
+        for (int i = 0; i < slots; i++)
+            updateItemCache(i);
+    }
+
+    public void updateItemCache(int slot) {
+        ItemStack stack = itemStackHandler.getStackInSlot(slot);
+        Item item = stack.getItem();
+        Block block = Block.getBlockFromItem(item);
+        boolean plantable = (item instanceof IPlantable) || (block != Blocks.AIR && block instanceof IPlantable);
+        boolean fertilizer = isValidFertilizer(stack);
+
+        if ( plantableSlots[slot] != plantable ) {
+            plantableSlots[slot] = plantable;
+            plantables += plantable ? 1 : -1;
+        }
+
+        if ( fertilizerSlots[slot] != fertilizer ) {
+            fertilizerSlots[slot] = fertilizer;
+            fertilizers += fertilizer ? 1 : -1;
+        }
     }
 
     /* Slot Locks */
@@ -226,9 +280,10 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         capacityAugment = calculateMaxSlots(factor);
     }
 
-    public void setCropAugmented(boolean augmented, boolean silky) {
+    public void setCropAugmented(boolean augmented, boolean silky, int fortune) {
         processCrops = augmented;
         silkyCrops = silky;
+        fortuneCrops = fortune;
     }
 
     public void setWorldAugmented(boolean augmented) {
@@ -401,8 +456,13 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( tile == null ) {
             if ( processCrops ) {
                 Block block = state.getBlock();
-                if ( !world.isAirBlock(pos) && !(block instanceof IPlantable || block instanceof IGrowable) && !block.isReplaceable(world, pos) )
-                    return null;
+                if ( inverted ) {
+                    if ( world.isAirBlock(target) || BehaviorManager.getBehavior(block) == null )
+                        return null;
+                } else {
+                    if ( !world.isAirBlock(target) && !(block instanceof IPlantable || block instanceof IGrowable) )
+                        return null;
+                }
 
             } else if ( !processBlocks )
                 return null;
@@ -452,15 +512,21 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
             Block block = state.getBlock();
             if ( processCrops ) {
-                if ( !inverted && world.isAirBlock(target.pos) ) {
+                boolean isAir = world.isAirBlock(target.pos);
+                if ( !inverted && isAir ) {
+                    if ( plantables == 0 )
+                        return WorkResult.FAILURE_CONTINUE;
+
                     int slots = capabilityHandler.getSlots();
                     for (int i = 0; i < slots; i++) {
                         ItemStack stack = capabilityHandler.getStackInSlot(i);
                         Item item = stack.getItem();
-                        if ( stack.isEmpty() || !(item instanceof IPlantable) )
+                        Block itemBlock = Block.getBlockFromItem(item);
+
+                        if ( stack.isEmpty() || !(item instanceof IPlantable || itemBlock instanceof IPlantable) )
                             continue;
 
-                        if ( world.getBlockState(target.pos.down()).getBlock() == Blocks.DIRT )
+                        if ( item instanceof ItemSeeds && world.getBlockState(target.pos.down()).getBlock() == Blocks.DIRT )
                             world.setBlockState(target.pos.down(), Blocks.FARMLAND.getDefaultState());
 
                         FakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos.up());
@@ -471,47 +537,41 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                             remainingPerTick--;
                             activeTargetsPerTick++;
                             extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                            if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                                return WorkResult.SUCCESS_STOP_REMOVE;
                             return WorkResult.SUCCESS_REMOVE;
                         } else
                             return WorkResult.FAILURE_REMOVE;
                     }
 
-                } else if ( block instanceof IPlantable || block instanceof IGrowable ) {
+                } else if ( !isAir ) {
                     if ( inverted ) {
-                        if ( silkyCrops ) {
+                        IHarvestBehavior behavior = BehaviorManager.getBehavior(block);
+                        if ( behavior == null )
+                            return WorkResult.FAILURE_REMOVE;
 
-                        } else {
-                            NonNullList<ItemStack> drops = NonNullList.create();
-                            block.getDrops(drops, world, target.pos, state, 0);
+                        if ( !behavior.canHarvest(state, world, target.pos, silkyCrops, fortuneCrops, this) )
+                            return WorkResult.FAILURE_REMOVE;
 
-                            boolean did_insert = false;
+                        if ( behavior.harvest(state, world, target.pos, silkyCrops, fortuneCrops, this) ) {
+                            activeTargetsPerTick++;
+                            extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                            if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                                return WorkResult.SUCCESS_STOP_REMOVE;
+                            return WorkResult.SUCCESS_REMOVE;
+                        } else
+                            return WorkResult.FAILURE_REMOVE;
 
-                            for (ItemStack stack : drops) {
-                                if ( stack.isEmpty() )
-                                    continue;
+                    } else if ( block instanceof IGrowable ) {
+                        if ( fertilizers == 0 )
+                            return WorkResult.FAILURE_CONTINUE;
 
-                                ItemStack result = InventoryHelper.insertStackIntoInventory(capabilityHandler, stack, false);
-                                int inserted = stack.getCount() - result.getCount();
-                                if ( inserted > 0 ) {
-                                    itemsPerTick += inserted;
-                                    remainingPerTick -= inserted;
-                                    did_insert = true;
-                                }
-                            }
-
-                            if ( did_insert ) {
-                                activeTargetsPerTick++;
-                                extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                                world.setBlockToAir(target.pos);
-                                return WorkResult.SUCCESS_REMOVE;
-                            } else {
-                                return WorkResult.FAILURE_REMOVE;
-                            }
-                        }
-
-                    } else {
+                        int offset = getBufferOffset();
                         int slots = capabilityHandler.getSlots();
                         for (int i = 0; i < slots; i++) {
+                            if ( !fertilizerSlots[i + offset] )
+                                continue;
+
                             ItemStack stack = capabilityHandler.getStackInSlot(i);
                             if ( !isValidFertilizer(stack) )
                                 continue;
@@ -533,6 +593,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                                 remainingPerTick--;
                                 activeTargetsPerTick++;
                                 extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                                if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                                    return WorkResult.SUCCESS_STOP;
                                 return WorkResult.SUCCESS_CONTINUE;
                             } else
                                 return WorkResult.FAILURE_REMOVE;
@@ -687,6 +749,20 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     @Override
     public WorkResult performWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull DesublimatorTarget target, @Nonnull World world, @Nonnull IBlockState state, @Nonnull TileEntity tile) {
         return WorkResult.FAILURE_REMOVE;
+    }
+
+    public CapabilityHandler getCapabilityHandler() {
+        return capabilityHandler;
+    }
+
+    public boolean canInsertAll(List<ItemStack> items) {
+        return StackHelper.canInsertAll(capabilityHandler, items);
+    }
+
+    public void insertAll(List<ItemStack> items) {
+        int inserted = StackHelper.insertAll(capabilityHandler, items);
+        itemsPerTick += inserted;
+        remainingPerTick -= inserted;
     }
 
     /* Energy */

@@ -22,14 +22,16 @@ public class ItemCropAugment extends ItemAugment {
 
     @Override
     public int getItemEnchantability(ItemStack stack) {
-        return 1;
+        return 15;
     }
 
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        if ( enchantment == Enchantments.SILK_TOUCH ) {
+        if ( enchantment == Enchantments.SILK_TOUCH )
             return true;
-        }
+
+        if ( enchantment == Enchantments.FORTUNE )
+            return true;
 
         return super.canApplyAtEnchantingTable(stack, enchantment);
     }
@@ -37,11 +39,14 @@ public class ItemCropAugment extends ItemAugment {
     @Override
     public void apply(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         boolean silky = false;
-        if ( !stack.isEmpty() )
+        int fortune = 0;
+        if ( !stack.isEmpty() ) {
             silky = EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0;
+            fortune = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
+        }
 
         if ( augmentable instanceof ICropAugmentable )
-            ((ICropAugmentable) augmentable).setCropAugmented(!stack.isEmpty(), silky);
+            ((ICropAugmentable) augmentable).setCropAugmented(!stack.isEmpty(), silky, fortune);
     }
 
     @Override
