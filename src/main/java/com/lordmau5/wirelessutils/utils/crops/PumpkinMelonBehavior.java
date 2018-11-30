@@ -22,6 +22,6 @@ public class PumpkinMelonBehavior implements IHarvestBehavior {
 
     @Override
     public boolean harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
-        return harvestByBreaking(state, world, pos, fortune, desublimator);
+        return harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator);
     }
 }

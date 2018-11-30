@@ -17,12 +17,12 @@ public class BlockBase extends BlockCore {
         setCreativeTab(WirelessUtils.creativeTabCU);
     }
 
-    public BlockBase(Material material, MapColor blockMapColor) {
+    protected BlockBase(Material material, MapColor blockMapColor) {
         super(material, blockMapColor, WirelessUtils.MODID);
         setCreativeTab(WirelessUtils.creativeTabCU);
     }
 
-    public void setName(String name) {
+    protected void setName(String name) {
         setTranslationKey(name);
         setRegistryName(name);
     }

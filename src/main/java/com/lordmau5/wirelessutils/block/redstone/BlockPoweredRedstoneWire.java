@@ -70,7 +70,7 @@ public class BlockPoweredRedstoneWire extends BlockRedstoneWire {
         worldIn.setBlockState(pos, Blocks.REDSTONE_WIRE.getDefaultState());
     }
 
-    public void addParticle(IBlockState state, World world, BlockPos pos, Random rand) {
+    private void addParticle(IBlockState state, World world, BlockPos pos, Random rand) {
         EnumFacing facing = state.getValue(FACING);
         boolean addMainAxis = facing.getAxisDirection().getOffset() < 0;
         EnumFacing.Axis axis = facing.getAxis();

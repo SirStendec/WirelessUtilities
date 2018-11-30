@@ -10,8 +10,8 @@ import java.util.Map;
 
 public class BehaviorManager {
 
-    private static Map<Block, IHarvestBehavior> behaviorCache = new Object2ObjectOpenHashMap<>();
-    private static List<IHarvestBehavior> behaviors = new ArrayList<>();
+    private static final Map<Block, IHarvestBehavior> behaviorCache = new Object2ObjectOpenHashMap<>();
+    private static final List<IHarvestBehavior> behaviors = new ArrayList<>();
 
     static {
         addBehavior(new CropBehavior());

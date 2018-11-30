@@ -28,7 +28,7 @@ import net.minecraft.world.World;
 
 public abstract class BlockBaseMachine extends BlockBaseTile implements IInventoryRetainer, INBTPreservingIngredient {
 
-    public BlockBaseMachine() {
+    protected BlockBaseMachine() {
         super();
 
         setHardness(5F);
@@ -120,7 +120,7 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IInvento
         NBTTagCompound tag = super.getItemStackTag(world, pos);
 
         TileEntity tile = world.getTileEntity(pos);
-        if ( tile == null || !(tile instanceof TileEntityBaseMachine) )
+        if ( !(tile instanceof TileEntityBaseMachine) )
             return tag;
 
         TileEntityBaseMachine machine = (TileEntityBaseMachine) tile;

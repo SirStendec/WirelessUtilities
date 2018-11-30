@@ -32,6 +32,7 @@ import com.lordmau5.wirelessutils.tile.desublimator.TilePositionalDesublimator;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
+import com.lordmau5.wirelessutils.utils.WUFakePlayer;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
@@ -62,7 +63,7 @@ import java.util.List;
 @Mod.EventBusSubscriber
 public class CommonProxy {
 
-    public static List<Class<? extends TileEntity>> MACHINES = new ArrayList<>();
+    public static final List<Class<? extends TileEntity>> MACHINES = new ArrayList<>();
 
     public void preInit(FMLPreInitializationEvent e) {
         PluginRegistry.preInit(e);
@@ -99,6 +100,8 @@ public class CommonProxy {
     @SuppressWarnings("unused")
     @SubscribeEvent
     public static void onWorldUnload(WorldEvent.Unload event) {
+        World world = event.getWorld();
+        WUFakePlayer.removeFakePlayer(world);
         EventDispatcher.WORLD_UNLOAD.dispatchEvent(event);
     }
 
@@ -201,7 +204,7 @@ public class CommonProxy {
         PluginRegistry.registerBlocks(event);
     }
 
-    public static void registerTile(Class<? extends TileEntity> klass) {
+    private static void registerTile(Class<? extends TileEntity> klass) {
         Machine machine = klass.getAnnotation(Machine.class);
         if ( machine == null )
             return;

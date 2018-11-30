@@ -44,10 +44,7 @@ public interface ILevellingBlock extends IAugmentableTwoElectricBoogaloo {
         if ( !ModConfig.augments.requirePreviousTiers )
             return true;
 
-        if ( hasHigherTierAugment(augment) )
-            return false;
-
-        return true;
+        return !hasHigherTierAugment(augment);
     }
 
     default boolean hasLowerTierAugment(ItemStack augment) {

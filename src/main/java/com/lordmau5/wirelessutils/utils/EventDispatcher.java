@@ -21,37 +21,37 @@ import java.util.concurrent.ConcurrentMap;
 
 public class EventDispatcher<T extends Event> {
 
-    public static final EventDispatcher WORLD_UNLOAD = new EventDispatcher<WorldEvent.Unload>();
-    public static final EventDispatcher PLACE_BLOCK = new EventDispatcher<BlockEvent.PlaceEvent>();
-    public static final EventDispatcher BREAK_BLOCK = new EventDispatcher<BlockEvent.BreakEvent>();
-    public static final EventDispatcher CHUNK_LOAD = new EventDispatcher<ChunkEvent.Load>();
-    public static final EventDispatcher CHUNK_UNLOAD = new EventDispatcher<ChunkEvent.Unload>();
+    public static final EventDispatcher<WorldEvent.Unload> WORLD_UNLOAD = new EventDispatcher<>();
+    public static final EventDispatcher<BlockEvent.PlaceEvent> PLACE_BLOCK = new EventDispatcher<>();
+    public static final EventDispatcher<BlockEvent.BreakEvent> BREAK_BLOCK = new EventDispatcher<>();
+    public static final EventDispatcher<ChunkEvent.Load> CHUNK_LOAD = new EventDispatcher<>();
+    public static final EventDispatcher<ChunkEvent.Unload> CHUNK_UNLOAD = new EventDispatcher<>();
 
-    private final Map<Integer, Map<Long, ConcurrentMap<IEventListener<T>, IEventListener<T>>>> allListeners = new Int2ObjectOpenHashMap<>();
-    private final ConcurrentMap<IEventListener<T>, Map<Integer, Set<Long>>> listenerPositions = new MapMaker().weakKeys().makeMap();
+    private final Map<Integer, Map<Long, ConcurrentMap<IEventListener, IEventListener>>> allListeners = new Int2ObjectOpenHashMap<>();
+    private final ConcurrentMap<IEventListener, Map<Integer, Set<Long>>> listenerPositions = new MapMaker().weakKeys().makeMap();
 
-    public void addListener(int dimension, @Nonnull BlockPos pos, @Nonnull IEventListener<T> listener) {
+    public void addListener(int dimension, @Nonnull BlockPos pos, @Nonnull IEventListener listener) {
         addListener(dimension, pos.getX() >> 4, pos.getZ() >> 4, listener);
     }
 
-    public void addListener(BlockPosDimension pos, @Nonnull IEventListener<T> listener) {
+    public void addListener(BlockPosDimension pos, @Nonnull IEventListener listener) {
         addListener(pos.getDimension(), pos, listener);
     }
 
-    public void addListener(int dimension, @Nonnull ChunkPos pos, @Nonnull IEventListener<T> listener) {
+    public void addListener(int dimension, @Nonnull ChunkPos pos, @Nonnull IEventListener listener) {
         addListener(dimension, pos.x, pos.z, listener);
     }
 
-    public void addListener(int dimension, int chunkX, int chunkZ, @Nonnull IEventListener<T> listener) {
+    public void addListener(int dimension, int chunkX, int chunkZ, @Nonnull IEventListener listener) {
         long chunk = ChunkPos.asLong(chunkX, chunkZ);
 
-        Map<Long, ConcurrentMap<IEventListener<T>, IEventListener<T>>> worldListeners = allListeners.get(dimension);
+        Map<Long, ConcurrentMap<IEventListener, IEventListener>> worldListeners = allListeners.get(dimension);
         if ( worldListeners == null ) {
             worldListeners = new Long2ObjectOpenHashMap<>();
             allListeners.put(dimension, worldListeners);
         }
 
-        ConcurrentMap<IEventListener<T>, IEventListener<T>> listeners = worldListeners.get(chunk);
+        ConcurrentMap<IEventListener, IEventListener> listeners = worldListeners.get(chunk);
         if ( listeners == null ) {
             listeners = new MapMaker().weakKeys().weakValues().makeMap();
             worldListeners.put(chunk, listeners);
@@ -74,7 +74,7 @@ public class EventDispatcher<T extends Event> {
         positions.add(chunk);
     }
 
-    public void removeListener(@Nonnull IEventListener<T> listener) {
+    public void removeListener(@Nonnull IEventListener listener) {
         Map<Integer, Set<Long>> worldPositions = listenerPositions.get(listener);
         if ( worldPositions == null )
             return;
@@ -83,10 +83,10 @@ public class EventDispatcher<T extends Event> {
 
         for (Map.Entry<Integer, Set<Long>> entry : worldPositions.entrySet()) {
             int dimension = entry.getKey();
-            Map<Long, ConcurrentMap<IEventListener<T>, IEventListener<T>>> worldListeners = allListeners.get(dimension);
+            Map<Long, ConcurrentMap<IEventListener, IEventListener>> worldListeners = allListeners.get(dimension);
             if ( worldListeners != null ) {
                 for (long chunk : entry.getValue()) {
-                    ConcurrentMap<IEventListener<T>, IEventListener<T>> listeners = worldListeners.get(chunk);
+                    ConcurrentMap<IEventListener, IEventListener> listeners = worldListeners.get(chunk);
                     if ( listeners != null ) {
                         listeners.remove(listener);
                         if ( listeners.isEmpty() )
@@ -100,26 +100,26 @@ public class EventDispatcher<T extends Event> {
         }
     }
 
-    public void removeListener(@Nonnull BlockPosDimension pos, @Nonnull IEventListener<T> listener) {
+    public void removeListener(@Nonnull BlockPosDimension pos, @Nonnull IEventListener listener) {
         removeListener(pos.getDimension(), pos, listener);
     }
 
-    public void removeListener(int dimension, @Nonnull BlockPos pos, @Nonnull IEventListener<T> listener) {
+    public void removeListener(int dimension, @Nonnull BlockPos pos, @Nonnull IEventListener listener) {
         removeListener(dimension, pos.getX() >> 4, pos.getZ() >> 4, listener);
     }
 
-    public void removeListener(int dimension, @Nonnull ChunkPos pos, @Nonnull IEventListener<T> listener) {
+    public void removeListener(int dimension, @Nonnull ChunkPos pos, @Nonnull IEventListener listener) {
         removeListener(dimension, pos.x, pos.z, listener);
     }
 
-    public void removeListener(int dimension, int chunkX, int chunkZ, @Nonnull IEventListener<T> listener) {
-        Map<Long, ConcurrentMap<IEventListener<T>, IEventListener<T>>> worldListeners = allListeners.get(dimension);
+    public void removeListener(int dimension, int chunkX, int chunkZ, @Nonnull IEventListener listener) {
+        Map<Long, ConcurrentMap<IEventListener, IEventListener>> worldListeners = allListeners.get(dimension);
         if ( worldListeners == null )
             return;
 
         long chunk = ChunkPos.asLong(chunkX, chunkZ);
 
-        ConcurrentMap<IEventListener<T>, IEventListener<T>> listeners = worldListeners.get(chunk);
+        ConcurrentMap<IEventListener, IEventListener> listeners = worldListeners.get(chunk);
         if ( listeners == null )
             return;
 
@@ -181,20 +181,20 @@ public class EventDispatcher<T extends Event> {
         } else
             return;
 
-        Map<Long, ConcurrentMap<IEventListener<T>, IEventListener<T>>> worldListeners = allListeners.get(dimension);
+        Map<Long, ConcurrentMap<IEventListener, IEventListener>> worldListeners = allListeners.get(dimension);
         if ( worldListeners == null )
             return;
 
-        ConcurrentMap<IEventListener<T>, IEventListener<T>> listeners = worldListeners.get(chunk);
+        ConcurrentMap<IEventListener, IEventListener> listeners = worldListeners.get(chunk);
         if ( listeners == null )
             return;
 
-        for (IEventListener<T> listener : listeners.keySet())
+        for (IEventListener listener : listeners.keySet())
             listener.handleEvent(event);
     }
 
-    public interface IEventListener<T> {
-        default void handleEvent(@Nonnull T event) {
+    public interface IEventListener {
+        default void handleEvent(@Nonnull Event event) {
         }
     }
 }

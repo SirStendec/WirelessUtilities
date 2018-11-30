@@ -27,7 +27,7 @@ import java.util.Set;
 
 public abstract class TileXNetNetworkBase extends TileEntityBaseMachine implements
         IRangeAugmentable, ITickable, ITargetProvider,
-        IConnectable, EventDispatcher.IEventListener<Event> {
+        IConnectable, EventDispatcher.IEventListener {
 
     public List<BlockPosDimension> validTargets;
 

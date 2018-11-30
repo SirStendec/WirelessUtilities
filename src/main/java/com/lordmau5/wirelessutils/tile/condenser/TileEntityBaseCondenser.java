@@ -53,11 +53,11 @@ import java.util.List;
 public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy implements IRoundRobinMachine, IWorldAugmentable, ITransferAugmentable, ICapacityAugmentable, IInventoryAugmentable, IInvertAugmentable, ITickable, IWorkProvider<TileEntityBaseCondenser.CondenserTarget> {
 
     protected List<BlockPosDimension> validTargets;
-    protected Worker worker;
+    protected final Worker worker;
 
-    protected FluidTank tank;
-    protected IFluidHandler fluidHandler;
-    protected IFluidHandler internalHandler;
+    protected final FluidTank tank;
+    protected final IFluidHandler fluidHandler;
+    protected final IFluidHandler internalHandler;
 
     protected boolean locked;
     protected FluidStack lockStack;
@@ -85,7 +85,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     public TileEntityBaseCondenser() {
         super();
-        worker = new Worker(this);
+        worker = new Worker<>(this);
 
         tank = new FluidTank(calculateFluidCapacity());
         fluidMaxRate = calculateMaxFluidRate();
@@ -895,7 +895,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
         craftingTicks = tag.getInteger("CraftingTicks");
-        NBTTagCompound crafting = tag.getCompoundTag("CraftingFluid");
+        NBTTagCompound crafting = tag.hasKey("CraftingFluid") ? tag.getCompoundTag("CraftingFluid") : null;
         if ( crafting != null )
             craftingFluid = FluidStack.loadFluidStackFromNBT(crafting);
     }
@@ -922,7 +922,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         boolean locked = tag.getBoolean("Locked");
         if ( locked ) {
-            NBTTagCompound lock = tag.getCompoundTag("LockStack");
+            NBTTagCompound lock = tag.hasKey("LockStack") ? tag.getCompoundTag("LockStack") : null;
             if ( lock != null ) {
                 FluidStack stack = FluidStack.loadFluidStackFromNBT(lock);
                 if ( stack == null )

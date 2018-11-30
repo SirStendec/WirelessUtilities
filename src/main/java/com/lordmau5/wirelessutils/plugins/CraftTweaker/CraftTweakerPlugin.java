@@ -31,7 +31,7 @@ public class CraftTweakerPlugin implements IPlugin {
         CraftTweakerAPI.registerClass(PearlReactions.class);
     }
 
-    public static FluidStack getFluidStack(ILiquidStack stack) {
+    private static FluidStack getFluidStack(ILiquidStack stack) {
         if ( stack == null )
             return null;
 
@@ -43,7 +43,7 @@ public class CraftTweakerPlugin implements IPlugin {
     }
 
     @Nonnull
-    public static ItemStack getItemStack(IItemStack stack) {
+    private static ItemStack getItemStack(IItemStack stack) {
         if ( stack == null )
             return ItemStack.EMPTY;
 
@@ -54,6 +54,7 @@ public class CraftTweakerPlugin implements IPlugin {
         return ItemStack.EMPTY;
     }
 
+    @SuppressWarnings("WeakerAccess")
     @ZenClass("mods.wirelessutils.pearl_reactions")
     public static class PearlReactions {
         @SuppressWarnings("unused")
@@ -108,6 +109,7 @@ public class CraftTweakerPlugin implements IPlugin {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     @ZenClass("mods.wirelessutils.levels")
     public static class LevelIntegration {
         @SuppressWarnings("unused")
@@ -157,6 +159,7 @@ public class CraftTweakerPlugin implements IPlugin {
         }
     }
 
+    @SuppressWarnings("WeakerAccess")
     @ZenClass("mods.wirelessutils.condenser")
     public static class CondenserIntegration {
         @SuppressWarnings("unused")
@@ -244,6 +247,7 @@ public class CraftTweakerPlugin implements IPlugin {
     }
 
 
+    @SuppressWarnings("WeakerAccess")
     @ZenClass("mods.wirelessutils.charger")
     public static class ChargerIntegration {
         @SuppressWarnings("unused")

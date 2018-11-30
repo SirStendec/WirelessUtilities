@@ -32,7 +32,7 @@ public class WirelessUtils {
     @Mod.Instance
     public static WirelessUtils instance;
 
-    public static CreativeTabs creativeTabCU = new CreativeTabs(MODID) {
+    public static final CreativeTabs creativeTabCU = new CreativeTabs(MODID) {
         @Override
         public int getSearchbarWidth() {
             return 70;

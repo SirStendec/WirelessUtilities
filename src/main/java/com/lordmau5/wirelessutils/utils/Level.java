@@ -13,7 +13,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import java.util.ArrayList;
 
 public class Level {
-    private static ArrayList<Level> levels = new ArrayList<>();
+    private static final ArrayList<Level> levels = new ArrayList<>();
 
     static {
         // baseEnergyPerOperation, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity

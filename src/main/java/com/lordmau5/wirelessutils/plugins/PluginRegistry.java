@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PluginRegistry {
-    private static Map<String, IPlugin> plugins = new HashMap<>();
+    private static final Map<String, IPlugin> plugins = new HashMap<>();
 
     private static void addPlugin(String modid, IPlugin plugin) {
         plugins.put(modid, plugin);

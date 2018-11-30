@@ -14,11 +14,11 @@ import java.util.Set;
 
 public class ChargerRecipeManager {
     private static Map<ComparableItemStackValidated, ChargerRecipe> allRecipes = new Object2ObjectOpenHashMap<>();
-    private static Set<ItemStack> allBlocks = new ObjectOpenHashSet<>();
-    private static Set<ComparableItemStackValidated> blocks = new ObjectOpenHashSet<>();
+    private static final Set<ItemStack> allBlocks = new ObjectOpenHashSet<>();
+    private static final Set<ComparableItemStackValidated> blocks = new ObjectOpenHashSet<>();
 
-    private static Map<ComparableItemStackValidated, ChargerRecipe> recipeMap = new Object2ObjectOpenHashMap<>();
-    private static Map<ComparableItemStackValidated, Set<ChargerRecipe>> outputMap = new Object2ObjectOpenHashMap<>();
+    private static final Map<ComparableItemStackValidated, ChargerRecipe> recipeMap = new Object2ObjectOpenHashMap<>();
+    private static final Map<ComparableItemStackValidated, Set<ChargerRecipe>> outputMap = new Object2ObjectOpenHashMap<>();
 
     public static ChargerRecipe getRecipe(@Nonnull ItemStack input) {
         if ( input.isEmpty() )

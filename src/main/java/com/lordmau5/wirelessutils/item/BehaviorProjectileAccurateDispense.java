@@ -35,11 +35,11 @@ public abstract class BehaviorProjectileAccurateDispense extends BehaviorDefault
 
     protected abstract IProjectile getProjectileEntity(@Nonnull World worldIn, @Nonnull IPosition position, @Nonnull ItemStack stack);
 
-    public float getProjectileInaccuracy(@Nonnull ItemStack stack) {
+    protected float getProjectileInaccuracy(@Nonnull ItemStack stack) {
         return 6.0F;
     }
 
-    public float getProjectileVelocity(@Nonnull ItemStack stack) {
+    protected float getProjectileVelocity(@Nonnull ItemStack stack) {
         return 1.1F;
     }
 }

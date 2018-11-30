@@ -16,7 +16,7 @@ public class ElementAreaButton extends ElementButtonManaged {
 
     private final static ResourceLocation TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/button_area.png");
 
-    private TileEntityBaseArea tile;
+    private final TileEntityBaseArea tile;
 
     private boolean isActive;
 

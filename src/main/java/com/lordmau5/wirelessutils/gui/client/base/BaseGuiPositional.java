@@ -20,7 +20,7 @@ public class BaseGuiPositional extends BaseGuiContainer {
         this.machine = machine;
     }
 
-    public BaseGuiPositional(Container container, TileEntityBaseMachine machine, ResourceLocation texture) {
+    protected BaseGuiPositional(Container container, TileEntityBaseMachine machine, ResourceLocation texture) {
         super(container, machine, texture);
         this.machine = machine;
     }

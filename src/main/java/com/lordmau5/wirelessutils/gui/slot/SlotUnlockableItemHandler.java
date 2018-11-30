@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 
 public class SlotUnlockableItemHandler extends SlotItemHandler {
 
-    private IUnlockableSlots tile;
+    private final IUnlockableSlots tile;
 
     public SlotUnlockableItemHandler(IUnlockableSlots tile, IItemHandler handler, int slotIndex, int x, int y) {
         super(handler, slotIndex, x, y);

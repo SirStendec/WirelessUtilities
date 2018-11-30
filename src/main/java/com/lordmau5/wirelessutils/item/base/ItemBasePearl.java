@@ -73,10 +73,7 @@ public abstract class ItemBasePearl extends ItemBase implements IEnhancedItem, I
 
     @Override
     public boolean shouldItemTakeDamage(@Nonnull EntityItemEnhanced entity, @Nonnull ItemStack stack, DamageSource source, float amount) {
-        if ( source == DamageSource.IN_FIRE || source == DamageSource.LIGHTNING_BOLT )
-            return false;
-
-        return true;
+        return source != DamageSource.IN_FIRE && source != DamageSource.LIGHTNING_BOLT;
     }
 
     @Override

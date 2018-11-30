@@ -19,8 +19,8 @@ public class CondenserRecipeManager {
     private static Map<CondenserRecipeInput, CondenserRecipe> allRecipes = new Object2ObjectOpenHashMap<>();
     private static Set<CondenserRecipeInput> blocks = new ObjectOpenHashSet<>();
 
-    private static Map<CondenserRecipeInput, CondenserRecipe> recipeMap = new Object2ObjectOpenHashMap<>();
-    private static Map<ComparableItemStackValidated, Set<CondenserRecipe>> outputMap = new Object2ObjectOpenHashMap<>();
+    private static final Map<CondenserRecipeInput, CondenserRecipe> recipeMap = new Object2ObjectOpenHashMap<>();
+    private static final Map<ComparableItemStackValidated, Set<CondenserRecipe>> outputMap = new Object2ObjectOpenHashMap<>();
 
     public static CondenserRecipe getRecipe(FluidStack fluid, @Nonnull ItemStack input) {
         if ( fluid == null )
@@ -199,8 +199,7 @@ public class CondenserRecipeManager {
         allRecipes = new Object2ObjectOpenHashMap<>(tempAll.size());
         blocks = new ObjectOpenHashSet<>(tempBlocks.size());
 
-        for (CondenserRecipeInput input : tempBlocks)
-            blocks.add(input);
+        blocks.addAll(tempBlocks);
 
         for (CondenserRecipe recipe : tempAll.values()) {
             allRecipes.put(recipe.recipeInput, recipe);

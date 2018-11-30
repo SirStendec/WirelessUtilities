@@ -36,8 +36,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class BlockBaseTile extends BlockCoreTile implements IConfigGui {
 
-    protected boolean standardGui = true;
-    protected boolean configGui = false;
+    protected final boolean standardGui = true;
+    protected final boolean configGui = false;
 
     protected BlockBaseTile() {
         this(Material.IRON);

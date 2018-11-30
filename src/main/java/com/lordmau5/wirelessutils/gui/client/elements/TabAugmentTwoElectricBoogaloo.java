@@ -8,8 +8,8 @@ import net.minecraft.item.ItemStack;
 
 public class TabAugmentTwoElectricBoogaloo extends TabAugment {
 
-    private IAugmentableContainer container;
-    private int numAugments;
+    private final IAugmentableContainer container;
+    private final int numAugments;
     private int slotsBorderX1 = 18;
     private int slotsBorderY1 = 20;
 
@@ -100,10 +100,10 @@ public class TabAugmentTwoElectricBoogaloo extends TabAugment {
             if ( slot != null ) {
                 int x = xPos + (i * 18);
                 if ( !slot.canTakeStack(getContainerScreen().mc.player) ) {
-                    gui.drawRect(x, yPos, x + 16, yPos + 16, 0x90600000);
+                    GuiContainerCore.drawRect(x, yPos, x + 16, yPos + 16, 0x90600000);
 
                 } else if ( !held.isEmpty() && !slot.isItemValid(held) ) {
-                    gui.drawRect(x, yPos, x + 16, yPos + 16, 0x99222222);
+                    GuiContainerCore.drawRect(x, yPos, x + 16, yPos + 16, 0x99222222);
                 }
             }
         }

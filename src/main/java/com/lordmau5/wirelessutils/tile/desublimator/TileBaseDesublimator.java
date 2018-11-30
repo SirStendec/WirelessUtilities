@@ -32,10 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ITickable;
+import net.minecraft.util.*;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.capabilities.Capability;
@@ -53,7 +50,7 @@ import java.util.List;
 public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implements ICropAugmentable, IInvertAugmentable, ITransferAugmentable, ICapacityAugmentable, IUnlockableSlots, IRoundRobinMachine, ITickable, IWorkProvider<TileBaseDesublimator.DesublimatorTarget> {
 
     protected List<BlockPosDimension> validTargets;
-    protected Worker worker;
+    protected final Worker worker;
     protected CapabilityHandler capabilityHandler;
 
     private ComparableItemStackValidatedNBT[] locks;
@@ -85,7 +82,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     public TileBaseDesublimator() {
         super();
-        worker = new Worker(this);
+        worker = new Worker<>(this);
     }
 
     @Override
@@ -484,7 +481,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( stack.getItem().equals(Items.DYE) && stack.getMetadata() == 15 )
             return true;
 
-        if ( stack.getItem().getRegistryName().toString().equalsIgnoreCase("thermalfoundation:fertilizer") )
+        ResourceLocation name = stack.getItem().getRegistryName();
+        if ( name != null && name.toString().equalsIgnoreCase("thermalfoundation:fertilizer") )
             return true;
 
         // Theoretical Ore Dictionary Stuff
@@ -530,8 +528,12 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                             world.setBlockState(target.pos.down(), Blocks.FARMLAND.getDefaultState());
 
                         FakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos.up());
+                        if ( isCreative )
+                            stack = stack.copy();
+
                         player.setHeldItem(EnumHand.MAIN_HAND, stack);
                         EnumActionResult result = stack.onItemUse(player, world, target.pos.down(), EnumHand.MAIN_HAND, EnumFacing.UP, 0, 0, 0);
+
                         if ( result == EnumActionResult.SUCCESS ) {
                             itemsPerTick++;
                             remainingPerTick--;
@@ -578,6 +580,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
                             FakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos.up());
                             boolean success;
+
+                            if ( isCreative )
+                                stack = stack.copy();
 
                             if ( stack.getItem() == Items.DYE ) {
                                 success = ItemDye.applyBonemeal(stack, world, target.pos, player, EnumHand.MAIN_HAND);

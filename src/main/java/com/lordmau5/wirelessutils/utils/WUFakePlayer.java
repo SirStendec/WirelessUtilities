@@ -15,10 +15,15 @@ import java.util.UUID;
 
 public class WUFakePlayer extends FakePlayer {
 
-    private static Map<Integer, WUFakePlayer> fakePlayerMap = new Int2ObjectOpenHashMap<>();
+    private static final Map<Integer, WUFakePlayer> fakePlayerMap = new Int2ObjectOpenHashMap<>();
 
     private static final UUID uuid = UUID.fromString("1a82a7dc-9467-40e8-b806-b5ebf0a39a73");
-    private static GameProfile PROFILE = new GameProfile(uuid, "[WU]");
+    private static final GameProfile PROFILE = new GameProfile(uuid, "[WU]");
+
+    public static void removeFakePlayer(@Nonnull World world) {
+        int dimension = world.provider.getDimension();
+        fakePlayerMap.remove(dimension);
+    }
 
     public static WUFakePlayer getFakePlayer(@Nonnull World world) {
         int dimension = world.provider.getDimension();
@@ -42,7 +47,7 @@ public class WUFakePlayer extends FakePlayer {
         return player;
     }
 
-    public WUFakePlayer(WorldServer world) {
+    private WUFakePlayer(WorldServer world) {
         super(world, PROFILE);
     }
 
@@ -52,12 +57,12 @@ public class WUFakePlayer extends FakePlayer {
     }
 
     @Override
-    public void playSound(SoundEvent soundIn, float volume, float pitch) {
-
+    public void playSound(@Nonnull SoundEvent soundIn, float volume, float pitch) {
+        // Intentionally Left Blank
     }
 
     @Override
     public void openEditSign(TileEntitySign signTile) {
-
+        // Intentionally Left Blank
     }
 }

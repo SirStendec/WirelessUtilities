@@ -18,14 +18,13 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
-import java.io.IOException;
 import java.util.List;
 
 public class ElementFluidLock extends ElementBase {
 
     public static final ResourceLocation TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/directional_machine.png");
 
-    private TileEntityBaseCondenser condenser;
+    private final TileEntityBaseCondenser condenser;
 
     public ElementFluidLock(GuiContainerCore gui, TileEntityBaseCondenser condenser, int posX, int posY) {
         super(gui, posX, posY, 18, 18);
@@ -93,7 +92,7 @@ public class ElementFluidLock extends ElementBase {
     }
 
     @Override
-    public boolean onMousePressed(int mouseX, int mouseY, int mouseButton) throws IOException {
+    public boolean onMousePressed(int mouseX, int mouseY, int mouseButton) {
         if ( mouseButton == 1 ) {
             if ( condenser.isLocked() ) {
                 condenser.setLocked(false);

@@ -14,9 +14,9 @@ import net.minecraft.world.World;
 
 public abstract class BlockBaseDirectionalMachine extends BlockBaseMachine {
 
-    public static final PropertyEnum<EnumFacingRotation> FACING = PropertyEnum.<EnumFacingRotation>create("facing", EnumFacingRotation.class);
+    public static final PropertyEnum<EnumFacingRotation> FACING = PropertyEnum.create("facing", EnumFacingRotation.class);
 
-    public BlockBaseDirectionalMachine() {
+    protected BlockBaseDirectionalMachine() {
         super();
 
         setDefaultState(blockState.getBaseState().withProperty(Properties.LEVEL, 0).withProperty(Properties.ACTIVE, false).withProperty(FACING, EnumFacingRotation.NORTH));

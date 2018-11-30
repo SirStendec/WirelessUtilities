@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.utils.crops;
 
 import com.lordmau5.wirelessutils.tile.desublimator.TileBaseDesublimator;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockNetherWart;
 import net.minecraft.block.state.IBlockState;
@@ -20,9 +21,9 @@ public class NetherWartBehavior implements IHarvestBehavior {
 
     @Override
     public boolean harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
-        if ( silkTouch )
+        if ( silkTouch && ModConfig.augments.crop.useActivation )
             return harvestByUsing(state, world, pos, fortune, desublimator);
 
-        return harvestByBreaking(state, world, pos, fortune, desublimator);
+        return harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator);
     }
 }

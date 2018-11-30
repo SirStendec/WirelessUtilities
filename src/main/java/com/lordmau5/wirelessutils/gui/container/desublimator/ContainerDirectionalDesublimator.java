@@ -10,7 +10,7 @@ import net.minecraftforge.items.IItemHandler;
 public class ContainerDirectionalDesublimator extends BaseContainerTile {
 
     private final TileBaseDesublimator desublimator;
-    private IItemHandler itemHandler;
+    private final IItemHandler itemHandler;
 
     public ContainerDirectionalDesublimator(InventoryPlayer inventory, TileDirectionalDesublimator desublimator) {
         super(inventory, desublimator, true, true);

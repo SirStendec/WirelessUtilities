@@ -4,10 +4,10 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public class BigEnergyStorage implements cofh.redstoneflux.api.IEnergyStorage {
 
-    protected long energy;
-    protected long capacity;
-    protected long maxReceive;
-    protected long maxExtract;
+    private long energy;
+    private long capacity;
+    private long maxReceive;
+    private long maxExtract;
 
     public BigEnergyStorage(long capacity) {
         this(capacity, capacity, capacity);

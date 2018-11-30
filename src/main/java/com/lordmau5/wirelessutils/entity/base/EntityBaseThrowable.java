@@ -34,7 +34,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         SPEED
     }
 
-    public static Map<Block, HitReaction> REACTIONS = new Object2ObjectOpenHashMap<>();
+    public static final Map<Block, HitReaction> REACTIONS = new Object2ObjectOpenHashMap<>();
 
     public static void initReactions() {
         REACTIONS.put(Blocks.TRIPWIRE, HitReaction.IGNORE);
@@ -76,11 +76,11 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
             this.scale = scale;
         }
 
-        public static HitReaction IGNORE = new HitReaction(HitReactionType.IGNORE);
-        public static HitReaction SLOW = new HitReaction(HitReactionType.SPEED, 0.8);
-        public static HitReaction FAST = new HitReaction(HitReactionType.SPEED, 1.2);
-        public static HitReaction NONE = new HitReaction(HitReactionType.NONE);
-        public static HitReaction BOUNCE = new HitReaction(HitReactionType.BOUNCE, 0.8);
+        public static final HitReaction IGNORE = new HitReaction(HitReactionType.IGNORE);
+        public static final HitReaction SLOW = new HitReaction(HitReactionType.SPEED, 0.8);
+        public static final HitReaction FAST = new HitReaction(HitReactionType.SPEED, 1.2);
+        public static final HitReaction NONE = new HitReaction(HitReactionType.NONE);
+        public static final HitReaction BOUNCE = new HitReaction(HitReactionType.BOUNCE, 0.8);
     }
 
 
@@ -239,7 +239,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
                                     ModAdvancements.REPULSION.trigger((EntityPlayerMP) thrower);
                             }
 
-                            if ( steps < 10 && (remainingX > 0 || remainingY > 0 || remainingZ > 0) ) {
+                            if ( remainingX > 0 || remainingY > 0 || remainingZ > 0 ) {
                                 ++steps;
                                 continue;
                             }
@@ -316,7 +316,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
                                 ModAdvancements.REPULSION.trigger((EntityPlayerMP) thrower);
                         }
 
-                        if ( steps < 10 && (remainingX > 0 || remainingY > 0 || remainingZ > 0) ) {
+                        if ( remainingX > 0 || remainingY > 0 || remainingZ > 0 ) {
                             ++steps;
                             continue;
                         }
@@ -332,7 +332,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
                         posY = ray.hitVec.y;
                         posZ = ray.hitVec.z;
 
-                        if ( steps < 10 && (remainingX > 0 || remainingY > 0 || remainingZ > 0) ) {
+                        if ( remainingX > 0 || remainingY > 0 || remainingZ > 0 ) {
                             ++steps;
                             continue;
                         }

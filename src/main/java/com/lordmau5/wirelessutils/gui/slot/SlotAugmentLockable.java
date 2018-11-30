@@ -12,14 +12,16 @@ import net.minecraft.item.ItemStack;
 
 public class SlotAugmentLockable extends SlotAugment {
 
-    private IAugmentableTwoElectricBoogaloo tile;
-    private InventoryPlayer inventoryPlayer;
+    private final IAugmentableTwoElectricBoogaloo tile;
+    private final InventoryPlayer inventoryPlayer;
 
     public SlotAugmentLockable(IAugmentable tile, InventoryPlayer inventoryPlayer, IInventory inventory, int slotIndex, int x, int y) {
         super(tile, inventory, slotIndex, x, y);
 
         if ( tile instanceof IAugmentableTwoElectricBoogaloo )
             this.tile = (IAugmentableTwoElectricBoogaloo) tile;
+        else
+            this.tile = null;
 
         this.inventoryPlayer = inventoryPlayer;
     }

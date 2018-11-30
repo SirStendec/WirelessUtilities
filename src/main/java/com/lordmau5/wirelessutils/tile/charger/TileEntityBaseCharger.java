@@ -32,7 +32,7 @@ import java.util.List;
 public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy implements IInvertAugmentable, IRoundRobinMachine, ICapacityAugmentable, ITransferAugmentable, IInventoryAugmentable, ITickable, IWorkProvider<TileEntityBaseCharger.ChargerTarget> {
 
     protected List<BlockPosDimension> validTargets;
-    protected Worker worker;
+    protected final Worker worker;
 
     private boolean inverted = false;
 
@@ -53,7 +53,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
     public TileEntityBaseCharger() {
         super();
-        worker = new Worker(this);
+        worker = new Worker<>(this);
     }
 
     /* Debugging */
@@ -405,9 +405,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         if ( recipe == null )
             return WorkResult.FAILURE_REMOVE;
 
-        long added = 0;
         if ( craftingEnergy < recipe.cost && craftingEnergy + getEnergyStored() >= recipe.cost ) {
-            added = Math.min(recipe.cost - craftingEnergy, remainingPerTick);
+            long added = Math.min(recipe.cost - craftingEnergy, remainingPerTick);
             added = getEnergyStorage().extractEnergy(added, false);
             craftingEnergy += added;
             remainingPerTick -= added;

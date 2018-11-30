@@ -18,7 +18,7 @@ public enum EnumFacingRotation implements IStringSerializable {
     public final String name;
     private final int opposite;
 
-    private EnumFacingRotation(EnumFacing facing, boolean rotation_x, String name, int opposite) {
+    EnumFacingRotation(EnumFacing facing, boolean rotation_x, String name, int opposite) {
         this.facing = facing;
         this.rotation_x = rotation_x;
         this.name = name;

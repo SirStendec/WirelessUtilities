@@ -19,14 +19,14 @@ import java.util.List;
 
 public class TabWorkInfo extends TabBase {
 
-    public static ResourceLocation TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/directional_machine.png");
-    public static String INTL_KEY = "info." + WirelessUtils.MODID + ".work_info";
+    public static final ResourceLocation TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/directional_machine.png");
+    public static final String INTL_KEY = "info." + WirelessUtils.MODID + ".work_info";
 
-    public static int defaultSide = 0;
-    public static int defaultHeaderColor = 0xE1C92F;
-    public static int defaultSubHeaderColor = 0xAAAFB8;
-    public static int defaultTextColor = 0x000000;
-    public static int defaultBackgroundColor = 0x089e4c;
+    public static final int defaultSide = 0;
+    public static final int defaultHeaderColor = 0xE1C92F;
+    public static final int defaultSubHeaderColor = 0xAAAFB8;
+    public static final int defaultTextColor = 0x000000;
+    public static final int defaultBackgroundColor = 0x089e4c;
 
     private final BaseGuiContainer gui;
     private final IWorkInfoProvider provider;

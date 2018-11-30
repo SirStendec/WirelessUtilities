@@ -47,7 +47,7 @@ public class ColorHandler {
         public static final IBlockColor handleBlockColor = (IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex) -> {
             if ( tintIndex == 1 && worldIn != null && pos != null ) {
                 TileEntity tile = worldIn.getTileEntity(pos);
-                if ( tile != null && tile instanceof TileEntityBaseCondenser ) {
+                if ( tile instanceof TileEntityBaseCondenser ) {
                     TileEntityBaseCondenser condenser = (TileEntityBaseCondenser) tile;
                     FluidStack stack = condenser.getTankFluid();
                     if ( stack != null ) {
@@ -75,9 +75,8 @@ public class ColorHandler {
     }
 
     public static class RedstoneWire {
-        public static final IBlockColor handleBlockColor = (IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex) -> {
-            return BlockRedstoneWire.colorMultiplier(state.getValue(BlockRedstoneWire.POWER));
-        };
+        public static final IBlockColor handleBlockColor = (IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex) ->
+                BlockRedstoneWire.colorMultiplier(state.getValue(BlockRedstoneWire.POWER));
     }
 
     public static class Augment {

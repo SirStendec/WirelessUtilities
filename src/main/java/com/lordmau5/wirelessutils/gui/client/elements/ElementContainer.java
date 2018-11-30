@@ -10,7 +10,7 @@ import java.util.List;
 
 public abstract class ElementContainer extends ElementBase implements IContainsButtons {
 
-    protected ArrayList<ElementBase> elements = new ArrayList<>();
+    private final ArrayList<ElementBase> elements = new ArrayList<>();
 
     public ElementContainer(GuiContainerCore gui, int posX, int posY) {
         super(gui, posX, posY);

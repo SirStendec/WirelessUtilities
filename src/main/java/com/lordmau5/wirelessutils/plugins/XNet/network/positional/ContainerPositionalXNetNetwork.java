@@ -10,7 +10,7 @@ import net.minecraftforge.items.IItemHandler;
 public class ContainerPositionalXNetNetwork extends BaseContainerTile {
 
     private final TilePositionalXNetNetwork tile;
-    private IItemHandler itemHandler;
+    private final IItemHandler itemHandler;
 
     public ContainerPositionalXNetNetwork(InventoryPlayer playerInventory, TilePositionalXNetNetwork te) {
         super(playerInventory, te);
@@ -29,8 +29,6 @@ public class ContainerPositionalXNetNetwork extends BaseContainerTile {
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 3; x++, slotIndex++) {
-                int slotHere = slotIndex;
-
                 addSlotToContainer(new SlotUnlockableItemHandler(
                         tile, this.itemHandler, slotIndex, xPos + (x * 18), yPos + (y * 18)));
             }

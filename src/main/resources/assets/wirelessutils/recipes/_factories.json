@@ -4,6 +4,7 @@
 		"copy_nbt_shapeless": "com.lordmau5.wirelessutils.utils.crafting.CopyNBTShapelessRecipeFactory"
 	},
 	"conditions": {
+		"level_exists": "com.lordmau5.wirelessutils.utils.crafting.ConditionLevelExists",
 		"ore_exists": "com.lordmau5.wirelessutils.utils.crafting.ConditionOreExists"
 	}
 }

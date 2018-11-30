@@ -41,9 +41,9 @@ public class BlockAngledSlime extends BlockBase {
     public static final PropertyEnum<EnumOmniFacing> ATTACHED = PropertyEnum.create("attached", EnumOmniFacing.class);
     public static final PropertyInteger ROTATION = PropertyInteger.create("rotation", 0, 3);
 
-    public static final AxisAlignedBB INTERNAL_BOX = new AxisAlignedBB(-0.4375, -0.4375, -0.4375, 0.4375, 0.4375, 0.4375);
+    private static final AxisAlignedBB INTERNAL_BOX = new AxisAlignedBB(-0.4375, -0.4375, -0.4375, 0.4375, 0.4375, 0.4375);
 
-    public static final AxisAlignedBB BOUNDING_BOX = new AxisAlignedBB(0.0625, 0.0625, 0.0625, 0.9375, 0.9375, 0.9375);
+    private static final AxisAlignedBB BOUNDING_BOX = new AxisAlignedBB(0.0625, 0.0625, 0.0625, 0.9375, 0.9375, 0.9375);
 
     public BlockAngledSlime() {
         super(Material.CLAY, MapColor.GREEN);
@@ -350,7 +350,7 @@ public class BlockAngledSlime extends BlockBase {
         }
     }
 
-    public static Matrix4d getTransformation(IBlockState state) {
+    private static Matrix4d getTransformation(IBlockState state) {
         EnumOmniFacing attachment = state.getValue(ATTACHED);
         EnumFacing.Axis axis = getAxis(attachment);
         int rotState = state.getValue(ROTATION);
@@ -426,7 +426,7 @@ public class BlockAngledSlime extends BlockBase {
     public AngledBounceResult tryBounce(Vec3d position, AxisAlignedBB boundingBox, Vec3d velocity, RayTraceResult ray, IBlockState state, World world) {
         EnumOmniFacing attachment = state.getValue(ATTACHED);
         EnumFacing.Axis axis = getAxis(attachment);
-        if ( ray == null || ray.sideHit == null || attachment == null || ray.sideHit == attachment.facing || ray.sideHit.getAxis() == axis )
+        if ( ray == null || ray.sideHit == null || ray.sideHit == attachment.facing || ray.sideHit.getAxis() == axis )
             return null;
 
         BlockPos pos = ray.getBlockPos();
@@ -500,7 +500,7 @@ public class BlockAngledSlime extends BlockBase {
         );
     }
 
-    public static EnumFacing.Axis getAxis(EnumOmniFacing attachment) {
+    private static EnumFacing.Axis getAxis(EnumOmniFacing attachment) {
         switch (attachment) {
             case SOUTH:
             case NORTH:

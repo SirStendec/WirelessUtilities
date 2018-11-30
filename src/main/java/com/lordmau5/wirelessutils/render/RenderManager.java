@@ -56,8 +56,8 @@ public class RenderManager {
     private Map<Integer, Long> areaTouch;
     private Map<BlockArea, Integer> areaUsers;
 
-    private ItemStack[] heldItemStack = {ItemStack.EMPTY, ItemStack.EMPTY};
-    private int[] heldID = {-1, -1};
+    private final ItemStack[] heldItemStack = {ItemStack.EMPTY, ItemStack.EMPTY};
+    private final int[] heldID = {-1, -1};
 
     public RenderManager() {
         enabled = ModConfig.rendering.enableAreaRenderer;
@@ -94,11 +94,7 @@ public class RenderManager {
         if ( !enabled )
             return -1;
 
-        Set<BlockArea> dimensionAreas = areas.get(area.dimension);
-        if ( dimensionAreas == null ) {
-            dimensionAreas = new HashSet<>();
-            areas.put(area.dimension, dimensionAreas);
-        }
+        Set<BlockArea> dimensionAreas = areas.computeIfAbsent(area.dimension, k -> new HashSet<>());
 
         int id = ++lastID;
 

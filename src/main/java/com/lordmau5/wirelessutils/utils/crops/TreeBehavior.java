@@ -46,7 +46,7 @@ public class TreeBehavior implements IHarvestBehavior {
             world.setBlockToAir(pos);
 
         } else
-            harvestByBreaking(state, world, pos, fortune, desublimator);
+            harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator);
 
         if ( count < 100 ) {
             for (EnumFacing face : EnumFacing.VALUES) {

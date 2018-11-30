@@ -2,7 +2,9 @@ package com.lordmau5.wirelessutils.item.pearl;
 
 import com.lordmau5.wirelessutils.entity.pearl.EntityScorchedPearl;
 import com.lordmau5.wirelessutils.item.base.ItemBasePearl;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.dispenser.IPosition;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
@@ -24,6 +26,13 @@ public class ItemScorchedPearl extends ItemBasePearl {
         if ( !entityItem.isInWater() )
             entityItem.setFire(1);
         return false;
+    }
+
+    @Override
+    public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
+        super.onUpdate(stack, worldIn, entityIn, itemSlot, isSelected);
+        if ( ModConfig.items.scorchedPearl.fireUpPlayers && entityIn instanceof EntityPlayer )
+            entityIn.setFire(1);
     }
 
     @Nonnull

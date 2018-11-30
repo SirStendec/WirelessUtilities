@@ -13,7 +13,7 @@ public class BaseContainerTile extends ContainerTileAugmentable {
 
     private InventoryPlayer inventory;
 
-    public BaseContainerTile() {
+    protected BaseContainerTile() {
         super();
     }
 
@@ -21,11 +21,11 @@ public class BaseContainerTile extends ContainerTileAugmentable {
         super(tile);
     }
 
-    public BaseContainerTile(InventoryPlayer inventory, TileEntity tile) {
+    protected BaseContainerTile(InventoryPlayer inventory, TileEntity tile) {
         this(inventory, tile, true, true);
     }
 
-    public BaseContainerTile(InventoryPlayer inventory, TileEntity tile, boolean augSlots, boolean playerInvSlots) {
+    protected BaseContainerTile(InventoryPlayer inventory, TileEntity tile, boolean augSlots, boolean playerInvSlots) {
         super(tile);
 
         this.inventory = inventory;

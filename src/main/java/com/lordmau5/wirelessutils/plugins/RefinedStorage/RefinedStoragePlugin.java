@@ -35,6 +35,7 @@ public class RefinedStoragePlugin implements IPlugin {
     @RSAPIInject
     public static IRSAPI RSAPI;
 
+    @SuppressWarnings("CanBeFinal")
     @CapabilityInject(INetworkNodeProxy.class)
     public static Capability<INetworkNodeProxy> NETWORK_NODE_PROXY_CAPABILITY = null;
 

@@ -17,7 +17,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nonnull;
 
-public abstract class TileEntityBase extends TileRSControl implements EventDispatcher.IEventListener<Event>, IWorldNameable {
+public abstract class TileEntityBase extends TileRSControl implements EventDispatcher.IEventListener, IWorldNameable {
     private boolean watchUnload = false;
 
     @Override

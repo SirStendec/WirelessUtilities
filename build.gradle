@@ -70,6 +70,8 @@ dependencies {
     compile "com.github.mcjty:xnet:${config.xnet_version}"
     deobfProvided "CraftTweaker2:CraftTweaker2-API:${config.ct_api_version}"
     runtime "CraftTweaker2:CraftTweaker2-MC1120-Main:${config.ct_version}"
+    //deobfProvided "mezz.jei:jei_${config.mc_version}:${config.jei_version}:api"
+    //runtime "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
 }
 
 minecraft {
@@ -96,20 +98,20 @@ processResources {
 version = "${project.minecraft.version}-${project.version}"
 
 jar {
-	classifier = 'universal'
+    classifier = 'universal'
 }
 
 task deobfJar(type: Jar) {
-	from sourceSets.main.output
-	classifier = 'deobf'
+    from sourceSets.main.output
+    classifier = 'deobf'
 }
 
 task srcJar(type: Jar) {
-	from sourceSets.main.allSource
-	classifier = 'sources'
+    from sourceSets.main.allSource
+    classifier = 'sources'
 }
 
 artifacts {
-	archives deobfJar
-	archives srcJar
+    archives deobfJar
+    archives srcJar
 }

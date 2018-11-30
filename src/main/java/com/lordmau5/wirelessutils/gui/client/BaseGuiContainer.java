@@ -28,10 +28,10 @@ import java.util.List;
 
 public abstract class BaseGuiContainer extends GuiContainerCore implements IContainsButtons {
 
-    private TileEntityBase tile;
+    private final TileEntityBase tile;
     private Slot cachedSlot = null;
 
-    public BaseGuiContainer(Container container, TileEntity tile) {
+    protected BaseGuiContainer(Container container, TileEntity tile) {
         super(container);
         this.tile = (TileEntityBase) tile;
 
@@ -39,7 +39,7 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements ICont
         ySize = 176;
     }
 
-    public BaseGuiContainer(Container container, TileEntity tile, ResourceLocation texture) {
+    protected BaseGuiContainer(Container container, TileEntity tile, ResourceLocation texture) {
         super(container, texture);
         this.tile = (TileEntityBase) tile;
 
@@ -66,7 +66,7 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements ICont
         return null;
     }
 
-    public void drawGhostItem(@Nonnull ItemStack stack, int x, int y, boolean drawOverlay, boolean drawRect, @Nullable String text) {
+    protected void drawGhostItem(@Nonnull ItemStack stack, int x, int y, boolean drawOverlay, boolean drawRect, @Nullable String text) {
         RenderHelper.enableGUIStandardItemLighting();
         GlStateManager.enableDepth();
         GlStateManager.disableBlend();

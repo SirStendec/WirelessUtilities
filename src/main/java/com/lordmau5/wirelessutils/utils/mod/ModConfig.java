@@ -7,6 +7,7 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+@SuppressWarnings("CanBeFinal")
 @Config(modid = WirelessUtils.MODID)
 public class ModConfig {
     @Config.Name("Items")
@@ -55,6 +56,20 @@ public class ModConfig {
                 "Throwing a Fluxed Pearl up into a storm can attract lightning, electrifying the pearl into a Charged Pearl."
         })
         public final FluxedPearl fluxedPearl = new FluxedPearl();
+
+        @Config.Name("Scorched Pearl")
+        @Config.Comment({
+                "Scorched Pearls can be thrown like Ender Pearls.",
+                "Upon hitting a target, they can start a fire."
+        })
+        public final ScorchedPearl scorchedPearl = new ScorchedPearl();
+
+        @Config.Name("Stabilized Ender Pearl")
+        @Config.Comment({
+                "Stabilized Ender Pearls behave similarly to other pearls added by the mod. They bounce on slime, etc.",
+                "When fired from a Dispenser rather than thrown by an entity, the pearl will, upon landing, teleport the closest entity to where it struck."
+        })
+        public final StabilizedEnderPearl stabilizedEnderPearl = new StabilizedEnderPearl();
     }
 
     public static class FluxedPearl {
@@ -121,6 +136,23 @@ public class ModConfig {
         public boolean enableScorching = true;
     }
 
+    public static class ScorchedPearl {
+        @Config.Name("Create Fire on Impact")
+        @Config.Comment("Enable Scorched Pearls to create fires when thrown at a block.")
+        public boolean fireOnImpact = true;
+
+        @Config.Name("Light Players on Fire")
+        @Config.Comment("Enable setting players holding Scorched Pearls on fire.")
+        public boolean fireUpPlayers = false;
+    }
+
+    public static class StabilizedEnderPearl {
+        @Config.Name("Search Radius")
+        @Config.Comment("Search this many blocks in each direction for a living entity to teleport if the pearl wasn't thrown by one.")
+        @Config.RangeInt(min = 0, max = 128)
+        public int radius = 16;
+    }
+
     public static class Augments {
         @Config.Name("Require Previous Tiers")
         @Config.Comment("When enabled, installing an augment into a machine requires that the machine also has the previous tier augments.")
@@ -145,6 +177,26 @@ public class ModConfig {
         @Config.Name("Inventory Augments")
         @Config.Comment("Inventory Augments allow machines to scan for processable items within block inventories.")
         public final InventoryAugments inventory = new InventoryAugments();
+
+        @Config.Name("Crop Augments")
+        @Config.Comment("Crop Augments allow machines to interact with crops. This includes: planting, fertilizing, and (with an Invert Augment) harvesting.")
+        public final CropAugments crop = new CropAugments();
+    }
+
+    public static class CropAugments {
+        @Config.Name("Allow Silk Touch")
+        @Config.Comment("Allow Crop Augments to be enchanted with Silk Touch, changing harvesting behavior to use Silk Touch when possible.")
+        @Config.RequiresWorldRestart
+        public boolean allowSilkTouch = true;
+
+        @Config.Name("Allow Fortune")
+        @Config.Comment("Allow Crop Augments to be enchanted with Fortune, to be applied when harvesting crops.")
+        @Config.RequiresWorldRestart
+        public boolean allowFortune = true;
+
+        @Config.Name("Silk Touch Block Activation")
+        @Config.Comment("Activate crop blocks (right-click) to harvest them with Silk Touch, rather than breaking them. This behavior will not work correctly if there is no other mod present that adds activation behavior to crops.")
+        public boolean useActivation = true;
     }
 
     public static class CapacityAugments {

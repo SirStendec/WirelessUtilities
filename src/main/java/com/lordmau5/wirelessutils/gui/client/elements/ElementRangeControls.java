@@ -199,7 +199,7 @@ public class ElementRangeControls extends ElementContainer {
             }
         }
 
-        gui.playClickSound(pitch);
+        BaseGuiContainer.playClickSound(pitch);
         machine.sendModePacket();
     }
 }

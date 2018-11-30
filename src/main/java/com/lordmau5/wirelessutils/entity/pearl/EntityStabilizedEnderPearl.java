@@ -2,6 +2,7 @@ package com.lordmau5.wirelessutils.entity.pearl;
 
 import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
 import com.lordmau5.wirelessutils.render.RenderPearl;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.Minecraft;
@@ -58,21 +59,24 @@ public class EntityStabilizedEnderPearl extends EntityBaseThrowable {
     protected void onImpact(RayTraceResult result) {
         EntityLivingBase thrower = getThrower();
         if ( !world.isRemote && thrower == null ) {
-            List<EntityLivingBase> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(
-                    posX - 16, posY - 16, posZ - 16,
-                    posX + 16, posY + 16, posZ + 16
-            ));
+            int radius = ModConfig.items.stabilizedEnderPearl.radius;
+            if ( radius > 0 ) {
+                List<EntityLivingBase> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, new AxisAlignedBB(
+                        posX - radius, posY - radius, posZ - radius,
+                        posX + radius, posY + radius, posZ + radius
+                ));
 
-            double dist = Double.MAX_VALUE;
+                double dist = Double.MAX_VALUE;
 
-            if ( entities != null && !entities.isEmpty() )
-                for (EntityLivingBase entity : entities) {
-                    double entityDist = entity.getDistanceSq(this);
-                    if ( entityDist < dist ) {
-                        thrower = entity;
-                        dist = entityDist;
+                if ( entities != null && !entities.isEmpty() )
+                    for (EntityLivingBase entity : entities) {
+                        double entityDist = entity.getDistanceSq(this);
+                        if ( entityDist < dist ) {
+                            thrower = entity;
+                            dist = entityDist;
+                        }
                     }
-                }
+            }
         }
 
         if ( result.typeOfHit == RayTraceResult.Type.BLOCK ) {

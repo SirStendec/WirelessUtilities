@@ -9,9 +9,9 @@ import net.minecraftforge.items.IItemHandler;
 public class BaseContainerPositional extends BaseContainerTile {
 
     private final TileEntityBaseMachine machine;
-    private IItemHandler itemHandler;
+    private final IItemHandler itemHandler;
 
-    public BaseContainerPositional(InventoryPlayer player, TileEntityBaseMachine machine) {
+    protected BaseContainerPositional(InventoryPlayer player, TileEntityBaseMachine machine) {
         super(player, machine);
 
         this.machine = machine;
@@ -22,7 +22,7 @@ public class BaseContainerPositional extends BaseContainerTile {
         return 0;
     }
 
-    public void addOwnSlots() {
+    protected void addOwnSlots() {
         if ( !(machine instanceof IUnlockableSlots) )
             return;
 

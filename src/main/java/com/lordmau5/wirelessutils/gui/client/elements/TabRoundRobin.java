@@ -26,14 +26,14 @@ import java.util.List;
 
 public class TabRoundRobin extends TabBase implements IContainsButtons {
 
-    public static ResourceLocation TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/directional_machine.png");
-    public static String INTL_KEY = "info." + WirelessUtils.MODID + ".round_robin";
+    public static final ResourceLocation TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/directional_machine.png");
+    public static final String INTL_KEY = "info." + WirelessUtils.MODID + ".round_robin";
 
-    public static int defaultSide = 1;
-    public static int defaultHeaderColor = 0xE1C92F;
-    public static int defaultSubHeaderColor = 0xAAAFB8;
-    public static int defaultTextColor = 0x000000;
-    public static int defaultBackgroundColor = 0x0a76d0;
+    public static final int defaultSide = 1;
+    public static final int defaultHeaderColor = 0xE1C92F;
+    public static final int defaultSubHeaderColor = 0xAAAFB8;
+    public static final int defaultTextColor = 0x000000;
+    public static final int defaultBackgroundColor = 0x0a76d0;
 
     private final BaseGuiContainer gui;
     private final TileEntityBaseMachine machine;
@@ -178,7 +178,7 @@ public class TabRoundRobin extends TabBase implements IContainsButtons {
             change2 = 10;
         }
 
-        return new Tuple<Long, Long>(change, change2);
+        return new Tuple<>(change, change2);
     }
 
     @Override

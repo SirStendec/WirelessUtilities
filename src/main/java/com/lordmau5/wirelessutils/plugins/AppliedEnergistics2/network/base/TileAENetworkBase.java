@@ -32,7 +32,7 @@ import java.util.Map;
 
 public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         IRangeAugmentable, ITickable, ITargetProvider,
-        IGridHost, IGridBlock, EventDispatcher.IEventListener<Event> {
+        IGridHost, IGridBlock, EventDispatcher.IEventListener {
 
     public int IDLE_ENERGY_COST = 2;
 

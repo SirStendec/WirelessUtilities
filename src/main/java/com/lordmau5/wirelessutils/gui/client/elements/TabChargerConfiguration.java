@@ -21,26 +21,26 @@ import java.util.List;
 
 public class TabChargerConfiguration extends TabBase implements IContainsButtons {
 
-    public static ResourceLocation TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/directional_machine.png");
+    public static final ResourceLocation TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/directional_machine.png");
 
-    public static int defaultSide = 0;
-    public static int defaultHeaderColor = 0xE1C92F;
-    public static int defaultSubHeaderColor = 0xAAAFB8;
-    public static int defaultTextColor = 0x000000;
-    public static int defaultBackgroundColor = 0x226688;
+    public static final int defaultSide = 0;
+    public static final int defaultHeaderColor = 0xE1C92F;
+    public static final int defaultSubHeaderColor = 0xAAAFB8;
+    public static final int defaultTextColor = 0x000000;
+    public static final int defaultBackgroundColor = 0x226688;
 
     private final TileEntityBaseCharger charger;
 
-    static final String UNIT_INSTANT = "RF/t";
+    private static final String UNIT_INSTANT = "RF/t";
 
     private boolean editMode = false;
 
-    private ElementContainedButton decButton;
-    private ElementContainedButton incButton;
-    private ElementContainedButton editButton;
-    private ElementContainedButton saveButton;
+    private final ElementContainedButton decButton;
+    private final ElementContainedButton incButton;
+    private final ElementContainedButton editButton;
+    private final ElementContainedButton saveButton;
 
-    private ElementTextField editor;
+    private final ElementTextField editor;
 
     public TabChargerConfiguration(GuiContainerCore gui, TileEntityBaseCharger container) {
         this(gui, defaultSide, container);
@@ -157,7 +157,7 @@ public class TabChargerConfiguration extends TabBase implements IContainsButtons
             change2 = 10;
         }
 
-        return new Tuple<Long, Long>(change, change2);
+        return new Tuple<>(change, change2);
     }
 
     @Override

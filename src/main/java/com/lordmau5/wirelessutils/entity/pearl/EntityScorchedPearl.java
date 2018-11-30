@@ -2,6 +2,7 @@ package com.lordmau5.wirelessutils.entity.pearl;
 
 import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
 import com.lordmau5.wirelessutils.render.RenderPearl;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
@@ -54,9 +55,11 @@ public class EntityScorchedPearl extends EntityBaseThrowable {
     @Override
     protected void onImpact(RayTraceResult result) {
         if ( !world.isRemote ) {
-            BlockPos pos = result.getBlockPos().offset(result.sideHit);
-            if ( world.isAirBlock(pos) )
-                world.setBlockState(pos, Blocks.FIRE.getDefaultState());
+            if ( ModConfig.items.scorchedPearl.fireOnImpact ) {
+                BlockPos pos = result.getBlockPos().offset(result.sideHit);
+                if ( world.isAirBlock(pos) )
+                    world.setBlockState(pos, Blocks.FIRE.getDefaultState());
+            }
 
             dropItemWithMeta(ModItems.itemScorchedPearl, 1);
             setDead();

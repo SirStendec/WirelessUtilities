@@ -141,7 +141,7 @@ public class ElementOffsetControls extends ElementContainer {
                 return;
         }
 
-        gui.playClickSound(pitch);
+        BaseGuiContainer.playClickSound(pitch);
         machine.sendModePacket();
     }
 }

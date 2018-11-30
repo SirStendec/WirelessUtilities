@@ -3,7 +3,6 @@ package com.lordmau5.wirelessutils.tile.base;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import net.minecraftforge.common.DimensionManager;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +69,7 @@ public interface ITargetProvider {
     static void sortTargetList(BlockPosDimension origin, List<BlockPosDimension> list) {
         Map<BlockPosDimension, Long> distanceMap = new HashMap<>();
 
-        Collections.sort(list, (o1, o2) -> {
+        list.sort((o1, o2) -> {
             long d1, d2;
             if ( distanceMap.containsKey(o1) )
                 d1 = distanceMap.get(o1);

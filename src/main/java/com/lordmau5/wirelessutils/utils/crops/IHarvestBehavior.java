@@ -7,6 +7,7 @@ import com.lordmau5.wirelessutils.utils.WUFakePlayer;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -16,7 +17,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.items.IItemHandler;
 
 import java.util.List;
@@ -67,12 +70,34 @@ public interface IHarvestBehavior {
         return true;
     }
 
-    default boolean harvestByBreaking(IBlockState state, World world, BlockPos pos, int fortune, TileBaseDesublimator desublimator) {
+    default boolean harvestByBreaking(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
         Block block = state.getBlock();
         NonNullList<ItemStack> drops = NonNullList.create();
-        block.getDrops(drops, world, pos, state, fortune);
-        if ( desublimator.canInsertAll(drops) ) {
-            desublimator.insertAll(drops);
+
+        FakePlayer player = WUFakePlayer.getFakePlayer(world, pos.up());
+        boolean silky;
+        if ( silkTouch && block.canSilkHarvest(world, pos, state, player) ) {
+            Item item = Item.getItemFromBlock(block);
+            int i = 0;
+            if ( item.getHasSubtypes() )
+                i = block.getMetaFromState(state);
+
+            drops.add(new ItemStack(item, 1, i));
+            silky = true;
+        } else {
+            block.getDrops(drops, world, pos, state, fortune);
+            silky = false;
+        }
+
+        BlockEvent.HarvestDropsEvent event = new BlockEvent.HarvestDropsEvent(world, pos, state, fortune, 1F, drops, player, silky);
+        MinecraftForge.EVENT_BUS.post(event);
+
+        List<ItemStack> finalDrops = event.getDrops();
+        if ( finalDrops == null || finalDrops.isEmpty() )
+            return false;
+
+        if ( desublimator.canInsertAll(finalDrops) ) {
+            desublimator.insertAll(finalDrops);
             world.setBlockToAir(pos);
             return true;
         }

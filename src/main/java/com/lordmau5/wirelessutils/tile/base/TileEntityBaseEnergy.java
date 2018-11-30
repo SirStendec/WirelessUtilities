@@ -12,7 +12,7 @@ import net.minecraftforge.energy.IEnergyStorage;
 import javax.annotation.Nullable;
 
 public abstract class TileEntityBaseEnergy extends TileEntityBaseMachine implements IEnergyInfo, IEnergyStorage {
-    private BigEnergyStorage energyStorage;
+    private final BigEnergyStorage energyStorage;
 
     protected long energyPerTick = 0;
 

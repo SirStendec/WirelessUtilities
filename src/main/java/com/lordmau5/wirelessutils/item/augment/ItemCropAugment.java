@@ -2,6 +2,7 @@ package com.lordmau5.wirelessutils.item.augment;
 
 import cofh.api.core.IAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.init.Enchantments;
@@ -27,10 +28,10 @@ public class ItemCropAugment extends ItemAugment {
 
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        if ( enchantment == Enchantments.SILK_TOUCH )
+        if ( ModConfig.augments.crop.allowSilkTouch && enchantment == Enchantments.SILK_TOUCH )
             return true;
 
-        if ( enchantment == Enchantments.FORTUNE )
+        if ( ModConfig.augments.crop.allowFortune && enchantment == Enchantments.FORTUNE )
             return true;
 
         return super.canApplyAtEnchantingTable(stack, enchantment);
@@ -41,8 +42,8 @@ public class ItemCropAugment extends ItemAugment {
         boolean silky = false;
         int fortune = 0;
         if ( !stack.isEmpty() ) {
-            silky = EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0;
-            fortune = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
+            silky = ModConfig.augments.crop.allowSilkTouch && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0;
+            fortune = ModConfig.augments.crop.allowFortune ? EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack) : 0;
         }
 
         if ( augmentable instanceof ICropAugmentable )

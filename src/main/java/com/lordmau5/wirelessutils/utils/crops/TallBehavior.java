@@ -45,6 +45,6 @@ public class TallBehavior implements IHarvestBehavior {
         if ( below.getBlock() != block )
             return harvested;
 
-        return harvestByBreaking(state, world, pos, fortune, desublimator) || harvested;
+        return harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator) || harvested;
     }
 }

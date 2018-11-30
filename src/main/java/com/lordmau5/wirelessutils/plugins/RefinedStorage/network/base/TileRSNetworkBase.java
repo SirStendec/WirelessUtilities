@@ -25,7 +25,7 @@ import java.util.List;
 
 public abstract class TileRSNetworkBase<N extends NetworkNodeBase> extends TileEntityBaseMachine implements
         IRangeAugmentable, ITickable, ITargetProvider,
-        INetworkNodeProxy<N>, EventDispatcher.IEventListener<Event> {
+        INetworkNodeProxy<N>, EventDispatcher.IEventListener {
 
     public List<BlockPosDimension> validTargets;
     private int energyCost;

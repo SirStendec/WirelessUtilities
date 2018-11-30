@@ -30,7 +30,7 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     protected boolean isCreative = false;
     protected boolean wasDismantled = false;
 
-    protected TimeTracker tracker = new TimeTracker();
+    protected final TimeTracker tracker = new TimeTracker();
     private boolean activeCooldown = false;
 
     @Override

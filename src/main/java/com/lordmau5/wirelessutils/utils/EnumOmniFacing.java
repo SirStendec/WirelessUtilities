@@ -19,7 +19,7 @@ public enum EnumOmniFacing implements IStringSerializable {
 
     /* Static */
 
-    private static EnumOmniFacing[] facings = new EnumOmniFacing[EnumFacing.values().length];
+    private static final EnumOmniFacing[] facings = new EnumOmniFacing[EnumFacing.values().length];
 
     static {
         EnumOmniFacing[] values = values();

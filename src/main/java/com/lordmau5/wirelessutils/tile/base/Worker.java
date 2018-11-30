@@ -17,20 +17,20 @@ import net.minecraftforge.items.VanillaDoubleChestItemHandler;
 import java.util.List;
 import java.util.Random;
 
-public class Worker {
+public class Worker<T extends TargetInfo> {
 
-    private final IWorkProvider provider;
+    private final IWorkProvider<T> provider;
 
     private short cacheTTL = 0;
 
-    private List<TargetInfo> cacheList;
+    private List<T> cacheList;
     private int cachePosition = -1;
     private boolean cacheInInventory = false;
     private int cacheInvPosition = -1;
 
-    private Random random;
+    private final Random random;
 
-    public Worker(IWorkProvider provider) {
+    public Worker(IWorkProvider<T> provider) {
         this.provider = provider;
         random = new Random();
     }
@@ -47,13 +47,16 @@ public class Worker {
     }
 
     public void clearTargetCache() {
+        if ( cacheList != null )
+            cacheList.clear();
+
         cacheTTL = 0;
         cachePosition = -1;
         cacheInInventory = false;
         cacheInvPosition = -1;
     }
 
-    public void updateTargetCache() {
+    private void updateTargetCache() {
         if ( cacheList != null && cacheTTL > 0 )
             return;
 
@@ -62,7 +65,7 @@ public class Worker {
             cacheList = new ObjectArrayList<>();
         else {
             if ( cachePosition >= 0 && cachePosition < cacheList.size() ) {
-                TargetInfo target = cacheList.get(cachePosition);
+                T target = cacheList.get(cachePosition);
                 if ( target != null )
                     oldPos = target.pos;
             }
@@ -89,8 +92,6 @@ public class Worker {
         if ( targets == null )
             return;
 
-        BlockPosDimension worker = provider.getPosition();
-
         for (BlockPosDimension target : targets) {
             if ( target == oldPos )
                 passedOldPos = true;
@@ -101,7 +102,7 @@ public class Worker {
 
             IBlockState state = world.getBlockState(target);
             TileEntity tile = world.getTileEntity(target);
-            TargetInfo info = null;
+            T info = null;
             boolean useSingleChest = false;
 
             if ( !processBlocks && tile == null )
@@ -253,7 +254,7 @@ public class Worker {
 
             didWork = false;
 
-            TargetInfo target = cacheList.get(cachePosition);
+            T target = cacheList.get(cachePosition);
             if ( cacheInInventory && (target == null || !target.processInventory) ) {
                 cacheInInventory = false;
                 cacheInvPosition = -1;
