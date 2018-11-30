@@ -248,6 +248,9 @@ info.wirelessutils.work_info.targets.info=%s of %s
 info.wirelessutils.item_rate=Items/t
 info.wirelessutils.buffer=Buffer
 
+jei.wirelessutils.charger=Item Charging
+jei.wirelessutils.condenser=Item Condensing
+
 btn.wirelessutils.edit=Edit
 btn.wirelessutils.save=Save
 
