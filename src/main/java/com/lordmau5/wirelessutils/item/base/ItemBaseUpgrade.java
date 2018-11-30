@@ -44,7 +44,11 @@ public abstract class ItemBaseUpgrade extends ItemBase {
                 Block block = state.getBlock();
                 ITextComponent blockName = new TextComponentTranslation(block.getTranslationKey() + ".name");
 
-                if ( upgradeable.installUpgrade(stack) ) {
+                ItemStack clone = stack.copy();
+                if ( clone.getCount() > 1 )
+                    clone.setCount(1);
+
+                if ( upgradeable.installUpgrade(clone) ) {
                     if ( !player.capabilities.isCreativeMode )
                         stack.shrink(1);
 
@@ -53,13 +57,13 @@ public abstract class ItemBaseUpgrade extends ItemBase {
                     player.world.playSound(null, player.getPosition(), SoundEvents.BLOCK_ANVIL_USE, SoundCategory.PLAYERS, 0.6F, 1.0F);
                     player.sendMessage(new TextComponentTranslation(
                             "chat." + WirelessUtils.MODID + ".upgrade.success",
-                            stack.getTextComponent(),
+                            clone.getTextComponent(),
                             blockName
                     ));
                 } else
                     player.sendMessage(new TextComponentTranslation(
                             "chat." + WirelessUtils.MODID + ".upgrade.failed",
-                            stack.getTextComponent(),
+                            clone.getTextComponent(),
                             blockName
                     ));
             }
