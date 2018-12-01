@@ -63,6 +63,7 @@ import java.util.List;
 @Mod.EventBusSubscriber
 public class CommonProxy {
 
+    public static final List<Item> ITEMS = new ArrayList<>();
     public static final List<Class<? extends TileEntity>> MACHINES = new ArrayList<>();
 
     public void preInit(FMLPreInitializationEvent e) {
@@ -216,44 +217,49 @@ public class CommonProxy {
     @SuppressWarnings("unused")
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(new ItemBlockMachine(ModBlocks.blockDirectionalCharger).setRegistryName(ModBlocks.blockDirectionalCharger.getRegistryName()));
-        event.getRegistry().register(new ItemBlockMachine(ModBlocks.blockPositionalCharger).setRegistryName(ModBlocks.blockPositionalCharger.getRegistryName()));
+        registerItem(event, new ItemBlockMachine(ModBlocks.blockDirectionalCharger).setRegistryName(ModBlocks.blockDirectionalCharger.getRegistryName()));
+        registerItem(event, new ItemBlockMachine(ModBlocks.blockPositionalCharger).setRegistryName(ModBlocks.blockPositionalCharger.getRegistryName()));
         //event.getRegistry().register(new ItemBlockMachine(ModBlocks.blockChunkCharger).setRegistryName(ModBlocks.blockChunkCharger.getRegistryName()));
 
-        event.getRegistry().register(new ItemBlockMachine(ModBlocks.blockDirectionalCondenser).setRegistryName(ModBlocks.blockDirectionalCondenser.getRegistryName()));
-        event.getRegistry().register(new ItemBlockMachine(ModBlocks.blockPositionalCondenser).setRegistryName(ModBlocks.blockPositionalCondenser.getRegistryName()));
+        registerItem(event, new ItemBlockMachine(ModBlocks.blockDirectionalCondenser).setRegistryName(ModBlocks.blockDirectionalCondenser.getRegistryName()));
+        registerItem(event, new ItemBlockMachine(ModBlocks.blockPositionalCondenser).setRegistryName(ModBlocks.blockPositionalCondenser.getRegistryName()));
 
-        event.getRegistry().register(new ItemBlockMachine(ModBlocks.blockDirectionalDesublimator).setRegistryName(ModBlocks.blockDirectionalDesublimator.getRegistryName()));
-        event.getRegistry().register(new ItemBlockMachine(ModBlocks.blockPositionalDesublimator).setRegistryName(ModBlocks.blockPositionalDesublimator.getRegistryName()));
+        registerItem(event, new ItemBlockMachine(ModBlocks.blockDirectionalDesublimator).setRegistryName(ModBlocks.blockDirectionalDesublimator.getRegistryName()));
+        registerItem(event, new ItemBlockMachine(ModBlocks.blockPositionalDesublimator).setRegistryName(ModBlocks.blockPositionalDesublimator.getRegistryName()));
 
-        event.getRegistry().register(new ItemBlockExplainable(ModBlocks.blockAngledSlime).setRegistryName(ModBlocks.blockAngledSlime.getRegistryName()));
+        registerItem(event, new ItemBlockExplainable(ModBlocks.blockAngledSlime).setRegistryName(ModBlocks.blockAngledSlime.getRegistryName()));
 
-        event.getRegistry().register(new ItemFluxedPearl());
-        event.getRegistry().register(new ItemChargedPearl());
-        event.getRegistry().register(new ItemQuenchedPearl());
-        event.getRegistry().register(new ItemScorchedPearl());
-        event.getRegistry().register(new ItemStabilizedEnderPearl());
+        registerItem(event, new ItemFluxedPearl());
+        registerItem(event, new ItemChargedPearl());
+        registerItem(event, new ItemQuenchedPearl());
+        registerItem(event, new ItemScorchedPearl());
+        registerItem(event, new ItemStabilizedEnderPearl());
 
-        event.getRegistry().register(new ItemPositionalCard());
-        event.getRegistry().register(new ItemGlasses());
+        registerItem(event, new ItemPositionalCard());
+        registerItem(event, new ItemGlasses());
 
-        event.getRegistry().register(new ItemEnderCoil());
+        registerItem(event, new ItemEnderCoil());
 
-        event.getRegistry().register(new ItemMachinePanel());
-        event.getRegistry().register(new ItemLevelUpgrade());
-        event.getRegistry().register(new ItemConversionUpgrade());
+        registerItem(event, new ItemMachinePanel());
+        registerItem(event, new ItemLevelUpgrade());
+        registerItem(event, new ItemConversionUpgrade());
 
-        event.getRegistry().register(new ItemBaseAugment());
-        event.getRegistry().register(new ItemRangeAugment());
-        event.getRegistry().register(new ItemInventoryAugment());
-        event.getRegistry().register(new ItemSlotAugment());
-        event.getRegistry().register(new ItemCapacityAugment());
-        event.getRegistry().register(new ItemTransferAugment());
-        event.getRegistry().register(new ItemWorldAugment());
-        event.getRegistry().register(new ItemInvertAugment());
-        event.getRegistry().register(new ItemCropAugment());
+        registerItem(event, new ItemBaseAugment());
+        registerItem(event, new ItemRangeAugment());
+        registerItem(event, new ItemInventoryAugment());
+        registerItem(event, new ItemSlotAugment());
+        registerItem(event, new ItemCapacityAugment());
+        registerItem(event, new ItemTransferAugment());
+        registerItem(event, new ItemWorldAugment());
+        registerItem(event, new ItemInvertAugment());
+        registerItem(event, new ItemCropAugment());
 
         PluginRegistry.registerItems(event);
+    }
+
+    public static void registerItem(RegistryEvent.Register<Item> event, Item item) {
+        event.getRegistry().register(item);
+        ITEMS.add(item);
     }
 
 }

@@ -2,6 +2,9 @@ package com.lordmau5.wirelessutils.tile.condenser;
 
 import cofh.core.fluid.FluidTankCore;
 import cofh.core.network.PacketBase;
+import cofh.core.util.CoreUtils;
+import cofh.core.util.helpers.FluidHelper;
+import cofh.core.util.helpers.InventoryHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
@@ -31,14 +34,8 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.IFluidBlock;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.FluidTankProperties;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import net.minecraftforge.fluids.*;
+import net.minecraftforge.fluids.capability.*;
 import net.minecraftforge.fluids.capability.wrappers.BlockLiquidWrapper;
 import net.minecraftforge.fluids.capability.wrappers.FluidBlockWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -647,6 +644,12 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             return true;
         }
 
+        if ( !inverted && FluidHelper.isFillableEmptyContainer(stack) ) {
+            validTargetsPerTick++;
+            maxEnergyPerTick += level.baseEnergyPerOperation + getEnergyCost(target);
+            return true;
+        }
+
         if ( inverted )
             return false;
 
@@ -746,12 +749,35 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             return WorkResult.FAILURE_CONTINUE;
 
         FluidStack fluid = tank.getFluid();
-        if ( fluid == null || fluid.amount <= 0 )
+        if ( !inverted && (fluid == null || fluid.amount <= 0) )
             return WorkResult.FAILURE_STOP;
 
-        IFluidHandler handler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
-        if ( handler != null )
-            return fillContainer(handler, target.cost);
+        IFluidHandlerItem handler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+        if ( handler != null ) {
+            FluidActionResult result;
+            if ( inverted )
+                result = FluidUtil.tryEmptyContainerAndStow(stack, internalHandler, inventory, remainingPerTick, null, true);
+            else
+                result = FluidUtil.tryFillContainerAndStow(stack, internalHandler, inventory, remainingPerTick, null, true);
+
+            if ( result.isSuccess() ) {
+                ItemStack outStack = result.getResult();
+                stack.shrink(stack.getCount());
+                ItemStack remaining = inventory.insertItem(slot, outStack, false);
+                if ( !remaining.isEmpty() ) {
+                    remaining = InventoryHelper.insertStackIntoInventory(inventory, remaining, false);
+                    if ( !remaining.isEmpty() )
+                        CoreUtils.dropItemStackIntoWorldWithVelocity(remaining, world, target.pos);
+                }
+
+                activeTargetsPerTick++;
+                extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                if ( remainingPerTick > 0 )
+                    return WorkResult.SUCCESS_CONTINUE;
+                return WorkResult.SUCCESS_STOP;
+            } else
+                return WorkResult.FAILURE_CONTINUE;
+        }
 
         if ( !target.canCraft || inverted )
             return WorkResult.FAILURE_REMOVE;

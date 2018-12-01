@@ -276,6 +276,9 @@ public class Worker<T extends TargetInfo> {
             TileEntity tile = world.getTileEntity(target.pos);
             boolean keepWorking = true;
 
+            if ( tile == null && target.processInventory )
+                target.processInventory = false;
+
             if ( !cacheInInventory && target.processBlock ) {
                 IWorkProvider.WorkResult result = provider.performWork(target, world, state, tile);
                 if ( result == null )

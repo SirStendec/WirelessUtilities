@@ -7,6 +7,7 @@ import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.directiona
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional.BlockPositionalAENetwork;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional.TilePositionalAENetwork;
 import com.lordmau5.wirelessutils.plugins.IPlugin;
+import com.lordmau5.wirelessutils.proxy.CommonProxy;
 import com.lordmau5.wirelessutils.utils.ColorHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.color.BlockColors;
@@ -42,8 +43,8 @@ public class AppliedEnergistics2Plugin implements IPlugin {
 
     @Override
     public void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(new ItemBlockMachine(blockDirectionalRSNetwork).setRegistryName(blockDirectionalRSNetwork.getRegistryName()));
-        event.getRegistry().register(new ItemBlockMachine(blockPositionalRSNetwork).setRegistryName(blockPositionalRSNetwork.getRegistryName()));
+        CommonProxy.registerItem(event, new ItemBlockMachine(blockDirectionalRSNetwork).setRegistryName(blockDirectionalRSNetwork.getRegistryName()));
+        CommonProxy.registerItem(event, new ItemBlockMachine(blockPositionalRSNetwork).setRegistryName(blockPositionalRSNetwork.getRegistryName()));
     }
 
     @Override

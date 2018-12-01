@@ -1,7 +1,9 @@
 package com.lordmau5.wirelessutils.plugins.JEI;
 
+import com.lordmau5.wirelessutils.item.base.IJEIInformationItem;
 import com.lordmau5.wirelessutils.plugins.JEI.charger.ChargerRecipeCategory;
 import com.lordmau5.wirelessutils.plugins.JEI.condenser.CondenserRecipeCategory;
+import com.lordmau5.wirelessutils.proxy.CommonProxy;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
 import mezz.jei.api.IGuiHelper;
@@ -9,6 +11,7 @@ import mezz.jei.api.IJeiHelpers;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.IModRegistry;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 @SuppressWarnings("unused")
@@ -30,6 +33,11 @@ public class JEIPlugin implements IModPlugin {
     public void register(IModRegistry registry) {
         IJeiHelpers jeiHelpers = registry.getJeiHelpers();
         IGuiHelper guiHelper = jeiHelpers.getGuiHelper();
+
+        for (Item item : CommonProxy.ITEMS) {
+            if ( item instanceof IJEIInformationItem )
+                ((IJEIInformationItem) item).registerJEI(registry);
+        }
 
         registry.addRecipes(ChargerRecipeCategory.getRecipes(guiHelper), ChargerRecipeCategory.UID);
         registry.addRecipes(CondenserRecipeCategory.getRecipes(guiHelper), CondenserRecipeCategory.UID);

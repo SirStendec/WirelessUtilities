@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.block.base;
 
 import cofh.api.tileentity.IInventoryRetainer;
+import cofh.core.util.helpers.FluidHelper;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.constants.Properties;
@@ -25,6 +26,8 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 
 public abstract class BlockBaseMachine extends BlockBaseTile implements IInventoryRetainer, INBTPreservingIngredient {
 
@@ -140,12 +143,23 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IInvento
 
     @Override
     public boolean onBlockActivatedDelegate(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
+        TileEntityBaseMachine machine = (TileEntityBaseMachine) world.getTileEntity(pos);
         ItemStack stack = player.getHeldItem(hand);
         if ( stack.getItem() == Items.BED && stack.getDisplayName().equalsIgnoreCase("debug") ) {
-            TileEntityBaseMachine machine = (TileEntityBaseMachine) world.getTileEntity(pos);
             if ( machine != null ) {
                 machine.debugPrint();
                 return true;
+            }
+        }
+
+        if ( machine != null && !player.isSneaking() ) {
+            IFluidHandler handler = machine.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, side);
+            if ( FluidHelper.isFillableEmptyContainer(stack) ) {
+                if ( FluidHelper.fillItemFromHandler(stack, handler, player, hand) )
+                    return true;
+            } else {
+                if ( FluidHelper.drainItemToHandler(stack, handler, player, hand) )
+                    return true;
             }
         }
 

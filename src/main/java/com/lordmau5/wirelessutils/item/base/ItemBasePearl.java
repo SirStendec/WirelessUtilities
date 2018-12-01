@@ -4,6 +4,7 @@ import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.item.BehaviorProjectileAccurateDispense;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import mezz.jei.api.IModRegistry;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
@@ -24,7 +25,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class ItemBasePearl extends ItemBase implements IEnhancedItem, IDamageableItem {
+public abstract class ItemBasePearl extends ItemBase implements IJEIInformationItem, IEnhancedItem, IDamageableItem {
 
     public ItemBasePearl() {
         super();
@@ -55,6 +56,12 @@ public abstract class ItemBasePearl extends ItemBase implements IEnhancedItem, I
     public void initModel() {
         ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
         ModelLoader.setCustomModelResourceLocation(this, 1, new ModelResourceLocation(getRegistryName() + "_stabilized", "inventory"));
+    }
+
+    @Override
+    public void registerJEI(IModRegistry registry) {
+        IJEIInformationItem.addJEIInformation(registry, new ItemStack(this, 1, 0));
+        IJEIInformationItem.addJEIInformation(registry, new ItemStack(this, 1, 1));
     }
 
     @Override

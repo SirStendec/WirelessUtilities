@@ -8,6 +8,7 @@ import com.lordmau5.wirelessutils.plugins.XNet.network.directional.BlockDirectio
 import com.lordmau5.wirelessutils.plugins.XNet.network.directional.TileDirectionalXNetNetwork;
 import com.lordmau5.wirelessutils.plugins.XNet.network.positional.BlockPositionalXNetNetwork;
 import com.lordmau5.wirelessutils.plugins.XNet.network.positional.TilePositionalXNetNetwork;
+import com.lordmau5.wirelessutils.proxy.CommonProxy;
 import com.lordmau5.wirelessutils.utils.ColorHandler;
 import mcjty.xnet.api.IXNet;
 import mcjty.xnet.api.channels.IConsumerProvider;
@@ -98,8 +99,8 @@ public class XNetPlugin implements IPlugin {
 
     @Override
     public void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(new ItemBlockMachine(blockDirectionalXNetNetwork).setRegistryName(blockDirectionalXNetNetwork.getRegistryName()));
-        event.getRegistry().register(new ItemBlockMachine(blockPositionalXNetNetwork).setRegistryName(blockPositionalXNetNetwork.getRegistryName()));
+        CommonProxy.registerItem(event, new ItemBlockMachine(blockDirectionalXNetNetwork).setRegistryName(blockDirectionalXNetNetwork.getRegistryName()));
+        CommonProxy.registerItem(event, new ItemBlockMachine(blockPositionalXNetNetwork).setRegistryName(blockPositionalXNetNetwork.getRegistryName()));
     }
 
     @Override

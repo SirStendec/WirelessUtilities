@@ -22,4 +22,6 @@ public class BlockDirectionalCondenser extends BlockBaseDirectionalMachine {
     public TileEntity createTileEntity(@Nonnull World world, @Nonnull IBlockState state) {
         return new TileEntityDirectionalCondenser();
     }
+
+
 }

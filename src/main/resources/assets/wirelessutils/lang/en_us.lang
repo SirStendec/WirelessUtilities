@@ -93,11 +93,20 @@ item.wirelessutils.fluxed_pearl.info.0=Adding redstone to an Ender Pearl
 item.wirelessutils.fluxed_pearl.info.1=seems to have reduced its capability
 item.wirelessutils.fluxed_pearl.info.2=for teleportation but given it
 item.wirelessutils.fluxed_pearl.info.3=strange powers over flux.
+item.wirelessutils.fluxed_pearl.jei.0=Coating an Ender Pearl with Redstone muffles its teleportation abilities.
+item.wirelessutils.fluxed_pearl.jei.1=Instead, these pearls create a pulse of flux when they hit a block.
+item.wirelessutils.fluxed_pearl.jei.2=Fluxed Pearls bounce when they hit slime blocks, and they can be fired from Dispensers.
 
 item.wirelessutils.charged_pearl.name=Charged Pearl
+item.wirelessutils.charged_pearl.jei.0=A Fluxed Pearl that has been exposed to a lot of energy.\n
+item.wirelessutils.charged_pearl.jei.1=Rumor has it that Charged Pearls were first discovered when a frustrated miner threw one into the heart of a storm cloud.
 
 item.wirelessutils.quenched_pearl.name=Quenched Pearl
 item.wirelessutils.scorched_pearl.name=Scorched Pearl
+
+item.wirelessutils.stabilized_ender_pearl.jei.0=Stabilized Ender Pearls behave similarly to Fluxed Pearls, in that they can be bounced and fired from Dispensers.
+item.wirelessutils.stabilized_ender_pearl.jei.1=If a Stabilized Ender Pearl is shot from a Dispenser rather than thrown, it will teleport a nearby creature to itself when it lands.
+item.wirelessutils.stabilized_ender_pearl.jei.2=The stabilization also seems to have made the process safer.
 
 item.wirelessutils.ender_coil.name=Ender Coil
 item.wirelessutils.machine_panel.name=Machine Panel

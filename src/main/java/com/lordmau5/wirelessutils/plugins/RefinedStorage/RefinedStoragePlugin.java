@@ -13,6 +13,7 @@ import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.directional.Til
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.positional.BlockPositionalRSNetwork;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.positional.NetworkNodePositionalRSNetwork;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.positional.TilePositionalRSNetwork;
+import com.lordmau5.wirelessutils.proxy.CommonProxy;
 import com.lordmau5.wirelessutils.utils.ColorHandler;
 import com.raoulvdberge.refinedstorage.api.IRSAPI;
 import com.raoulvdberge.refinedstorage.api.RSAPIInject;
@@ -83,9 +84,9 @@ public class RefinedStoragePlugin implements IPlugin {
 
     @Override
     public void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(new ItemBlock(blockInfiniteWirelessTransmitter).setRegistryName(blockInfiniteWirelessTransmitter.getRegistryName()));
-        event.getRegistry().register(new ItemBlockMachine(blockDirectionalRSNetwork).setRegistryName(blockDirectionalRSNetwork.getRegistryName()));
-        event.getRegistry().register(new ItemBlockMachine(blockPositionalRSNetwork).setRegistryName(blockPositionalRSNetwork.getRegistryName()));
+        CommonProxy.registerItem(event, new ItemBlock(blockInfiniteWirelessTransmitter).setRegistryName(blockInfiniteWirelessTransmitter.getRegistryName()));
+        CommonProxy.registerItem(event, new ItemBlockMachine(blockDirectionalRSNetwork).setRegistryName(blockDirectionalRSNetwork.getRegistryName()));
+        CommonProxy.registerItem(event, new ItemBlockMachine(blockPositionalRSNetwork).setRegistryName(blockPositionalRSNetwork.getRegistryName()));
     }
 
     @Override
