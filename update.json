@@ -1,10 +1,11 @@
 {
-    "homepage": "https://minecraft.curseforge.com/projects/wireless-utilities",
-    "1.12.2": {
-        "1.1": "See GitHub commits for changelog"
-    },
-    "promos": {
-        "1.12.2-latest": "1.1",
-        "1.12.2-recommended": "1.1"
-    }
+	"homepage": "https://minecraft.curseforge.com/projects/wireless-utilities",
+	"1.12.2": {
+		"1.2": "Added: Crop Augment\nAdded: Alternate Iteration Modes (Nearest First, Furthest First, Random, Round Robin)\nAdded: JEI Integration\nFixed: Crash with Charged Pearls falling into water/lava.\nFixed: Issue with Condenser filling/draining items in inventories that turn into other items when filled/drained.\n\nFor full changes, see GitHub or CurseForge.",
+		"1.1": "See GitHub commits for changelog"
+	},
+	"promos": {
+		"1.12.2-latest": "1.2",
+		"1.12.2-recommended": "1.2"
+	}
 }
