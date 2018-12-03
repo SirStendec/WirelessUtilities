@@ -12,8 +12,11 @@ public interface IJEIInformationItem {
     void registerJEI(IModRegistry registry);
 
     static void addJEIInformation(IModRegistry registry, ItemStack stack) {
+        addJEIInformation(registry, stack, stack.getTranslationKey() + ".jei");
+    }
+
+    static void addJEIInformation(IModRegistry registry, ItemStack stack, String name) {
         int i = 0;
-        String name = stack.getTranslationKey() + ".jei";
         String path = name + "." + i;
         ArrayList<String> out = new ArrayList<>();
         while ( StringHelper.canLocalize(path) ) {

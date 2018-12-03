@@ -11,6 +11,7 @@ import mezz.jei.api.IJeiHelpers;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.IModRegistry;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
+import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
@@ -35,8 +36,13 @@ public class JEIPlugin implements IModPlugin {
         IGuiHelper guiHelper = jeiHelpers.getGuiHelper();
 
         for (Item item : CommonProxy.ITEMS) {
-            if ( item instanceof IJEIInformationItem )
+            if ( item instanceof IJEIInformationItem ) {
                 ((IJEIInformationItem) item).registerJEI(registry);
+            } else {
+                Block block = Block.getBlockFromItem(item);
+                if ( block instanceof IJEIInformationItem )
+                    ((IJEIInformationItem) block).registerJEI(registry);
+            }
         }
 
         registry.addRecipes(ChargerRecipeCategory.getRecipes(guiHelper), ChargerRecipeCategory.UID);

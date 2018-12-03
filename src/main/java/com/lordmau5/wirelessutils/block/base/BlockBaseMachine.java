@@ -2,10 +2,13 @@ package com.lordmau5.wirelessutils.block.base;
 
 import cofh.api.tileentity.IInventoryRetainer;
 import cofh.core.util.helpers.FluidHelper;
+import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.item.base.IJEIInformationItem;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.constants.Properties;
 import com.lordmau5.wirelessutils.utils.crafting.INBTPreservingIngredient;
+import mezz.jei.api.IModRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.BlockStateContainer;
@@ -29,7 +32,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
-public abstract class BlockBaseMachine extends BlockBaseTile implements IInventoryRetainer, INBTPreservingIngredient {
+public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInformationItem, IInventoryRetainer, INBTPreservingIngredient {
+
+    private String name;
 
     protected BlockBaseMachine() {
         super();
@@ -41,6 +46,12 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IInvento
     }
 
     @Override
+    public void setName(String name) {
+        this.name = name;
+        super.setName(name);
+    }
+
+    @Override
     public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> items) {
         if ( tab != this.getCreativeTab() )
             return;
@@ -49,6 +60,16 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IInvento
 
         for (int i = 0; i < levels.length; i++)
             items.add(new ItemStack(this, 1, i));
+    }
+
+    @Override
+    public void registerJEI(IModRegistry registry) {
+        if ( name == null )
+            return;
+
+        Level[] levels = Level.values();
+        for (int i = 0; i < levels.length; i++)
+            IJEIInformationItem.addJEIInformation(registry, new ItemStack(this, 1, i), "tab." + WirelessUtils.MODID + "." + name);
     }
 
     @Override
