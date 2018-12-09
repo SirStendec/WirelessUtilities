@@ -219,7 +219,7 @@ public class RenderManager {
         double y = player.lastTickPosY + (player.posY - player.lastTickPosY) * ticks;
         double z = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * ticks;
 
-        GlStateManager.translate(-x, -y, -z);
+        //GlStateManager.translate(-x, -y, -z);
 
         if ( disableDepth ) {
             GlStateManager.disableDepth();
@@ -260,12 +260,12 @@ public class RenderManager {
             cG = (float) (area.color >> 8 & 0xFF) / 255.0f;
             cB = (float) (area.color & 0xFF) / 255.0f;
 
-            double minX = area.minX - OUTLINE_OFFSET;
-            double minY = area.minY - OUTLINE_OFFSET;
-            double minZ = area.minZ - OUTLINE_OFFSET;
-            double maxX = area.maxX + OUTLINE_OFFSET;
-            double maxY = area.maxY + OUTLINE_OFFSET;
-            double maxZ = area.maxZ + OUTLINE_OFFSET;
+            double minX = area.minX - OUTLINE_OFFSET - x;
+            double minY = area.minY - OUTLINE_OFFSET - y;
+            double minZ = area.minZ - OUTLINE_OFFSET - z;
+            double maxX = area.maxX + OUTLINE_OFFSET - x;
+            double maxY = area.maxY + OUTLINE_OFFSET - y;
+            double maxZ = area.maxZ + OUTLINE_OFFSET - z;
 
             drawOutline(minX, minY, minZ, maxX, maxY, maxZ);
 
