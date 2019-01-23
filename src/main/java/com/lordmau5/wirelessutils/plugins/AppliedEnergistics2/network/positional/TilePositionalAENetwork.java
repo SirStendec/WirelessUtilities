@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional;
 
 import cofh.core.network.PacketBase;
+import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics2Plugin;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.TileAENetworkBase;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
@@ -16,6 +17,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Tuple;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
@@ -26,6 +28,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRangeAugment;
+import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRelativePositionalCard;
 
 @Machine(name = "positional_ae_network")
 public class TilePositionalAENetwork extends TileAENetworkBase implements ISlotAugmentable, IUnlockableSlots, IPositionalMachine {
@@ -98,11 +101,19 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements ISlotA
         if ( !isPositionalCardValid(stack) || !isSlotUnlocked(slot) )
             return false;
 
-        BlockPosDimension target = BlockPosDimension.fromTag(stack.getTagCompound());
+        ItemBasePositionalCard card = (ItemBasePositionalCard) stack.getItem();
+        if ( card == null )
+            return false;
+
+        BlockPosDimension origin = getPosition();
+        if ( origin == null )
+            return false;
+
+        BlockPosDimension target = card.getTarget(stack, origin);
         if ( target == null )
             return false;
 
-        if ( !isTargetInRange(target) )
+        if ( !isTargetInRange(target) && !card.shouldIgnoreDistance(stack) )
             return false;
 
         int slots = itemStackHandler.getSlots();
@@ -114,7 +125,11 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements ISlotA
             if ( !isPositionalCardValid(existing) )
                 continue;
 
-            BlockPosDimension existingTarget = BlockPosDimension.fromTag(existing.getTagCompound());
+            ItemBasePositionalCard existingCard = (ItemBasePositionalCard) existing.getItem();
+            if ( existingCard == null )
+                continue;
+
+            BlockPosDimension existingTarget = existingCard.getTarget(existing, origin);
             if ( existingTarget != null && existingTarget.equals(target) )
                 return false;
         }
@@ -165,22 +180,35 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements ISlotA
             if ( !isPositionalCardValid(slotted) )
                 continue;
 
-            BlockPosDimension target = BlockPosDimension.fromTag(slotted.getTagCompound());
-            if ( target == null || !isTargetInRange(target) )
+            ItemBasePositionalCard card = (ItemBasePositionalCard) slotted.getItem();
+            if ( card == null )
+                continue;
+
+            if ( card.updateCard(slotted, this) ) {
+                itemStackHandler.setStackInSlot(i, slotted);
+                markDirty();
+            }
+
+            BlockPosDimension target = card.getTarget(slotted, origin);
+            if ( target == null || (!isTargetInRange(target) && !card.shouldIgnoreDistance(slotted)) )
                 continue;
 
             boolean sameDimension = target.getDimension() == dimension;
             if ( sameDimension )
-                addRenderArea(target, NiceColors.COLORS[i]);
+                addRenderArea(
+                        target,
+                        NiceColors.COLORS[i],
+                        slotted.hasDisplayName() ? slotted.getDisplayName() : null,
+                        card == itemRelativePositionalCard ? itemRelativePositionalCard.getVector(slotted) : null
+                );
 
-            BlockPosDimension targetPos = new BlockPosDimension(target, dimension);
-            validTargets.add(targetPos);
+            validTargets.add(new Tuple<>(target, slotted));
 
             if ( !world.isRemote ) {
-                cachePlacedPosition(targetPos);
+                cachePlacedPosition(target);
 
-                EventDispatcher.PLACE_BLOCK.addListener(targetPos, this);
-                EventDispatcher.BREAK_BLOCK.addListener(targetPos, this);
+                EventDispatcher.PLACE_BLOCK.addListener(target, this);
+                EventDispatcher.BREAK_BLOCK.addListener(target, this);
             }
         }
     }
@@ -250,13 +278,22 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements ISlotA
                     maxRange = itemRangeAugment.getPositionalRange(replacement);
             }
 
+            BlockPosDimension origin = getPosition();
+
             int slots = itemStackHandler.getSlots();
             for (int i = 0; i < slots; i++) {
                 ItemStack stack = itemStackHandler.getStackInSlot(i);
                 if ( !isPositionalCardValid(stack) )
                     continue;
 
-                BlockPosDimension target = BlockPosDimension.fromTag(stack.getTagCompound());
+                ItemBasePositionalCard card = (ItemBasePositionalCard) stack.getItem();
+                if ( card == null )
+                    continue;
+
+                if ( card.shouldIgnoreDistance(stack) )
+                    continue;
+
+                BlockPosDimension target = card.getTarget(stack, origin);
                 if ( target == null )
                     continue;
 

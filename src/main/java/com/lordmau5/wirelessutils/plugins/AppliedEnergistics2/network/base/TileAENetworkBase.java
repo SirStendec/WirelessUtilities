@@ -19,6 +19,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -38,7 +39,7 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
 
     private Map<BlockPosDimension, IGridConnection> connections;
     private Map<BlockPosDimension, Integer> placedCacheMap;
-    public List<BlockPosDimension> validTargets;
+    public List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     private int energyCost;
 
     private boolean needsRecalculation;
@@ -96,7 +97,7 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         return new BlockPosDimension(getPos(), getWorld().provider.getDimension());
     }
 
-    public Iterable<BlockPosDimension> getTargets() {
+    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
         if ( validTargets == null )
             calculateTargets();
 

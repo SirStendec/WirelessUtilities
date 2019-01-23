@@ -1,0 +1,16 @@
+{
+	"type": "wirelessutils:copy_nbt_shapeless",
+	"group": "wirelessutils",
+	"ingredients": [
+		{
+			"item": "wirelessutils:relative_positional_card"
+		},
+		{
+			"item": "wirelessutils:relative_positional_card"
+		}
+	],
+	"result": {
+		"item": "wirelessutils:relative_positional_card",
+		"count": 2
+	}
+}

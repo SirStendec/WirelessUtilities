@@ -2,11 +2,8 @@ package com.lordmau5.wirelessutils.item;
 
 import cofh.core.util.CoreUtils;
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.item.base.ISlotContextTooltip;
-import com.lordmau5.wirelessutils.item.base.ItemBase;
-import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
+import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
-import com.lordmau5.wirelessutils.utils.crafting.INBTPreservingIngredient;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import net.minecraft.client.Minecraft;
@@ -16,18 +13,16 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.*;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
@@ -38,24 +33,15 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static com.lordmau5.wirelessutils.utils.constants.TextHelpers.*;
+public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
 
-public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip, INBTPreservingIngredient {
-
-    public ItemPositionalCard() {
-        super();
-
+    public ItemAbsolutePositionalCard() {
         setName("positional_card");
-        setMaxStackSize(16);
 
         addPropertyOverride(new ResourceLocation("angle"), new IItemPropertyGetter() {
             @SideOnly(Side.CLIENT)
             public float apply(@Nonnull ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entityIn) {
-                if ( (entityIn == null && !stack.isOnItemFrame()) || !stack.hasTagCompound() )
-                    return -1F;
-
-                BlockPosDimension target = BlockPosDimension.fromTag(stack.getTagCompound());
-                if ( target == null )
+                if ( (entityIn == null && !stack.isOnItemFrame()) )
                     return -1F;
 
                 boolean onEntity = entityIn != null;
@@ -65,6 +51,11 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
 
                 if ( world == null )
                     world = entity.world;
+
+                BlockPosDimension origin = new BlockPosDimension(entity.getPosition(), world.provider.getDimension());
+                BlockPosDimension target = getTarget(stack, origin);
+                if ( target == null )
+                    return -1F;
 
                 double d0;
 
@@ -96,16 +87,16 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
     }
 
     @Override
-    public int getItemStackLimit(@Nonnull ItemStack stack) {
-        if ( stack.hasTagCompound() && BlockPosDimension.fromTag(stack.getTagCompound()) != null )
-            return 1;
-
-        return super.getItemStackLimit(stack);
+    public boolean isCardConfigured(@Nonnull ItemStack stack) {
+        return stack.hasTagCompound() && BlockPosDimension.fromTag(stack.getTagCompound()) != null;
     }
 
     @Override
-    public boolean isValidForCraft(@Nonnull IRecipe recipe, @Nonnull InventoryCrafting craft, @Nonnull ItemStack stack, @Nonnull ItemStack output) {
-        return output.getItem() == this && stack.hasTagCompound();
+    public BlockPosDimension getTarget(@Nonnull ItemStack stack, @Nonnull BlockPosDimension origin) {
+        if ( !stack.hasTagCompound() )
+            return null;
+
+        return BlockPosDimension.fromTag(stack.getTagCompound());
     }
 
     @Override
@@ -135,53 +126,6 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
                         TextHelpers.getComponent(target.getDimension()),
                         type == null ? null : TextHelpers.getComponent(type.getName())
                 ).setStyle(TextHelpers.GRAY).getFormattedText());
-            }
-        }
-    }
-
-    @Override
-    public void addTooltipContext(@Nonnull List<String> tooltip, @Nonnull TileEntity tile, @Nonnull Slot slot, @Nonnull ItemStack stack) {
-        if ( tile instanceof IPositionalMachine && tile.hasWorld() ) {
-            BlockPosDimension target = null;
-            if ( stack.hasTagCompound() )
-                target = BlockPosDimension.fromTag(stack.getTagCompound());
-
-            if ( target == null ) {
-                tooltip.add(1,
-                        new TextComponentTranslation(getTranslationKey() + ".invalid.unset")
-                                .setStyle(GRAY)
-                                .getFormattedText());
-                return;
-            }
-
-            IPositionalMachine machine = (IPositionalMachine) tile;
-            World world = tile.getWorld();
-
-            if ( world != null ) {
-                ITextComponent distance;
-                int dimension = world.provider.getDimension();
-
-                if ( dimension != target.getDimension() ) {
-                    distance = new TextComponentString("999").setStyle(
-                            getStyle(TextFormatting.WHITE, true)
-                    );
-
-                } else {
-                    BlockPos pos = tile.getPos();
-                    int blockDistance = (int) Math.floor(target.getDistance(pos.getX(), pos.getY(), pos.getZ()));
-                    distance = getComponent(blockDistance);
-                }
-
-                tooltip.add(1, new TextComponentTranslation(
-                        getTranslationKey() + ".distance",
-                        distance
-                ).setStyle(GRAY).getFormattedText());
-
-                if ( !machine.isTargetInRange(target) )
-                    tooltip.add(1, new TextComponentTranslation(
-                            getTranslationKey() + ".invalid.range")
-                            .setStyle(RED)
-                            .getFormattedText());
             }
         }
     }
@@ -225,7 +169,7 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
                 return new ActionResult<>(EnumActionResult.PASS, stack);
 
             NBTTagCompound tag = stack.getTagCompound();
-            if ( tag == null )
+            if ( tag == null || tag.getBoolean("Locked") )
                 return new ActionResult<>(EnumActionResult.PASS, stack);
             else if ( stack.getCount() > 1 )
                 tag = tag.copy();
@@ -257,6 +201,8 @@ public class ItemPositionalCard extends ItemBase implements ISlotContextTooltip,
             NBTTagCompound tag = stack.getTagCompound();
             if ( tag == null )
                 tag = new NBTTagCompound();
+            else if ( tag.getBoolean("Locked") )
+                return EnumActionResult.PASS;
             else if ( stack.getCount() > 1 )
                 tag = tag.copy();
 

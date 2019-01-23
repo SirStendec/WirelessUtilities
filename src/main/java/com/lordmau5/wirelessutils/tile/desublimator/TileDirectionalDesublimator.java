@@ -173,7 +173,7 @@ public class TileDirectionalDesublimator extends TileBaseDesublimator implements
             if ( target.equals(pos) )
                 continue;
 
-            validTargets.add(new BlockPosDimension(target, dimension, facing));
+            validTargets.add(new Tuple<>(new BlockPosDimension(target, dimension, facing), ItemStack.EMPTY));
         }
 
         ITargetProvider.sortTargetList(origin, validTargets);

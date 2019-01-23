@@ -78,13 +78,23 @@ item.wirelessutils.accurate_pearl.name=Stabilized %s
 item.wirelessutils.accurate_pearl.info.0=Flies accurately and consistently
 item.wirelessutils.accurate_pearl.info.1=when shot from a Dispenser.
 
-item.wirelessutils.positional_card.name=Positional Card
+item.wirelessutils.positional_card.name=Absolute Positional Card
 item.wirelessutils.positional_card.info.0=Sneak-Use this item on a block to
 item.wirelessutils.positional_card.info.1=store its position and side.
 item.wirelessutils.positional_card.highlight=%s (%s)
 item.wirelessutils.positional_card.distance=Distance: %s
 item.wirelessutils.positional_card.invalid.range=The target location is not within range.
 item.wirelessutils.positional_card.invalid.unset=No target has been set.
+
+item.wirelessutils.relative_positional_card.name=Relative Positional Card
+item.wirelessutils.relative_positional_card.info.0=Sneak-Use this item on a block to set
+item.wirelessutils.relative_positional_card.info.1=an origin, and then Sneak-Use this item
+item.wirelessutils.relative_positional_card.info.2=on another block to store the relative
+item.wirelessutils.relative_positional_card.info.3=position.
+item.wirelessutils.relative_positional_card.highlight=%s (%s)
+item.wirelessutils.relative_positional_card.distance=Distance: %s
+item.wirelessutils.relative_positional_card.invalid.range=The target location is not within range.
+item.wirelessutils.relative_positional_card.invalid.unset=No target has been set.
 
 item.wirelessutils.fluxed_pearl.name=Fluxed Pearl
 item.wirelessutils.fluxed_pearl.weather.0=The pearl seems to be reacting

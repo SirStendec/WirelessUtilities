@@ -170,7 +170,7 @@ public class TileDirectionalXNetNetwork extends TileXNetNetworkBase implements I
                 continue;
 
             BlockPosDimension targetPos = new BlockPosDimension(target, dimension, facing);
-            validTargets.add(targetPos);
+            validTargets.add(new Tuple<>(targetPos, ItemStack.EMPTY));
 
             if ( !world.isRemote ) {
                 EventDispatcher.PLACE_BLOCK.addListener(targetPos, this);

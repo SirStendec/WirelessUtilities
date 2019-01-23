@@ -51,9 +51,10 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
      * but able to perform work on an item within that block.
      *
      * @param target The location of the prospective target.
+     * @param source The ItemStack of the positional card responsible for this target. EMPTY if not applicable.
      * @return
      */
-    T createInfo(@Nonnull BlockPosDimension target);
+    T createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source);
 
     /**
      * Determine whether or not we can perform work on the provided
@@ -61,12 +62,13 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
      * if we can work, otherwise null.
      *
      * @param target The location of the prospective target.
+     * @param source The ItemStack of the positional card responsible for this target. EMPTY if not applicable.
      * @param world  The world the target is in.
      * @param block  The block state of the prospective target.
      * @param tile   The tile entity of the prospective target. May be null if getProcessBlocks returns true.
      * @return An instance of TargetInfo if we can work on that target, otherwise false.
      */
-    T canWork(@Nonnull BlockPosDimension target, @Nonnull World world, @Nonnull IBlockState block, TileEntity tile);
+    T canWork(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, TileEntity tile);
 
     /**
      * Determine whether or not we can perform work on the provided
@@ -76,12 +78,13 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
      * @param slot      Which slot of the inventory it's in.
      * @param inventory The inventory containing the item stack.
      * @param target    The location of the target containing the item stack.
+     * @param source    The ItemStack of the positional card responsible for this target. EMPTY if not applicable.
      * @param world     The world the target is in.
      * @param block     The block state of the target containing the item stack.
      * @param tile      The tile entity of the target containing the item stack.
      * @return True if we should try working on that item stack.
      */
-    boolean canWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull World world, @Nonnull IBlockState block, @Nonnull TileEntity tile);
+    boolean canWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nonnull TileEntity tile);
 
     /**
      * Attempt to perform work on the provided target.

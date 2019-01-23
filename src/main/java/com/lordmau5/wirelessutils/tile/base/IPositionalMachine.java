@@ -1,9 +1,8 @@
 package com.lordmau5.wirelessutils.tile.base;
 
+import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
-import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 
 public interface IPositionalMachine {
 
@@ -14,14 +13,11 @@ public interface IPositionalMachine {
     BlockPosDimension getPosition();
 
     default boolean isPositionalCardValid(ItemStack stack) {
-        if ( stack.isEmpty() || stack.getItem() != ModItems.itemPositionalCard || !stack.hasTagCompound() )
+        if ( stack.isEmpty() || !(stack.getItem() instanceof ItemBasePositionalCard) )
             return false;
 
-        NBTTagCompound tag = stack.getTagCompound();
-        if ( tag == null )
-            return false;
-
-        return tag.hasKey("position") && tag.hasKey("dimension");
+        ItemBasePositionalCard card = (ItemBasePositionalCard) stack.getItem();
+        return card.isCardConfigured(stack);
     }
 
     default boolean isTargetInRange(BlockPosDimension target) {

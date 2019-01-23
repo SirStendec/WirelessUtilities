@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.tile.charger;
 import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.gui.client.charger.GuiPositionalCharger;
 import com.lordmau5.wirelessutils.gui.container.charger.ContainerPositionalCharger;
+import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
 import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
@@ -18,10 +19,12 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.Tuple;
 
 import java.util.ArrayList;
 
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRangeAugment;
+import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRelativePositionalCard;
 
 @Machine(name = "positional_charger")
 public class TileEntityPositionalCharger extends TileEntityBaseCharger implements IRangeAugmentable, ISlotAugmentable, IUnlockableSlots, IPositionalMachine {
@@ -84,11 +87,19 @@ public class TileEntityPositionalCharger extends TileEntityBaseCharger implement
         if ( !isPositionalCardValid(stack) || !isSlotUnlocked(slot) )
             return false;
 
-        BlockPosDimension target = BlockPosDimension.fromTag(stack.getTagCompound());
+        ItemBasePositionalCard card = (ItemBasePositionalCard) stack.getItem();
+        if ( card == null )
+            return false;
+
+        BlockPosDimension origin = getPosition();
+        if ( origin == null )
+            return false;
+
+        BlockPosDimension target = card.getTarget(stack, origin);
         if ( target == null )
             return false;
 
-        if ( !isTargetInRange(target) )
+        if ( !isTargetInRange(target) && !card.shouldIgnoreDistance(stack) )
             return false;
 
         int slots = itemStackHandler.getSlots();
@@ -100,7 +111,11 @@ public class TileEntityPositionalCharger extends TileEntityBaseCharger implement
             if ( !isPositionalCardValid(existing) )
                 continue;
 
-            BlockPosDimension existingTarget = BlockPosDimension.fromTag(existing.getTagCompound());
+            ItemBasePositionalCard existingCard = (ItemBasePositionalCard) existing.getItem();
+            if ( existingCard == null )
+                continue;
+
+            BlockPosDimension existingTarget = existingCard.getTarget(existing, origin);
             if ( existingTarget != null && existingTarget.equals(target) )
                 return false;
         }
@@ -140,15 +155,29 @@ public class TileEntityPositionalCharger extends TileEntityBaseCharger implement
             if ( !isPositionalCardValid(slotted) )
                 continue;
 
-            BlockPosDimension target = BlockPosDimension.fromTag(slotted.getTagCompound());
-            if ( target == null || !isTargetInRange(target) )
+            ItemBasePositionalCard card = (ItemBasePositionalCard) slotted.getItem();
+            if ( card == null )
+                continue;
+
+            if ( card.updateCard(slotted, this) ) {
+                itemStackHandler.setStackInSlot(i, slotted);
+                markDirty();
+            }
+
+            BlockPosDimension target = card.getTarget(slotted, origin);
+            if ( target == null || (!isTargetInRange(target) && !card.shouldIgnoreDistance(slotted)) )
                 continue;
 
             boolean sameDimension = target.getDimension() == origin.getDimension();
             if ( sameDimension )
-                addRenderArea(target, NiceColors.COLORS[i], slotted.hasDisplayName() ? slotted.getDisplayName() : null);
+                addRenderArea(
+                        target,
+                        NiceColors.COLORS[i],
+                        slotted.hasDisplayName() ? slotted.getDisplayName() : null,
+                        card == itemRelativePositionalCard ? itemRelativePositionalCard.getVector(slotted) : null
+                );
 
-            validTargets.add(target);
+            validTargets.add(new Tuple<>(target, slotted));
         }
 
         ITargetProvider.sortTargetList(origin, validTargets);
@@ -213,13 +242,22 @@ public class TileEntityPositionalCharger extends TileEntityBaseCharger implement
                     maxRange = itemRangeAugment.getPositionalRange(replacement);
             }
 
+            BlockPosDimension origin = getPosition();
+
             int slots = itemStackHandler.getSlots();
             for (int i = 0; i < slots; i++) {
                 ItemStack stack = itemStackHandler.getStackInSlot(i);
                 if ( !isPositionalCardValid(stack) )
                     continue;
 
-                BlockPosDimension target = BlockPosDimension.fromTag(stack.getTagCompound());
+                ItemBasePositionalCard card = (ItemBasePositionalCard) stack.getItem();
+                if ( card == null )
+                    continue;
+
+                if ( card.shouldIgnoreDistance(stack) )
+                    continue;
+
+                BlockPosDimension target = card.getTarget(stack, origin);
                 if ( target == null )
                     continue;
 

@@ -40,6 +40,10 @@ public class TextHelpers {
         return new TextComponentString(value).setStyle(WHITE);
     }
 
+    public static String formatRelative(long number) {
+        return (number < 0 ? "" : "+") + StringHelper.formatNumber(number);
+    }
+
     public static String getScaledNumber(long number, String postfix, boolean si) {
         int unit = si ? 1000 : 1024;
         if ( number < unit )

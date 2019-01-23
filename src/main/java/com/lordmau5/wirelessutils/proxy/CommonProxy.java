@@ -235,7 +235,8 @@ public class CommonProxy {
         registerItem(event, new ItemScorchedPearl());
         registerItem(event, new ItemStabilizedEnderPearl());
 
-        registerItem(event, new ItemPositionalCard());
+        registerItem(event, new ItemAbsolutePositionalCard());
+        registerItem(event, new ItemRelativePositionalCard());
         registerItem(event, new ItemGlasses());
 
         registerItem(event, new ItemEnderCoil());

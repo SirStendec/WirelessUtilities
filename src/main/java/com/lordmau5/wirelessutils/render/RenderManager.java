@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.render;
 
+import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.utils.constants.NiceColors;
 import com.lordmau5.wirelessutils.utils.location.BlockArea;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
@@ -13,10 +14,14 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -182,10 +187,34 @@ public class RenderManager {
         if ( newStack.isEmpty() )
             return;
 
-        if ( newStack.getItem() == ModItems.itemPositionalCard && newStack.hasTagCompound() ) {
-            BlockPosDimension target = BlockPosDimension.fromTag(newStack.getTagCompound());
-            if ( target != null )
-                heldID[idx] = addArea(new BlockArea(target, NiceColors.HANDY_COLORS[idx], newStack.hasDisplayName() ? newStack.getDisplayName() : null), false);
+        Item item = newStack.getItem();
+        if ( item instanceof ItemBasePositionalCard && newStack.hasTagCompound() ) {
+            NBTTagCompound tag = newStack.getTagCompound();
+            if ( tag == null )
+                return;
+
+            if ( item == ModItems.itemAbsolutePositionalCard ) {
+                BlockPosDimension target = BlockPosDimension.fromTag(tag);
+                if ( target != null )
+                    heldID[idx] = addArea(new BlockArea(target, NiceColors.HANDY_COLORS[idx], newStack.hasDisplayName() ? newStack.getDisplayName() : null), false);
+
+            } else if ( item == ModItems.itemRelativePositionalCard ) {
+                byte stage = tag.getByte("Stage");
+                BlockPosDimension origin = new BlockPosDimension(
+                        BlockPos.fromLong(tag.getLong("Origin")),
+                        tag.getInteger("Dimension")
+                );
+                if ( origin != null ) {
+                    if ( stage == 1 ) {
+                        heldID[idx] = addArea(new BlockArea(origin, NiceColors.HANDY_COLORS[idx], newStack.hasDisplayName() ? newStack.getDisplayName() : null), false);
+                    } else if ( stage == 2 ) {
+                        Vec3d offset = ModItems.itemRelativePositionalCard.getVector(newStack);
+                        BlockPosDimension target = ModItems.itemRelativePositionalCard.getTarget(newStack, origin);
+                        if ( target != null )
+                            heldID[idx] = addArea(new BlockArea(target, NiceColors.HANDY_COLORS[idx], newStack.hasDisplayName() ? newStack.getDisplayName() : null, offset), false);
+                    }
+                }
+            }
         }
     }
 
@@ -223,18 +252,18 @@ public class RenderManager {
 
         if ( disableDepth ) {
             GlStateManager.disableDepth();
-            render(dimensionAreas, x, y, z, 0.11f, 0.11f, false);
+            render(dimensionAreas, x, y, z, 0.11f, 0.11f, false, true);
             GlStateManager.enableDepth();
-            render(dimensionAreas, x, y, z, 0.19f, 0.19f, true);
+            render(dimensionAreas, x, y, z, 0.19f, 0.19f, true, false);
 
         } else
-            render(dimensionAreas, x, y, z, 0.25f, 0.3f, true);
+            render(dimensionAreas, x, y, z, 0.25f, 0.3f, true, false);
 
         GlStateManager.popMatrix();
         GlStateManager.popAttrib();
     }
 
-    public void render(Iterable<BlockArea> areas, double x, double y, double z, float opacity, float facingOpacity, boolean drawNames) {
+    public void render(Iterable<BlockArea> areas, double x, double y, double z, float opacity, float facingOpacity, boolean drawNames, boolean depthDisabled) {
         if ( areas == null )
             return;
 
@@ -269,6 +298,23 @@ public class RenderManager {
 
             drawOutline(minX, minY, minZ, maxX, maxY, maxZ);
 
+            if ( area.vector != null ) {
+                double sizeX = area.maxX - area.minX;
+                double sizeY = area.maxY - area.minY;
+                double sizeZ = area.maxZ - area.minZ;
+
+                double midX = area.minX - x + (sizeX / 2);
+                double midY = area.minY - y + (sizeY / 2);
+                double midZ = area.minZ - z + (sizeZ / 2);
+
+                GlStateManager.glLineWidth(15f);
+                GlStateManager.disableDepth();
+                drawRay(midX, midY, midZ, midX + area.vector.x, midY + area.vector.y, midZ + area.vector.z);
+                if ( !depthDisabled )
+                    GlStateManager.enableDepth();
+                GlStateManager.glLineWidth(2f);
+            }
+
             GlStateManager.enableAlpha();
             GlStateManager.enableBlend();
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -294,9 +340,9 @@ public class RenderManager {
                     EntityRenderer.drawNameplate(
                             minecraft.fontRenderer,
                             area.name,
-                            area.minX + (area.maxX - area.minX) / 2F,
-                            area.minY + (area.maxY - area.minY) / 2F,
-                            area.minZ + (area.maxZ - area.minZ) / 2F,
+                            area.minX - (float) x + (area.maxX - area.minX) / 2F,
+                            area.minY - (float) y + (area.maxY - area.minY) / 2F,
+                            area.minZ - (float) z + (area.maxZ - area.minZ) / 2F,
                             0,
                             minecraft.player.rotationYaw,
                             minecraft.player.rotationPitch,
@@ -309,6 +355,18 @@ public class RenderManager {
     private RenderManager posEx(double x, double y, double z) {
         buffer.pos(x, y, z).color(cR, cG, cB, cA).endVertex();
         return this;
+    }
+
+    public void drawRay(double x1, double y1, double z1, double x2, double y2, double z2) {
+        Tessellator tessellator = Tessellator.getInstance();
+        buffer = tessellator.getBuffer();
+
+        cA = 0.5f;
+        buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
+
+        posEx(x1, y1, z1).posEx(x2, y2, z2);
+        tessellator.draw();
+        buffer = null;
     }
 
     public void drawOutline(double x1, double y1, double z1, double x2, double y2, double z2) {

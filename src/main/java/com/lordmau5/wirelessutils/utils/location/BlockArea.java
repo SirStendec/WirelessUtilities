@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.utils.location;
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.Objects;
 
@@ -21,12 +22,17 @@ public class BlockArea {
     public final EnumFacing activeSide;
 
     public final String name;
+    public final Vec3d vector;
 
     public BlockArea(int dimension, int xA, int yA, int zA, int xB, int yB, int zB, EnumFacing activeSide, int color, boolean includeMaximumBlock) {
-        this(dimension, xA, yA, zA, xB, yB, zB, activeSide, color, includeMaximumBlock, null);
+        this(dimension, xA, yA, zA, xB, yB, zB, activeSide, color, includeMaximumBlock, null, null);
     }
 
     public BlockArea(int dimension, int xA, int yA, int zA, int xB, int yB, int zB, EnumFacing activeSide, int color, boolean includeMaximumBlock, String name) {
+        this(dimension, xA, yA, zA, xB, yB, zB, activeSide, color, includeMaximumBlock, name, null);
+    }
+
+    public BlockArea(int dimension, int xA, int yA, int zA, int xB, int yB, int zB, EnumFacing activeSide, int color, boolean includeMaximumBlock, String name, Vec3d vector) {
         minX = Math.min(xA, xB);
         minY = Math.min(yA, yB);
         minZ = Math.min(zA, zB);
@@ -41,6 +47,7 @@ public class BlockArea {
         this.color = color;
         this.activeSide = activeSide;
         this.name = name;
+        this.vector = vector;
     }
 
     public BlockArea(int dimension, BlockPos cornerA, BlockPos cornerB, EnumFacing activeSide, int color, boolean includeMaximumBlock) {
@@ -51,12 +58,20 @@ public class BlockArea {
         this(dimension, cornerA.getX(), cornerA.getY(), cornerA.getZ(), cornerB.getX(), cornerB.getY(), cornerB.getZ(), activeSide, color, includeMaximumBlock, name);
     }
 
+    public BlockArea(int dimension, BlockPos cornerA, BlockPos cornerB, EnumFacing activeSide, int color, boolean includeMaximumBlock, String name, Vec3d vector) {
+        this(dimension, cornerA.getX(), cornerA.getY(), cornerA.getZ(), cornerB.getX(), cornerB.getY(), cornerB.getZ(), activeSide, color, includeMaximumBlock, name, vector);
+    }
+
     public BlockArea(BlockPosDimension pos, int color) {
         this(pos.getDimension(), pos, pos, pos.getFacing(), color, true);
     }
 
     public BlockArea(BlockPosDimension pos, int color, String name) {
         this(pos.getDimension(), pos, pos, pos.getFacing(), color, true, name);
+    }
+
+    public BlockArea(BlockPosDimension pos, int color, String name, Vec3d vector) {
+        this(pos.getDimension(), pos, pos, pos.getFacing(), color, true, name, vector);
     }
 
     public BlockArea(BlockPosDimension cornerA, BlockPos cornerB, int color) {
@@ -67,6 +82,10 @@ public class BlockArea {
         this(cornerA.getDimension(), cornerA, cornerB, cornerA.getFacing(), color, true, name);
     }
 
+    public BlockArea(BlockPosDimension cornerA, BlockPos cornerB, int color, String name, Vec3d vector) {
+        this(cornerA.getDimension(), cornerA, cornerB, cornerA.getFacing(), color, true, name, vector);
+    }
+
     public BlockArea(int dimension, BlockPos cornerA, BlockPos cornerB, int color) {
         this(dimension, cornerA, cornerB, null, color, true);
     }
@@ -75,12 +94,20 @@ public class BlockArea {
         this(dimension, cornerA, cornerB, null, color, true, name);
     }
 
+    public BlockArea(int dimension, BlockPos cornerA, BlockPos cornerB, int color, String name, Vec3d vector) {
+        this(dimension, cornerA, cornerB, null, color, true, name, vector);
+    }
+
     public BlockArea(int dimension, BlockPos cornerA, BlockPos cornerB, EnumFacing activeSide, int color) {
         this(dimension, cornerA, cornerB, activeSide, color, true);
     }
 
     public BlockArea(int dimension, BlockPos cornerA, BlockPos cornerB, EnumFacing activeSide, int color, String name) {
         this(dimension, cornerA, cornerB, activeSide, color, true, name);
+    }
+
+    public BlockArea(int dimension, BlockPos cornerA, BlockPos cornerB, EnumFacing activeSide, int color, String name, Vec3d vector) {
+        this(dimension, cornerA, cornerB, activeSide, color, true, name, vector);
     }
 
     public String toString() {
@@ -94,6 +121,8 @@ public class BlockArea {
                 .add("maxZ", maxZ)
                 .add("color", color)
                 .add("side", activeSide)
+                .add("name", name)
+                .add("vector", vector)
                 .toString();
     }
 
@@ -109,11 +138,12 @@ public class BlockArea {
                 maxX == blockArea.maxX &&
                 maxY == blockArea.maxY &&
                 maxZ == blockArea.maxZ &&
-                color == blockArea.color;
+                color == blockArea.color &&
+                vector == blockArea.vector;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dimension, activeSide, minX, minY, minZ, maxX, maxY, maxZ, color);
+        return Objects.hash(dimension, activeSide, minX, minY, minZ, maxX, maxY, maxZ, color, vector);
     }
 }

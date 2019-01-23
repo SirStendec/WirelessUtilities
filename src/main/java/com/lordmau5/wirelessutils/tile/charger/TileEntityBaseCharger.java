@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.tile.charger;
 
 import cofh.core.network.PacketBase;
+import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
@@ -13,11 +14,13 @@ import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.location.TargetInfo;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
@@ -31,7 +34,7 @@ import java.util.List;
 
 public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy implements IInvertAugmentable, IRoundRobinMachine, ICapacityAugmentable, ITransferAugmentable, IInventoryAugmentable, ITickable, IWorkProvider<TileEntityBaseCharger.ChargerTarget> {
 
-    protected List<BlockPosDimension> validTargets;
+    protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
 
     private boolean inverted = false;
@@ -285,6 +288,15 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         return transferred;
     }
 
+    public int getEnergyCost(@Nonnull BlockPosDimension target) {
+        BlockPosDimension worker = getPosition();
+
+        boolean interdimensional = worker.getDimension() != target.getDimension();
+        double distance = worker.getDistance(target.getX(), target.getY(), target.getZ()) - 1;
+
+        return getEnergyCost(distance, interdimensional);
+    }
+
     public abstract int getEnergyCost(double distance, boolean isInterdimensional);
 
     /* Charger Crafting */
@@ -326,7 +338,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         return new BlockPosDimension(getPos(), getWorld().provider.getDimension());
     }
 
-    public Iterable<BlockPosDimension> getTargets() {
+    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
         if ( validTargets == null )
             calculateTargets();
 
@@ -347,24 +359,30 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     }
 
     @Override
-    public ChargerTarget createInfo(@Nonnull BlockPosDimension target) {
-        BlockPosDimension worker = getPosition();
+    public ChargerTarget createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
+        int cost = -1;
 
-        boolean interdimensional = worker.getDimension() != target.getDimension();
-        double distance = worker.getDistance(target.getX(), target.getY(), target.getZ()) - 1;
+        if ( !source.isEmpty() ) {
+            Item item = source.getItem();
+            if ( item instanceof ItemBasePositionalCard )
+                cost = ((ItemBasePositionalCard) item).getCost(source);
+        }
 
-        return new ChargerTarget(target, getEnergyCost(distance, interdimensional));
+        if ( cost == -1 )
+            cost = getEnergyCost(target);
+
+        return new ChargerTarget(target, cost);
     }
 
-    public ChargerTarget canWork(@Nonnull BlockPosDimension target, @Nonnull World world, @Nonnull IBlockState block, TileEntity tile) {
+    public ChargerTarget canWork(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, TileEntity tile) {
         if ( tile == null || !tile.hasCapability(CapabilityEnergy.ENERGY, target.getFacing()) )
             return null;
 
         validTargetsPerTick++;
-        return createInfo(target);
+        return createInfo(target, source);
     }
 
-    public boolean canWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull World world, @Nonnull IBlockState block, @Nonnull TileEntity tile) {
+    public boolean canWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nonnull TileEntity tile) {
         if ( stack.isEmpty() )
             return false;
 

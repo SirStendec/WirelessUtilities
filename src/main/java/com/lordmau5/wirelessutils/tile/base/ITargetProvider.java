@@ -1,6 +1,8 @@
 package com.lordmau5.wirelessutils.tile.base;
 
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Tuple;
 import net.minecraftforge.common.DimensionManager;
 
 import java.util.HashMap;
@@ -20,7 +22,7 @@ public interface ITargetProvider {
      *
      * @return List of target locations.
      */
-    Iterable<BlockPosDimension> getTargets();
+    Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets();
 
     /**
      * Calculate the distance between two positions, adding a penalty of 1000 for
@@ -66,10 +68,13 @@ public interface ITargetProvider {
      * @param origin The origin
      * @param list   The list of targets
      */
-    static void sortTargetList(BlockPosDimension origin, List<BlockPosDimension> list) {
+    static void sortTargetList(BlockPosDimension origin, List<Tuple<BlockPosDimension, ItemStack>> list) {
         Map<BlockPosDimension, Long> distanceMap = new HashMap<>();
 
-        list.sort((o1, o2) -> {
+        list.sort((val1, val2) -> {
+            BlockPosDimension o1 = val1.getFirst();
+            BlockPosDimension o2 = val2.getFirst();
+
             long d1, d2;
             if ( distanceMap.containsKey(o1) )
                 d1 = distanceMap.get(o1);

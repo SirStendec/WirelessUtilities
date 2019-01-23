@@ -2,10 +2,7 @@ package com.lordmau5.wirelessutils.utils.mod;
 
 import cofh.api.util.ThermalExpansionHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.item.ItemEnderCoil;
-import com.lordmau5.wirelessutils.item.ItemGlasses;
-import com.lordmau5.wirelessutils.item.ItemMachinePanel;
-import com.lordmau5.wirelessutils.item.ItemPositionalCard;
+import com.lordmau5.wirelessutils.item.*;
 import com.lordmau5.wirelessutils.item.augment.*;
 import com.lordmau5.wirelessutils.item.pearl.*;
 import com.lordmau5.wirelessutils.item.upgrade.ItemConversionUpgrade;
@@ -34,7 +31,10 @@ public class ModItems {
     public final static ItemArmor.ArmorMaterial GLASSES_MATERIAL = EnumHelper.addArmorMaterial(WirelessUtils.MODID + ":glasses", new ResourceLocation(WirelessUtils.MODID, "glasses").toString(), 10, new int[]{1, 3, 2, 1}, 20, SoundEvents.ITEM_ARMOR_EQUIP_IRON, 0F);
 
     @GameRegistry.ObjectHolder("wirelessutils:positional_card")
-    public static ItemPositionalCard itemPositionalCard;
+    public static ItemAbsolutePositionalCard itemAbsolutePositionalCard;
+
+    @GameRegistry.ObjectHolder("wirelessutils:relative_positional_card")
+    public static ItemRelativePositionalCard itemRelativePositionalCard;
 
     @GameRegistry.ObjectHolder("wirelessutils:fluxed_pearl")
     public static ItemFluxedPearl itemFluxedPearl;
@@ -140,7 +140,8 @@ public class ModItems {
 
     @SideOnly(Side.CLIENT)
     public static void initModels() {
-        itemPositionalCard.initModel();
+        itemAbsolutePositionalCard.initModel();
+        itemRelativePositionalCard.initModel();
         itemFluxedPearl.initModel();
         itemChargedPearl.initModel();
         itemQuenchedPearl.initModel();

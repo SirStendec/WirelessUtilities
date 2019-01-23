@@ -6,6 +6,7 @@ import cofh.core.util.CoreUtils;
 import cofh.core.util.helpers.FluidHelper;
 import cofh.core.util.helpers.InventoryHelper;
 import cofh.core.util.helpers.StringHelper;
+import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
@@ -31,6 +32,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -49,7 +51,7 @@ import java.util.List;
 
 public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy implements IRoundRobinMachine, IWorldAugmentable, ITransferAugmentable, ICapacityAugmentable, IInventoryAugmentable, IInvertAugmentable, ITickable, IWorkProvider<TileEntityBaseCondenser.CondenserTarget> {
 
-    protected List<BlockPosDimension> validTargets;
+    protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
 
     protected final FluidTank tank;
@@ -540,13 +542,19 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             markChunkDirty();
     }
 
-    public CondenserTarget createInfo(@Nonnull BlockPosDimension target) {
-        BlockPosDimension worker = getPosition();
+    public CondenserTarget createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
+        int cost = -1;
 
-        boolean interdimensional = worker.getDimension() != target.getDimension();
-        double distance = worker.getDistance(target.getX(), target.getY(), target.getZ()) - 1;
+        if ( !source.isEmpty() ) {
+            Item item = source.getItem();
+            if ( item instanceof ItemBasePositionalCard )
+                cost = ((ItemBasePositionalCard) item).getCost(source);
+        }
 
-        return new CondenserTarget(target, getEnergyCost(distance, interdimensional));
+        if ( cost == -1 )
+            cost = getEnergyCost(target);
+
+        return new CondenserTarget(target, cost);
     }
 
     public int getEnergyCost(@Nonnull BlockPosDimension target) {
@@ -560,7 +568,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     public abstract int getEnergyCost(double distance, boolean interdimensional);
 
-    public Iterable<BlockPosDimension> getTargets() {
+    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
         if ( validTargets == null )
             calculateTargets();
 
@@ -589,7 +597,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     @Override
-    public CondenserTarget canWork(@Nonnull BlockPosDimension target, @Nonnull World world, @Nonnull IBlockState block, TileEntity tile) {
+    public CondenserTarget canWork(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, TileEntity tile) {
         if ( tile == null ) {
             if ( fluidRate < Fluid.BUCKET_VOLUME )
                 return null;
@@ -628,13 +636,13 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             return null;
 
         validTargetsPerTick++;
-        CondenserTarget out = createInfo(target);
+        CondenserTarget out = createInfo(target, source);
         maxEnergyPerTick += level.baseEnergyPerOperation + out.cost;
         return out;
     }
 
     @Override
-    public boolean canWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull World world, @Nonnull IBlockState block, @Nonnull TileEntity tile) {
+    public boolean canWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nonnull TileEntity tile) {
         if ( stack.isEmpty() )
             return false;
 

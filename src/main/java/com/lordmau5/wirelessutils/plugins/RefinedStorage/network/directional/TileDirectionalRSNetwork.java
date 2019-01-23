@@ -201,7 +201,7 @@ public class TileDirectionalRSNetwork extends TileRSNetworkBase<NetworkNodeDirec
                 continue;
 
             BlockPosDimension targetPos = new BlockPosDimension(target, dimension, facing);
-            validTargets.add(targetPos);
+            validTargets.add(new Tuple<>(targetPos, ItemStack.EMPTY));
 
             if ( !world.isRemote ) {
                 if ( isNodeValid(targetPos) ) {

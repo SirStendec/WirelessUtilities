@@ -9,9 +9,11 @@ import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import mcjty.xnet.api.channels.IConnectable;
 import mcjty.xnet.api.net.IWorldBlob;
 import mcjty.xnet.api.tiles.IConnectorTile;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -29,7 +31,7 @@ public abstract class TileXNetNetworkBase extends TileEntityBaseMachine implemen
         IRangeAugmentable, ITickable, ITargetProvider,
         IConnectable, EventDispatcher.IEventListener {
 
-    public List<BlockPosDimension> validTargets;
+    public List<Tuple<BlockPosDimension, ItemStack>> validTargets;
 
     private boolean needsRecalculation;
     private int recalculationDelay = 10;
@@ -64,7 +66,7 @@ public abstract class TileXNetNetworkBase extends TileEntityBaseMachine implemen
         return new BlockPosDimension(getPos(), getWorld().provider.getDimension());
     }
 
-    public Iterable<BlockPosDimension> getTargets() {
+    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
         if ( validTargets == null )
             calculateTargetsAndMarkDirty();
 
@@ -151,7 +153,9 @@ public abstract class TileXNetNetworkBase extends TileEntityBaseMachine implemen
     public Set<BlockPos> getConsumers() {
         Set<BlockPos> consumers = Collections.emptySet();
         if ( validTargets != null ) {
-            consumers = new HashSet<>(validTargets);
+            consumers = new HashSet<>();
+            for (Tuple<BlockPosDimension, ItemStack> target : validTargets)
+                consumers.add(target.getFirst());
         }
 
         return consumers;

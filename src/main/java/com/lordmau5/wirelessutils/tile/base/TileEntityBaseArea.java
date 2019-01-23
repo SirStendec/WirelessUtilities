@@ -6,6 +6,7 @@ import com.lordmau5.wirelessutils.utils.constants.NiceColors;
 import com.lordmau5.wirelessutils.utils.location.BlockArea;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -171,16 +172,32 @@ public abstract class TileEntityBaseArea extends TileEntityBase implements IArea
         addRenderArea(cornerA, cornerB, NiceColors.COLORS[getDefaultColor()], name);
     }
 
+    public void addRenderArea(BlockPosDimension cornerA, BlockPos cornerB, String name, Vec3d vector) {
+        addRenderArea(cornerA, cornerB, NiceColors.COLORS[getDefaultColor()], name, vector);
+    }
+
     public void addRenderArea(BlockPosDimension cornerA, BlockPos cornerB, int color, String name) {
         addRenderArea(new BlockArea(cornerA, cornerB, color, name));
+    }
+
+    public void addRenderArea(BlockPosDimension cornerA, BlockPos cornerB, int color, String name, Vec3d vector) {
+        addRenderArea(new BlockArea(cornerA, cornerB, color, name, vector));
     }
 
     public void addRenderArea(BlockPosDimension pos, String name) {
         addRenderArea(pos, NiceColors.COLORS[getDefaultColor()], name);
     }
 
+    public void addRenderArea(BlockPosDimension pos, String name, Vec3d vector) {
+        addRenderArea(pos, NiceColors.COLORS[getDefaultColor()], name, vector);
+    }
+
     public void addRenderArea(BlockPosDimension pos, int color, String name) {
         addRenderArea(new BlockArea(pos, color, name));
+    }
+
+    public void addRenderArea(BlockPosDimension pos, int color, String name, Vec3d vector) {
+        addRenderArea(new BlockArea(pos, color, name, vector));
     }
 
     public void clearRenderAreas() {

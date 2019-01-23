@@ -7,7 +7,9 @@ import com.lordmau5.wirelessutils.utils.constants.NiceColors;
 import com.lordmau5.wirelessutils.utils.location.BlockArea;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -52,7 +54,7 @@ public class TileEntityChunkCharger extends TileEntityBaseCharger {
     }
 
     @Override
-    public Iterable<BlockPosDimension> getTargets() {
+    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
         World world = getWorld();
         BlockPos pos = getPos();
         if ( world == null || world.provider == null || pos == null )
@@ -67,7 +69,10 @@ public class TileEntityChunkCharger extends TileEntityBaseCharger {
 
         Map<BlockPos, TileEntity> entities = chunk.getTileEntityMap();
 
-        return () -> BlockPosDimension.iterateWithDimension(world.provider.getDimension(), entities.keySet());
+        return null;
+
+        // TODO: Fix this.
+        // return () -> BlockPosDimension.iterateWithDimension(world.provider.getDimension(), entities.keySet());
     }
 
     /* GUI */

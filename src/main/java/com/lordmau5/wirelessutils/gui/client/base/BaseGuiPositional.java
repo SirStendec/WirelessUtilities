@@ -2,6 +2,7 @@ package com.lordmau5.wirelessutils.gui.client.base;
 
 import com.lordmau5.wirelessutils.gui.client.BaseGuiContainer;
 import com.lordmau5.wirelessutils.gui.container.BaseContainerPositional;
+import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
@@ -45,9 +46,13 @@ public class BaseGuiPositional extends BaseGuiContainer {
         boolean hasInvalidStack = false;
 
         ItemStack held = mc.player.inventory.getItemStack();
-        if ( !held.isEmpty() ) {
-            if ( pos.isPositionalCardValid(held) && !pos.isTargetInRange(BlockPosDimension.fromTag(held.getTagCompound())) )
-                hasInvalidStack = true;
+        if ( !held.isEmpty() && pos.isPositionalCardValid(held) ) {
+            ItemBasePositionalCard card = (ItemBasePositionalCard) held.getItem();
+            if ( card != null && !card.shouldIgnoreDistance(held) ) {
+                BlockPosDimension target = card.getTarget(held, pos.getPosition());
+                if ( target == null || !pos.isTargetInRange(target) )
+                    hasInvalidStack = true;
+            }
         }
 
         for (int y = 0; y < 3; y++) {

@@ -5,6 +5,7 @@ import cofh.core.network.PacketBase;
 import cofh.core.util.helpers.InventoryHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.*;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
@@ -49,7 +50,7 @@ import java.util.List;
 
 public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implements ICropAugmentable, IInvertAugmentable, ITransferAugmentable, ICapacityAugmentable, IUnlockableSlots, IRoundRobinMachine, ITickable, IWorkProvider<TileBaseDesublimator.DesublimatorTarget> {
 
-    protected List<BlockPosDimension> validTargets;
+    protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
     protected CapabilityHandler capabilityHandler;
 
@@ -405,8 +406,19 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             markChunkDirty();
     }
 
-    public DesublimatorTarget createInfo(@Nonnull BlockPosDimension target) {
-        return new DesublimatorTarget(target, getEnergyCost(target));
+    public DesublimatorTarget createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
+        int cost = -1;
+
+        if ( !source.isEmpty() ) {
+            Item item = source.getItem();
+            if ( item instanceof ItemBasePositionalCard )
+                cost = ((ItemBasePositionalCard) item).getCost(source);
+        }
+
+        if ( cost == -1 )
+            cost = getEnergyCost(target);
+
+        return new DesublimatorTarget(target, cost);
     }
 
     public int getEnergyCost(@Nonnull BlockPosDimension target) {
@@ -420,7 +432,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     public abstract int getEnergyCost(double distance, boolean interdimensional);
 
-    public Iterable<BlockPosDimension> getTargets() {
+    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
         if ( validTargets == null )
             calculateTargets();
 
@@ -449,7 +461,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     @Override
-    public DesublimatorTarget canWork(@Nonnull BlockPosDimension target, @Nonnull World world, @Nonnull IBlockState state, TileEntity tile) {
+    public DesublimatorTarget canWork(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState state, TileEntity tile) {
         if ( tile == null ) {
             if ( processCrops ) {
                 Block block = state.getBlock();
@@ -468,7 +480,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return null;
 
         validTargetsPerTick++;
-        DesublimatorTarget out = createInfo(target);
+        DesublimatorTarget out = createInfo(target, source);
         maxEnergyPerTick += level.baseEnergyPerOperation + out.cost;
         return out;
     }
@@ -746,7 +758,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     @Override
-    public boolean canWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull World world, @Nonnull IBlockState block, @Nonnull TileEntity tile) {
+    public boolean canWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nonnull TileEntity tile) {
         return false;
     }
 

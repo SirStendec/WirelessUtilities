@@ -10,10 +10,12 @@ import com.raoulvdberge.refinedstorage.api.network.node.INetworkNode;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNodeManager;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNodeProxy;
 import com.raoulvdberge.refinedstorage.apiimpl.util.OneSixMigrationHelper;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -27,7 +29,7 @@ public abstract class TileRSNetworkBase<N extends NetworkNodeBase> extends TileE
         IRangeAugmentable, ITickable, ITargetProvider,
         INetworkNodeProxy<N>, EventDispatcher.IEventListener {
 
-    public List<BlockPosDimension> validTargets;
+    public List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     private int energyCost;
 
     private boolean needsRecalculation;
@@ -68,7 +70,7 @@ public abstract class TileRSNetworkBase<N extends NetworkNodeBase> extends TileE
         return new BlockPosDimension(getPos(), getWorld().provider.getDimension());
     }
 
-    public Iterable<BlockPosDimension> getTargets() {
+    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
         if ( validTargets == null )
             calculateAndRebuild();
 

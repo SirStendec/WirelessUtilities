@@ -168,7 +168,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
             if ( target.equals(pos) )
                 continue;
 
-            validTargets.add(new BlockPosDimension(target, dimension, facing));
+            validTargets.add(new Tuple<>(new BlockPosDimension(target, dimension, facing), ItemStack.EMPTY));
         }
 
         ITargetProvider.sortTargetList(origin, validTargets);

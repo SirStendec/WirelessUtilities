@@ -21,7 +21,7 @@ public class WirelessUtils {
     public static final String MODID = "wirelessutils";
     public static final String NAME = "Wireless Utilities";
 
-    public static final String VERSION = "1.1";
+    public static final String VERSION = "1.3";
     public static final String UPDATE_URL = "https://raw.github.com/sirstendec/wirelessutilities/master/update.json";
 
     public static final String DEPENDENCIES = CoFHCore.VERSION_GROUP;

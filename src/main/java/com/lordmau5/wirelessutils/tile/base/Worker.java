@@ -8,6 +8,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -88,11 +89,14 @@ public class Worker<T extends TargetInfo> {
 
         int[] tempSlots = new int[ModConfig.augments.inventory.maximumScanSlots];
 
-        Iterable<BlockPosDimension> targets = provider.getTargets();
+        Iterable<Tuple<BlockPosDimension, ItemStack>> targets = provider.getTargets();
         if ( targets == null )
             return;
 
-        for (BlockPosDimension target : targets) {
+        for (Tuple<BlockPosDimension, ItemStack> pair : targets) {
+            BlockPosDimension target = pair.getFirst();
+            ItemStack source = pair.getSecond();
+
             if ( target == oldPos )
                 passedOldPos = true;
 
@@ -109,7 +113,7 @@ public class Worker<T extends TargetInfo> {
                 continue;
 
             if ( processBlocks || (processTiles && tile != null) ) {
-                info = provider.canWork(target, world, state, tile);
+                info = provider.canWork(target, source, world, state, tile);
                 if ( info != null )
                     info.processBlock = true;
 
@@ -136,7 +140,7 @@ public class Worker<T extends TargetInfo> {
                             hitTarget = true;
 
                         ItemStack stack = handler.getStackInSlot(i);
-                        if ( provider.canWork(stack, i, handler, target, world, state, tile) ) {
+                        if ( provider.canWork(stack, i, handler, target, source, world, state, tile) ) {
                             if ( hitTarget && cacheInvPosition == -1 ) {
                                 cacheInvPosition = count;
                                 cacheInInventory = true;
@@ -149,7 +153,7 @@ public class Worker<T extends TargetInfo> {
 
                     if ( count > 0 ) {
                         if ( info == null )
-                            info = provider.createInfo(target);
+                            info = provider.createInfo(target, source);
 
                         info.processInventory = true;
                         info.useSingleChest = useSingleChest;
