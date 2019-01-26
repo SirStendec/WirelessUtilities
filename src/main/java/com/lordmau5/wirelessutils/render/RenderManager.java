@@ -252,23 +252,25 @@ public class RenderManager {
 
         if ( disableDepth ) {
             GlStateManager.disableDepth();
-            render(dimensionAreas, x, y, z, 0.11f, 0.11f, false, true);
+            render(dimensionAreas, x, y, z, 0.11f, 0.11f, false);
             GlStateManager.enableDepth();
-            render(dimensionAreas, x, y, z, 0.19f, 0.19f, true, false);
+            render(dimensionAreas, x, y, z, 0.19f, 0.19f, true);
 
         } else
-            render(dimensionAreas, x, y, z, 0.25f, 0.3f, true, false);
+            render(dimensionAreas, x, y, z, 0.25f, 0.3f, true);
 
         GlStateManager.popMatrix();
         GlStateManager.popAttrib();
     }
 
-    public void render(Iterable<BlockArea> areas, double x, double y, double z, float opacity, float facingOpacity, boolean drawNames, boolean depthDisabled) {
+    public void render(Iterable<BlockArea> areas, double x, double y, double z, float opacity, float facingOpacity, boolean drawNames) {
         if ( areas == null )
             return;
 
+        long time = Minecraft.getSystemTime();
+
         aNormal = opacity;
-        aFacing = aNormal + MathHelper.abs(MathHelper.sin((float) (Minecraft.getSystemTime() % 2500L) / 2500.0F * ((float) Math.PI * 2F))) * facingOpacity;
+        aFacing = aNormal + MathHelper.abs(MathHelper.sin((float) (time % 2500L) / 2500.0F * ((float) Math.PI * 2F))) * facingOpacity;
 
         GlStateManager.pushMatrix();
         GlStateManager.pushAttrib();
@@ -276,6 +278,8 @@ public class RenderManager {
         GlStateManager.disableTexture2D();
         GlStateManager.glLineWidth(2f);
         GlStateManager.color(1f, 1f, 1f);
+
+        long offset = 0;
 
         for (BlockArea area : areas) {
             double dX = (double) area.minX - x;
@@ -298,27 +302,106 @@ public class RenderManager {
 
             drawOutline(minX, minY, minZ, maxX, maxY, maxZ);
 
+            GlStateManager.enableAlpha();
+            GlStateManager.enableBlend();
+            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+            GlStateManager.depthMask(false);
+
             if ( area.vector != null ) {
                 double sizeX = area.maxX - area.minX;
                 double sizeY = area.maxY - area.minY;
                 double sizeZ = area.maxZ - area.minZ;
 
-                double midX = area.minX - x + (sizeX / 2);
-                double midY = area.minY - y + (sizeY / 2);
-                double midZ = area.minZ - z + (sizeZ / 2);
+                double startX = area.minX - x + (sizeX / 2);
+                double startY = area.minY - y + (sizeY / 2);
+                double startZ = area.minZ - z + (sizeZ / 2);
+
+                double endX = startX + area.vector.x;
+                double endY = startY + area.vector.y;
+                double endZ = startZ + area.vector.z;
+
+                float partialTime = 0.5F - (float) ((time + offset) % 1000L) / 1000.0F;
+                offset += 200L;
+
+                double midX = startX + 2 * area.vector.x * partialTime;
+                double midY = startY + 2 * area.vector.y * partialTime;
+                double midZ = startZ + 2 * area.vector.z * partialTime;
+
+                double midEndX = midX + (area.vector.x / 2);
+                double midEndY = midY + (area.vector.y / 2);
+                double midEndZ = midZ + (area.vector.z / 2);
+
+                if ( area.vector.x > 0 ) {
+                    if ( midX < startX )
+                        midX = startX;
+                    else if ( midX > endX )
+                        midX = endX;
+
+                    if ( midEndX > endX )
+                        midEndX = endX;
+                    else if ( midEndX < startX )
+                        midEndX = startX;
+                } else {
+                    if ( midX > startX )
+                        midX = startX;
+                    else if ( midX < endX )
+                        midX = endX;
+
+                    if ( midEndX < endX )
+                        midEndX = endX;
+                    else if ( midEndX > startX )
+                        midEndX = startX;
+                }
+
+                if ( area.vector.y > 0 ) {
+                    if ( midY < startY )
+                        midY = startY;
+                    else if ( midY > endY )
+                        midY = endY;
+
+                    if ( midEndY > endY )
+                        midEndY = endY;
+                    else if ( midEndY < startY )
+                        midEndY = startY;
+                } else {
+                    if ( midY > startY )
+                        midY = startY;
+                    else if ( midY < endY )
+                        midY = endY;
+
+                    if ( midEndY < endY )
+                        midEndY = endY;
+                    else if ( midEndY > startY )
+                        midEndY = startY;
+                }
+
+                if ( area.vector.z > 0 ) {
+                    if ( midZ < startZ )
+                        midZ = startZ;
+                    else if ( midZ > endZ )
+                        midZ = endZ;
+
+                    if ( midEndZ > endZ )
+                        midEndZ = endZ;
+                    else if ( midEndZ < startZ )
+                        midEndZ = startZ;
+                } else {
+                    if ( midZ > startZ )
+                        midZ = startZ;
+                    else if ( midZ < endZ )
+                        midZ = endZ;
+
+                    if ( midEndZ < endZ )
+                        midEndZ = endZ;
+                    else if ( midEndZ > startZ )
+                        midEndZ = startZ;
+                }
 
                 GlStateManager.glLineWidth(15f);
-                GlStateManager.disableDepth();
-                drawRay(midX, midY, midZ, midX + area.vector.x, midY + area.vector.y, midZ + area.vector.z);
-                if ( !depthDisabled )
-                    GlStateManager.enableDepth();
+                drawRay(startX, startY, startZ, endX, endY, endZ, 0.4F);
+                drawRay(midX, midY, midZ, midEndX, midEndY, midEndZ, 0.6F);
                 GlStateManager.glLineWidth(2f);
             }
-
-            GlStateManager.enableAlpha();
-            GlStateManager.enableBlend();
-            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            GlStateManager.depthMask(false);
 
             drawFaces(minX, minY, minZ, maxX, maxY, maxZ, area.activeSide);
 
@@ -357,11 +440,11 @@ public class RenderManager {
         return this;
     }
 
-    public void drawRay(double x1, double y1, double z1, double x2, double y2, double z2) {
+    public void drawRay(double x1, double y1, double z1, double x2, double y2, double z2, float opacity) {
         Tessellator tessellator = Tessellator.getInstance();
         buffer = tessellator.getBuffer();
 
-        cA = 0.5f;
+        cA = opacity;
         buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
 
         posEx(x1, y1, z1).posEx(x2, y2, z2);
