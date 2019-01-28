@@ -80,7 +80,7 @@ dependencies {
     deobfProvided "CraftTweaker2:CraftTweaker2-API:${config.ct_api_version}"
     runtime "CraftTweaker2:CraftTweaker2-MC1120-Main:${config.ct_version}"
     deobfCompile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
-    deobfCompile "mcp.mobius.waila:Waila:${config.hwyla_version}"
+    deobfCompile "mcp.mobius.waila:Hwyla:${config.hwyla_version}"
 }
 
 minecraft {
