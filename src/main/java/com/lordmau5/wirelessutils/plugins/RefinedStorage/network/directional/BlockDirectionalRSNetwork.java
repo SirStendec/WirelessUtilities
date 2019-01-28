@@ -5,6 +5,7 @@ import com.lordmau5.wirelessutils.plugins.RefinedStorage.RefinedStoragePlugin;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.base.TileRSNetworkBase;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNode;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNodeManager;
+import com.raoulvdberge.refinedstorage.api.util.Action;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
@@ -52,7 +53,7 @@ public class BlockDirectionalRSNetwork extends BlockBaseDirectionalMachine {
         manager.markForSaving();
 
         if ( node != null && node.getNetwork() != null ) {
-            node.getNetwork().getNodeGraph().rebuild();
+            node.getNetwork().getNodeGraph().invalidate(Action.PERFORM, world, pos);
         }
 
         super.breakBlock(world, pos, state);

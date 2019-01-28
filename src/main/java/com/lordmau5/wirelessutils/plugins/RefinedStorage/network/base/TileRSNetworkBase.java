@@ -9,6 +9,7 @@ import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNode;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNodeManager;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNodeProxy;
+import com.raoulvdberge.refinedstorage.api.util.Action;
 import com.raoulvdberge.refinedstorage.apiimpl.util.OneSixMigrationHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -26,10 +27,10 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public abstract class TileRSNetworkBase<N extends NetworkNodeBase> extends TileEntityBaseMachine implements
-        IRangeAugmentable, ITickable, ITargetProvider,
+        IRangeAugmentable, ITickable,
         INetworkNodeProxy<N>, EventDispatcher.IEventListener {
 
-    public List<Tuple<BlockPosDimension, ItemStack>> validTargets;
+    public List<BlockPosDimension> validTargets;
     private int energyCost;
 
     private boolean needsRecalculation;
@@ -70,7 +71,7 @@ public abstract class TileRSNetworkBase<N extends NetworkNodeBase> extends TileE
         return new BlockPosDimension(getPos(), getWorld().provider.getDimension());
     }
 
-    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
+    public Iterable<BlockPosDimension> getTargets() {
         if ( validTargets == null )
             calculateAndRebuild();
 
@@ -108,7 +109,7 @@ public abstract class TileRSNetworkBase<N extends NetworkNodeBase> extends TileE
 
     public void rebuildGraphNetwork() {
         if ( getNode().getNetwork() != null && getNode().getNetwork().getNodeGraph() != null ) {
-            getNode().getNetwork().getNodeGraph().rebuild();
+            getNode().getNetwork().getNodeGraph().invalidate(Action.PERFORM, getWorld(), getPos());
         }
     }
 

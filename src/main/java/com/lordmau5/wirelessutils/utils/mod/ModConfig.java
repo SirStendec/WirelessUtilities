@@ -409,6 +409,10 @@ public class ModConfig {
 
         @Config.Name("Directional AE Network")
         public DirectionalAENetwork directionalAENetwork = new DirectionalAENetwork();
+
+        @Config.Name("Dense Cable Connection")
+        @Config.Comment("Whether or not the AE Network machines should act like a Dense Cable (32 channels) or not (8 channels)")
+        public boolean denseCableConnection = true;
     }
 
     public static class PositionalAENetwork {

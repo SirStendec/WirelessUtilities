@@ -194,7 +194,7 @@ public class TilePositionalRSNetwork extends TileRSNetworkBase<NetworkNodePositi
                         card == itemRelativePositionalCard ? itemRelativePositionalCard.getVector(slotted) : null
                 );
 
-            validTargets.add(new Tuple<>(target, slotted));
+            validTargets.add(target);
 
             if ( !world.isRemote ) {
                 if ( isNodeValid(target) ) {

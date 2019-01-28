@@ -332,6 +332,8 @@ info.wirelessutils.tiered.required.lower.2=been installed.
 
 info.wirelessutils.voiding_fluids=Voiding Fluids
 
+info.wirelessutils.ae2.channels=%d of %d Channels
+
 chat.wirelessutils.upgrade.success=Installed %s into %s.
 chat.wirelessutils.upgrade.failed=Could not install %s into %s.
 

@@ -53,8 +53,8 @@ public class NetworkNodeDirectionalRSNetwork extends NetworkNodeBase {
 
         TileDirectionalRSNetwork tile = (TileDirectionalRSNetwork) world.getTileEntity(pos);
         if ( tile != null && tile.redstoneControlOrDisable() ) {
-            for (Tuple<BlockPosDimension, ItemStack> target : tile.getTargets()) {
-                operator.apply(world, target.getFirst(), null);
+            for (BlockPosDimension target : tile.getTargets()) {
+                operator.apply(world, target, null);
             }
         }
     }
