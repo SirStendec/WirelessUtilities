@@ -202,7 +202,7 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements ISlotA
                         card == itemRelativePositionalCard ? itemRelativePositionalCard.getVector(slotted) : null
                 );
 
-            validTargets.add(new Tuple<>(target, slotted));
+            validTargets.add(target);
 
             if ( !world.isRemote ) {
                 cachePlacedPosition(target);

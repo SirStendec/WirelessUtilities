@@ -4,6 +4,8 @@ import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics
 import com.lordmau5.wirelessutils.plugins.CraftTweaker.CraftTweakerPlugin;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.RefinedStoragePlugin;
 import com.lordmau5.wirelessutils.plugins.TConstruct.TConstructPlugin;
+import com.lordmau5.wirelessutils.plugins.TheOneProbe.TOPPlugin;
+import com.lordmau5.wirelessutils.plugins.Waila.WailaPlugin;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.ItemColors;
@@ -28,6 +30,14 @@ public class PluginRegistry {
     }
 
     private static void findPlugins() {
+        if ( Loader.isModLoaded("theoneprobe") ) {
+            addPlugin("theoneprobe", new TOPPlugin());
+        }
+
+        if ( Loader.isModLoaded("waila") ) {
+            addPlugin("waila", new WailaPlugin());
+        }
+
         if ( Loader.isModLoaded("refinedstorage") ) {
             addPlugin("refinedstorage", new RefinedStoragePlugin());
         }

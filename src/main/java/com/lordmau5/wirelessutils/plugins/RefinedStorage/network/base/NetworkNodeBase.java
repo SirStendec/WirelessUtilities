@@ -4,6 +4,7 @@ import com.lordmau5.wirelessutils.plugins.RefinedStorage.RefinedStoragePlugin;
 import com.raoulvdberge.refinedstorage.api.network.INetwork;
 import com.raoulvdberge.refinedstorage.api.network.INetworkNodeVisitor;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNode;
+import com.raoulvdberge.refinedstorage.api.util.Action;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -124,7 +125,7 @@ public abstract class NetworkNodeBase implements INetworkNode, INetworkNodeVisit
                     onConnectedStateChange(true);
 
                     if ( shouldRebuildGraphOnChange() ) {
-                        network.getNodeGraph().rebuild();
+                        network.getNodeGraph().invalidate(Action.PERFORM, getWorld(), getPos());
                     }
                 }
             }
