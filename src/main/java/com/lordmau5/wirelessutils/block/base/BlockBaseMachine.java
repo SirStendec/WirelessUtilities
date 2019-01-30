@@ -52,6 +52,12 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
     }
 
     @Override
+    @SuppressWarnings("deprecation")
+    public boolean hasComparatorInputOverride(IBlockState state) {
+        return true;
+    }
+
+    @Override
     public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> items) {
         if ( tab != this.getCreativeTab() )
             return;

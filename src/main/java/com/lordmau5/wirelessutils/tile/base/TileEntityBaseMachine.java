@@ -33,6 +33,8 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     protected final TimeTracker tracker = new TimeTracker();
     private boolean activeCooldown = false;
 
+    private int comparatorState = 0;
+
     @Override
     public String getTileName() {
         Machine machine = this.getClass().getAnnotation(Machine.class);
@@ -40,6 +42,30 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
             return "tile." + WirelessUtils.MODID + "." + machine.name() + ".name";
 
         return null;
+    }
+
+    /* Comparator Logic */
+
+    @Override
+    public int getComparatorInputOverride() {
+        return comparatorState;
+    }
+
+    public int calculateComparatorInput() {
+        return 0;
+    }
+
+    public void runTrackers() {
+        int comparatorState = calculateComparatorInput();
+        if ( comparatorState != this.comparatorState ) {
+            this.comparatorState = comparatorState;
+            callNeighborTileChange();
+        }
+    }
+
+    public void updateTrackers() {
+        if ( timeCheck() )
+            runTrackers();
     }
 
     /* Levels and Augments */

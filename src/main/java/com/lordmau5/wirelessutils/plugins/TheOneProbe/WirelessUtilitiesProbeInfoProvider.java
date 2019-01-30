@@ -20,7 +20,7 @@ public class WirelessUtilitiesProbeInfoProvider implements IProbeInfoProvider {
     @Override
     public void addProbeInfo(ProbeMode mode, IProbeInfo probeInfo, EntityPlayer player, World world, IBlockState blockState, IProbeHitData data) {
         TileEntity tile = world.getTileEntity(data.getPos());
-        if (tile instanceof ITileInfoProvider) {
+        if ( tile instanceof ITileInfoProvider ) {
             for (String string : ((ITileInfoProvider) tile).getInfoTooltips(null)) {
                 probeInfo.text(string);
             }

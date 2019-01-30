@@ -3,8 +3,10 @@ package com.lordmau5.wirelessutils.tile.condenser;
 import cofh.core.fluid.FluidTankCore;
 import cofh.core.network.PacketBase;
 import cofh.core.util.CoreUtils;
+import cofh.core.util.TimeTracker;
 import cofh.core.util.helpers.FluidHelper;
 import cofh.core.util.helpers.InventoryHelper;
+import cofh.core.util.helpers.MathHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
@@ -53,6 +55,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
+    protected final TimeTracker fluidTracker = new TimeTracker();
 
     protected final FluidTank tank;
     protected final IFluidHandler fluidHandler;
@@ -230,6 +233,35 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         };
     }
 
+    /* Lighting */
+
+    private int lightValue;
+
+    @Override
+    public int getLightValue() {
+        FluidStack stack = getTankFluid();
+        if ( stack == null || stack.amount == 0 )
+            return 0;
+
+        Fluid fluid = stack.getFluid();
+        if ( fluid == null )
+            return 0;
+
+        return MathHelper.round(fluid.getLuminosity(stack) / 2.0D);
+    }
+
+    @Override
+    public void runTrackers() {
+        super.runTrackers();
+
+        int lightValue = getLightValue();
+        if ( lightValue != this.lightValue ) {
+            this.lightValue = lightValue;
+            updateLighting();
+            sendTilePacket(Side.CLIENT);
+        }
+    }
+
     /* Debugging */
 
     public String debugPrintStack(FluidStack stack) {
@@ -254,6 +286,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         System.out.println(" Crafting Fluid: " + debugPrintStack(craftingFluid));
         System.out.println("       Capacity: " + tank.getCapacity());
         System.out.println("       Contents: " + debugPrintStack(tank.getFluid()));
+        System.out.println("    Light Level: " + lightValue);
     }
 
     /* Tank Stuff */
@@ -904,6 +937,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             activeTargetsPerTick = 0;
             fluidPerTick = 0;
             energyPerTick = 0;
+            updateTrackers();
             return;
         }
 
@@ -921,6 +955,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         if ( isCreative && inverted ) // Void Fluids
             tank.setFluid(null);
+
+        updateTrackers();
     }
 
     /* NBT Read and Write */
@@ -1000,6 +1036,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     public void handleTilePacket(PacketBase payload) {
         super.handleTilePacket(payload);
         tank.setFluid(payload.getFluidStack());
+        callBlockUpdate();
     }
 
     @Override

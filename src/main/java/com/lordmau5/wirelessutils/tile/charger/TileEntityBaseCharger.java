@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.tile.charger;
 
 import cofh.core.network.PacketBase;
+import cofh.core.util.helpers.MathHelper;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
@@ -85,6 +86,20 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
         if ( worker != null )
             worker.debugPrint();
+    }
+
+    /* Comparator */
+
+    @Override
+    public int calculateComparatorInput() {
+        if ( isCreative() )
+            return 15;
+
+        long energy = getFullEnergyStored();
+        if ( energy == 0 )
+            return 0;
+
+        return 1 + MathHelper.round(energy * 14 / (double) getFullMaxEnergyStored());
     }
 
     /* Augments */
@@ -540,6 +555,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
             activeTargetsPerTick = 0;
             energyPerTick = 0;
             setActive(false);
+            updateTrackers();
             return;
         }
 
@@ -552,6 +568,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         activeTargetsPerTick = 0;
         setActive(worker.performWork());
         energyPerTick = total - remainingPerTick;
+        updateTrackers();
     }
 
     /* Packets */
