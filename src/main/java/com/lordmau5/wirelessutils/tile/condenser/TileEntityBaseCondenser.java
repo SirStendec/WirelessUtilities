@@ -478,6 +478,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     @Override
+    public boolean isWorldAugmented() {
+        return processBlocks;
+    }
+
+    @Override
     public void setWorldAugmented(boolean augmented) {
         processBlocks = augmented;
     }

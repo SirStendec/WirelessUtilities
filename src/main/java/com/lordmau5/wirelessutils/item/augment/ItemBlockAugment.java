@@ -12,10 +12,10 @@ import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nonnull;
 
-public class ItemCropAugment extends ItemAugment {
-    public ItemCropAugment() {
+public class ItemBlockAugment extends ItemAugment {
+    public ItemBlockAugment() {
         super();
-        setName("crop_augment");
+        setName("block_augment");
     }
 
     @Override
@@ -24,16 +24,16 @@ public class ItemCropAugment extends ItemAugment {
     }
 
     @Override
-    public int getItemEnchantability(ItemStack stack) {
+    public int getItemEnchantability() {
         return 15;
     }
 
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        if ( ModConfig.augments.crop.allowSilkTouch && enchantment == Enchantments.SILK_TOUCH )
+        if ( ModConfig.augments.block.allowSilkTouch && enchantment == Enchantments.SILK_TOUCH )
             return true;
 
-        if ( ModConfig.augments.crop.allowFortune && enchantment == Enchantments.FORTUNE )
+        if ( ModConfig.augments.block.allowFortune && enchantment == Enchantments.FORTUNE )
             return true;
 
         return super.canApplyAtEnchantingTable(stack, enchantment);
@@ -44,27 +44,27 @@ public class ItemCropAugment extends ItemAugment {
         boolean silky = false;
         int fortune = 0;
         if ( !stack.isEmpty() ) {
-            silky = ModConfig.augments.crop.allowSilkTouch && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0;
-            fortune = ModConfig.augments.crop.allowFortune ? EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack) : 0;
+            silky = ModConfig.augments.block.allowSilkTouch && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0;
+            fortune = ModConfig.augments.block.allowFortune ? EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack) : 0;
         }
 
-        if ( augmentable instanceof ICropAugmentable )
-            ((ICropAugmentable) augmentable).setCropAugmented(!stack.isEmpty(), silky, fortune);
+        if ( augmentable instanceof IBlockAugmentable )
+            ((IBlockAugmentable) augmentable).setBlockAugmented(!stack.isEmpty(), silky, fortune);
     }
 
     @Override
     public boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull Class<? extends IAugmentable> klass) {
-        return ICropAugmentable.class.isAssignableFrom(klass);
+        return IBlockAugmentable.class.isAssignableFrom(klass);
     }
 
     @Override
     public boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
-        if ( augmentable instanceof IBlockAugmentable && ((IBlockAugmentable) augmentable).isBlockAugmented() )
+        if ( augmentable instanceof ICropAugmentable && ((ICropAugmentable) augmentable).isCropAugmented() )
             return false;
 
         if ( augmentable instanceof IWorldAugmentable && ((IWorldAugmentable) augmentable).isWorldAugmented() )
             return false;
 
-        return augmentable instanceof ICropAugmentable;
+        return augmentable instanceof IBlockAugmentable;
     }
 }

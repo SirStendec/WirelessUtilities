@@ -87,6 +87,9 @@ public class ModItems {
     @GameRegistry.ObjectHolder("wirelessutils:world_augment")
     public static ItemWorldAugment itemWorldAugment;
 
+    @GameRegistry.ObjectHolder("wirelessutils:block_augment")
+    public static ItemBlockAugment itemBlockAugment;
+
     @GameRegistry.ObjectHolder("wirelessutils:invert_augment")
     public static ItemInvertAugment itemInvertAugment;
 
@@ -160,6 +163,7 @@ public class ModItems {
         itemMachinePanel.initModel();
         itemWorldAugment.initModel();
         itemInvertAugment.initModel();
+        itemBlockAugment.initModel();
         itemCropAugment.initModel();
     }
 

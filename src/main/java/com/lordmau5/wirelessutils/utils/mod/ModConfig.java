@@ -181,6 +181,10 @@ public class ModConfig {
         @Config.Name("Crop Augments")
         @Config.Comment("Crop Augments allow machines to interact with crops. This includes: planting, fertilizing, and (with an Invert Augment) harvesting.")
         public final CropAugments crop = new CropAugments();
+
+        @Config.Name("Block Augments")
+        @Config.Comment("Block Augments allow Desublimators to place and break blocks.")
+        public final BlockAugments block = new BlockAugments();
     }
 
     public static class CropAugments {
@@ -197,6 +201,23 @@ public class ModConfig {
         @Config.Name("Silk Touch Block Activation")
         @Config.Comment("Activate crop blocks (right-click) to harvest them with Silk Touch, rather than breaking them. This behavior will not work correctly if there is no other mod present that adds activation behavior to crops.")
         public boolean useActivation = true;
+    }
+
+    public static class BlockAugments {
+        @Config.Name("Allow Silk Touch")
+        @Config.Comment("Allow Block Augments to be enchanted with Silk Touch, so that blocks are harvested with Silk Touch.")
+        @Config.RequiresWorldRestart
+        public boolean allowSilkTouch = true;
+
+        @Config.Name("Allow Fortune")
+        @Config.Comment("Allow Block Augments to be enchanted with Fortune, to be applied when harvesting blocks.")
+        @Config.RequiresWorldRestart
+        public boolean allowFortune = true;
+
+        @Config.Name("Maximum Harvest Level")
+        @Config.Comment("The maximum harvest level for blocks that should be harvestable via a Block Augment. Defaults to diamond.")
+        @Config.RangeInt(min = 0)
+        public int harvestLevel = 3;
     }
 
     public static class CapacityAugments {

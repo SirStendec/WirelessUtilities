@@ -2,15 +2,13 @@ package com.lordmau5.wirelessutils.tile.desublimator;
 
 import cofh.core.inventory.ComparableItemStackValidatedNBT;
 import cofh.core.network.PacketBase;
+import cofh.core.util.CoreUtils;
 import cofh.core.util.helpers.InventoryHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.*;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.*;
 import com.lordmau5.wirelessutils.utils.ItemStackHandler;
 import com.lordmau5.wirelessutils.utils.StackHelper;
 import com.lordmau5.wirelessutils.utils.WUFakePlayer;
@@ -23,8 +21,12 @@ import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemDye;
@@ -34,10 +36,16 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.IPlantable;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -46,9 +54,15 @@ import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implements ICropAugmentable, IInvertAugmentable, ITransferAugmentable, ICapacityAugmentable, IUnlockableSlots, IRoundRobinMachine, ITickable, IWorkProvider<TileBaseDesublimator.DesublimatorTarget> {
+public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implements
+        IWorldAugmentable, IBlockAugmentable,
+        ICropAugmentable, IInvertAugmentable, ITransferAugmentable, ICapacityAugmentable,
+        IUnlockableSlots, IRoundRobinMachine, ITickable,
+        IWorkProvider<TileBaseDesublimator.DesublimatorTarget> {
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
@@ -76,10 +90,15 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     private int maxEnergyPerTick;
 
     private boolean inverted = false;
+    private boolean processDrops = false;
     private boolean processBlocks = false;
     private boolean processCrops = false;
     private boolean silkyCrops = false;
     private int fortuneCrops = 0;
+
+    private boolean silkyBlocks = false;
+    private int fortuneBlocks = 0;
+    private ItemStack pickaxe = ItemStack.EMPTY;
 
     public TileBaseDesublimator() {
         super();
@@ -110,6 +129,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         System.out.println("      Iter. Mode: " + iterationMode);
         System.out.println("     Round Robin: " + roundRobin);
         System.out.println("         Items/t: " + itemRate);
+        System.out.println("   Process Drops: " + processDrops);
         System.out.println("  Process Blocks: " + processBlocks);
         System.out.println("   Process Crops: " + processCrops + (silkyCrops ? " (SILKY)" : ""));
         System.out.println("   Valid Targets: " + validTargetsPerTick);
@@ -164,6 +184,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     public void updateItemCache(int slot) {
+        if ( slot < getBufferOffset() )
+            return;
+
         ItemStack stack = itemStackHandler.getStackInSlot(slot);
         Item item = stack.getItem();
         Block block = Block.getBlockFromItem(item);
@@ -284,8 +307,45 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         fortuneCrops = fortune;
     }
 
-    public void setWorldAugmented(boolean augmented) {
+    @Override
+    public void setBlockAugmented(boolean augmented, boolean silky, int fortune) {
         processBlocks = augmented;
+        silkyBlocks = silky;
+        fortuneBlocks = fortune;
+        if ( augmented ) {
+            pickaxe = new ItemStack(Items.DIAMOND_PICKAXE);
+            if ( silky || fortune > 0 ) {
+                Map<Enchantment, Integer> enchantments = new HashMap<>();
+                if ( silkyBlocks )
+                    enchantments.put(Enchantments.SILK_TOUCH, 1);
+                if ( fortuneBlocks > 0 )
+                    enchantments.put(Enchantments.FORTUNE, fortuneBlocks);
+
+                EnchantmentHelper.setEnchantments(enchantments, pickaxe);
+            }
+
+        } else
+            pickaxe = ItemStack.EMPTY;
+
+    }
+
+    @Override
+    public boolean isBlockAugmented() {
+        return processBlocks;
+    }
+
+    @Override
+    public boolean isCropAugmented() {
+        return processCrops;
+    }
+
+    @Override
+    public boolean isWorldAugmented() {
+        return processDrops;
+    }
+
+    public void setWorldAugmented(boolean augmented) {
+        processDrops = augmented;
     }
 
     public void setInvertAugmented(boolean augmented) {
@@ -442,11 +502,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     public boolean shouldProcessBlocks() {
-        return processBlocks || processCrops;
+        return processDrops || processBlocks || processCrops;
     }
 
     public boolean shouldProcessTiles() {
-        return true;
+        return !processBlocks;
     }
 
     public boolean shouldProcessItems() {
@@ -473,7 +533,14 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                         return null;
                 }
 
-            } else if ( !processBlocks )
+            } else if ( processBlocks ) {
+                if ( inverted == world.isAirBlock(target) )
+                    return null;
+
+            } else if ( processDrops ) {
+                if ( !world.isAirBlock(target) )
+                    return null;
+            } else
                 return null;
 
         } else if ( !InventoryHelper.hasItemHandlerCap(tile, target.getFacing()) )
@@ -516,7 +583,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
             return WorkResult.FAILURE_CONTINUE;
 
-        if ( tile == null ) {
+        if ( tile == null || processBlocks ) {
             if ( gatherTick != 0 )
                 return WorkResult.FAILURE_CONTINUE;
 
@@ -619,12 +686,159 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                     }
                 }
 
-            } else if ( !processBlocks )
+            } else if ( processBlocks ) {
+                if ( inverted ) {
+                    if ( world.isAirBlock(target.pos) )
+                        return WorkResult.FAILURE_REMOVE;
+
+                    WUFakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos);
+                    player.setHeldItem(EnumHand.MAIN_HAND, pickaxe.copy());
+
+                    BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(world, target.pos, state, player);
+                    MinecraftForge.EVENT_BUS.post(event);
+                    if ( event.isCanceled() )
+                        return WorkResult.FAILURE_REMOVE;
+
+                    if ( state.getBlockHardness(world, target.pos) < 0 )
+                        return WorkResult.FAILURE_REMOVE;
+
+                    if ( block.getHarvestLevel(state) > ModConfig.augments.block.harvestLevel )
+                        return WorkResult.FAILURE_REMOVE;
+
+                    NonNullList<ItemStack> drops = NonNullList.create();
+
+                    boolean silky = false;
+                    if ( silkyBlocks && block.canSilkHarvest(world, target.pos, state, player) ) {
+                        ItemStack stack = block.getPickBlock(
+                                state,
+                                new RayTraceResult(new Vec3d(target.pos.getX(), target.pos.getY(), target.pos.getZ()), target.pos.getFacing()),
+                                world,
+                                target.pos,
+                                player
+                        );
+
+                        if ( !stack.isEmpty() ) {
+                            drops.add(stack);
+                            silky = true;
+                        }
+                    }
+
+                    if ( !silky )
+                        block.getDrops(drops, world, target.pos, state, fortuneBlocks);
+
+                    BlockEvent.HarvestDropsEvent harvestEvent = new BlockEvent.HarvestDropsEvent(world, target.pos, state, fortuneBlocks, 1F, drops, player, silky);
+                    MinecraftForge.EVENT_BUS.post(harvestEvent);
+                    if ( harvestEvent.isCanceled() )
+                        return WorkResult.FAILURE_REMOVE;
+
+                    List<ItemStack> finalDrops = harvestEvent.getDrops();
+                    if ( finalDrops != null && !finalDrops.isEmpty() ) {
+                        if ( !canInsertAll(finalDrops) )
+                            return WorkResult.FAILURE_REMOVE;
+
+                        insertAll(finalDrops);
+                    }
+
+                    // Play the sound + particle of a block being broken.
+                    world.playEvent(null, 2001, target.pos, Block.getStateId(state));
+                    world.setBlockToAir(target.pos);
+
+                    activeTargetsPerTick++;
+                    extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                    if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                        return WorkResult.SUCCESS_STOP_REMOVE;
+                    return WorkResult.SUCCESS_REMOVE;
+
+                } else {
+                    if ( !world.isAirBlock(target.pos) )
+                        return WorkResult.FAILURE_REMOVE;
+
+                    int slots = capabilityHandler.getSlots();
+                    for (int i = 0; i < slots; i++) {
+                        int slot = i + getBufferOffset();
+                        ItemStack stack = capabilityHandler.getStackInSlot(i);
+                        if ( stack.isEmpty() )
+                            continue;
+
+                        EnumFacing facing = target.pos.getFacing();
+                        if ( facing == null )
+                            facing = EnumFacing.DOWN;
+
+                        EnumFacing opposite = facing.getOpposite();
+                        FakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos.offset(facing, 2));
+                        if ( isCreative )
+                            stack = stack.copy();
+
+                        player.setHeldItem(EnumHand.MAIN_HAND, stack);
+                        player.rotationYaw = opposite.getHorizontalAngle();
+
+                        EnumActionResult result = ForgeHooks.onPlaceItemIntoWorld(stack, player, world, target.pos, opposite, 0.5F, 0.5F, 0.5F, EnumHand.MAIN_HAND);
+
+                        if ( result == EnumActionResult.SUCCESS ) {
+                            itemsPerTick++;
+                            remainingPerTick--;
+                            activeTargetsPerTick++;
+                            extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                            if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                                return WorkResult.SUCCESS_STOP_REMOVE;
+                            return WorkResult.SUCCESS_REMOVE;
+                        }
+                    }
+
+                    return WorkResult.FAILURE_STOP;
+                }
+
+            } else if ( !processDrops )
                 return WorkResult.FAILURE_REMOVE;
 
-            return WorkResult.FAILURE_REMOVE;
+            if ( inverted ) {
+                List<EntityItem> entityItems = world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(target.pos));
+                if ( entityItems == null || entityItems.isEmpty() )
+                    return WorkResult.FAILURE_CONTINUE;
 
-            /*int slots = itemStackHandler.getSlots();
+                boolean gathered = false;
+                for (EntityItem item : entityItems) {
+                    ItemStack stack = item.getItem().copy();
+                    int count = stack.getCount();
+                    if ( count > itemRatePerTarget ) {
+                        stack.setCount(itemRatePerTarget);
+                        count = itemRatePerTarget;
+                    }
+
+                    if ( count > remainingPerTick ) {
+                        stack.setCount(remainingPerTick);
+                        count = remainingPerTick;
+                    }
+
+                    ItemStack result = InventoryHelper.insertStackIntoInventory(capabilityHandler, stack, false);
+                    int inserted = count - result.getCount();
+                    if ( inserted > 0 ) {
+                        gathered = true;
+                        itemsPerTick += inserted;
+                        remainingPerTick -= inserted;
+                        if ( result.isEmpty() )
+                            item.setDead();
+                        else
+                            item.setItem(result);
+
+                        if ( remainingPerTick <= 0 )
+                            break;
+                    }
+                }
+
+                if ( gathered ) {
+                    extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                    activeTargetsPerTick++;
+                    if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                        return WorkResult.SUCCESS_STOP;
+
+                    return WorkResult.SUCCESS_CONTINUE;
+                }
+
+                return WorkResult.FAILURE_CONTINUE;
+            }
+
+            int slots = itemStackHandler.getSlots();
             for (int i = getBufferOffset(); i < slots; i++) {
                 ItemStack stack = itemStackHandler.getStackInSlot(i);
                 if ( stack.isEmpty() )
@@ -655,51 +869,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 return WorkResult.SUCCESS_CONTINUE;
             }
 
-            return WorkResult.FAILURE_STOP;*/
-
-            /*List<EntityItem> entityItems = world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(target.pos));
-            if ( entityItems == null || entityItems.isEmpty() )
-                return WorkResult.FAILURE_CONTINUE;
-
-            boolean gathered = false;
-            for (EntityItem item : entityItems) {
-                ItemStack stack = item.getItem().copy();
-                int count = stack.getCount();
-                if ( count > itemRatePerTarget ) {
-                    stack.setCount(itemRatePerTarget);
-                    count = itemRatePerTarget;
-                }
-
-                if ( count > remainingPerTick ) {
-                    stack.setCount(remainingPerTick);
-                    count = remainingPerTick;
-                }
-
-                ItemStack result = InventoryHelper.insertStackIntoInventory(capabilityHandler, stack, false);
-                int inserted = count - result.getCount();
-                if ( inserted > 0 ) {
-                    gathered = true;
-                    itemsPerTick += inserted;
-                    remainingPerTick -= inserted;
-                    if ( result.isEmpty() )
-                        item.setDead();
-                    else
-                        item.setItem(result);
-
-                    if ( remainingPerTick <= 0 )
-                        break;
-                }
-            }
-
-            if ( gathered ) {
-                activeTargetsPerTick++;
-                if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
-                    return WorkResult.SUCCESS_STOP;
-
-                return WorkResult.SUCCESS_CONTINUE;
-            }
-
-            return WorkResult.FAILURE_CONTINUE;*/
+            return WorkResult.FAILURE_STOP;
         }
 
         IItemHandler handler = InventoryHelper.getItemHandlerCap(tile, target.pos.getFacing());

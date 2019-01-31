@@ -252,6 +252,7 @@ public class CommonProxy {
         registerItem(event, new ItemCapacityAugment());
         registerItem(event, new ItemTransferAugment());
         registerItem(event, new ItemWorldAugment());
+        registerItem(event, new ItemBlockAugment());
         registerItem(event, new ItemInvertAugment());
         registerItem(event, new ItemCropAugment());
 

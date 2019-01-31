@@ -1,6 +1,8 @@
 package com.lordmau5.wirelessutils.item.augment;
 
 import cofh.api.core.IAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IBlockAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityBaseCondenser;
 import com.lordmau5.wirelessutils.tile.desublimator.TileBaseDesublimator;
@@ -36,6 +38,12 @@ public class ItemWorldAugment extends ItemAugment {
 
     @Override
     public boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
+        if ( augmentable instanceof ICropAugmentable && ((ICropAugmentable) augmentable).isCropAugmented() )
+            return false;
+
+        if ( augmentable instanceof IBlockAugmentable && ((IBlockAugmentable) augmentable).isBlockAugmented() )
+            return false;
+
         return augmentable instanceof IWorldAugmentable;
     }
 }
