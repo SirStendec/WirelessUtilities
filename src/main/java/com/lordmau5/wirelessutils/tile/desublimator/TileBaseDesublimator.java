@@ -4,6 +4,7 @@ import cofh.core.inventory.ComparableItemStackValidatedNBT;
 import cofh.core.network.PacketBase;
 import cofh.core.util.CoreUtils;
 import cofh.core.util.helpers.InventoryHelper;
+import cofh.core.util.helpers.MathHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
@@ -28,10 +29,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemDye;
-import net.minecraft.item.ItemSeeds;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
@@ -141,6 +139,49 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             for (int i = 0; i < locks.length; i++)
                 System.out.println("  " + i + ": " + locks[i]);
         }
+    }
+
+    /* Comparator */
+
+    @Override
+    public int calculateComparatorInput() {
+        if ( capabilityHandler == null )
+            return 0;
+
+        if ( isCreative() ) {
+            if ( inverted )
+                return 0;
+        }
+
+        int slots = itemStackHandler.getSlots();
+        int items = 0;
+        int capacity = 0;
+
+        for (int i = getBufferOffset(); i < slots; i++) {
+            if ( !isSlotUnlocked(i) )
+                continue;
+
+            ItemStack stack = itemStackHandler.getStackInSlot(i);
+            ComparableItemStackValidatedNBT lock = locks[i];
+
+            int slot_max = itemStackHandler.getSlotLimit(i);
+            int max = stack.getMaxStackSize();
+
+            if ( lock != null && lock.stackSize < slot_max )
+                slot_max = lock.stackSize;
+
+            if ( slot_max < max )
+                capacity += slot_max;
+            else
+                capacity += max;
+
+            items += stack.getCount();
+        }
+
+        if ( items == 0 )
+            return 0;
+
+        return 1 + MathHelper.round(items * 14 / (double) capacity);
     }
 
     /* Inventory */
@@ -755,7 +796,6 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
                     int slots = capabilityHandler.getSlots();
                     for (int i = 0; i < slots; i++) {
-                        int slot = i + getBufferOffset();
                         ItemStack stack = capabilityHandler.getStackInSlot(i);
                         if ( stack.isEmpty() )
                             continue;
@@ -771,6 +811,10 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
                         player.setHeldItem(EnumHand.MAIN_HAND, stack);
                         player.rotationYaw = opposite.getHorizontalAngle();
+
+                        Item item = stack.getItem();
+                        if ( item instanceof ItemBed || item instanceof ItemDoor )
+                            opposite = EnumFacing.UP;
 
                         EnumActionResult result = ForgeHooks.onPlaceItemIntoWorld(stack, player, world, target.pos, opposite, 0.5F, 0.5F, 0.5F, EnumHand.MAIN_HAND);
 
@@ -998,11 +1042,13 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
         if ( !redstoneControlOrDisable() ) {
             setActive(false);
+            updateTrackers();
             return;
         }
 
         remainingPerTick = itemRate;
         setActive(worker.performWork());
+        updateTrackers();
     }
 
     /* Capabilities */

@@ -233,6 +233,26 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         };
     }
 
+    /* Comparator */
+
+    @Override
+    public int calculateComparatorInput() {
+        if ( isCreative() ) {
+            if ( inverted )
+                return 0;
+            return 15;
+        }
+
+        if ( tank == null )
+            return 0;
+
+        int fluid = tank.getFluidAmount();
+        if ( fluid == 0 )
+            return 0;
+
+        return 1 + MathHelper.round(fluid * 14 / (double) tank.getCapacity());
+    }
+
     /* Lighting */
 
     private int lightValue;

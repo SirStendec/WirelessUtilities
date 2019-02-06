@@ -15,6 +15,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.VanillaDoubleChestItemHandler;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -25,8 +26,11 @@ public class Worker<T extends TargetInfo> {
     private short cacheTTL = 0;
 
     private List<T> cacheList;
+    private List<T> randomList;
+
     private int cachePosition = -1;
     private boolean cacheInInventory = false;
+    private boolean cacheDidWork = false;
     private int cacheInvPosition = -1;
 
     private final Random random;
@@ -170,6 +174,15 @@ public class Worker<T extends TargetInfo> {
                     cachePosition = cacheList.size() - 1;
             }
         }
+
+        if ( randomList != null ) {
+            if ( provider.getIterationMode() == IWorkProvider.IterationMode.RANDOM ) {
+                randomList.clear();
+                randomList.addAll(cacheList);
+                Collections.shuffle(randomList, random);
+            } else
+                randomList = null;
+        }
     }
 
     /**
@@ -179,29 +192,33 @@ public class Worker<T extends TargetInfo> {
         cacheTTL--;
     }
 
+    public void shuffleRandom() {
+        if ( cacheList == null )
+            return;
+
+        if ( randomList == null )
+            randomList = new ObjectArrayList<>(cacheList);
+
+        Collections.shuffle(randomList, random);
+    }
+
     public boolean performWork() {
         return performWork(ModConfig.performance.stepsPerTick);
     }
 
-    public void incrementTarget(IWorkProvider.IterationMode mode, boolean didWork) {
+    public void incrementTarget(IWorkProvider.IterationMode mode, boolean didWork, boolean didRemove) {
         if ( cacheList == null || cacheList.isEmpty() )
             return;
 
         int size = cacheList.size();
-        if ( mode == IWorkProvider.IterationMode.RANDOM ) {
-            if ( didWork )
-                cachePosition = random.nextInt(cacheList.size());
-            else
-                cachePosition++;
-
-        } else if ( mode == IWorkProvider.IterationMode.FURTHEST_FIRST ) {
-            if ( didWork )
+        if ( mode == IWorkProvider.IterationMode.FURTHEST_FIRST ) {
+            if ( didWork && !didRemove )
                 cachePosition = size - 1;
             else
                 cachePosition--;
 
         } else if ( mode == IWorkProvider.IterationMode.NEAREST_FIRST ) {
-            if ( didWork )
+            if ( didWork && !didRemove )
                 cachePosition = 0;
             else
                 cachePosition++;
@@ -210,23 +227,28 @@ public class Worker<T extends TargetInfo> {
 
         if ( cachePosition < 0 )
             cachePosition = size - 1;
-        if ( cachePosition >= size )
+
+        if ( cachePosition >= size ) {
+            if ( mode == IWorkProvider.IterationMode.RANDOM )
+                shuffleRandom();
+
             cachePosition = 0;
+        }
     }
+
 
     public boolean performWork(int steps) {
         updateTargetCache();
         boolean worked = false;
 
-        if ( cacheList == null || cacheList.isEmpty() )
+        if ( cacheList == null || cacheList.isEmpty() ) {
+            cacheDidWork = false;
             return worked;
+        }
 
         IWorkProvider.IterationMode mode = provider.getIterationMode();
         if ( !cacheInInventory ) {
-            if ( mode == IWorkProvider.IterationMode.RANDOM )
-                cachePosition = random.nextInt(cacheList.size());
-
-            else if ( mode == IWorkProvider.IterationMode.NEAREST_FIRST )
+            if ( mode == IWorkProvider.IterationMode.NEAREST_FIRST )
                 cachePosition = 0;
 
             else if ( mode == IWorkProvider.IterationMode.FURTHEST_FIRST )
@@ -236,10 +258,17 @@ public class Worker<T extends TargetInfo> {
                 cachePosition = 0;
         }
 
+        boolean isRandom = mode == IWorkProvider.IterationMode.RANDOM;
+        if ( isRandom && randomList == null )
+            shuffleRandom();
+
         int startingPosition = cachePosition;
         int loops = 0;
+        boolean didRemove = false;
         boolean didWork = false;
         boolean started = false;
+
+        cacheDidWork = false;
 
         while ( steps > 0 ) {
             loops++;
@@ -248,17 +277,21 @@ public class Worker<T extends TargetInfo> {
 
             if ( !cacheInInventory ) {
                 if ( started ) {
-                    incrementTarget(mode, didWork);
+                    incrementTarget(mode, didWork, didRemove);
 
-                    if ( cachePosition == startingPosition )
+                    if ( cachePosition == startingPosition ) {
+                        if ( worked )
+                            cacheDidWork = true;
+
                         return worked;
+                    }
                 } else
                     started = true;
             }
 
             didWork = false;
 
-            T target = cacheList.get(cachePosition);
+            T target = (isRandom ? randomList : cacheList).get(cachePosition);
             if ( cacheInInventory && (target == null || !target.processInventory) ) {
                 cacheInInventory = false;
                 cacheInvPosition = -1;
@@ -279,6 +312,7 @@ public class Worker<T extends TargetInfo> {
             IBlockState state = world.getBlockState(target.pos);
             TileEntity tile = world.getTileEntity(target.pos);
             boolean keepWorking = true;
+            boolean wasRemoved = false;
 
             if ( tile == null && target.processInventory )
                 target.processInventory = false;
@@ -297,13 +331,17 @@ public class Worker<T extends TargetInfo> {
                 if ( !result.keepProcessing )
                     keepWorking = false;
 
-                if ( result.remove )
+                if ( result.remove ) {
+                    wasRemoved = true;
                     target.processBlock = false;
+                }
             }
 
             if ( target.processInventory && tile != null ) {
                 if ( steps <= 0 || !keepWorking ) {
                     cacheInInventory = true;
+                    if ( worked )
+                        cacheDidWork = true;
                     return worked;
                 }
 
@@ -376,8 +414,10 @@ public class Worker<T extends TargetInfo> {
                         if ( result.remove ) {
                             target.slots[i] = -1;
                             target.liveSlots--;
-                            if ( target.liveSlots <= 0 )
+                            if ( target.liveSlots <= 0 ) {
+                                wasRemoved = true;
                                 target.processInventory = false;
+                            }
                         }
 
                         if ( steps < 1 || !result.keepProcessing ) {
@@ -387,6 +427,9 @@ public class Worker<T extends TargetInfo> {
                             } else
                                 cacheInInventory = false;
 
+                            if ( worked )
+                                cacheDidWork = true;
+
                             return worked;
                         }
                     }
@@ -395,9 +438,15 @@ public class Worker<T extends TargetInfo> {
                 cacheInInventory = false;
             }
 
+            if ( wasRemoved && !target.processBlock && !target.processInventory )
+                didRemove = true;
+
             if ( !keepWorking )
                 return worked;
         }
+
+        if ( worked )
+            cacheDidWork = true;
 
         return worked;
     }

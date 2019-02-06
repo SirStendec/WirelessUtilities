@@ -397,6 +397,7 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         System.out.println("Class: " + getClass().getCanonicalName());
         System.out.println("Level: " + level.toInt() + ": " + level.getName());
         System.out.println("Active: " + isActive);
+        System.out.println("Comparator: " + comparatorState);
         System.out.println("Dismantled: " + wasDismantled);
 
         ItemStack[] augments = getAugmentSlots();
