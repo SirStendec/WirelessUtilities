@@ -1,11 +1,12 @@
 {
 	"homepage": "https://minecraft.curseforge.com/projects/wireless-utilities",
 	"1.12.2": {
+		"1.3": "Added: Relative Positional Card.\nAdded: Comparator output for machines.\nAdded: World Augment in Desublimator drops/picks up items.\nAdded: Block Augment in Desublimator places/breaks blocks.\nChanged: Rename Positional Card to Absolute Positional Card.\nChanged: Condensers with bright fluids now emit light.\nChanged: Clean up different iteration modes to work nicer.\nChanged: AE2 Machines now act as a dense cable. 32 channels vs 8.\nFixed: Rendering work areas at extreme world positions.\n\nFor full changes, see GitHub or CurseForge.",
 		"1.2": "Added: Crop Augment\nAdded: Alternate Iteration Modes (Nearest First, Furthest First, Random, Round Robin)\nAdded: JEI Integration\nFixed: Crash with Charged Pearls falling into water/lava.\nFixed: Issue with Condenser filling/draining items in inventories that turn into other items when filled/drained.\n\nFor full changes, see GitHub or CurseForge.",
 		"1.1": "See GitHub commits for changelog"
 	},
 	"promos": {
-		"1.12.2-latest": "1.2",
-		"1.12.2-recommended": "1.2"
+		"1.12.2-latest": "1.3",
+		"1.12.2-recommended": "1.3"
 	}
 }
