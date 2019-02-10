@@ -109,7 +109,9 @@ public abstract class TileRSNetworkBase<N extends NetworkNodeBase> extends TileE
 
     public void rebuildGraphNetwork() {
         if ( getNode().getNetwork() != null && getNode().getNetwork().getNodeGraph() != null ) {
-            getNode().getNetwork().getNodeGraph().invalidate(Action.PERFORM, getWorld(), getPos());
+            World world = getNode().getNetwork().world();
+            BlockPos pos = getNode().getNetwork().getPosition();
+            getNode().getNetwork().getNodeGraph().invalidate(Action.PERFORM, world, pos);
         }
     }
 
