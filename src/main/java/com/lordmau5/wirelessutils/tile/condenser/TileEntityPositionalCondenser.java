@@ -147,6 +147,7 @@ public class TileEntityPositionalCondenser extends TileEntityBaseCondenser imple
 
         worker.clearTargetCache();
         clearRenderAreas();
+        unloadAllChunks();
 
         BlockPosDimension origin = getPosition();
 
@@ -177,6 +178,9 @@ public class TileEntityPositionalCondenser extends TileEntityBaseCondenser imple
                         slotted.hasDisplayName() ? slotted.getDisplayName() : null,
                         card == itemRelativePositionalCard ? itemRelativePositionalCard.getVector(slotted) : null
                 );
+
+            if ( chunkLoading )
+                loadChunk(target);
 
             validTargets.add(new Tuple<>(target, slotted));
         }

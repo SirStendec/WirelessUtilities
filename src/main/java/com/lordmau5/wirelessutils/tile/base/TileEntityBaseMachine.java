@@ -1,38 +1,64 @@
 package com.lordmau5.wirelessutils.tile.base;
 
+import cofh.core.init.CoreProps;
 import cofh.core.network.PacketBase;
 import cofh.core.util.CoreUtils;
 import cofh.core.util.TimeTracker;
+import cofh.core.util.helpers.SecurityHelper;
+import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.augment.ItemAugment;
+import com.lordmau5.wirelessutils.utils.ChunkManager;
 import com.lordmau5.wirelessutils.utils.ItemStackHandler;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.constants.Properties;
+import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
+import com.mojang.authlib.GameProfile;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import joptsimple.internal.Strings;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PreYggdrasilConverter;
+import net.minecraft.util.Tuple;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.Map;
+import javax.annotation.Nullable;
+import java.util.*;
 
-public abstract class TileEntityBaseMachine extends TileEntityBaseArea implements IUpgradeable, ILevellingBlock {
+public abstract class TileEntityBaseMachine extends TileEntityBaseArea implements ITileInfoProvider, IUpgradeable, ILevellingBlock {
 
+    /* Security */
+    protected GameProfile owner = CoreProps.DEFAULT_OWNER;
+    private Map<Integer, Tuple<Integer, ChunkPos>> loadedChunks = new Int2ObjectOpenHashMap<>();
+    private Map<BlockPosDimension, Integer> loadedByPos = new Object2IntOpenHashMap<>();
+
+    /* Inventory */
     protected ItemStackHandler itemStackHandler;
     protected ItemStack[] augments = new ItemStack[0];
 
+    /* Levels */
     protected Level level = Level.getMinLevel();
     protected boolean isCreative = false;
     protected boolean wasDismantled = false;
 
+    /* Throttling */
     protected final TimeTracker tracker = new TimeTracker();
     private boolean activeCooldown = false;
 
+    /* Compartor-ing */
     private int comparatorState = 0;
 
     @Override
@@ -312,6 +338,176 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         super.blockDismantled();
     }
 
+    /* ITileInfoProvider */
+
+    @Override
+    public List<String> getInfoTooltips(@Nullable NBTTagCompound tag) {
+        List<String> tooltip = new ArrayList<>();
+
+        tooltip.add(new TextComponentTranslation(
+                "info." + WirelessUtils.MODID + ".owner",
+                CoreProps.DEFAULT_OWNER.equals(owner) ?
+                        StringHelper.localize("info." + WirelessUtils.MODID + ".no_owner") :
+                        owner.getName()
+        ).getFormattedText());
+
+        return tooltip;
+    }
+
+    @Override
+    public NBTTagCompound getInfoNBT(NBTTagCompound tag) {
+        return new NBTTagCompound();
+        //return null;
+    }
+
+    /* Chunk Loading */
+
+    public void loadChunk(BlockPosDimension pos) {
+        if ( loadedByPos.containsKey(pos) )
+            return;
+
+        int id = loadChunk(pos.getDimension(), new ChunkPos(pos));
+        if ( id == -1 )
+            return;
+
+        loadedByPos.put(pos, id);
+    }
+
+    public void unloadChunk(BlockPosDimension pos) {
+        if ( !loadedByPos.containsKey(pos) )
+            return;
+
+        unloadChunk(loadedByPos.get(pos));
+        loadedByPos.remove(pos);
+    }
+
+    private int loadChunk(int dimension, ChunkPos chunk) {
+        if ( world == null || world.isRemote )
+            return -1;
+
+        ChunkManager.ChunkRequests requests = ChunkManager.getChunk(dimension, chunk);
+        int id = requests.load(owner);
+        if ( id == -1 )
+            return -1;
+
+        setWatchUnload();
+        loadedChunks.put(id, new Tuple<>(dimension, chunk));
+        return id;
+    }
+
+    private void unloadChunk(int id) {
+        Tuple<Integer, ChunkPos> posTuple = loadedChunks.get(id);
+        if ( posTuple == null )
+            return;
+
+        ChunkManager.ChunkRequests requests = ChunkManager.getChunk(posTuple);
+        loadedChunks.remove(id);
+        requests.unload(id);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unloadAllChunks();
+    }
+
+    public void unloadAllChunks() {
+        loadedByPos.clear();
+        Set<Integer> ids = new IntArraySet(loadedChunks.keySet());
+        for (int id : ids)
+            unloadChunk(id);
+    }
+
+    /* Security */
+    // A lot of this is copied from CoFH Core, but we don't want everything they do.
+
+    public void onOwnerChanged(GameProfile oldOwner) {
+        Set<BlockPosDimension> positions = new ObjectOpenHashSet<>(loadedByPos.keySet());
+        unloadAllChunks();
+        for (BlockPosDimension pos : positions)
+            loadChunk(pos);
+    }
+
+    public GameProfile getOwner() {
+        return owner;
+    }
+
+    public boolean setOwnerName(String name) {
+        if ( !CoreProps.DEFAULT_OWNER.equals(owner) )
+            return false;
+
+        MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+        if ( server == null )
+            return false;
+
+        if ( Strings.isNullOrEmpty(name) || CoreProps.DEFAULT_OWNER.getName().equalsIgnoreCase(name) )
+            return false;
+
+        String uuid = PreYggdrasilConverter.convertMobOwnerIfNeeded(server, name);
+        if ( Strings.isNullOrEmpty(uuid) )
+            return false;
+
+        return setOwner(new GameProfile(UUID.fromString(uuid), name));
+    }
+
+    public boolean setOwner(GameProfile profile) {
+        if ( !CoreProps.DEFAULT_OWNER.equals(owner) )
+            return false;
+
+        if ( SecurityHelper.isDefaultUUID(owner.getId()) ) {
+            owner = profile;
+            if ( !SecurityHelper.isDefaultUUID(owner.getId()) ) {
+                if ( FMLCommonHandler.instance().getMinecraftServerInstance() != null ) {
+                    new Thread("CoFH User Loader") {
+                        @Override
+                        public void run() {
+                            owner = SecurityHelper.getProfile(owner.getId(), owner.getName());
+                        }
+                    }.start();
+                }
+
+                if ( world != null && !world.isRemote ) {
+                    markChunkDirty();
+                    sendTilePacket(Side.CLIENT);
+                }
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void readOwnerFromNBT(NBTTagCompound tag) {
+        GameProfile oldOwner = owner;
+        owner = CoreProps.DEFAULT_OWNER;
+
+        String name = tag.getString("Owner");
+        UUID uuid = tag.hasKey("OwnerUUID") ? tag.getUniqueId("OwnerUUID") : null;
+
+        if ( uuid != null || !Strings.isNullOrEmpty(name) ) {
+            GameProfile profile = new GameProfile(uuid, name);
+            if ( !owner.equals(profile) ) {
+                if ( uuid != null )
+                    setOwner(profile);
+                else if ( !Strings.isNullOrEmpty(name) )
+                    setOwnerName(name);
+            }
+        }
+
+        if ( !owner.equals(oldOwner) )
+            onOwnerChanged(oldOwner);
+    }
+
+    public void writeOwnerToNBT(NBTTagCompound tag) {
+        if ( CoreProps.DEFAULT_OWNER.equals(owner) )
+            return;
+
+        tag.setString("Owner", owner.getName());
+        tag.setUniqueId("OwnerUUID", owner.getId());
+    }
+
+
     /* NBT Save and Load */
 
     @Override
@@ -319,6 +515,7 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         // These need to happen before we read extra, so do
         // these before the super call.
         readLevelFromNBT(tag);
+        readOwnerFromNBT(tag);
         readAugmentsFromNBT(tag);
         updateAugmentStatus();
 
@@ -329,6 +526,7 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         super.writeToNBT(tag);
         writeLevelToNBT(tag);
+        writeOwnerToNBT(tag);
         writeAugmentsToNBT(tag);
         return tag;
     }
@@ -381,6 +579,8 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     public PacketBase getTilePacket() {
         PacketBase payload = super.getTilePacket();
         payload.addByte(level.ordinal());
+        payload.addUUID(owner.getId());
+        payload.addString(owner.getName());
         return payload;
     }
 
@@ -389,6 +589,12 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     public void handleTilePacket(PacketBase payload) {
         super.handleTilePacket(payload);
         setLevel(payload.getByte());
+
+        GameProfile oldOwner = owner;
+        owner = CoreProps.DEFAULT_OWNER;
+        setOwner(new GameProfile(payload.getUUID(), payload.getString()));
+        if ( !owner.equals(oldOwner) )
+            onOwnerChanged(oldOwner);
     }
 
     /* Debugging */
@@ -397,6 +603,7 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         System.out.println("Class: " + getClass().getCanonicalName());
         System.out.println("Level: " + level.toInt() + ": " + level.getName());
         System.out.println("Active: " + isActive);
+        System.out.println("Owner: " + owner.getName() + "#" + owner.getId());
         System.out.println("Comparator: " + comparatorState);
         System.out.println("Dismantled: " + wasDismantled);
 

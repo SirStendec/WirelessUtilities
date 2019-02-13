@@ -81,6 +81,10 @@ public class PluginRegistry {
         plugins.values().forEach(plugin -> plugin.registerItems(event));
     }
 
+    public static void registerRecipes() {
+        plugins.values().forEach(plugin -> plugin.registerRecipes());
+    }
+
     @SideOnly(Side.CLIENT)
     public static void registerModels(ModelRegistryEvent event) {
         plugins.values().forEach(plugin -> plugin.registerModels(event));

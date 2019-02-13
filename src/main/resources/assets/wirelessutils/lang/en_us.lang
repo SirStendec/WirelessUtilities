@@ -153,6 +153,12 @@ item.wirelessutils.inventory_augment.info.1=operate on items within the inventor
 item.wirelessutils.inventory_augment.info.2=of blocks in addition to the blocks
 item.wirelessutils.inventory_augment.info.3=themselves.
 
+item.wirelessutils.chunk_load_augment.name=Chunk Loading Augment
+item.wirelessutils.chunk_load_augment.info.0=This augment causes a machine to
+item.wirelessutils.chunk_load_augment.info.1=force all of its targets to stay
+item.wirelessutils.chunk_load_augment.info.2=loaded at all times as long as the
+item.wirelessutils.chunk_load_augment.info.3=machine itself remains loaded.
+
 item.wirelessutils.slot_augment.name=Target Slot Augment
 item.wirelessutils.slot_augment.info.0=This augment increases the number of
 item.wirelessutils.slot_augment.info.1=slots available for Positional Cards
@@ -257,6 +263,9 @@ btn.wirelessutils.dec_area.one=Decrease by %s
 btn.wirelessutils.dec_area.all=Decrease all by %s
 btn.wirelessutils.inc_area.one=Increase by %s
 btn.wirelessutils.inc_area.all=Increase all by %s
+
+info.wirelessutils.owner=Owner: %s
+info.wirelessutils.no_owner=(Not Set)
 
 info.wirelessutils.round_robin.name=Round Robin
 info.wirelessutils.round_robin.per_target=Per Target:

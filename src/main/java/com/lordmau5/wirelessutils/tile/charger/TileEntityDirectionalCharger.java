@@ -163,11 +163,18 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
         int dimension = origin.getDimension();
         EnumFacing facing = getEnumFacing().getOpposite();
 
+        unloadAllChunks();
+
         for (BlockPos target : BlockPos.getAllInBox(corners.getFirst(), corners.getSecond())) {
             if ( target.equals(pos) )
                 continue;
 
-            validTargets.add(new Tuple<>(new BlockPosDimension(target, dimension, facing), ItemStack.EMPTY));
+            BlockPosDimension bpd = new BlockPosDimension(target, dimension, facing);
+
+            if ( chunkLoading )
+                loadChunk(bpd);
+
+            validTargets.add(new Tuple<>(bpd, ItemStack.EMPTY));
         }
 
         ITargetProvider.sortTargetList(origin, validTargets);

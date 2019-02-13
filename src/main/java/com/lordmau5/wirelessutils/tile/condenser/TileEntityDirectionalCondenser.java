@@ -150,6 +150,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
         if ( world == null || pos == null || world.provider == null || !world.isBlockLoaded(pos) )
             return;
 
+        unloadAllChunks();
         clearRenderAreas();
         worker.clearTargetCache();
 
@@ -168,7 +169,11 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
             if ( target.equals(pos) )
                 continue;
 
-            validTargets.add(new Tuple<>(new BlockPosDimension(target, dimension, facing), ItemStack.EMPTY));
+            BlockPosDimension bpd = new BlockPosDimension(target, dimension, facing);
+            if ( chunkLoading )
+                loadChunk(bpd);
+
+            validTargets.add(new Tuple<>(bpd, ItemStack.EMPTY));
         }
 
         ITargetProvider.sortTargetList(origin, validTargets);

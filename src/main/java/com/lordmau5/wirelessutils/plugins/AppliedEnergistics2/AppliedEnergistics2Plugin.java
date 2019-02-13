@@ -8,11 +8,13 @@ import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional.TilePositionalAENetwork;
 import com.lordmau5.wirelessutils.plugins.IPlugin;
 import com.lordmau5.wirelessutils.proxy.CommonProxy;
+import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
 import com.lordmau5.wirelessutils.utils.ColorHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.event.RegistryEvent;
@@ -23,6 +25,15 @@ public class AppliedEnergistics2Plugin implements IPlugin {
     public static BlockDirectionalAENetwork blockDirectionalRSNetwork;
 
     public static BlockPositionalAENetwork blockPositionalRSNetwork;
+
+    @GameRegistry.ObjectHolder("appliedenergistics2:quartz_ore")
+    public static Item itemQuartzOre;
+
+    @GameRegistry.ObjectHolder("appliedenergistics2:charged_quartz_ore")
+    public static Item itemChargedQuartzOre;
+
+    @GameRegistry.ObjectHolder("appliedenergistics2:material")
+    public static Item itemMaterial;
 
     @Override
     public void postInit(FMLPostInitializationEvent event) {
@@ -45,6 +56,15 @@ public class AppliedEnergistics2Plugin implements IPlugin {
     public void registerItems(RegistryEvent.Register<Item> event) {
         CommonProxy.registerItem(event, new ItemBlockMachine(blockDirectionalRSNetwork).setRegistryName(blockDirectionalRSNetwork.getRegistryName()));
         CommonProxy.registerItem(event, new ItemBlockMachine(blockPositionalRSNetwork).setRegistryName(blockPositionalRSNetwork.getRegistryName()));
+    }
+
+    @Override
+    public void registerRecipes() {
+        if ( itemQuartzOre != null && itemChargedQuartzOre != null )
+            ChargerRecipeManager.addRecipe(itemQuartzOre, itemChargedQuartzOre, 8000);
+
+        if ( itemMaterial != null )
+            ChargerRecipeManager.addRecipe(new ItemStack(itemMaterial, 1, 0), new ItemStack(itemMaterial, 1, 1), 8000);
     }
 
     @Override

@@ -29,10 +29,7 @@ import com.lordmau5.wirelessutils.tile.condenser.TileEntityDirectionalCondenser;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityPositionalCondenser;
 import com.lordmau5.wirelessutils.tile.desublimator.TileDirectionalDesublimator;
 import com.lordmau5.wirelessutils.tile.desublimator.TilePositionalDesublimator;
-import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
-import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
-import com.lordmau5.wirelessutils.utils.EventDispatcher;
-import com.lordmau5.wirelessutils.utils.WUFakePlayer;
+import com.lordmau5.wirelessutils.utils.*;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
@@ -83,6 +80,7 @@ public class CommonProxy {
         ModItems.initRecipes();
 
         PluginRegistry.init(e);
+        PluginRegistry.registerRecipes();
     }
 
     public void postInit(FMLPostInitializationEvent e) {
@@ -102,7 +100,11 @@ public class CommonProxy {
     @SubscribeEvent
     public static void onWorldUnload(WorldEvent.Unload event) {
         World world = event.getWorld();
-        WUFakePlayer.removeFakePlayer(world);
+        if ( world != null ) {
+            WUFakePlayer.removeFakePlayer(world);
+            ChunkManager.unloadWorld(world.provider.getDimension());
+        }
+
         EventDispatcher.WORLD_UNLOAD.dispatchEvent(event);
     }
 
@@ -255,6 +257,7 @@ public class CommonProxy {
         registerItem(event, new ItemBlockAugment());
         registerItem(event, new ItemInvertAugment());
         registerItem(event, new ItemCropAugment());
+        registerItem(event, new ItemChunkLoadAugment());
 
         PluginRegistry.registerItems(event);
     }

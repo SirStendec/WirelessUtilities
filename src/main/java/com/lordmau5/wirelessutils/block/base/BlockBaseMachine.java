@@ -128,6 +128,11 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
             TileEntityBaseMachine machine = (TileEntityBaseMachine) te;
             machine.setLevel(stack.getMetadata());
 
+            if ( placer instanceof EntityPlayer ) {
+                EntityPlayer player = (EntityPlayer) placer;
+                machine.setOwner(player.getGameProfile());
+            }
+
             NBTTagCompound tag = stack.getTagCompound();
             if ( tag != null ) {
                 if ( tag.hasKey("BlockEntityTag") )

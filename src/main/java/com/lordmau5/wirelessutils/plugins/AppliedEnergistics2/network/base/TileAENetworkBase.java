@@ -8,10 +8,7 @@ import appeng.api.util.AECableType;
 import appeng.api.util.AEColor;
 import appeng.api.util.AEPartLocation;
 import appeng.api.util.DimensionalCoord;
-import cofh.core.util.helpers.StringHelper;
-import com.google.common.collect.Lists;
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.ITileInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
@@ -24,7 +21,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
@@ -309,12 +305,12 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
 
     @Override
     public List<String> getInfoTooltips(@Nullable NBTTagCompound tag) {
-        List<String> tooltips = Lists.newArrayList();
+        List<String> tooltips = super.getInfoTooltips(tag);
 
         boolean dense = ModConfig.plugins.appliedEnergistics.denseCableConnection;
 
-        if (tag == null) {
-            if (getNode() != null && getNode().isActive()) {
+        if ( tag == null ) {
+            if ( getNode() != null && getNode().isActive() ) {
                 tag = new NBTTagCompound();
                 writeToNBT(tag);
                 lastUsedChannels = tag.getByte("channels");
@@ -333,7 +329,7 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         NBTTagCompound tempTag = new NBTTagCompound();
         writeToNBT(tempTag);
 
-        if(tempTag.hasKey("channels")) {
+        if ( tempTag.hasKey("channels") ) {
             byte usedChannels = tempTag.getByte("channels");
             tag.setByte("channels", usedChannels);
         }

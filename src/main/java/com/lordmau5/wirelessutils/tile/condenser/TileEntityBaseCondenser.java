@@ -51,7 +51,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy implements IRoundRobinMachine, IWorldAugmentable, ITransferAugmentable, ICapacityAugmentable, IInventoryAugmentable, IInvertAugmentable, ITickable, IWorkProvider<TileEntityBaseCondenser.CondenserTarget> {
+public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy implements IChunkLoadAugmentable, IRoundRobinMachine, IWorldAugmentable, ITransferAugmentable, ICapacityAugmentable, IInventoryAugmentable, IInvertAugmentable, ITickable, IWorkProvider<TileEntityBaseCondenser.CondenserTarget> {
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
@@ -67,6 +67,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     private int capacityAugment;
     private int transferAugment;
     private boolean inverted;
+    protected boolean chunkLoading;
 
     private int fluidRate;
     private int fluidMaxRate;
@@ -515,6 +516,16 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     @Override
     public boolean isInverted() {
         return inverted;
+    }
+
+    @Override
+    public void setChunkLoadAugmented(boolean augmented) {
+        if ( chunkLoading == augmented )
+            return;
+
+        chunkLoading = augmented;
+        if ( world != null && !world.isRemote )
+            calculateTargets();
     }
 
     @Override

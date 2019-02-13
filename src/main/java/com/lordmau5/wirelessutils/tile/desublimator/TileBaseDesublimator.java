@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implements
-        IWorldAugmentable, IBlockAugmentable,
+        IWorldAugmentable, IBlockAugmentable, IChunkLoadAugmentable,
         ICropAugmentable, IInvertAugmentable, ITransferAugmentable, ICapacityAugmentable,
         IUnlockableSlots, IRoundRobinMachine, ITickable,
         IWorkProvider<TileBaseDesublimator.DesublimatorTarget> {
@@ -87,6 +87,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     private int validTargetsPerTick;
     private int maxEnergyPerTick;
 
+    protected boolean chunkLoading = false;
     private boolean inverted = false;
     private boolean processDrops = false;
     private boolean processBlocks = false;
@@ -387,6 +388,16 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     public void setWorldAugmented(boolean augmented) {
         processDrops = augmented;
+    }
+
+    @Override
+    public void setChunkLoadAugmented(boolean augmented) {
+        if ( chunkLoading == augmented )
+            return;
+
+        chunkLoading = augmented;
+        if ( world != null && !world.isRemote )
+            calculateTargets();
     }
 
     public void setInvertAugmented(boolean augmented) {

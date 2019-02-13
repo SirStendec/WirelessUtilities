@@ -96,6 +96,9 @@ public class ModItems {
     @GameRegistry.ObjectHolder("wirelessutils:crop_augment")
     public static ItemCropAugment itemCropAugment;
 
+    @GameRegistry.ObjectHolder("wirelessutils:chunk_load_augment")
+    public static ItemChunkLoadAugment itemChunkLoadAugment;
+
     public static void initLootTables() {
         LootTableList.register(new ResourceLocation(WirelessUtils.MODID, "charged_pearl_drops"));
     }
@@ -165,6 +168,7 @@ public class ModItems {
         itemInvertAugment.initModel();
         itemBlockAugment.initModel();
         itemCropAugment.initModel();
+        itemChunkLoadAugment.initModel();
     }
 
     @SideOnly(Side.CLIENT)

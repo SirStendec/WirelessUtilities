@@ -7,10 +7,7 @@ import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
 import com.lordmau5.wirelessutils.tile.base.Worker;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IInventoryAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.*;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.location.TargetInfo;
@@ -33,12 +30,13 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy implements IInvertAugmentable, IRoundRobinMachine, ICapacityAugmentable, ITransferAugmentable, IInventoryAugmentable, ITickable, IWorkProvider<TileEntityBaseCharger.ChargerTarget> {
+public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy implements IChunkLoadAugmentable, IInvertAugmentable, IRoundRobinMachine, ICapacityAugmentable, ITransferAugmentable, IInventoryAugmentable, ITickable, IWorkProvider<TileEntityBaseCharger.ChargerTarget> {
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
 
     private boolean inverted = false;
+    protected boolean chunkLoading = false;
 
     protected long transferLimit = -1;
     protected int capacityAugment = 0;
@@ -107,6 +105,16 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     @Override
     public boolean isInverted() {
         return inverted;
+    }
+
+    @Override
+    public void setChunkLoadAugmented(boolean augmented) {
+        if ( augmented == chunkLoading )
+            return;
+
+        chunkLoading = augmented;
+        if ( world != null && !world.isRemote )
+            calculateTargets();
     }
 
     @Override
@@ -564,6 +572,10 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
             craftingTicks = 0;
 
         long total = getFullMaxEnergyPerTick();
+        long stored = getFullEnergyStored();
+        if ( stored < total )
+            total = stored;
+
         remainingPerTick = total;
         activeTargetsPerTick = 0;
         setActive(worker.performWork());

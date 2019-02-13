@@ -160,6 +160,7 @@ public class TilePositionalDesublimator extends TileBaseDesublimator implements 
 
         worker.clearTargetCache();
         clearRenderAreas();
+        unloadAllChunks();
 
         BlockPosDimension origin = getPosition();
 
@@ -190,6 +191,9 @@ public class TilePositionalDesublimator extends TileBaseDesublimator implements 
                         slotted.hasDisplayName() ? slotted.getDisplayName() : null,
                         card == itemRelativePositionalCard ? itemRelativePositionalCard.getVector(slotted) : null
                 );
+
+            if ( chunkLoading )
+                loadChunk(target);
 
             validTargets.add(new Tuple<>(target, slotted));
         }

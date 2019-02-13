@@ -33,6 +33,10 @@ public interface IPlugin {
 
     }
 
+    default void registerRecipes() {
+
+    }
+
     @SideOnly(Side.CLIENT)
     default void registerModels(ModelRegistryEvent event) {
 
