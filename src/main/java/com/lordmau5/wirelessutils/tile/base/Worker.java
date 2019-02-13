@@ -314,8 +314,6 @@ public class Worker<T extends TargetInfo> {
             boolean keepWorking = true;
             boolean wasRemoved = false;
 
-            tile.isInvalid()
-
             if ( tile == null && target.processInventory )
                 target.processInventory = false;
 
