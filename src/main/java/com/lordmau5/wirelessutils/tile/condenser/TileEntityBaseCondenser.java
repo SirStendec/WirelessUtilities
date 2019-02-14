@@ -76,6 +76,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     private FluidStack craftingFluid = null;
     private int craftingTicks = 0;
+    private byte gatherTick = 0;
 
     private int remainingPerTick;
     private int fluidPerTick;
@@ -611,7 +612,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             markChunkDirty();
     }
 
-    public CondenserTarget createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
+    public CondenserTarget createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile) {
+        return new CondenserTarget(target, tile, getEnergyCost(target, source));
+    }
+
+    public int getEnergyCost(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
         int cost = -1;
 
         if ( !source.isEmpty() ) {
@@ -623,7 +628,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( cost == -1 )
             cost = getEnergyCost(target);
 
-        return new CondenserTarget(target, cost);
+        return cost;
     }
 
     public int getEnergyCost(@Nonnull BlockPosDimension target) {
@@ -665,53 +670,55 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         return new BlockPosDimension(getPos(), getWorld().provider.getDimension());
     }
 
-    @Override
-    public CondenserTarget canWork(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, TileEntity tile) {
-        if ( tile == null ) {
-            if ( fluidRate < Fluid.BUCKET_VOLUME )
-                return null;
+    public boolean canWorkBlock(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nullable TileEntity tile) {
+        if ( fluidRate < Fluid.BUCKET_VOLUME )
+            return false;
 
-            Material material = block.getMaterial();
-            if ( inverted ) {
-                if ( !material.isLiquid() )
-                    return null;
+        Material material = block.getMaterial();
+        if ( inverted ) {
+            if ( !material.isLiquid() )
+                return false;
 
-                IFluidHandler handler = getHandlerForBlock(world, target, block);
-                if ( handler == null )
-                    return null;
+            IFluidHandler handler = getHandlerForBlock(world, target, block);
+            if ( handler == null )
+                return false;
 
-                IFluidTankProperties[] properties = handler.getTankProperties();
-                if ( properties == null || properties.length != 1 || !properties[0].canDrain() )
-                    return null;
+            IFluidTankProperties[] properties = handler.getTankProperties();
+            if ( properties == null || properties.length != 1 || !properties[0].canDrain() )
+                return false;
 
-                FluidStack stack = tank.getFluid();
-                if ( stack != null && stack.amount > tank.getCapacity() - Fluid.BUCKET_VOLUME )
-                    return null;
+            FluidStack stack = tank.getFluid();
+            if ( stack != null && stack.amount > tank.getCapacity() - Fluid.BUCKET_VOLUME )
+                return false;
 
-                FluidStack other = properties[0].getContents();
-                if ( other == null || other.amount < Fluid.BUCKET_VOLUME || (stack != null && !stack.isFluidEqual(other)) )
-                    return null;
+            FluidStack other = properties[0].getContents();
+            if ( other == null || other.amount < Fluid.BUCKET_VOLUME || (stack != null && !stack.isFluidEqual(other)) )
+                return false;
 
-            } else {
-                if ( !world.isAirBlock(target) && material.isSolid() && !block.getBlock().isReplaceable(world, pos) )
-                    return null;
+        } else {
+            if ( !world.isAirBlock(target) && material.isSolid() && !block.getBlock().isReplaceable(world, pos) )
+                return false;
 
-                FluidStack stack = tank.getFluid();
-                if ( stack == null || stack.amount < Fluid.BUCKET_VOLUME || stack.getFluid() == null || !stack.getFluid().canBePlacedInWorld() )
-                    return null;
-            }
-
-        } else if ( !tile.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, target.getFacing()) )
-            return null;
+            FluidStack stack = tank.getFluid();
+            if ( stack == null || stack.amount < Fluid.BUCKET_VOLUME || stack.getFluid() == null || !stack.getFluid().canBePlacedInWorld() )
+                return false;
+        }
 
         validTargetsPerTick++;
-        CondenserTarget out = createInfo(target, source);
-        maxEnergyPerTick += level.baseEnergyPerOperation + out.cost;
-        return out;
+        maxEnergyPerTick += level.baseEnergyPerOperation + getEnergyCost(target, source);
+        return true;
     }
 
-    @Override
-    public boolean canWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nonnull TileEntity tile) {
+    public boolean canWorkTile(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
+        if ( !tile.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, target.getFacing()) )
+            return false;
+
+        validTargetsPerTick++;
+        maxEnergyPerTick += level.baseEnergyPerOperation + getEnergyCost(target, source);
+        return true;
+    }
+
+    public boolean canWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
         if ( stack.isEmpty() )
             return false;
 
@@ -751,7 +758,10 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     @Nonnull
-    public WorkResult performWork(@Nonnull CondenserTarget target, @Nonnull World world, @Nonnull IBlockState state, TileEntity tile) {
+    public WorkResult performWorkBlock(@Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile) {
+        if ( gatherTick != 0 )
+            return WorkResult.FAILURE_CONTINUE;
+
         if ( getEnergyStored() < level.baseEnergyPerOperation )
             return WorkResult.FAILURE_STOP;
         else if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
@@ -766,46 +776,61 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                 return WorkResult.FAILURE_STOP;
         }
 
-        if ( tile == null ) {
-            if ( !processBlocks )
+        if ( state == null )
+            state = world.getBlockState(target.pos);
+
+        IFluidHandler handler = getHandlerForBlock(world, target.pos, state);
+        if ( handler != null ) {
+            IFluidTankProperties[] properties = handler.getTankProperties();
+            if ( properties == null || properties.length != 1 )
                 return WorkResult.FAILURE_REMOVE;
 
-            IFluidHandler handler = getHandlerForBlock(world, target.pos, state);
-            if ( handler != null ) {
-                IFluidTankProperties[] properties = handler.getTankProperties();
-                if ( properties == null || properties.length != 1 )
+            FluidStack contained = properties[0].getContents();
+
+            if ( inverted ) {
+                if ( contained == null || contained.amount < Fluid.BUCKET_VOLUME )
                     return WorkResult.FAILURE_REMOVE;
 
-                FluidStack contained = properties[0].getContents();
-
-                if ( inverted ) {
-                    if ( contained == null || contained.amount < Fluid.BUCKET_VOLUME )
-                        return WorkResult.FAILURE_REMOVE;
-
-                    if ( stack != null && !contained.isFluidEqual(stack) )
-                        return WorkResult.FAILURE_REMOVE;
-
-                    return fillContainer(handler, target.cost);
-                }
-
-                if ( contained != null && contained.amount == properties[0].getCapacity() )
+                if ( stack != null && !contained.isFluidEqual(stack) )
                     return WorkResult.FAILURE_REMOVE;
+
+                return fillContainer(handler, target.cost);
             }
 
-            if ( inverted )
+            if ( contained != null && contained.amount == properties[0].getCapacity() )
                 return WorkResult.FAILURE_REMOVE;
+        }
 
-            if ( FluidUtil.tryPlaceFluid(null, world, target.pos, internalHandler, tank.getFluid()) ) {
-                activeTargetsPerTick++;
-                extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-
-                if ( remainingPerTick > 0 )
-                    return WorkResult.SUCCESS_REMOVE;
-
-                return WorkResult.SUCCESS_STOP_REMOVE;
-            }
-
+        if ( inverted )
             return WorkResult.FAILURE_REMOVE;
+
+        if ( FluidUtil.tryPlaceFluid(null, world, target.pos, internalHandler, tank.getFluid()) ) {
+            activeTargetsPerTick++;
+            extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+
+            if ( remainingPerTick > 0 )
+                return WorkResult.SUCCESS_REMOVE;
+
+            return WorkResult.SUCCESS_STOP_REMOVE;
+        }
+
+        return WorkResult.FAILURE_REMOVE;
+    }
+
+    @Nonnull
+    public WorkResult performWorkTile(@Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile) {
+        if ( getEnergyStored() < level.baseEnergyPerOperation )
+            return WorkResult.FAILURE_STOP;
+        else if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
+            return WorkResult.FAILURE_CONTINUE;
+
+        FluidStack stack = tank.getFluid();
+        if ( inverted ) {
+            if ( stack != null && stack.amount >= tank.getCapacity() )
+                return WorkResult.FAILURE_STOP;
+        } else {
+            if ( stack == null || stack.amount <= 0 )
+                return WorkResult.FAILURE_STOP;
         }
 
         IFluidHandler handler = tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, target.pos.getFacing());
@@ -816,7 +841,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     @Nonnull
-    public WorkResult performWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull CondenserTarget target, @Nonnull World world, @Nonnull IBlockState state, @Nonnull TileEntity tile) {
+    public WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile) {
         if ( stack.isEmpty() )
             return WorkResult.FAILURE_REMOVE;
 
@@ -967,6 +992,10 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     public void update() {
         worker.tickDown();
+
+        gatherTick--;
+        if ( gatherTick < 0 )
+            gatherTick = 10;
 
         if ( !redstoneControlOrDisable() ) {
             setActive(false);
@@ -1158,8 +1187,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         public final int cost;
         public boolean canCraft = true;
 
-        public CondenserTarget(BlockPosDimension target, int cost) {
-            super(target);
+        public CondenserTarget(BlockPosDimension target, TileEntity tile, int cost) {
+            super(target, tile);
             this.cost = cost;
         }
 

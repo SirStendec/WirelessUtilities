@@ -9,6 +9,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
     /**
@@ -52,23 +53,34 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
      *
      * @param target The location of the prospective target.
      * @param source The ItemStack of the positional card responsible for this target. EMPTY if not applicable.
+     * @param world  The world the target is in.
+     * @param block  The block state of the prospective target. May be null if getProcessBlocks returned false.
+     * @param tile   A TileEntity found at that location that should be stored. May be null.
      * @return
      */
-    T createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source);
+    T createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nullable TileEntity tile);
 
     /**
-     * Determine whether or not we can perform work on the provided
-     * block and tile entity. Expected to return an instance of TargetInfo
-     * if we can work, otherwise null.
+     * Determine whether or not we can perform work on the provided block.
      *
      * @param target The location of the prospective target.
      * @param source The ItemStack of the positional card responsible for this target. EMPTY if not applicable.
      * @param world  The world the target is in.
      * @param block  The block state of the prospective target.
-     * @param tile   The tile entity of the prospective target. May be null if getProcessBlocks returns true.
-     * @return An instance of TargetInfo if we can work on that target, otherwise false.
+     * @param tile   The tile entity of the prospective target. May be null.
      */
-    T canWork(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, TileEntity tile);
+    boolean canWorkBlock(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nullable TileEntity tile);
+
+    /**
+     * Determine whether or not we can perform work on the provided tile entity.
+     *
+     * @param target The location of the prospective target.
+     * @param source The ItemStack of the positional card responsible for this target. EMPTY if not applicable.
+     * @param world  The world the target is in.
+     * @param block  The block state of the prospective target. May be null.
+     * @param tile   The tile entity of the prospective target.
+     */
+    boolean canWorkTile(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile);
 
     /**
      * Determine whether or not we can perform work on the provided
@@ -80,23 +92,37 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
      * @param target    The location of the target containing the item stack.
      * @param source    The ItemStack of the positional card responsible for this target. EMPTY if not applicable.
      * @param world     The world the target is in.
-     * @param block     The block state of the target containing the item stack.
+     * @param block     The block state of the target containing the item stack. May be null.
      * @param tile      The tile entity of the target containing the item stack.
      * @return True if we should try working on that item stack.
      */
-    boolean canWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nonnull TileEntity tile);
+    boolean canWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile);
 
     /**
-     * Attempt to perform work on the provided target.
+     * Attempt to perform work on the provided block.
      *
      * @param target The TargetInfo returned from canWork.
      * @param world  The world the target is in.
-     * @param state  The block state of the target.
+     * @param state  The block state of the target. This may be
+     *               null for performance reasons, requiring you
+     *               to look up the blockstate yourself.
+     * @param tile   The tile entity of the target. May be null.
+     * @return
+     */
+    @Nonnull
+    WorkResult performWorkBlock(@Nonnull T target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile);
+
+    /**
+     * Attempt to perform work on the provided tile.
+     *
+     * @param target The TargetInfo returned from canWork.
+     * @param world  The world the target is in.
+     * @param state  The block state of the target. May be null.
      * @param tile   The tile entity of the target.
      * @return
      */
     @Nonnull
-    WorkResult performWork(@Nonnull T target, @Nonnull World world, @Nonnull IBlockState state, TileEntity tile);
+    WorkResult performWorkTile(@Nonnull T target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile);
 
     /**
      * Attempt to perform work on the provided item stack for
@@ -107,12 +133,12 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
      * @param inventory The inventory containing the item stack.
      * @param target    A TargetInfo instance for the target containing this item.
      * @param world     The world the target is in.
-     * @param state     The block state of the target's containing block.
+     * @param state     The block state of the target's containing block. May be null.
      * @param tile      The tile entity of the target's containing block.
      * @return
      */
     @Nonnull
-    WorkResult performWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull T target, @Nonnull World world, @Nonnull IBlockState state, @Nonnull TileEntity tile);
+    WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull T target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile);
 
 
     enum IterationMode {

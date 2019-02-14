@@ -28,6 +28,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy implements IChunkLoadAugmentable, IInvertAugmentable, IRoundRobinMachine, ICapacityAugmentable, ITransferAugmentable, IInventoryAugmentable, ITickable, IWorkProvider<TileEntityBaseCharger.ChargerTarget> {
@@ -382,7 +383,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     }
 
     @Override
-    public ChargerTarget createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
+    public ChargerTarget createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nullable TileEntity tile) {
         int cost = -1;
 
         if ( !source.isEmpty() ) {
@@ -394,18 +395,27 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         if ( cost == -1 )
             cost = getEnergyCost(target);
 
-        return new ChargerTarget(target, cost);
+        return new ChargerTarget(target, tile, cost);
     }
 
-    public ChargerTarget canWork(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, TileEntity tile) {
-        if ( tile == null || !tile.hasCapability(CapabilityEnergy.ENERGY, target.getFacing()) )
-            return null;
+    public boolean canWorkBlock(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nullable TileEntity tile) {
+        return false;
+    }
+
+    @Nonnull
+    public WorkResult performWorkBlock(@Nonnull ChargerTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile) {
+        return null;
+    }
+
+    public boolean canWorkTile(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
+        if ( !tile.hasCapability(CapabilityEnergy.ENERGY, target.getFacing()) )
+            return false;
 
         validTargetsPerTick++;
-        return createInfo(target, source);
+        return true;
     }
 
-    public boolean canWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nonnull TileEntity tile) {
+    public boolean canWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
         if ( stack.isEmpty() )
             return false;
 
@@ -418,10 +428,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     }
 
     @Nonnull
-    public WorkResult performWork(@Nonnull ChargerTarget target, @Nonnull World world, @Nonnull IBlockState state, TileEntity tile) {
-        if ( tile == null )
-            return WorkResult.FAILURE_REMOVE;
-
+    public WorkResult performWorkTile(@Nonnull ChargerTarget target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile) {
         IEnergyStorage storage = tile.getCapability(CapabilityEnergy.ENERGY, target.pos.getFacing());
         if ( storage == null )
             return WorkResult.FAILURE_REMOVE;
@@ -430,8 +437,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     }
 
     @Nonnull
-    @Override
-    public WorkResult performWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull ChargerTarget target, @Nonnull World world, @Nonnull IBlockState state, @Nonnull TileEntity tile) {
+    public WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull ChargerTarget target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile) {
         if ( stack.isEmpty() )
             return WorkResult.FAILURE_REMOVE;
 
@@ -631,8 +637,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         public final int cost;
         public boolean canCharge = true;
 
-        public ChargerTarget(BlockPosDimension target, int cost) {
-            super(target);
+        public ChargerTarget(BlockPosDimension target, TileEntity tile, int cost) {
+            super(target, tile);
             this.cost = cost;
         }
 

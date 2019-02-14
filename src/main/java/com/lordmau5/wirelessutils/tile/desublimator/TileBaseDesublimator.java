@@ -51,6 +51,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -518,7 +519,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             markChunkDirty();
     }
 
-    public DesublimatorTarget createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
+    public DesublimatorTarget createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nullable TileEntity tile) {
+        return new DesublimatorTarget(target, tile, getEnergyCost(target, source));
+    }
+
+    public int getEnergyCost(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
         int cost = -1;
 
         if ( !source.isEmpty() ) {
@@ -530,7 +535,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( cost == -1 )
             cost = getEnergyCost(target);
 
-        return new DesublimatorTarget(target, cost);
+        return cost;
     }
 
     public int getEnergyCost(@Nonnull BlockPosDimension target) {
@@ -558,7 +563,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     public boolean shouldProcessTiles() {
-        return !processBlocks;
+        return !shouldProcessBlocks();
     }
 
     public boolean shouldProcessItems() {
@@ -573,35 +578,40 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     @Override
-    public DesublimatorTarget canWork(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState state, TileEntity tile) {
-        if ( tile == null ) {
-            if ( processCrops ) {
-                Block block = state.getBlock();
-                if ( inverted ) {
-                    if ( world.isAirBlock(target) || BehaviorManager.getBehavior(block) == null )
-                        return null;
-                } else {
-                    if ( !world.isAirBlock(target) && !(block instanceof IPlantable || block instanceof IGrowable) )
-                        return null;
-                }
+    public boolean canWorkBlock(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState state, @Nullable TileEntity tile) {
+        if ( processCrops ) {
+            Block block = state.getBlock();
+            if ( inverted ) {
+                if ( world.isAirBlock(target) || BehaviorManager.getBehavior(block) == null )
+                    return false;
+            } else {
+                if ( !world.isAirBlock(target) && !(block instanceof IPlantable || block instanceof IGrowable) )
+                    return false;
+            }
 
-            } else if ( processBlocks ) {
-                if ( inverted == world.isAirBlock(target) )
-                    return null;
+        } else if ( processBlocks ) {
+            if ( inverted == world.isAirBlock(target) )
+                return false;
 
-            } else if ( processDrops ) {
-                if ( !world.isAirBlock(target) )
-                    return null;
-            } else
-                return null;
-
-        } else if ( !InventoryHelper.hasItemHandlerCap(tile, target.getFacing()) )
-            return null;
+        } else if ( processDrops ) {
+            if ( !world.isAirBlock(target) )
+                return false;
+        } else
+            return false;
 
         validTargetsPerTick++;
-        DesublimatorTarget out = createInfo(target, source);
-        maxEnergyPerTick += level.baseEnergyPerOperation + out.cost;
-        return out;
+        maxEnergyPerTick += level.baseEnergyPerOperation + getEnergyCost(target, source);
+        return true;
+    }
+
+    @Override
+    public boolean canWorkTile(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
+        if ( !InventoryHelper.hasItemHandlerCap(tile, target.getFacing()) )
+            return false;
+
+        validTargetsPerTick++;
+        maxEnergyPerTick += level.baseEnergyPerOperation + getEnergyCost(target, source);
+        return true;
     }
 
     public static boolean isValidFertilizer(@Nonnull ItemStack stack) {
@@ -626,306 +636,324 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         return false;
     }
 
+    public boolean canWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
+        return false;
+    }
+
     @Nonnull
-    @Override
-    public WorkResult performWork(@Nonnull DesublimatorTarget target, @Nonnull World world, @Nonnull IBlockState state, TileEntity tile) {
+    public WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull DesublimatorTarget target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile) {
+        return WorkResult.FAILURE_REMOVE;
+    }
+
+    @Nonnull
+    public WorkResult performWorkBlock(@Nonnull DesublimatorTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile) {
+        if ( gatherTick != 0 )
+            return WorkResult.FAILURE_CONTINUE;
+
         if ( getEnergyStored() < level.baseEnergyPerOperation || itemStackHandler == null || itemRate == 0 )
             return WorkResult.FAILURE_STOP;
 
         if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
             return WorkResult.FAILURE_CONTINUE;
 
-        if ( tile == null || processBlocks ) {
-            if ( gatherTick != 0 )
-                return WorkResult.FAILURE_CONTINUE;
+        if ( state == null )
+            state = world.getBlockState(target.pos);
 
-            Block block = state.getBlock();
-            if ( processCrops ) {
-                boolean isAir = world.isAirBlock(target.pos);
-                if ( !inverted && isAir ) {
-                    if ( plantables == 0 )
-                        return WorkResult.FAILURE_CONTINUE;
-
-                    int slots = capabilityHandler.getSlots();
-                    for (int i = 0; i < slots; i++) {
-                        ItemStack stack = capabilityHandler.getStackInSlot(i);
-                        Item item = stack.getItem();
-                        Block itemBlock = Block.getBlockFromItem(item);
-
-                        if ( stack.isEmpty() || !(item instanceof IPlantable || itemBlock instanceof IPlantable) )
-                            continue;
-
-                        if ( item instanceof ItemSeeds && world.getBlockState(target.pos.down()).getBlock() == Blocks.DIRT )
-                            world.setBlockState(target.pos.down(), Blocks.FARMLAND.getDefaultState());
-
-                        FakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos.up());
-                        if ( isCreative )
-                            stack = stack.copy();
-
-                        player.setHeldItem(EnumHand.MAIN_HAND, stack);
-                        EnumActionResult result = stack.onItemUse(player, world, target.pos.down(), EnumHand.MAIN_HAND, EnumFacing.UP, 0, 0, 0);
-
-                        if ( result == EnumActionResult.SUCCESS ) {
-                            itemsPerTick++;
-                            remainingPerTick--;
-                            activeTargetsPerTick++;
-                            extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                            if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
-                                return WorkResult.SUCCESS_STOP_REMOVE;
-                            return WorkResult.SUCCESS_REMOVE;
-                        } else
-                            return WorkResult.FAILURE_REMOVE;
-                    }
-
-                } else if ( !isAir ) {
-                    if ( inverted ) {
-                        IHarvestBehavior behavior = BehaviorManager.getBehavior(block);
-                        if ( behavior == null )
-                            return WorkResult.FAILURE_REMOVE;
-
-                        if ( !behavior.canHarvest(state, world, target.pos, silkyCrops, fortuneCrops, this) )
-                            return WorkResult.FAILURE_REMOVE;
-
-                        if ( behavior.harvest(state, world, target.pos, silkyCrops, fortuneCrops, this) ) {
-                            activeTargetsPerTick++;
-                            extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                            if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
-                                return WorkResult.SUCCESS_STOP_REMOVE;
-                            return WorkResult.SUCCESS_REMOVE;
-                        } else
-                            return WorkResult.FAILURE_REMOVE;
-
-                    } else if ( block instanceof IGrowable ) {
-                        if ( fertilizers == 0 )
-                            return WorkResult.FAILURE_CONTINUE;
-
-                        int offset = getBufferOffset();
-                        int slots = capabilityHandler.getSlots();
-                        for (int i = 0; i < slots; i++) {
-                            if ( !fertilizerSlots[i + offset] )
-                                continue;
-
-                            ItemStack stack = capabilityHandler.getStackInSlot(i);
-                            if ( !isValidFertilizer(stack) )
-                                continue;
-
-                            FakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos.up());
-                            boolean success;
-
-                            if ( isCreative )
-                                stack = stack.copy();
-
-                            if ( stack.getItem() == Items.DYE ) {
-                                success = ItemDye.applyBonemeal(stack, world, target.pos, player, EnumHand.MAIN_HAND);
-
-                            } else {
-                                player.setHeldItem(EnumHand.MAIN_HAND, stack);
-                                EnumActionResult result = stack.onItemUse(player, world, target.pos, EnumHand.MAIN_HAND, EnumFacing.UP, 0, 0, 0);
-                                success = result == EnumActionResult.SUCCESS;
-                            }
-
-                            if ( success ) {
-                                itemsPerTick++;
-                                remainingPerTick--;
-                                activeTargetsPerTick++;
-                                extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                                if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
-                                    return WorkResult.SUCCESS_STOP;
-                                return WorkResult.SUCCESS_CONTINUE;
-                            } else
-                                return WorkResult.FAILURE_REMOVE;
-                        }
-                    }
-                }
-
-            } else if ( processBlocks ) {
-                if ( inverted ) {
-                    if ( world.isAirBlock(target.pos) )
-                        return WorkResult.FAILURE_REMOVE;
-
-                    WUFakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos);
-                    player.setHeldItem(EnumHand.MAIN_HAND, pickaxe.copy());
-
-                    BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(world, target.pos, state, player);
-                    MinecraftForge.EVENT_BUS.post(event);
-                    if ( event.isCanceled() )
-                        return WorkResult.FAILURE_REMOVE;
-
-                    if ( state.getBlockHardness(world, target.pos) < 0 )
-                        return WorkResult.FAILURE_REMOVE;
-
-                    if ( block.getHarvestLevel(state) > ModConfig.augments.block.harvestLevel )
-                        return WorkResult.FAILURE_REMOVE;
-
-                    NonNullList<ItemStack> drops = NonNullList.create();
-
-                    boolean silky = false;
-                    if ( silkyBlocks && block.canSilkHarvest(world, target.pos, state, player) ) {
-                        ItemStack stack = block.getPickBlock(
-                                state,
-                                new RayTraceResult(new Vec3d(target.pos.getX(), target.pos.getY(), target.pos.getZ()), target.pos.getFacing()),
-                                world,
-                                target.pos,
-                                player
-                        );
-
-                        if ( !stack.isEmpty() ) {
-                            drops.add(stack);
-                            silky = true;
-                        }
-                    }
-
-                    if ( !silky )
-                        block.getDrops(drops, world, target.pos, state, fortuneBlocks);
-
-                    BlockEvent.HarvestDropsEvent harvestEvent = new BlockEvent.HarvestDropsEvent(world, target.pos, state, fortuneBlocks, 1F, drops, player, silky);
-                    MinecraftForge.EVENT_BUS.post(harvestEvent);
-                    if ( harvestEvent.isCanceled() )
-                        return WorkResult.FAILURE_REMOVE;
-
-                    List<ItemStack> finalDrops = harvestEvent.getDrops();
-                    if ( finalDrops != null && !finalDrops.isEmpty() ) {
-                        if ( !canInsertAll(finalDrops) )
-                            return WorkResult.FAILURE_REMOVE;
-
-                        insertAll(finalDrops);
-                    }
-
-                    // Play the sound + particle of a block being broken.
-                    world.playEvent(null, 2001, target.pos, Block.getStateId(state));
-                    world.setBlockToAir(target.pos);
-
-                    activeTargetsPerTick++;
-                    extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                    if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
-                        return WorkResult.SUCCESS_STOP_REMOVE;
-                    return WorkResult.SUCCESS_REMOVE;
-
-                } else {
-                    if ( !world.isAirBlock(target.pos) )
-                        return WorkResult.FAILURE_REMOVE;
-
-                    int slots = capabilityHandler.getSlots();
-                    for (int i = 0; i < slots; i++) {
-                        ItemStack stack = capabilityHandler.getStackInSlot(i);
-                        if ( stack.isEmpty() )
-                            continue;
-
-                        EnumFacing facing = target.pos.getFacing();
-                        if ( facing == null )
-                            facing = EnumFacing.DOWN;
-
-                        EnumFacing opposite = facing.getOpposite();
-                        FakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos.offset(facing, 2));
-                        if ( isCreative )
-                            stack = stack.copy();
-
-                        player.setHeldItem(EnumHand.MAIN_HAND, stack);
-                        player.rotationYaw = opposite.getHorizontalAngle();
-
-                        Item item = stack.getItem();
-                        if ( item instanceof ItemBed || item instanceof ItemDoor )
-                            opposite = EnumFacing.UP;
-
-                        EnumActionResult result = ForgeHooks.onPlaceItemIntoWorld(stack, player, world, target.pos, opposite, 0.5F, 0.5F, 0.5F, EnumHand.MAIN_HAND);
-
-                        if ( result == EnumActionResult.SUCCESS ) {
-                            itemsPerTick++;
-                            remainingPerTick--;
-                            activeTargetsPerTick++;
-                            extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                            if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
-                                return WorkResult.SUCCESS_STOP_REMOVE;
-                            return WorkResult.SUCCESS_REMOVE;
-                        }
-                    }
-
-                    return WorkResult.FAILURE_STOP;
-                }
-
-            } else if ( !processDrops )
-                return WorkResult.FAILURE_REMOVE;
-
-            if ( inverted ) {
-                List<EntityItem> entityItems = world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(target.pos));
-                if ( entityItems == null || entityItems.isEmpty() )
+        Block block = state.getBlock();
+        if ( processCrops ) {
+            boolean isAir = world.isAirBlock(target.pos);
+            if ( !inverted && isAir ) {
+                if ( plantables == 0 )
                     return WorkResult.FAILURE_CONTINUE;
 
-                boolean gathered = false;
-                for (EntityItem item : entityItems) {
-                    ItemStack stack = item.getItem().copy();
-                    int count = stack.getCount();
-                    if ( count > itemRatePerTarget ) {
-                        stack.setCount(itemRatePerTarget);
-                        count = itemRatePerTarget;
-                    }
+                int slots = capabilityHandler.getSlots();
+                for (int i = 0; i < slots; i++) {
+                    ItemStack stack = capabilityHandler.getStackInSlot(i);
+                    Item item = stack.getItem();
+                    Block itemBlock = Block.getBlockFromItem(item);
 
-                    if ( count > remainingPerTick ) {
-                        stack.setCount(remainingPerTick);
-                        count = remainingPerTick;
-                    }
+                    if ( stack.isEmpty() || !(item instanceof IPlantable || itemBlock instanceof IPlantable) )
+                        continue;
 
-                    ItemStack result = InventoryHelper.insertStackIntoInventory(capabilityHandler, stack, false);
-                    int inserted = count - result.getCount();
-                    if ( inserted > 0 ) {
-                        gathered = true;
-                        itemsPerTick += inserted;
-                        remainingPerTick -= inserted;
-                        if ( result.isEmpty() )
-                            item.setDead();
-                        else
-                            item.setItem(result);
+                    if ( item instanceof ItemSeeds && world.getBlockState(target.pos.down()).getBlock() == Blocks.DIRT )
+                        world.setBlockState(target.pos.down(), Blocks.FARMLAND.getDefaultState());
 
-                        if ( remainingPerTick <= 0 )
-                            break;
-                    }
+                    FakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos.up());
+                    if ( isCreative )
+                        stack = stack.copy();
+
+                    player.setHeldItem(EnumHand.MAIN_HAND, stack);
+                    EnumActionResult result = stack.onItemUse(player, world, target.pos.down(), EnumHand.MAIN_HAND, EnumFacing.UP, 0, 0, 0);
+
+                    if ( result == EnumActionResult.SUCCESS ) {
+                        itemsPerTick++;
+                        remainingPerTick--;
+                        activeTargetsPerTick++;
+                        extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                        if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                            return WorkResult.SUCCESS_STOP_REMOVE;
+                        return WorkResult.SUCCESS_REMOVE;
+                    } else
+                        return WorkResult.FAILURE_REMOVE;
                 }
 
-                if ( gathered ) {
-                    extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                    activeTargetsPerTick++;
-                    if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
-                        return WorkResult.SUCCESS_STOP;
+            } else if ( !isAir ) {
+                if ( inverted ) {
+                    IHarvestBehavior behavior = BehaviorManager.getBehavior(block);
+                    if ( behavior == null )
+                        return WorkResult.FAILURE_REMOVE;
 
-                    return WorkResult.SUCCESS_CONTINUE;
+                    if ( !behavior.canHarvest(state, world, target.pos, silkyCrops, fortuneCrops, this) )
+                        return WorkResult.FAILURE_REMOVE;
+
+                    if ( behavior.harvest(state, world, target.pos, silkyCrops, fortuneCrops, this) ) {
+                        activeTargetsPerTick++;
+                        extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                        if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                            return WorkResult.SUCCESS_STOP_REMOVE;
+                        return WorkResult.SUCCESS_REMOVE;
+                    } else
+                        return WorkResult.FAILURE_REMOVE;
+
+                } else if ( block instanceof IGrowable ) {
+                    if ( fertilizers == 0 )
+                        return WorkResult.FAILURE_CONTINUE;
+
+                    int offset = getBufferOffset();
+                    int slots = capabilityHandler.getSlots();
+                    for (int i = 0; i < slots; i++) {
+                        if ( !fertilizerSlots[i + offset] )
+                            continue;
+
+                        ItemStack stack = capabilityHandler.getStackInSlot(i);
+                        if ( !isValidFertilizer(stack) )
+                            continue;
+
+                        FakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos.up());
+                        boolean success;
+
+                        if ( isCreative )
+                            stack = stack.copy();
+
+                        if ( stack.getItem() == Items.DYE ) {
+                            success = ItemDye.applyBonemeal(stack, world, target.pos, player, EnumHand.MAIN_HAND);
+
+                        } else {
+                            player.setHeldItem(EnumHand.MAIN_HAND, stack);
+                            EnumActionResult result = stack.onItemUse(player, world, target.pos, EnumHand.MAIN_HAND, EnumFacing.UP, 0, 0, 0);
+                            success = result == EnumActionResult.SUCCESS;
+                        }
+
+                        if ( success ) {
+                            itemsPerTick++;
+                            remainingPerTick--;
+                            activeTargetsPerTick++;
+                            extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                            if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                                return WorkResult.SUCCESS_STOP;
+                            return WorkResult.SUCCESS_CONTINUE;
+                        } else
+                            return WorkResult.FAILURE_REMOVE;
+                    }
                 }
-
-                return WorkResult.FAILURE_CONTINUE;
             }
 
-            int slots = itemStackHandler.getSlots();
-            for (int i = getBufferOffset(); i < slots; i++) {
-                ItemStack stack = itemStackHandler.getStackInSlot(i);
-                if ( stack.isEmpty() )
-                    continue;
+        } else if ( processBlocks ) {
+            if ( inverted ) {
+                if ( world.isAirBlock(target.pos) )
+                    return WorkResult.FAILURE_REMOVE;
 
-                ItemStack move = stack.copy();
+                WUFakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos);
+                player.setHeldItem(EnumHand.MAIN_HAND, pickaxe.copy());
+
+                BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(world, target.pos, state, player);
+                MinecraftForge.EVENT_BUS.post(event);
+                if ( event.isCanceled() )
+                    return WorkResult.FAILURE_REMOVE;
+
+                if ( state.getBlockHardness(world, target.pos) < 0 )
+                    return WorkResult.FAILURE_REMOVE;
+
+                if ( block.getHarvestLevel(state) > ModConfig.augments.block.harvestLevel )
+                    return WorkResult.FAILURE_REMOVE;
+
+                NonNullList<ItemStack> drops = NonNullList.create();
+
+                boolean silky = false;
+                if ( silkyBlocks && block.canSilkHarvest(world, target.pos, state, player) ) {
+                    ItemStack stack = block.getPickBlock(
+                            state,
+                            new RayTraceResult(new Vec3d(target.pos.getX(), target.pos.getY(), target.pos.getZ()), target.pos.getFacing()),
+                            world,
+                            target.pos,
+                            player
+                    );
+
+                    if ( !stack.isEmpty() ) {
+                        drops.add(stack);
+                        silky = true;
+                    }
+                }
+
+                if ( !silky )
+                    block.getDrops(drops, world, target.pos, state, fortuneBlocks);
+
+                BlockEvent.HarvestDropsEvent harvestEvent = new BlockEvent.HarvestDropsEvent(world, target.pos, state, fortuneBlocks, 1F, drops, player, silky);
+                MinecraftForge.EVENT_BUS.post(harvestEvent);
+                if ( harvestEvent.isCanceled() )
+                    return WorkResult.FAILURE_REMOVE;
+
+                List<ItemStack> finalDrops = harvestEvent.getDrops();
+                if ( finalDrops != null && !finalDrops.isEmpty() ) {
+                    if ( !canInsertAll(finalDrops) )
+                        return WorkResult.FAILURE_REMOVE;
+
+                    insertAll(finalDrops);
+                }
+
+                // Play the sound + particle of a block being broken.
+                world.playEvent(null, 2001, target.pos, Block.getStateId(state));
+                world.setBlockToAir(target.pos);
+
+                activeTargetsPerTick++;
+                extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                    return WorkResult.SUCCESS_STOP_REMOVE;
+                return WorkResult.SUCCESS_REMOVE;
+
+            } else {
+                if ( !world.isAirBlock(target.pos) )
+                    return WorkResult.FAILURE_REMOVE;
+
+                int slots = capabilityHandler.getSlots();
+                for (int i = 0; i < slots; i++) {
+                    ItemStack stack = capabilityHandler.getStackInSlot(i);
+                    if ( stack.isEmpty() )
+                        continue;
+
+                    EnumFacing facing = target.pos.getFacing();
+                    if ( facing == null )
+                        facing = EnumFacing.DOWN;
+
+                    EnumFacing opposite = facing.getOpposite();
+                    FakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos.offset(facing, 2));
+                    if ( isCreative )
+                        stack = stack.copy();
+
+                    player.setHeldItem(EnumHand.MAIN_HAND, stack);
+                    player.rotationYaw = opposite.getHorizontalAngle();
+
+                    Item item = stack.getItem();
+                    if ( item instanceof ItemBed || item instanceof ItemDoor )
+                        opposite = EnumFacing.UP;
+
+                    EnumActionResult result = ForgeHooks.onPlaceItemIntoWorld(stack, player, world, target.pos, opposite, 0.5F, 0.5F, 0.5F, EnumHand.MAIN_HAND);
+
+                    if ( result == EnumActionResult.SUCCESS ) {
+                        itemsPerTick++;
+                        remainingPerTick--;
+                        activeTargetsPerTick++;
+                        extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                        if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                            return WorkResult.SUCCESS_STOP_REMOVE;
+                        return WorkResult.SUCCESS_REMOVE;
+                    }
+                }
+
+                return WorkResult.FAILURE_STOP;
+            }
+
+        } else if ( !processDrops )
+            return WorkResult.FAILURE_REMOVE;
+
+        if ( inverted ) {
+            List<EntityItem> entityItems = world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(target.pos));
+            if ( entityItems == null || entityItems.isEmpty() )
+                return WorkResult.FAILURE_CONTINUE;
+
+            boolean gathered = false;
+            for (EntityItem item : entityItems) {
+                ItemStack stack = item.getItem().copy();
                 int count = stack.getCount();
                 if ( count > itemRatePerTarget ) {
-                    move.setCount(itemRatePerTarget);
+                    stack.setCount(itemRatePerTarget);
                     count = itemRatePerTarget;
                 }
 
                 if ( count > remainingPerTick ) {
-                    move.setCount(remainingPerTick);
+                    stack.setCount(remainingPerTick);
                     count = remainingPerTick;
                 }
 
-                CoreUtils.dropItemStackIntoWorld(move, world, new Vec3d(target.pos));
-                stack.shrink(count);
+                ItemStack result = InventoryHelper.insertStackIntoInventory(capabilityHandler, stack, false);
+                int inserted = count - result.getCount();
+                if ( inserted > 0 ) {
+                    gathered = true;
+                    itemsPerTick += inserted;
+                    remainingPerTick -= inserted;
+                    if ( result.isEmpty() )
+                        item.setDead();
+                    else
+                        item.setItem(result);
+
+                    if ( remainingPerTick <= 0 )
+                        break;
+                }
+            }
+
+            if ( gathered ) {
                 extractEnergy(level.baseEnergyPerOperation + target.cost, false);
                 activeTargetsPerTick++;
-                itemsPerTick += count;
-                remainingPerTick -= count;
-
                 if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
                     return WorkResult.SUCCESS_STOP;
 
                 return WorkResult.SUCCESS_CONTINUE;
             }
 
-            return WorkResult.FAILURE_STOP;
+            return WorkResult.FAILURE_CONTINUE;
         }
+
+        int slots = itemStackHandler.getSlots();
+        for (int i = getBufferOffset(); i < slots; i++) {
+            ItemStack stack = itemStackHandler.getStackInSlot(i);
+            if ( stack.isEmpty() )
+                continue;
+
+            ItemStack move = stack.copy();
+            int count = stack.getCount();
+            if ( count > itemRatePerTarget ) {
+                move.setCount(itemRatePerTarget);
+                count = itemRatePerTarget;
+            }
+
+            if ( count > remainingPerTick ) {
+                move.setCount(remainingPerTick);
+                count = remainingPerTick;
+            }
+
+            CoreUtils.dropItemStackIntoWorld(move, world, new Vec3d(target.pos));
+            stack.shrink(count);
+            extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+            activeTargetsPerTick++;
+            itemsPerTick += count;
+            remainingPerTick -= count;
+
+            if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                return WorkResult.SUCCESS_STOP;
+
+            return WorkResult.SUCCESS_CONTINUE;
+        }
+
+        return WorkResult.FAILURE_STOP;
+    }
+
+    @Nonnull
+    public WorkResult performWorkTile(@Nonnull DesublimatorTarget target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile) {
+        if ( getEnergyStored() < level.baseEnergyPerOperation || itemStackHandler == null || itemRate == 0 )
+            return WorkResult.FAILURE_STOP;
+
+        if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
+            return WorkResult.FAILURE_CONTINUE;
 
         IItemHandler handler = InventoryHelper.getItemHandlerCap(tile, target.pos.getFacing());
         if ( handler == null )
@@ -961,8 +989,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             ItemStack result = InventoryHelper.insertStackIntoInventory(dest, move.copy(), false);
             int inserted = count - result.getCount();
             if ( inserted > 0 ) {
-                if ( inverted || !isCreative )
-                    source.extractItem(i, inserted, false);
+                source.extractItem(i, inserted, false);
 
                 extractEnergy(level.baseEnergyPerOperation + target.cost, false);
                 activeTargetsPerTick++;
@@ -979,17 +1006,6 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( !inverted && !had_items )
             return WorkResult.FAILURE_STOP;
 
-        return WorkResult.FAILURE_REMOVE;
-    }
-
-    @Override
-    public boolean canWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nonnull TileEntity tile) {
-        return false;
-    }
-
-    @Nonnull
-    @Override
-    public WorkResult performWork(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull DesublimatorTarget target, @Nonnull World world, @Nonnull IBlockState state, @Nonnull TileEntity tile) {
         return WorkResult.FAILURE_REMOVE;
     }
 
@@ -1261,8 +1277,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     public static class DesublimatorTarget extends TargetInfo {
         public final int cost;
 
-        public DesublimatorTarget(BlockPosDimension pos, int cost) {
-            super(pos);
+        public DesublimatorTarget(BlockPosDimension pos, TileEntity tile, int cost) {
+            super(pos, tile);
             this.cost = cost;
         }
 
