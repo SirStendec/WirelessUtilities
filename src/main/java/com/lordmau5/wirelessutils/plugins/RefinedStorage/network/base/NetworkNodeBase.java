@@ -18,11 +18,9 @@ import javax.annotation.Nullable;
 
 public abstract class NetworkNodeBase implements INetworkNode, INetworkNodeVisitor {
 
-    @Nullable
     protected INetwork network;
     protected World world;
     protected BlockPos pos;
-    protected int ticks;
 
     private EnumFacing direction = EnumFacing.NORTH;
 
@@ -109,8 +107,6 @@ public abstract class NetworkNodeBase implements INetworkNode, INetworkNodeVisit
 
     @Override
     public void update() {
-        ++ticks;
-
         boolean canUpdate = getNetwork() != null && canUpdate();
 
         if ( needsUpdate && canUpdate ) {
