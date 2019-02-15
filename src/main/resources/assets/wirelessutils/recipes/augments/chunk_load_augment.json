@@ -21,7 +21,7 @@
 		}
 	},
 	"result": {
-		"item": "wirelessutils:inventory_augment",
+		"item": "wirelessutils:chunk_load_augment",
 		"count": 1
 	}
 }
