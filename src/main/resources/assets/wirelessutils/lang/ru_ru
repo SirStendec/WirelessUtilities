@@ -1,0 +1,408 @@
+#ru_RU
+
+itemGroup.wirelessutils=Wireless Utilities
+
+tile.wirelessutils.angled_slime.name=Угловая слизь
+tile.wirelessutils.angled_slime.info.0=Отскакивает жемчуг! Под углами!
+tile.wirelessutils.angled_slime.info.1=Примечание. Этот блок все еще
+tile.wirelessutils.angled_slime.info.2=находится в стадии разработки, и
+tile.wirelessutils.angled_slime.info.3=физика может вести себя не так,
+tile.wirelessutils.angled_slime.info.4=как вы ожидаете.
+
+tile.wirelessutils.chunk_charger.name=Зарядное устройство чанка
+tile.wirelessutils.chunk_charger.info.0=Зарядное устройство чанка заряжает вещи
+tile.wirelessutils.chunk_charger.info.1=в чанке! Целый чанк. Один
+tile.wirelessutils.chunk_charger.info.2=чанк. Не больше, не меньше.
+
+tile.wirelessutils.directional_charger.name=Направленное зарядное устройство
+tile.wirelessutils.directional_charger.info.0=Направленное зарядное устройство заряжает вещи
+tile.wirelessutils.directional_charger.info.1=в направлении! При заданном увеличении дальности
+tile.wirelessutils.directional_charger.info.2=машина расширит границы
+tile.wirelessutils.directional_charger.info.3=прямоугольной области.
+
+tile.wirelessutils.positional_charger.name=Позиционное зарядное устройство
+tile.wirelessutils.positional_charger.info.0=Позиционное зарядное устройство заряжает
+tile.wirelessutils.positional_charger.info.1=все заданные позиции, как указано
+tile.wirelessutils.positional_charger.info.2=в позиционной карте.
+
+tile.wirelessutils.directional_condenser.name=Направленный конденсатор
+tile.wirelessutils.directional_condenser.info.0=Направленный конденсатор передает
+tile.wirelessutils.directional_condenser.info.1=жидкости в направлении.
+
+tile.wirelessutils.positional_condenser.name=Позиционный конденсатор
+tile.wirelessutils.positional_condenser.info.0=Позиционный конденсатор передает
+tile.wirelessutils.positional_condenser.info.1=жидкости в заданные положения, как
+tile.wirelessutils.positional_condenser.info.2=указано в позиционных картах.
+
+tile.wirelessutils.directional_desublimator.name=Направленный десублиматор
+tile.wirelessutils.directional_desublimator.info.0=Направленный десублиматор передает
+tile.wirelessutils.directional_desublimator.info.1=предметы в направлении.
+
+tile.wirelessutils.positional_desublimator.name=Позиционный десублиматор
+tile.wirelessutils.positional_desublimator.info.0=Позиционный десублиматор передает
+tile.wirelessutils.positional_desublimator.info.1=предметы в заданные положения, как
+tile.wirelessutils.positional_desublimator.info.2=указано в позиционных картах.
+
+tile.wirelessutils.infinite_wireless_transmitter.name=Бесконечный беспроводной передатчик
+
+tile.wirelessutils.directional_rs_network.name=Направленная сеть RS
+tile.wirelessutils.directional_rs_network.info.0=Направленная сеть RS обеспечивает
+tile.wirelessutils.directional_rs_network.info.1=беспроводное соединение вашей сети в
+tile.wirelessutils.directional_rs_network.info.2=направлении! Учитывая увеличение диапазона, он
+tile.wirelessutils.directional_rs_network.info.3=соединит пользовательскую прямоугольную область.
+
+tile.wirelessutils.positional_rs_network.name=Позиционная сеть RS
+tile.wirelessutils.positional_rs_network.info.0=Позиционная сеть RS обеспечивает беспроводное
+tile.wirelessutils.positional_rs_network.info.1=подключение вашей сети в установленных
+tile.wirelessutils.positional_rs_network.info.2=положениях, как указано в
+tile.wirelessutils.positional_rs_network.info.3=позиционных картах.
+
+tile.wirelessutils.directional_ae_network.name=Направленная сеть AE
+tile.wirelessutils.directional_ae_network.info.0=Направленная сеть AE обеспечивает
+tile.wirelessutils.directional_ae_network.info.1=беспроводное соединение вашей сети в
+tile.wirelessutils.directional_ae_network.info.2=направлении! Учитывая увеличение диапазона, он
+tile.wirelessutils.directional_ae_network.info.3=соединит пользовательскую прямоугольную область.
+
+tile.wirelessutils.positional_ae_network.name=Позиционная сеть AE
+tile.wirelessutils.positional_ae_network.info.0=Позиционная сеть AE обеспечивает беспроводное
+tile.wirelessutils.positional_ae_network.info.1=подключение вашей сети в установленных
+tile.wirelessutils.positional_ae_network.info.2=положениях, как указано в
+tile.wirelessutils.positional_ae_network.info.3=позиционных картах.
+
+item.wirelessutils.glasses.name=Рабочие очки
+item.wirelessutils.glasses.info.0=Рабочие очки позволяют видеть рабочие
+item.wirelessutils.glasses.info.1=зоны машин и позиционных карт
+item.wirelessutils.glasses.info.2=через стены.
+
+item.wirelessutils.accurate_pearl.name=Стабилизированный %s
+item.wirelessutils.accurate_pearl.info.0=Летит точно и последовательно
+item.wirelessutils.accurate_pearl.info.1=при выстреле из раздатчика.
+
+item.wirelessutils.positional_card.name=Абсолютная позиционная карта
+item.wirelessutils.positional_card.info.0=Сидя-Используйте этот предмет на блоке,
+item.wirelessutils.positional_card.info.1=чтобы сохранить его положение и сторону.
+item.wirelessutils.positional_card.highlight=%s (%s)
+item.wirelessutils.positional_card.distance=Дистанция: %s
+item.wirelessutils.positional_card.invalid.range=Целевое местоположение не находится в пределах досягаемости.
+item.wirelessutils.positional_card.invalid.unset=Цель не была установлена.
+
+item.wirelessutils.relative_positional_card.name=Относительная позиционная карта
+item.wirelessutils.relative_positional_card.info.0=Сидя-Используйте этот предмет на блоке, чтобы установить
+item.wirelessutils.relative_positional_card.info.1=начало координат, а затем Сидя-Используйте этот предмет
+item.wirelessutils.relative_positional_card.info.2=в другом блоке, чтобы сохранить относительную
+item.wirelessutils.relative_positional_card.info.3=позицию.
+item.wirelessutils.relative_positional_card.highlight=%s (%s)
+item.wirelessutils.relative_positional_card.distance=Дистанция: %s
+item.wirelessutils.relative_positional_card.invalid.range=Целевое местоположение не находится в пределах досягаемости.
+item.wirelessutils.relative_positional_card.invalid.unset=Цель не была установлена.
+
+item.wirelessutils.fluxed_pearl.name=Флаксовый жемчуг
+item.wirelessutils.fluxed_pearl.weather.0=Кажется, жемчуг реагирует
+item.wirelessutils.fluxed_pearl.weather.1=на облака над головой.
+item.wirelessutils.fluxed_pearl.info.0=Добавление редстона к жемчугу Края,
+item.wirelessutils.fluxed_pearl.info.1=похоже, уменьшило ее способность
+item.wirelessutils.fluxed_pearl.info.2=к телепортации, но придает ему
+item.wirelessutils.fluxed_pearl.info.3=странную силу над флаксом.
+item.wirelessutils.fluxed_pearl.jei.0=Покрытие жемчуга Края редстоуном заглушает его телепортационные способности.
+item.wirelessutils.fluxed_pearl.jei.1=Вместо этого эти жемчуги создают импульс флакса, когда они попадают в блок.
+item.wirelessutils.fluxed_pearl.jei.2=Флаксовые жемчуги отскакивают, когда попадают в блоки слизи, и их можно стрелять из раздатчиков.
+
+item.wirelessutils.charged_pearl.name=Заряженный жемчуг
+item.wirelessutils.charged_pearl.jei.0=Флаксовый жемчуг, подвергшийся воздействию большого количества энергии.\n
+item.wirelessutils.charged_pearl.jei.1=Ходят слухи, что заряженные жемчуги были впервые обнаружены, когда расстроенный шахтер бросил его в сердце грозового облака.
+
+item.wirelessutils.quenched_pearl.name=Закаленный жемчуг
+item.wirelessutils.scorched_pearl.name=Выжженный жемчуг
+
+item.wirelessutils.stabilized_ender_pearl.jei.0=Стабилизированный жемчуг Края ведет себя так же, как и флаксовый жемчуг, в том смысле, что он может отскакивать и запускаться из раздатчика.
+item.wirelessutils.stabilized_ender_pearl.jei.1=Если стабилизированный жемчуг Края выстрелил из раздатчика, а не брошен, он телепортирует соседнее существо к себе при приземлении.
+item.wirelessutils.stabilized_ender_pearl.jei.2=Стабилизация также, кажется, сделала процесс более безопасным.
+
+item.wirelessutils.ender_coil.name=Катушка Края
+item.wirelessutils.machine_panel.name=Панель машины
+
+item.wirelessutils.level_upgrade.name=Комплект обновления
+item.wirelessutils.conversion_upgrade.name=Набор для преобразования
+
+item.wirelessutils.base_augment.name=Базовое дополнение
+
+item.wirelessutils.world_augment.name=Мировое дополнение
+item.wirelessutils.world_augment.info.0=Это дополнение позволяет определенным машинам
+item.wirelessutils.world_augment.info.1=изменять мир напрямую, например, путем
+item.wirelessutils.world_augment.info.2=помещения жидкости.
+
+item.wirelessutils.block_augment.name=Блоковое дополнение
+item.wirelessutils.block_augment.info.0=Это дополнение позволяет десублиматорам
+item.wirelessutils.block_augment.info.1=размещать и разбивать блоки, а не просто
+item.wirelessutils.block_augment.info.2=сбрасывать и собирать предметы
+item.wirelessutils.block_augment.info.3=с помощью мирового дополнения.
+
+item.wirelessutils.fluid_gen_augment.name=Вспомогательное дополнение конденсатора
+item.wirelessutils.fluid_gen_augment.info.0=Это дополнение прикрепляет дополнительный
+item.wirelessutils.fluid_gen_augment.info.1=конденсатор к машине, наполняя
+item.wirelessutils.fluid_gen_augment.info.2=бак этой машины жидкостью
+item.wirelessutils.fluid_gen_augment.info.3=в обмен на энергию.
+
+item.wirelessutils.fluid_gen_augment.fluid=Жидкость: %s
+item.wirelessutils.fluid_gen_augment.fluid_amount=Скорость: %s mB/тик
+item.wirelessutils.fluid_gen_augment.energy=Потребление энергии: %s
+
+item.wirelessutils.invert_augment.name=Инвертное дополнение
+item.wirelessutils.invert_augment.info.0=Это дополнение позволяет некоторым машинам
+item.wirelessutils.invert_augment.info.1=вести себя перевернутым образом, например,
+item.wirelessutils.invert_augment.info.2=извлекая жидкости вместо того, чтобы вставлять их.
+
+item.wirelessutils.crop_augment.name=Урожайное дополнение
+item.wirelessutils.crop_augment.info.0=Это дополнение позволяет некоторым машинам
+item.wirelessutils.crop_augment.info.1=взаимодействовать с культурами, например,
+item.wirelessutils.crop_augment.info.2=собирая урожай или используя на них костную муку.
+
+item.wirelessutils.inventory_augment.name=Инвентарное дополнение
+item.wirelessutils.inventory_augment.info.0=Это дополнение позволяет машине
+item.wirelessutils.inventory_augment.info.1=работать на предметах в инвентарных 
+item.wirelessutils.inventory_augment.info.2=блоков помимо 
+item.wirelessutils.inventory_augment.info.3=самих блоков.
+
+item.wirelessutils.chunk_load_augment.name=Дополнение загрузки чанка
+item.wirelessutils.chunk_load_augment.info.0=Это дополнение заставляет машину
+item.wirelessutils.chunk_load_augment.info.1=постоянно загружать все свои
+item.wirelessutils.chunk_load_augment.info.2=цели, пока сама
+item.wirelessutils.chunk_load_augment.info.3=машина остается загруженной.
+
+item.wirelessutils.slot_augment.name=Дополнение целевого слота
+item.wirelessutils.slot_augment.info.0=Это дополнение увеличивает количество
+item.wirelessutils.slot_augment.info.1=слотов, доступных для позиционных карт
+item.wirelessutils.slot_augment.info.2=в позиционных машинах.
+item.wirelessutils.slot_augment.lock.0=Слот дополнения не может быть удален,
+item.wirelessutils.slot_augment.lock.1=пока карты хранятся в
+item.wirelessutils.slot_augment.lock.2=добавленных ими слотах.
+
+item.wirelessutils.range_augment.name=Дополнение диапазона
+item.wirelessutils.range_augment.info.0=Это дополнение увеличивает максимальное
+item.wirelessutils.range_augment.info.1=расстояние, на которое может влиять машина.
+item.wirelessutils.range_augment.interdimensional=Межпространственный
+item.wirelessutils.range_augment.lock.0=Дополнение диапазона не может быть удалено,
+item.wirelessutils.range_augment.lock.1=когда цель требует, чтобы дополнение
+item.wirelessutils.range_augment.lock.2=диапазона было в пределах диапазона.
+
+item.wirelessutils.disabled=Этот предмет отключен в конфигурации.
+
+item.wirelessutils.augment_ctrl.inactive=Зажмите §e§oCtrl§r§7 для допустимых машин
+item.wirelessutils.augment_ctrl.active=Допустимые машины:
+item.wirelessutils.augment_ctrl.entry=- %s
+item.wirelessutils.augment_ctrl.none=Нет
+
+item.wirelessutils.capacity_augment.name=Дополнение емкости
+item.wirelessutils.capacity_augment.info.0=Это дополнение значительно увеличивает
+item.wirelessutils.capacity_augment.info.1=количество ресурсов, которые машина
+item.wirelessutils.capacity_augment.info.2=может хранить во внутреннем буфере.
+item.wirelessutils.capacity_augment.lock.condenser.0=Это дополнение нельзя удалить, так как в
+item.wirelessutils.capacity_augment.lock.condenser.1=этом случае емкость для жидкости слишком
+item.wirelessutils.capacity_augment.lock.condenser.2=мала, чтобы удерживать ее содержимое.
+item.wirelessutils.capacity_augment.lock.desublimator.0=Это дополнение не может быть удалено, так как
+item.wirelessutils.capacity_augment.lock.desublimator.1=из-за этого буфер элемента становится слишком
+item.wirelessutils.capacity_augment.lock.desublimator.2=маленьким, чтобы содержать его содержимое.
+
+item.wirelessutils.transfer_augment.name=Дополнение передачи
+item.wirelessutils.transfer_augment.info.0=Это дополнение значительно увеличивает
+item.wirelessutils.transfer_augment.info.1=скорость, с которой машина может
+item.wirelessutils.transfer_augment.info.2=передавать ресурсы в свои цели.
+
+item.wirelessutils.range_augment.tip.directional=Направленный диапазон: %sx%sx%s
+item.wirelessutils.range_augment.tip.positional=Позиционный диапазон: %s
+item.wirelessutils.range_augment.tip.range_positional=%s блоков
+item.wirelessutils.range_augment.tip.interdimensional=Межпространственный
+
+tab.wirelessutils.directional_charger.0=Направленное зарядное устройство заряжает вещи в направлении.
+tab.wirelessutils.directional_charger.1=Первоначально, направленное зарядное устройство заряжает только один блок перед ним в направлении, к которому оно обращено.
+tab.wirelessutils.directional_charger.2=Используя дополнения, можно беспроводным способом заряжать большую площадь!
+tab.wirelessutils.directional_charger.3=Дополнение может также использоваться, чтобы позволить направленному зарядному устройству заряжать предметы внутри сундуков, ящиков и других подобных блоков.
+
+tab.wirelessutils.positional_charger.0=Позиционное зарядное устройство заряжает вещи в определенных положениях.
+tab.wirelessutils.positional_charger.1=Поместите позиционную карту в один из слотов позиционного зарядного устройства, чтобы сказать ей, чтобы зарядить этот блок.
+tab.wirelessutils.positional_charger.2=Используя дополнения, можно добавить более одной позиционной карты.
+tab.wirelessutils.positional_charger.3=Дополнения также могут помочь вам заряжать блоки дальше от позиционного зарядного устройства. В конце концов, даже в разных измерениях!
+tab.wirelessutils.positional_charger.4=Дополнение также можно использовать, чтобы позиционное зарядное устройство могло заряжать предметы внутри сундуков, ящиков и других подобных блоков.
+
+tab.wirelessutils.directional_condenser.0=Направленный конденсатор передает жидкости в направлении.
+tab.wirelessutils.directional_condenser.1=Первоначально, направленный конденсатор конденсирует жидкость только в блок непосредственно перед ним.
+tab.wirelessutils.directional_condenser.2=Используя дополнения, можно беспрепятственно отправлять жидкости на большую площадь!
+tab.wirelessutils.directional_condenser.3=Дополнения также могут быть использованы для отправки жидкостей в предметы в инвентарях или для размещения жидкостей непосредственно в мире.
+tab.wirelessutils.directional_condenser.4=Когда присутствует инвертированное дополнение, он будет извлекать жидкости, а не отправлять их.
+
+tab.wirelessutils.positional_condenser.0=Позиционный конденсатор перемещает жидкости в определенные позиции.
+tab.wirelessutils.positional_condenser.1=Поместите позиционную карту в один из слотов позиционного конденсатора, чтобы сказать ей, чтобы отправить жидкость в этот блок.
+tab.wirelessutils.positional_condenser.2=Используя дополнения, можно добавить более одной позиционной карты.
+tab.wirelessutils.positional_condenser.3=Дополнения могут также позволить вам отправлять жидкости дальше или с большей скоростью.
+tab.wirelessutils.positional_condenser.4=Дополнения также могут быть использованы для отправки жидкостей в предметы в инвентарях или для размещения жидкостей непосредственно в мире.
+tab.wirelessutils.positional_condenser.5=Когда присутствует инвертированное дополнение, он будет извлекать жидкости, а не отправлять их.
+
+tab.wirelessutils.directional_desublimator.0=Направленный десублиматор передает предметы в направлении.
+tab.wirelessutils.directional_desublimator.1=Первоначально, направленный десублиматор переносит предметы в блок непосредственно перед ним.
+tab.wirelessutils.directional_desublimator.2=Используя дополнения, можно передавать предметы по беспроводной сети на большую площадь!
+tab.wirelessutils.directional_desublimator.3=Дополнения могут также позволить вам отправлять предметы подальше или с большей скоростью.
+tab.wirelessutils.directional_desublimator.4=Дополнение емкости увеличит размер внутреннего буфера предметов.
+tab.wirelessutils.directional_desublimator.5=При наличии инвертированного дополнения десублиматор извлекает элементы из своих целей, а не вставляет их.
+
+tab.wirelessutils.positional_desublimator.0=Позиционный десублиматор переносит предметы в определенные позиции.
+tab.wirelessutils.positional_desublimator.1=Поместите позиционную карту в один из слотов позиционного десублиматора, чтобы сказать ей отправлять предметы в этот блок.
+tab.wirelessutils.positional_desublimator.2=Используя дополнения, можно добавить более одной позиционной карты.
+tab.wirelessutils.positional_desublimator.3=Дополнения могут также позволить вам отправлять предметы дальше или с большей скоростью.
+tab.wirelessutils.positional_desublimator.4=Дополнение емкости увеличит размер внутреннего буфера предметов.
+tab.wirelessutils.positional_desublimator.5=При наличии инвертированного дополнения десублиматор извлекает элементы из своих целей, а не вставляет их.
+
+tab.wirelessutils.directional_rs_network.0=Направленная сеть RS соединяет вашу сеть в направлении.
+tab.wirelessutils.directional_rs_network.1=Первоначально, направленная сеть RS соединяет только один блок перед ней в направлении, к которому она обращена.
+tab.wirelessutils.directional_rs_network.2=Используя дополнения, возможно беспроводное соединение большой площади!
+
+tab.wirelessutils.positional_rs_network.0=Позиционная сеть RS соединяет определенные позиции.
+tab.wirelessutils.positional_rs_network.1=Поместите позиционную карту в один из слотов позиционной сети RS, чтобы сообщить ей о подключении этого блока.
+tab.wirelessutils.positional_rs_network.2=Используя дополнения, можно добавить более одной позиционной карты.
+tab.wirelessutils.positional_rs_network.3=Дополнения также могут помочь вам соединить блоки дальше от позиционной сети RS. В конце концов, даже в разных измерениях!
+
+tab.wirelessutils.directional_ae_network.0=Направленная сеть АЕ соединяет вашу сеть в направлении.
+tab.wirelessutils.directional_ae_network.1=Первоначально, направленная сеть АЕ соединяет только один блок перед ней в направлении, к которому она обращена.
+tab.wirelessutils.directional_ae_network.2=Используя дополнения, возможно беспроводное соединение большой площади!
+
+tab.wirelessutils.positional_ae_network.0=Позиционная сеть АЕ соединяет определенные позиции.
+tab.wirelessutils.positional_ae_network.1=Поместите позиционную карту в один из слотов позиционной сети АЕ, чтобы сообщить ей о подключении этого блока.
+tab.wirelessutils.positional_ae_network.2=Используя дополнения, можно добавить более одной позиционной карты.
+tab.wirelessutils.positional_ae_network.3=Дополнения также могут помочь вам соединить блоки дальше от Позиционной сети АЕ. В конце концов, даже в разных измерениях!
+
+btn.wirelessutils.dec_area.one=Уменьшить на %s
+btn.wirelessutils.dec_area.all=Уменьшить все на %s
+btn.wirelessutils.inc_area.one=Увеличить на %s
+btn.wirelessutils.inc_area.all=Увеличить все на %s
+
+info.wirelessutils.owner=Владелец: %s
+info.wirelessutils.no_owner=(не установлен)
+
+info.wirelessutils.round_robin.name=По кругу
+info.wirelessutils.round_robin.per_target=За цель:
+info.wirelessutils.round_robin.maximum=Максимум
+
+info.wirelessutils.work_info.name=Работа
+info.wirelessutils.work_info.tooltip.rate=Скорость: %s
+info.wirelessutils.work_info.tooltip.targets=Цели: %s из %s
+info.wirelessutils.work_info.current=Текущая скорость:
+info.wirelessutils.work_info.maximum=Максимальная скорость:
+info.wirelessutils.work_info.targets.name=Активные цели:
+info.wirelessutils.work_info.targets.info=%s из %s
+
+info.wirelessutils.item_rate=Предметов/тик
+info.wirelessutils.buffer=Буфер
+
+jei.wirelessutils.charger=Предметная зарядка
+jei.wirelessutils.condenser=Предметная конденсация
+
+btn.wirelessutils.edit=Редактировать
+btn.wirelessutils.save=Сохранить
+
+btn.wirelessutils.slot_locks.lock=Блокировка слотов
+btn.wirelessutils.slot_locks.unlock=Очистить слоты блокировки
+
+btn.wirelessutils.lock.lock=Заблокировать
+btn.wirelessutils.lock.unlock=Разблокировать
+btn.wirelessutils.lock.with=Заблокировать с %s
+btn.wirelessutils.lock.current=Заблокировать: %s
+
+btn.wirelessutils.mode.ROUND_ROBIN.name=По-кругу
+btn.wirelessutils.mode.NEAREST_FIRST.name=Ближний первый
+btn.wirelessutils.mode.FURTHEST_FIRST.name=Дальний первый
+btn.wirelessutils.mode.RANDOM.name=Случайный
+
+btn.wirelessutils.mode.range=Диапазон
+btn.wirelessutils.mode.offset=Смещение
+
+btn.wirelessutils.show_area=Показать рабочую зону
+btn.wirelessutils.hide_area=Скрыть рабочую зону
+btn.wirelessutils.area_scroll=Прокрутите, чтобы изменить цвета.
+btn.wirelessutils.range=Диапазон:
+
+btn.wirelessutils.offset.vertical=Вертикально:
+btn.wirelessutils.offset.horizontal=Горизонтально:
+
+btn.wirelessutils.range.height=Высота:
+btn.wirelessutils.range.length=Длина:
+btn.wirelessutils.range.width=Ширина:
+
+info.wirelessutils.slot_lock=Этот предмет не может быть удален.
+info.wirelessutils.max=Макс.: %s
+
+info.wirelessutils.blockpos.full=X: %s Y: %s Z: %s Изм.: %s
+info.wirelessutils.blockpos.basic=X: %s Y: %s Z: %s
+info.wirelessutils.blockpos.side=Сторона: %s
+info.wirelessutils.blockpos.dimension.simple=Изм.: %s
+info.wirelessutils.blockpos.dimension.named=Изм.: %s (%s)
+
+info.wirelessutils.configured=%s (настроено)
+
+info.wirelessutils.tiered.name=%s (%s)
+info.wirelessutils.tiered.tier=уровень %s
+info.wirelessutils.tiered.level.5=Творческий
+
+info.wirelessutils.tiered.upgrade.info.0=Этот предмет модернизирует машины
+info.wirelessutils.tiered.upgrade.info.1=из %s в %s.
+
+info.wirelessutils.tiered.conversion.info.0=Этот предмет обновит любую
+info.wirelessutils.tiered.conversion.info.1=машину до %s за один шаг.
+
+info.wirelessutils.tiered.required.higher.0=Этот предмет нельзя удалить, пока
+info.wirelessutils.tiered.required.higher.1=не будут удалены все более
+info.wirelessutils.tiered.required.higher.2=высокие уровни предмета.
+
+info.wirelessutils.tiered.required.lower.0=Этот предмет нельзя установить, пока
+info.wirelessutils.tiered.required.lower.1=не будут установлены все нижние
+info.wirelessutils.tiered.required.lower.2=уровни предмета.
+
+info.wirelessutils.voiding_fluids=Опустошение жидкостей
+
+info.wirelessutils.ae2.channels=%d из %d каналов
+
+chat.wirelessutils.upgrade.success=Установлено %s в %s.
+chat.wirelessutils.upgrade.failed=Не удалось установить %s в %s.
+
+advancements.wirelessutils.root.title=Беспроводные утилиты
+advancements.wirelessutils.root.description=Поскольку провода просто мешают.
+
+advancements.wirelessutils.fluxed_pearl.title=Получить флаксовый жемчуг
+advancements.wirelessutils.fluxed_pearl.description=Наполнить жемчуг Края потенциальной энергией редстоуна.
+
+advancements.wirelessutils.charged_pearl.title=Заряженный жемчуг
+advancements.wirelessutils.charged_pearl.description=Найдите способ зарядить энергией жемчуг.
+
+advancements.wirelessutils.storm_chaser.title=Штормовой охотник
+advancements.wirelessutils.storm_chaser.description=Бросьте жемчуг в небо, когда придет время.
+
+advancements.wirelessutils.refreshing.title=Освежающий
+advancements.wirelessutils.refreshing.description=Бросьте заряженный жемчуг в воду.
+
+advancements.wirelessutils.so_hot_right_now.title=Так жарко сейчас
+advancements.wirelessutils.so_hot_right_now.description=Бросьте заряженный жемчуг в лаву.
+
+advancements.wirelessutils.this_way.title=Сюда!
+advancements.wirelessutils.this_way.description=Построить направленное зарядное устройство.
+
+advancements.wirelessutils.augmented.title=Моя машина дополнена
+advancements.wirelessutils.augmented.description=Установите дополнение.
+
+advancements.wirelessutils.getting_an_upgrade.title=Получение обновления
+advancements.wirelessutils.getting_an_upgrade.description=Обновите машину.
+
+advancements.wirelessutils.gps.title=GPS
+advancements.wirelessutils.gps.description=Сохраните позицию в позиционной карте.
+
+advancements.wirelessutils.locked_on.title=Заблокировано!
+advancements.wirelessutils.locked_on.description=Построить позиционное зарядное устройство.
+
+advancements.wirelessutils.repulsion.title=Отталкивание
+advancements.wirelessutils.repulsion.description=Бросьте жемчуг, который отскочит 10 раз перед остановкой.
+
+advancements.wirelessutils.long_distance.title=Большие расстояния
+advancements.wirelessutils.long_distance.description=Бросьте жемчуг, который проходит не менее 300 блоков (по горизонтали) перед остановкой.
+
+advancements.wirelessutils.roundabout.title=Окольный
+advancements.wirelessutils.roundabout.description=Бросьте жемчуг, который переместится по крайней мере на 200 блоков (горизонтально), но который остановится в пределах 10 блоков, где он начался.
+
+advancements.wirelessutils.enlightened.title=Просвещенный
+advancements.wirelessutils.enlightened.description=Бросьте флаксовый жемчуг на редстоун лампу.
