@@ -3,3 +3,7 @@
 ### _Because wires just get in the way_
 
 ![](https://i.imgur.com/tkn7sMn.png)
+
+## Credits
+
+[Konstantin](https://github.com/kellixon): Russian Language Support
