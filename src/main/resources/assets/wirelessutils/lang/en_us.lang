@@ -368,7 +368,7 @@ commands.wirelessutils.fluidgen.usage=/wu_fluidgen <held OR fluid-name> <mB/t> <
 commands.wirelessutils.fluidgen.tag_error=Fluid tag parsing failed: %s
 commands.wirelessutils.fluidgen.not_holding=Not holding an item containing fluid to copy.
 commands.wirelessutils.fluidgen.no_such_fluid=There is no such fluid with name: %s
-commands.wirelessutils.fluidgen.success=Created Augmented: %s
+commands.wirelessutils.fluidgen.success=Created Augment: %s
 
 commands.wirelessutils.debug.success=Created Item: %s
 

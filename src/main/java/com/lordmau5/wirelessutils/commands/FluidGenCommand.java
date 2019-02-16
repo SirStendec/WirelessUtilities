@@ -114,10 +114,10 @@ public class FluidGenCommand extends CommandBase {
 
         stack.setTagCompound(tag);
 
+        sender.sendMessage(new TextComponentTranslation("commands." + WirelessUtils.MODID + ".fluidgen.success", stack.getTextComponent()));
+
         if ( !player.addItemStackToInventory(stack) )
             player.entityDropItem(stack, 0);
-
-        sender.sendMessage(new TextComponentTranslation("commands." + WirelessUtils.MODID + ".fluidgen.success", stack.getTextComponent()));
     }
 
     public static int parseHex(String input) throws NumberInvalidException {

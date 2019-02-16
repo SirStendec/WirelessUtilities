@@ -45,10 +45,10 @@ public class DebugCommand extends CommandBase {
         ItemStack bedStack = new ItemStack(Items.BED, 1, new Random().nextInt(16));
         bedStack.setStackDisplayName("Debug");
 
+        sender.sendMessage(new TextComponentTranslation("commands." + WirelessUtils.MODID + ".debug.success", bedStack.getTextComponent()));
+
         if ( !player.addItemStackToInventory(bedStack) )
             player.entityDropItem(bedStack, 0);
-
-        sender.sendMessage(new TextComponentTranslation("commands." + WirelessUtils.MODID + ".debug.success", bedStack.getTextComponent()));
     }
 
     @Override
