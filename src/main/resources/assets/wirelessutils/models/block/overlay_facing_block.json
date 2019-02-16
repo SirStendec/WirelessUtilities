@@ -4,14 +4,26 @@
 		"front": "#base",
 		"side": "#base",
 		"back": "#base",
+		"top": "#side",
+		"bottom": "#side",
+		"left": "#side",
+		"right": "#side",
 		"particle": "#base",
 		"overlay_front": "#overlay",
 		"overlay_side": "#overlay",
 		"overlay_back": "#overlay",
+		"overlay_top": "#overlay",
+		"overlay_bottom": "#overlay",
+		"overlay_left": "#overlay",
+		"overlay_right": "#overlay",
 		"mark": "wirelessutils:block/blank",
 		"mark_side": "#mark",
 		"mark_front": "#mark",
-		"mark_back": "#mark"
+		"mark_back": "#mark",
+		"mark_top": "#mark",
+		"mark_bottom": "#mark",
+		"mark_left": "#mark",
+		"mark_right": "#mark"
 	},
 	"elements": [
 		{
@@ -27,12 +39,12 @@
 			],
 			"faces": {
 				"down": {
-					"texture": "#side",
+					"texture": "#bottom",
 					"cullface": "down",
 					"rotation": 270
 				},
 				"up": {
-					"texture": "#side",
+					"texture": "#top",
 					"cullface": "up",
 					"rotation": 90
 				},
@@ -45,11 +57,11 @@
 					"cullface": "south"
 				},
 				"west": {
-					"texture": "#side",
+					"texture": "#left",
 					"cullface": "west"
 				},
 				"east": {
-					"texture": "#side",
+					"texture": "#right",
 					"cullface": "east",
 					"rotation": 180
 				}
@@ -68,13 +80,13 @@
 			],
 			"faces": {
 				"down": {
-					"texture": "#mark_side",
+					"texture": "#mark_bottom",
 					"cullface": "down",
 					"rotation": 270,
 					"tintindex": 1
 				},
 				"up": {
-					"texture": "#mark_side",
+					"texture": "#mark_top",
 					"cullface": "up",
 					"rotation": 90,
 					"tintindex": 1
@@ -90,12 +102,12 @@
 					"tintindex": 1
 				},
 				"west": {
-					"texture": "#mark_side",
+					"texture": "#mark_left",
 					"cullface": "west",
 					"tintindex": 1
 				},
 				"east": {
-					"texture": "#mark_side",
+					"texture": "#mark_right",
 					"cullface": "east",
 					"rotation": 180,
 					"tintindex": 1
@@ -115,13 +127,13 @@
 			],
 			"faces": {
 				"down": {
-					"texture": "#overlay_side",
+					"texture": "#overlay_bottom",
 					"cullface": "down",
 					"rotation": 270,
 					"tintindex": 2
 				},
 				"up": {
-					"texture": "#overlay_side",
+					"texture": "#overlay_top",
 					"cullface": "up",
 					"rotation": 90,
 					"tintindex": 2
@@ -137,12 +149,12 @@
 					"tintindex": 2
 				},
 				"west": {
-					"texture": "#overlay_side",
+					"texture": "#overlay_left",
 					"cullface": "west",
 					"tintindex": 2
 				},
 				"east": {
-					"texture": "#overlay_side",
+					"texture": "#overlay_right",
 					"cullface": "east",
 					"rotation": 180,
 					"tintindex": 2

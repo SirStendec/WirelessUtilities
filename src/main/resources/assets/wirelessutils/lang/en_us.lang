@@ -137,6 +137,16 @@ item.wirelessutils.block_augment.info.1=place and break blocks, rather than
 item.wirelessutils.block_augment.info.2=merely dropping and picking up items
 item.wirelessutils.block_augment.info.3=with a World Augment.
 
+item.wirelessutils.fluid_gen_augment.name=Auxiliary Condenser Augment
+item.wirelessutils.fluid_gen_augment.info.0=This augment attaches an extra
+item.wirelessutils.fluid_gen_augment.info.1=condenser to a machine, filling
+item.wirelessutils.fluid_gen_augment.info.2=that machine's tank with fluid
+item.wirelessutils.fluid_gen_augment.info.3=in exchange for energy.
+
+item.wirelessutils.fluid_gen_augment.fluid=Fluid: %s
+item.wirelessutils.fluid_gen_augment.fluid_amount=%s mB/t of %s
+item.wirelessutils.fluid_gen_augment.energy=Energy Cost: %s
+
 item.wirelessutils.invert_augment.name=Invert Augment
 item.wirelessutils.invert_augment.info.0=This augment allows certain machines
 item.wirelessutils.invert_augment.info.1=to behave in an inverted way, such as by

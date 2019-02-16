@@ -16,9 +16,13 @@ import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.Nullable;
 
+import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemFluidGenAugment;
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRangeAugment;
 
 public class ColorHandler {
+
+    public static final int WATER_COLOR = 0x3043d9;
+    public static final int LAVA_COLOR = 0xff6512;
 
     public static class Machine {
         public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
@@ -54,10 +58,10 @@ public class ColorHandler {
                         Fluid fluid = stack.getFluid();
                         if ( fluid != null ) {
                             if ( fluid == FluidRegistry.LAVA )
-                                return 0xff6512;
+                                return LAVA_COLOR;
 
                             else if ( fluid == FluidRegistry.WATER )
-                                return 0x3043d9;
+                                return WATER_COLOR;
 
                             return stack.getFluid().getColor(stack);
                         }
@@ -86,6 +90,25 @@ public class ColorHandler {
 
             return Level.fromAugment(stack).color;
         };
+
+        public static class FluidGen {
+            public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
+                if ( tintIndex == 0 || tintIndex == 1 )
+                    return 0xFFFFFF;
+
+                FluidStack fluidStack = itemFluidGenAugment.getFluid(stack);
+                if ( fluidStack == null )
+                    return WATER_COLOR;
+
+                Fluid fluid = fluidStack.getFluid();
+                if ( fluid == null || fluid == FluidRegistry.WATER )
+                    return WATER_COLOR;
+                else if ( fluid == FluidRegistry.LAVA )
+                    return LAVA_COLOR;
+
+                return fluid.getColor(fluidStack);
+            };
+        }
 
         public static class Range {
             public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {

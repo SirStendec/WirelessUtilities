@@ -12,6 +12,7 @@ import com.lordmau5.wirelessutils.block.redstone.BlockPoweredAir;
 import com.lordmau5.wirelessutils.block.redstone.BlockPoweredRedstoneWire;
 import com.lordmau5.wirelessutils.block.slime.BlockAngledSlime;
 import com.lordmau5.wirelessutils.commands.DebugCommand;
+import com.lordmau5.wirelessutils.commands.FluidGenCommand;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.entity.pearl.*;
 import com.lordmau5.wirelessutils.item.*;
@@ -89,6 +90,7 @@ public class CommonProxy {
 
     public void serverLoad(FMLServerStartingEvent event) {
         event.registerServerCommand(new DebugCommand());
+        event.registerServerCommand(new FluidGenCommand());
     }
 
     public void handleIdMapping(FMLModIdMappingEvent event) {
@@ -258,6 +260,7 @@ public class CommonProxy {
         registerItem(event, new ItemInvertAugment());
         registerItem(event, new ItemCropAugment());
         registerItem(event, new ItemChunkLoadAugment());
+        registerItem(event, new ItemFluidGenAugment());
 
         PluginRegistry.registerItems(event);
     }

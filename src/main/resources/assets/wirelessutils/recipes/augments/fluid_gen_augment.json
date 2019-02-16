@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"B B",
+		"EAE",
+		" R "
+	],
+	"key": {
+		"R": {
+			"item": "#REDSTONE"
+		},
+		"B": {
+			"item": "minecraft:water_bucket"
+		},
+		"A": {
+			"item": "wirelessutils:base_augment"
+		},
+		"E": {
+			"item": "#ENDER_PEARL"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:fluid_gen_augment",
+		"count": 1
+	}
+}

@@ -99,6 +99,9 @@ public class ModItems {
     @GameRegistry.ObjectHolder("wirelessutils:chunk_load_augment")
     public static ItemChunkLoadAugment itemChunkLoadAugment;
 
+    @GameRegistry.ObjectHolder("wirelessutils:fluid_gen_augment")
+    public static ItemFluidGenAugment itemFluidGenAugment;
+
     public static void initLootTables() {
         LootTableList.register(new ResourceLocation(WirelessUtils.MODID, "charged_pearl_drops"));
     }
@@ -169,18 +172,20 @@ public class ModItems {
         itemBlockAugment.initModel();
         itemCropAugment.initModel();
         itemChunkLoadAugment.initModel();
+        itemFluidGenAugment.initModel();
     }
 
     @SideOnly(Side.CLIENT)
     public static void initColors(ItemColors itemColors) {
-        itemColors.registerItemColorHandler(ColorHandler.LevelUpgrade.handleItemColor, ModItems.itemLevelUpgrade);
-        itemColors.registerItemColorHandler(ColorHandler.LevelUpgrade.handleItemColor, ModItems.itemConversionUpgrade);
-        itemColors.registerItemColorHandler(ColorHandler.Augment.Range.handleItemColor, ModItems.itemRangeAugment);
-        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, ModItems.itemSlotAugment);
-        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, ModItems.itemCapacityAugment);
-        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, ModItems.itemTransferAugment);
-        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, ModItems.itemWorldAugment);
-        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, ModItems.itemInvertAugment);
+        itemColors.registerItemColorHandler(ColorHandler.LevelUpgrade.handleItemColor, itemLevelUpgrade);
+        itemColors.registerItemColorHandler(ColorHandler.LevelUpgrade.handleItemColor, itemConversionUpgrade);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.Range.handleItemColor, itemRangeAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemSlotAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemCapacityAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemTransferAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemWorldAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemInvertAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.FluidGen.handleItemColor, itemFluidGenAugment);
 
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockDirectionalCharger));
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockPositionalCharger));

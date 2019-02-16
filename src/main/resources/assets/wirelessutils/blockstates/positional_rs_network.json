@@ -3,9 +3,12 @@
 	"defaults": {
 		"model": "wirelessutils:overlay_facing_block",
 		"textures": {
-			"base": "wirelessutils:block/rs/rs_network",
-			"overlay": "wirelessutils:block/overlay",
-			"mark": "refinedstorage:blocks/controller/cutouts/off"
+			"base": "wirelessutils:block/machine_base",
+			"side": "wirelessutils:block/machine_base",
+			"front": "wirelessutils:block/positional_front",
+			"top": "wirelessutils:block/rs/rs_network",
+			"mark_top": "refinedstorage:blocks/controller/cutouts/off",
+			"overlay": "wirelessutils:block/overlay"
 		}
 	},
 	"variants": {
@@ -28,9 +31,25 @@
 			"false": {},
 			"true": {
 				"textures": {
-					"mark": "refinedstorage:blocks/controller/cutouts/on"
+					"mark_top": "refinedstorage:blocks/controller/cutouts/on"
 				}
 			}
+		},
+		"facing": {
+			"north": {},
+			"south": {
+				"y": 180
+			},
+			"east": {
+				"y": 90
+			},
+			"west": {
+				"y": 270
+			},
+			"up_x": {},
+			"down_x": {},
+			"up_z": {},
+			"down_z": {}
 		}
 	}
 }

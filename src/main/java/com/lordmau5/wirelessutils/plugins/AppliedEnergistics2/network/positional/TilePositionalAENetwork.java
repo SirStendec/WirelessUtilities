@@ -4,6 +4,7 @@ import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics2Plugin;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.TileAENetworkBase;
+import com.lordmau5.wirelessutils.tile.base.IFacing;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.Machine;
@@ -17,9 +18,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Tuple;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,7 +34,11 @@ import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRangeAugment;
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRelativePositionalCard;
 
 @Machine(name = "positional_ae_network")
-public class TilePositionalAENetwork extends TileAENetworkBase implements ISlotAugmentable, IUnlockableSlots, IPositionalMachine {
+public class TilePositionalAENetwork extends TileAENetworkBase implements
+        IFacing,
+        ISlotAugmentable, IUnlockableSlots, IPositionalMachine {
+
+    private EnumFacing facing = EnumFacing.NORTH;
 
     private boolean interdimensional = false;
     private int range = 0;
@@ -50,6 +57,51 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements ISlotA
         System.out.println("           Range: " + range);
         System.out.println("Interdimensional: " + interdimensional);
         System.out.println("  Unlocked Slots: " + unlockedSlots);
+        System.out.println("          Facing: " + facing);
+    }
+
+    /* IFacing */
+
+    @Override
+    public boolean onWrench(EntityPlayer player, EnumFacing side) {
+        return rotateBlock(side);
+    }
+
+    @Override
+    public EnumFacing getEnumFacing() {
+        return facing;
+    }
+
+    @Override
+    public boolean getRotationX() {
+        return false;
+    }
+
+    @Override
+    public boolean setRotationX(boolean rotationX) {
+        return false;
+    }
+
+    @Override
+    public boolean setFacing(EnumFacing facing) {
+        if ( facing == this.facing )
+            return true;
+
+        if ( facing == EnumFacing.UP || facing == EnumFacing.DOWN )
+            return false;
+
+        this.facing = facing;
+        if ( !world.isRemote ) {
+            markChunkDirty();
+            sendTilePacket(Side.CLIENT);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean allowYAxisFacing() {
+        return false;
     }
 
     /* Events */
@@ -305,7 +357,35 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements ISlotA
         return true;
     }
 
+    /* NBT */
+
+    @Override
+    public void readFromNBT(NBTTagCompound tag) {
+        super.readFromNBT(tag);
+        facing = EnumFacing.byIndex(tag.getByte("Facing"));
+    }
+
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
+        tag = super.writeToNBT(tag);
+        tag.setByte("Facing", (byte) facing.ordinal());
+        return tag;
+    }
+
     /* Packets */
+
+    @Override
+    public PacketBase getTilePacket() {
+        PacketBase payload = super.getTilePacket();
+        payload.addByte(getFacing());
+        return payload;
+    }
+
+    @Override
+    public void handleTilePacket(PacketBase payload) {
+        super.handleTilePacket(payload);
+        setFacing(payload.getByte(), false);
+    }
 
     @Override
     public PacketBase getGuiPacket() {

@@ -26,7 +26,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 @Machine(name = "directional_charger")
-public class TileEntityDirectionalCharger extends TileEntityBaseCharger implements IRangeAugmentable, IDirectionalMachine {
+public class TileEntityDirectionalCharger extends TileEntityBaseCharger implements
+        IRangeAugmentable, IDirectionalMachine {
 
     private EnumFacing facing = EnumFacing.NORTH;
     private boolean rotationX = false;

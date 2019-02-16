@@ -51,7 +51,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy implements IChunkLoadAugmentable, IRoundRobinMachine, IWorldAugmentable, ITransferAugmentable, ICapacityAugmentable, IInventoryAugmentable, IInvertAugmentable, ITickable, IWorkProvider<TileEntityBaseCondenser.CondenserTarget> {
+public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy implements
+        IChunkLoadAugmentable, IRoundRobinMachine, IWorldAugmentable, ITransferAugmentable,
+        ICapacityAugmentable, IInventoryAugmentable, IInvertAugmentable, ITickable,
+        IFluidGenAugmentable,
+        IWorkProvider<TileEntityBaseCondenser.CondenserTarget> {
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
@@ -85,6 +89,10 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     private int maxEnergyPerTick;
     private boolean processBlocks = false;
     private boolean processItems = false;
+
+    private boolean fluidGen = false;
+    private FluidStack fluidGenStack = null;
+    private int fluidGenCost = 0;
 
 
     public TileEntityBaseCondenser() {
@@ -133,6 +141,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                     if ( locked && lockStack == null )
                         setLocked(resource);
 
+                    if ( filled == tank.getFluidAmount() )
+                        updateFluidGen();
+
                     remainingPerTick -= filled;
                 }
 
@@ -173,6 +184,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                     if ( lockStack != null && !tank.isLocked() && (tankFluid == null || tankFluid.amount == 0) )
                         tank.setLock(lockStack.getFluid());
 
+                    if ( tankFluid == null || tankFluid.amount == 0 )
+                        updateFluidGen();
+
                     remainingPerTick -= output.amount;
                 }
 
@@ -202,8 +216,12 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                 }
 
                 int out = tank.fill(resource, doFill);
-                if ( out > 0 && doFill )
+                if ( out > 0 && doFill ) {
                     markChunkDirty();
+
+                    if ( out == tank.getFluidAmount() )
+                        updateFluidGen();
+                }
 
                 return out;
             }
@@ -227,8 +245,12 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                     return null;
 
                 FluidStack out = tank.drain(maxDrain, doDrain);
-                if ( out != null && doDrain )
+                if ( out != null && doDrain ) {
                     markChunkDirty();
+
+                    if ( tank.getFluidAmount() == 0 )
+                        updateFluidGen();
+                }
 
                 return out;
             }
@@ -309,6 +331,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         System.out.println("       Capacity: " + tank.getCapacity());
         System.out.println("       Contents: " + debugPrintStack(tank.getFluid()));
         System.out.println("    Light Level: " + lightValue);
+        System.out.println("      Fluid Gen: " + fluidGen);
+        System.out.println("Fluid Gen Fluid: " + fluidGenStack);
+        System.out.println(" Fluid Gen Cost: " + fluidGenCost);
     }
 
     /* Tank Stuff */
@@ -377,6 +402,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             lockStack = null;
             tank.setLocked(false);
         }
+
+        updateFluidGen();
 
         if ( world != null && !world.isRemote ) {
             markChunkDirty();
@@ -530,6 +557,48 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     @Override
+    public void setFluidGenAugmented(boolean enabled, FluidStack fluidStack, int energy) {
+        int oldCost = fluidGenCost;
+
+        if ( !enabled ) {
+            fluidGenStack = null;
+            fluidGenCost = 0;
+
+        } else {
+            fluidGenStack = fluidStack;
+            fluidGenCost = energy;
+        }
+
+        if ( fluidGen )
+            maxEnergyPerTick -= oldCost;
+
+        updateFluidGen();
+
+        if ( fluidGen )
+            maxEnergyPerTick += fluidGenCost;
+    }
+
+    public void updateFluidGen() {
+        if ( fluidGenStack == null || tank == null ) {
+            fluidGen = false;
+            return;
+        }
+
+        if ( locked && lockStack != null && !lockStack.isFluidEqual(fluidGenStack) ) {
+            fluidGen = false;
+            return;
+        }
+
+        FluidStack fluid = tank.getFluid();
+        if ( fluid != null && !fluid.isFluidEqual(fluidGenStack) ) {
+            fluidGen = false;
+            return;
+        }
+
+        fluidGen = true;
+    }
+
+    @Override
     public void setInvertAugmented(boolean inverted) {
         if ( this.inverted == inverted )
             return;
@@ -648,6 +717,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         validTargetsPerTick = 0;
         maxEnergyPerTick = 0;
+        if ( fluidGen )
+            maxEnergyPerTick = fluidGenCost;
+
         return validTargets;
     }
 
@@ -997,11 +1069,18 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( gatherTick < 0 )
             gatherTick = 10;
 
+        activeTargetsPerTick = 0;
+        energyPerTick = 0;
+
+        if ( fluidGen && getEnergyStored() >= fluidGenCost ) {
+            int filled = fluidHandler.fill(fluidGenStack, true);
+            if ( filled > 0 )
+                extractEnergy(fluidGenCost, false);
+        }
+
         if ( !redstoneControlOrDisable() ) {
             setActive(false);
-            activeTargetsPerTick = 0;
             fluidPerTick = 0;
-            energyPerTick = 0;
             updateTrackers();
             return;
         }
@@ -1012,9 +1091,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( total > fluidMaxRate )
             total = fluidMaxRate;
 
-        energyPerTick = 0;
         remainingPerTick = total;
-        activeTargetsPerTick = 0;
         setActive(worker.performWork());
         fluidPerTick = total - remainingPerTick;
 

@@ -36,6 +36,11 @@ public class DebugCommand extends CommandBase {
     }
 
     @Override
+    public int getRequiredPermissionLevel() {
+        return 1;
+    }
+
+    @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         EntityPlayerMP player = getCommandSenderAsPlayer(sender);
         if ( player == null )

@@ -4,8 +4,10 @@
 		"model": "wirelessutils:overlay_facing_block",
 		"textures": {
 			"base": "wirelessutils:block/machine_base",
+			"side": "wirelessutils:block/machine_base",
+			"front": "wirelessutils:block/positional_front",
 			"overlay": "wirelessutils:block/overlay",
-			"mark": "wirelessutils:block/desublimator_mark"
+			"mark_top": "wirelessutils:block/desublimator_mark"
 		}
 	},
 	"variants": {
@@ -28,9 +30,25 @@
 			"false": {},
 			"true": {
 				"textures": {
-					"mark": "wirelessutils:block/desublimator_mark_active"
+					"mark_top": "wirelessutils:block/desublimator_mark_active"
 				}
 			}
+		},
+		"facing": {
+			"north": {},
+			"south": {
+				"y": 180
+			},
+			"east": {
+				"y": 90
+			},
+			"west": {
+				"y": 270
+			},
+			"up_x": {},
+			"down_x": {},
+			"up_z": {},
+			"down_z": {}
 		}
 	}
 }

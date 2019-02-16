@@ -185,6 +185,29 @@ public class ModConfig {
         @Config.Name("Block Augments")
         @Config.Comment("Block Augments allow Desublimators to place and break blocks.")
         public final BlockAugments block = new BlockAugments();
+
+        @Config.Name("Auxiliary Condenser Augments")
+        @Config.Comment("Auxiliary Condenser Augments allow machines to generate fluid with energy.")
+        public final FluidGenAugments fluidGen = new FluidGenAugments();
+    }
+
+    public static class FluidGenAugments {
+        @Config.Name("Default Fluid")
+        @Config.Comment("Generate this fluid.")
+        @Config.RequiresWorldRestart
+        public String fluidName = "water";
+
+        @Config.Name("Default Fluid Rate")
+        @Config.Comment("Generate this many mB of fluid per tick.")
+        @Config.RequiresWorldRestart
+        @Config.RangeInt(min = 0)
+        public int fluidRate = 1000;
+
+        @Config.Name("Default Energy Cost")
+        @Config.Comment("Cost this many RF per tick to generate fluid.")
+        @Config.RequiresWorldRestart
+        @Config.RangeInt(min = 0)
+        public int energyCost = 0;
     }
 
     public static class CropAugments {
