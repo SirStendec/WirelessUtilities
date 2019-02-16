@@ -208,6 +208,24 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         @Config.RangeInt(min = 0)
         public int energyCost = 0;
+
+        @Config.Name("Allow Trapping Cows")
+        @Config.Comment("When enabled, right-clicking a cow with an Auxiliary Condenser Augment will cause the augment to produce milk while removing the cow from the world.")
+        public boolean allowCows = true;
+
+        @Config.Name("Cow Milk Rate")
+        @Config.Comment("Trapped Cows produce milk at this mB/t. (Changes only affect newly trapped cows.)")
+        @Config.RangeInt(min = 0)
+        public int milkRate = 100;
+
+        @Config.Name("Allow Trapping Mooshrooms")
+        @Config.Comment("When enabled, right-clicking a Mooshroom with an Auxiliary Condenser Augment will cause the augment to produce Mushroom Stew while removing the cow from the world.")
+        public boolean allowMooshrooms = true;
+
+        @Config.Name("Mooshroom Stew Rate")
+        @Config.Comment("Trapped Mooshrooms produce Mushroom Stew at this mB/t. (Changes only affect newly trapped mooshrooms.)")
+        @Config.RangeInt(min = 0)
+        public int stewRate = 100;
     }
 
     public static class CropAugments {

@@ -144,8 +144,8 @@ item.wirelessutils.fluid_gen_augment.info.2=that machine's tank with fluid
 item.wirelessutils.fluid_gen_augment.info.3=in exchange for energy.
 
 item.wirelessutils.fluid_gen_augment.fluid=Fluid: %s
-item.wirelessutils.fluid_gen_augment.fluid_amount=%s mB/t of %s
-item.wirelessutils.fluid_gen_augment.energy=Energy Cost: %s
+item.wirelessutils.fluid_gen_augment.fluid_amount=Rate: %s mB/t
+item.wirelessutils.fluid_gen_augment.energy=Power Usage: %s
 
 item.wirelessutils.invert_augment.name=Invert Augment
 item.wirelessutils.invert_augment.info.0=This augment allows certain machines

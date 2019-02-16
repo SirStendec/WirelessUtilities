@@ -1,22 +1,29 @@
 package com.lordmau5.wirelessutils.item.augment;
 
 import cofh.api.core.IAugmentable;
+import cofh.core.util.CoreUtils;
+import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IFluidGenAugmentable;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.passive.EntityCow;
+import net.minecraft.entity.passive.EntityMooshroom;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -106,11 +113,12 @@ public class ItemFluidGenAugment extends ItemAugment {
 
             tooltip.add(new TextComponentTranslation(
                     name + ".fluid",
-                    new TextComponentTranslation(
-                            name + ".fluid_amount",
-                            fluid.amount,
-                            getStackComponent(fluid)
-                    )
+                    getStackComponent(fluid)
+            ).getFormattedText());
+
+            tooltip.add(new TextComponentTranslation(
+                    name + ".fluid_amount",
+                    StringHelper.formatNumber(fluid.amount)
             ).getFormattedText());
 
             if ( energy > 0 )
@@ -137,28 +145,62 @@ public class ItemFluidGenAugment extends ItemAugment {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-        if ( !worldIn.isRemote ) {
-            ItemStack stack = playerIn.getHeldItem(handIn);
-            NBTTagCompound tag = stack.getTagCompound();
-            if ( tag == null )
-                tag = new NBTTagCompound();
+    public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer player, EntityLivingBase entity, EnumHand hand) {
+        if ( entity.world.isRemote )
+            return false;
 
-            if ( tag.hasKey("Fluid") )
-                tag.removeTag("Fluid");
-            else {
-                FluidStack fluid = new FluidStack(FluidRegistry.LAVA, 100);
-                NBTTagCompound ftag = new NBTTagCompound();
-                fluid.writeToNBT(ftag);
-                tag.setTag("Fluid", ftag);
-            }
+        FluidStack fluid = null;
 
-            stack.setTagCompound(tag);
-            return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+        if ( (entity instanceof EntityMooshroom) && FluidRegistry.isFluidRegistered("mushroom_stew") ) {
+            if ( !ModConfig.augments.fluidGen.allowMooshrooms )
+                return false;
 
+            fluid = FluidRegistry.getFluidStack("mushroom_stew", ModConfig.augments.fluidGen.stewRate);
+
+        } else if ( (entity instanceof EntityCow) && FluidRegistry.isFluidRegistered("milk") ) {
+            if ( !ModConfig.augments.fluidGen.allowCows )
+                return false;
+
+            fluid = FluidRegistry.getFluidStack("milk", ModConfig.augments.fluidGen.milkRate);
         }
 
-        return super.onItemRightClick(worldIn, playerIn, handIn);
+        if ( fluid == null )
+            return false;
+
+        ItemStack newItem = stack.copy();
+        newItem.setCount(1);
+
+        NBTTagCompound tag = newItem.getTagCompound();
+        if ( tag == null )
+            tag = new NBTTagCompound();
+
+        if ( tag.hasKey("Fluid") )
+            return false;
+
+        NBTTagCompound ftag = new NBTTagCompound();
+        fluid.writeToNBT(ftag);
+        tag.setTag("Fluid", ftag);
+
+        player.world.playSound(null, entity.getPosition(), SoundEvents.ENTITY_COW_AMBIENT, SoundCategory.PLAYERS, 0.6F, 1.0F);
+
+        if ( player.world instanceof WorldServer ) {
+            WorldServer ws = (WorldServer) player.world;
+            ws.spawnParticle(EnumParticleTypes.SMOKE_LARGE, entity.posX, entity.posY + (entity.height / 2), entity.posZ, 3, 0.2D, 0.2D, 0.2D, 0D);
+        }
+
+        newItem.setTagCompound(tag);
+        entity.setDead();
+
+        if ( stack.getCount() == 1 )
+            player.setHeldItem(hand, newItem);
+        else {
+            stack.shrink(1);
+            player.setHeldItem(hand, stack);
+            if ( !player.addItemStackToInventory(newItem) )
+                CoreUtils.dropItemStackIntoWorldWithVelocity(newItem, player.world, player.getPositionVector());
+        }
+
+        return true;
     }
 
     @Override

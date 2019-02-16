@@ -7,6 +7,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -96,6 +97,10 @@ public class ColorHandler {
                 if ( tintIndex == 0 || tintIndex == 1 )
                     return 0xFFFFFF;
 
+                NBTTagCompound tag = stack.getTagCompound();
+                if ( tag != null && tag.hasKey("Color") )
+                    return tag.getInteger("Color");
+
                 FluidStack fluidStack = itemFluidGenAugment.getFluid(stack);
                 if ( fluidStack == null )
                     return WATER_COLOR;
@@ -105,6 +110,8 @@ public class ColorHandler {
                     return WATER_COLOR;
                 else if ( fluid == FluidRegistry.LAVA )
                     return LAVA_COLOR;
+                else if ( fluid.getName().equalsIgnoreCase("mushroom_stew") )
+                    return 0xB48F6E;
 
                 return fluid.getColor(fluidStack);
             };
