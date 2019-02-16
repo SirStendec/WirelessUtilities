@@ -4,6 +4,7 @@ import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
 import com.lordmau5.wirelessutils.entity.pearl.EntityFluxedPearl;
 import com.lordmau5.wirelessutils.plugins.IPlugin;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
+import com.lordmau5.wirelessutils.utils.ColorHandler;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
@@ -14,6 +15,7 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import stanhebben.zenscript.annotations.Optional;
@@ -29,6 +31,7 @@ public class CraftTweakerPlugin implements IPlugin {
         CraftTweakerAPI.registerClass(CondenserIntegration.class);
         CraftTweakerAPI.registerClass(LevelIntegration.class);
         CraftTweakerAPI.registerClass(PearlReactions.class);
+        CraftTweakerAPI.registerClass(FluidColors.class);
     }
 
     private static FluidStack getFluidStack(ILiquidStack stack) {
@@ -156,6 +159,52 @@ public class CraftTweakerPlugin implements IPlugin {
             Level level = new Level(name, augmentSlots, EnumRarity.values()[rarity], color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, maxItemsPerTick);
             Level.addLevel(level);
             return new LevelWrapper(level);
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    @ZenClass("mods.wirelessutils.fluid_colors")
+    public static class FluidColors {
+        @SuppressWarnings("unused")
+        @ZenMethod
+        public static void clear() {
+            ColorHandler.fluidColorMap.clear();
+        }
+
+        @SuppressWarnings("unused")
+        @ZenMethod
+        public static void remove(ILiquidStack fluidIn) {
+            FluidStack stack = getFluidStack(fluidIn);
+            if ( stack == null ) {
+                CraftTweakerAPI.logError("Invalid Fluid: " + fluidIn.toString());
+                return;
+            }
+
+            Fluid fluid = stack.getFluid();
+            if ( fluid == null ) {
+                CraftTweakerAPI.logError("Invalid Fluid: " + fluidIn.toString());
+                return;
+            }
+
+            ColorHandler.fluidColorMap.remove(fluid.getName());
+        }
+
+        @SuppressWarnings("unused")
+        @ZenMethod
+        public static void add(ILiquidStack fluidIn, int color) {
+            FluidStack stack = getFluidStack(fluidIn);
+            if ( stack == null ) {
+                CraftTweakerAPI.logError("Invalid Fluid: " + fluidIn.toString());
+                return;
+            }
+
+            Fluid fluid = stack.getFluid();
+            if ( fluid == null ) {
+                CraftTweakerAPI.logError("Invalid Fluid: " + fluidIn.toString());
+                return;
+            }
+
+            ColorHandler.fluidColorMap.put(fluid.getName(), color);
         }
     }
 

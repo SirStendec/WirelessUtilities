@@ -7,18 +7,22 @@ import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IFluidGenAugmentable;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.passive.EntityMooshroom;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.EnumAction;
 import net.minecraft.item.EnumRarity;
+import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.stats.StatList;
+import net.minecraft.util.*;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -70,8 +74,15 @@ public class ItemFluidGenAugment extends ItemAugment {
         FluidStack fluid = null;
         if ( !stack.isEmpty() && stack.getItem() == this ) {
             NBTTagCompound tag = stack.getTagCompound();
-            if ( tag != null && tag.hasKey("Fluid") ) {
-                fluid = FluidStack.loadFluidStackFromNBT(tag.getCompoundTag("Fluid"));
+            if ( tag != null ) {
+                if ( tag.hasKey("Cows") )
+                    fluid = FluidRegistry.getFluidStack("milk", tag.getByte("Cows") * ModConfig.augments.fluidGen.milkRate);
+
+                else if ( tag.hasKey("Mooshrooms") )
+                    fluid = FluidRegistry.getFluidStack("mushroom_stew", tag.getByte("Mooshrooms") * ModConfig.augments.fluidGen.stewRate);
+
+                else if ( tag.hasKey("Fluid") )
+                    fluid = FluidStack.loadFluidStackFromNBT(tag.getCompoundTag("Fluid"));
             }
         }
 
@@ -121,6 +132,19 @@ public class ItemFluidGenAugment extends ItemAugment {
                     StringHelper.formatNumber(fluid.amount)
             ).getFormattedText());
 
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("Cows") )
+                tooltip.add(new TextComponentTranslation(
+                        name + ".cows",
+                        tag.getByte("Cows")
+                ).getFormattedText());
+
+            if ( tag != null && tag.hasKey("Mooshrooms") )
+                tooltip.add(new TextComponentTranslation(
+                        name + ".mooshrooms",
+                        tag.getByte("Mooshrooms")
+                ).getFormattedText());
+
             if ( energy > 0 )
                 tooltip.add(new TextComponentTranslation(
                         name + ".energy",
@@ -149,37 +173,52 @@ public class ItemFluidGenAugment extends ItemAugment {
         if ( entity.world.isRemote )
             return false;
 
-        FluidStack fluid = null;
+        NBTTagCompound tag = stack.getTagCompound();
+
+        String name;
+        byte count;
 
         if ( (entity instanceof EntityMooshroom) && FluidRegistry.isFluidRegistered("mushroom_stew") ) {
-            if ( !ModConfig.augments.fluidGen.allowMooshrooms )
+            byte mooshrooms = tag == null ? 0 : tag.getByte("Mooshrooms");
+            if ( mooshrooms >= ModConfig.augments.fluidGen.allowMooshrooms )
                 return false;
 
-            fluid = FluidRegistry.getFluidStack("mushroom_stew", ModConfig.augments.fluidGen.stewRate);
+            if ( tag != null ) {
+                if ( tag.hasKey("Cows") || tag.hasKey("Fluid") )
+                    return false;
+            }
 
-        } else if ( (entity instanceof EntityCow) && FluidRegistry.isFluidRegistered("milk") ) {
-            if ( !ModConfig.augments.fluidGen.allowCows )
+            name = "Mooshrooms";
+            count = (byte) (mooshrooms + 1);
+
+            // We don't use instanceof here because mods have subclasses of cows that don't give milk.
+            // So, basically... Moo Fluids. TODO support for Moo Fluids?
+        } else if ( (entity.getClass().equals(EntityCow.class)) && FluidRegistry.isFluidRegistered("milk") ) {
+            byte cows = tag == null ? 0 : tag.getByte("Cows");
+            if ( cows >= ModConfig.augments.fluidGen.allowCows )
                 return false;
 
-            fluid = FluidRegistry.getFluidStack("milk", ModConfig.augments.fluidGen.milkRate);
-        }
+            if ( tag != null ) {
+                if ( tag.hasKey("Mooshrooms") || tag.hasKey("Fluid") )
+                    return false;
+            }
 
-        if ( fluid == null )
+            name = "Cows";
+            count = (byte) (cows + 1);
+
+        } else
             return false;
 
         ItemStack newItem = stack.copy();
         newItem.setCount(1);
 
-        NBTTagCompound tag = newItem.getTagCompound();
+        tag = newItem.getTagCompound();
         if ( tag == null )
             tag = new NBTTagCompound();
 
-        if ( tag.hasKey("Fluid") )
-            return false;
-
-        NBTTagCompound ftag = new NBTTagCompound();
-        fluid.writeToNBT(ftag);
-        tag.setTag("Fluid", ftag);
+        tag.setByte(name, count);
+        newItem.setTagCompound(tag);
+        entity.setDead();
 
         player.world.playSound(null, entity.getPosition(), SoundEvents.ENTITY_COW_AMBIENT, SoundCategory.PLAYERS, 0.6F, 1.0F);
 
@@ -187,9 +226,6 @@ public class ItemFluidGenAugment extends ItemAugment {
             WorldServer ws = (WorldServer) player.world;
             ws.spawnParticle(EnumParticleTypes.SMOKE_LARGE, entity.posX, entity.posY + (entity.height / 2), entity.posZ, 3, 0.2D, 0.2D, 0.2D, 0D);
         }
-
-        newItem.setTagCompound(tag);
-        entity.setDead();
 
         if ( stack.getCount() == 1 )
             player.setHeldItem(hand, newItem);
@@ -201,6 +237,116 @@ public class ItemFluidGenAugment extends ItemAugment {
         }
 
         return true;
+    }
+
+    @Override
+    @Nonnull
+    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
+        ItemStack stack = player.getHeldItem(hand);
+        if ( !stack.isEmpty() && stack.getItem() == this ) {
+            FluidStack fluidStack = getFluid(stack);
+            if ( fluidStack != null ) {
+                Fluid fluid = fluidStack.getFluid();
+                int drink = ModConfig.augments.fluidGen.milkDrink;
+                if ( drink != 0 && fluidStack.amount >= drink && fluid.getName().equalsIgnoreCase("milk") ) {
+                    player.setActiveHand(hand);
+                    return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+                }
+
+                int eat = ModConfig.augments.fluidGen.stewEat;
+                if ( eat != 0 && fluidStack.amount >= eat && fluid.getName().equalsIgnoreCase("mushroom_stew") ) {
+                    if ( player.canEat(false) ) {
+                        player.setActiveHand(hand);
+                        return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+                    }
+
+                    return new ActionResult<>(EnumActionResult.FAIL, stack);
+                }
+            }
+
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.getByte("Cows") > 0 ) {
+                world.playSound(player, player.getPosition(), SoundEvents.ENTITY_COW_AMBIENT, SoundCategory.PLAYERS, 0.6F, world.rand.nextFloat() * 0.1F + 0.9F);
+                player.getCooldownTracker().setCooldown(this, 10);
+            }
+        }
+
+        return super.onItemRightClick(world, player, hand);
+    }
+
+    @Override
+    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, EntityLivingBase entityLiving) {
+        FluidStack fluidStack = getFluid(stack);
+        if ( fluidStack != null ) {
+            Fluid fluid = fluidStack.getFluid();
+            int drink = ModConfig.augments.fluidGen.milkDrink;
+            if ( drink != 0 && fluidStack.amount >= drink && fluid.getName().equalsIgnoreCase("milk") ) {
+                ItemStack bucket = new ItemStack(Items.MILK_BUCKET);
+                if ( !worldIn.isRemote )
+                    entityLiving.curePotionEffects(bucket);
+
+                if ( entityLiving instanceof EntityPlayerMP ) {
+                    EntityPlayerMP player = (EntityPlayerMP) entityLiving;
+                    CriteriaTriggers.CONSUME_ITEM.trigger(player, bucket);
+                    player.addStat(StatList.getObjectUseStats(Items.MILK_BUCKET));
+                }
+
+                return stack;
+            }
+
+            int eat = ModConfig.augments.fluidGen.stewEat;
+            if ( eat != 0 && fluidStack.amount >= eat && fluid.getName().equalsIgnoreCase("mushroom_stew") ) {
+                if ( entityLiving instanceof EntityPlayer ) {
+                    EntityPlayer player = (EntityPlayer) entityLiving;
+                    ItemStack stew = new ItemStack(Items.MUSHROOM_STEW);
+                    player.getFoodStats().addStats((ItemFood) Items.MUSHROOM_STEW, stew);
+                    worldIn.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_BURP, SoundCategory.PLAYERS, 0.5F, worldIn.rand.nextFloat() * 0.1F + 0.9F);
+                    player.addStat(StatList.getObjectUseStats(Items.MUSHROOM_STEW));
+
+                    if ( player instanceof EntityPlayerMP ) {
+                        CriteriaTriggers.CONSUME_ITEM.trigger((EntityPlayerMP) player, stew);
+                    }
+                }
+
+                return stack;
+            }
+        }
+
+        return super.onItemUseFinish(stack, worldIn, entityLiving);
+    }
+
+    @Override
+    public int getMaxItemUseDuration(ItemStack stack) {
+        FluidStack fluidStack = getFluid(stack);
+        if ( fluidStack != null ) {
+            Fluid fluid = fluidStack.getFluid();
+            int drink = ModConfig.augments.fluidGen.milkDrink;
+            if ( drink != 0 && fluidStack.amount >= drink && fluid.getName().equalsIgnoreCase("milk") )
+                return 32;
+
+            int eat = ModConfig.augments.fluidGen.stewEat;
+            if ( eat != 0 && fluidStack.amount >= eat && fluid.getName().equalsIgnoreCase("mushroom_stew") )
+                return 32;
+        }
+
+        return super.getMaxItemUseDuration(stack);
+    }
+
+    @Override
+    public EnumAction getItemUseAction(ItemStack stack) {
+        FluidStack fluidStack = getFluid(stack);
+        if ( fluidStack != null ) {
+            Fluid fluid = fluidStack.getFluid();
+            int drink = ModConfig.augments.fluidGen.milkDrink;
+            if ( drink != 0 && fluidStack.amount >= drink && fluid.getName().equalsIgnoreCase("milk") )
+                return EnumAction.DRINK;
+
+            int eat = ModConfig.augments.fluidGen.stewEat;
+            if ( eat != 0 && fluidStack.amount >= eat && fluid.getName().equalsIgnoreCase("mushroom_stew") )
+                return EnumAction.EAT;
+        }
+
+        return super.getItemUseAction(stack);
     }
 
     @Override

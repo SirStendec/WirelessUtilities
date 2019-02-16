@@ -1,11 +1,8 @@
 package com.lordmau5.wirelessutils.commands;
 
-import com.google.common.collect.Lists;
+import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.NumberInvalidException;
+import net.minecraft.command.*;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
@@ -13,18 +10,21 @@ import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class FluidGenCommand extends CommandBase {
-
-    private final List<String> ALIASES = Lists.newArrayList("wu_fluidgen");
 
     @Override
     public String getName() {
@@ -33,7 +33,7 @@ public class FluidGenCommand extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "wu_fluidgen <fluid> <mb/t> <energy> [color/-] [fluid-nbt-data]";
+        return "commands." + WirelessUtils.MODID + ".fluidgen.usage";
     }
 
     @Override
@@ -42,30 +42,42 @@ public class FluidGenCommand extends CommandBase {
     }
 
     @Override
-    public List<String> getAliases() {
-        return ALIASES;
-    }
-
-    @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         EntityPlayerMP player = getCommandSenderAsPlayer(sender);
         if ( player == null )
             return;
 
-        if ( args.length == 0 ) {
-            sender.sendMessage(new TextComponentString(getUsage(sender)));
-            return;
-        }
+        if ( args.length < 3 )
+            throw new WrongUsageException("commands." + WirelessUtils.MODID + ".fluidgen.usage", 0);
 
-        if ( args.length < 3 ) {
-            sender.sendMessage(new TextComponentString("Invalid Arguments"));
-            return;
-        }
+        Fluid fluid = null;
 
-        Fluid fluid = FluidRegistry.getFluid(args[0]);
-        if ( fluid == null ) {
-            sender.sendMessage(new TextComponentString("No Such Fluid: " + args[0]));
-            return;
+        if ( args[0].equalsIgnoreCase("held") ) {
+            ItemStack held = player.getHeldItemMainhand();
+            IFluidHandlerItem handler = held.isEmpty() ? null : held.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+            if ( handler == null )
+                throw new CommandException("command." + WirelessUtils.MODID + ".fluidgen.not_holding", 0);
+
+            IFluidTankProperties[] properties = handler.getTankProperties();
+            if ( properties == null || properties.length == 0 )
+                throw new CommandException("command." + WirelessUtils.MODID + ".fluidgen.not_holding", 0);
+
+            for (IFluidTankProperties prop : properties) {
+                FluidStack contents = prop.getContents();
+                if ( contents != null ) {
+                    fluid = contents.getFluid();
+                    if ( fluid != null )
+                        break;
+                }
+            }
+
+            if ( fluid == null )
+                throw new CommandException("command." + WirelessUtils.MODID + ".fluidgen.not_holding", 0);
+
+        } else {
+            fluid = FluidRegistry.getFluid(args[0]);
+            if ( fluid == null )
+                throw new CommandException("commands." + WirelessUtils.MODID + ".fluidgen.no_such_fluid", args[0]);
         }
 
         int amount = parseInt(args[1], 1);
@@ -96,7 +108,7 @@ public class FluidGenCommand extends CommandBase {
                 ftag.merge(JsonToNBT.getTagFromJson(s));
                 tag.setTag("Fluid", ftag);
             } catch (NBTException ex) {
-                throw new CommandException("commands.give.tagError", ex.getMessage());
+                throw new CommandException("commands." + WirelessUtils.MODID + ".fluidgen.tag_error", ex.getMessage());
             }
         }
 
@@ -105,7 +117,7 @@ public class FluidGenCommand extends CommandBase {
         if ( !player.addItemStackToInventory(stack) )
             player.entityDropItem(stack, 0);
 
-        sender.sendMessage(new TextComponentString("Done."));
+        sender.sendMessage(new TextComponentTranslation("commands." + WirelessUtils.MODID + ".fluidgen.success", stack.getTextComponent()));
     }
 
     public static int parseHex(String input) throws NumberInvalidException {
@@ -145,8 +157,12 @@ public class FluidGenCommand extends CommandBase {
     @Override
     @Nonnull
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        if ( args.length < 2 )
-            return getListOfStringsMatchingLastWord(args, FluidRegistry.getRegisteredFluids().keySet());
+        if ( args.length < 2 ) {
+            Set<String> values = new HashSet<>(FluidRegistry.getRegisteredFluids().keySet());
+            values.add("held");
+
+            return getListOfStringsMatchingLastWord(args, values);
+        }
 
         return super.getTabCompletions(server, sender, args, targetPos);
     }

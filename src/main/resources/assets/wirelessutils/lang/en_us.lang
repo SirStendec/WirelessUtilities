@@ -146,6 +146,8 @@ item.wirelessutils.fluid_gen_augment.info.3=in exchange for energy.
 item.wirelessutils.fluid_gen_augment.fluid=Fluid: %s
 item.wirelessutils.fluid_gen_augment.fluid_amount=Rate: %s mB/t
 item.wirelessutils.fluid_gen_augment.energy=Power Usage: %s
+item.wirelessutils.fluid_gen_augment.cows=Trapped Cows: %s
+item.wirelessutils.fluid_gen_augment.mooshrooms=Trapped Mooshrooms: %s
 
 item.wirelessutils.invert_augment.name=Invert Augment
 item.wirelessutils.invert_augment.info.0=This augment allows certain machines
@@ -361,6 +363,14 @@ info.wirelessutils.ae2.channels=%d of %d Channels
 
 chat.wirelessutils.upgrade.success=Installed %s into %s.
 chat.wirelessutils.upgrade.failed=Could not install %s into %s.
+
+commands.wirelessutils.fluidgen.usage=/wu_fluidgen <held OR fluid-name> <mB/t> <energy> [color OR -] [fluidTag]
+commands.wirelessutils.fluidgen.tag_error=Fluid tag parsing failed: %s
+commands.wirelessutils.fluidgen.not_holding=Not holding an item containing fluid to copy.
+commands.wirelessutils.fluidgen.no_such_fluid=There is no such fluid with name: %s
+commands.wirelessutils.fluidgen.success=Created Augmented: %s
+
+commands.wirelessutils.debug.success=Created Item: %s
 
 advancements.wirelessutils.root.title=Wireless Utilities
 advancements.wirelessutils.root.description=Because wires just get in the way.

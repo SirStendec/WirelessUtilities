@@ -2,6 +2,7 @@ package com.lordmau5.wirelessutils.utils;
 
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityBaseCondenser;
 import com.lordmau5.wirelessutils.utils.constants.Properties;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockRedstoneWire;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.color.IBlockColor;
@@ -12,18 +13,35 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemFluidGenAugment;
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRangeAugment;
 
 public class ColorHandler {
 
-    public static final int WATER_COLOR = 0x3043d9;
-    public static final int LAVA_COLOR = 0xff6512;
+    public static Map<String, Integer> fluidColorMap = new Object2IntOpenHashMap<>();
+
+    static {
+        fluidColorMap.put("water", 0x3043D9);
+        fluidColorMap.put("lava", 0xFF6512);
+        fluidColorMap.put("mushroom_stew", 0xB48F6E);
+    }
+
+    public static int getFluidColor(@Nullable FluidStack stack) {
+        Fluid fluid = stack == null ? null : stack.getFluid();
+        if ( fluid == null )
+            return 0xFFFFFF;
+
+        String name = fluid.getName();
+        if ( fluidColorMap.containsKey(name) )
+            return fluidColorMap.get(name);
+
+        return fluid.getColor(stack);
+    }
 
     public static class Machine {
         public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
@@ -55,18 +73,8 @@ public class ColorHandler {
                 if ( tile instanceof TileEntityBaseCondenser ) {
                     TileEntityBaseCondenser condenser = (TileEntityBaseCondenser) tile;
                     FluidStack stack = condenser.getTankFluid();
-                    if ( stack != null ) {
-                        Fluid fluid = stack.getFluid();
-                        if ( fluid != null ) {
-                            if ( fluid == FluidRegistry.LAVA )
-                                return LAVA_COLOR;
-
-                            else if ( fluid == FluidRegistry.WATER )
-                                return WATER_COLOR;
-
-                            return stack.getFluid().getColor(stack);
-                        }
-                    }
+                    if ( stack != null )
+                        return getFluidColor(stack);
                 }
             }
 
@@ -102,18 +110,7 @@ public class ColorHandler {
                     return tag.getInteger("Color");
 
                 FluidStack fluidStack = itemFluidGenAugment.getFluid(stack);
-                if ( fluidStack == null )
-                    return WATER_COLOR;
-
-                Fluid fluid = fluidStack.getFluid();
-                if ( fluid == null || fluid == FluidRegistry.WATER )
-                    return WATER_COLOR;
-                else if ( fluid == FluidRegistry.LAVA )
-                    return LAVA_COLOR;
-                else if ( fluid.getName().equalsIgnoreCase("mushroom_stew") )
-                    return 0xB48F6E;
-
-                return fluid.getColor(fluidStack);
+                return getFluidColor(fluidStack);
             };
         }
 

@@ -12,6 +12,7 @@ import com.lordmau5.wirelessutils.utils.ColorHandler;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
@@ -137,6 +138,20 @@ public class ModItems {
         ThermalExpansionHelper.addTransposerFill(400, new ItemStack(itemChargedPearl, 1, 0), new ItemStack(itemScorchedPearl, 1, 0), lava, false);
         ThermalExpansionHelper.addTransposerFill(400, new ItemStack(itemChargedPearl, 1, 1), new ItemStack(itemScorchedPearl, 1, 1), lava, false);
 
+        ItemStack bottle = new ItemStack(Items.GLASS_BOTTLE);
+        ItemStack xp_bottle = new ItemStack(Items.EXPERIENCE_BOTTLE);
+
+        FluidStack xpjuice = FluidRegistry.getFluidStack("xpjuice", 250);
+        if ( xpjuice != null )
+            CondenserRecipeManager.addRecipe(xpjuice, bottle, xp_bottle, 400);
+
+        xpjuice = FluidRegistry.getFluidStack("essence", 250);
+        if ( xpjuice != null )
+            CondenserRecipeManager.addRecipe(xpjuice, bottle, xp_bottle, 400);
+
+        xpjuice = FluidRegistry.getFluidStack("experience", 250);
+        if ( xpjuice != null )
+            CondenserRecipeManager.addRecipe(xpjuice, bottle, xp_bottle, 400);
 
         // Concrete
         for (int i = 0; i < 16; i++)
