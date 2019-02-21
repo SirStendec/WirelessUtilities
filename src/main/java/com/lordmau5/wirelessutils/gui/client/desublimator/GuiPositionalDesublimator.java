@@ -25,6 +25,7 @@ public class GuiPositionalDesublimator extends BaseGuiPositional {
     public static final ItemStack CHEST = new ItemStack(Blocks.CHEST);
 
     private final TilePositionalDesublimator desublimator;
+    private TabSideControl sideControl;
 
     public GuiPositionalDesublimator(InventoryPlayer player, TilePositionalDesublimator desublimator) {
         super(new ContainerPositionalDesublimator(player, desublimator), desublimator, TEXTURE);
@@ -50,7 +51,14 @@ public class GuiPositionalDesublimator extends BaseGuiPositional {
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));
         addTab(new TabRedstoneControl(this, desublimator));
         addTab(new TabRoundRobin(this, desublimator));
+        sideControl = (TabSideControl) addTab(new TabSideControl(this, desublimator));
+    }
 
+    @Override
+    protected void updateElementInformation() {
+        super.updateElementInformation();
+
+        sideControl.setVisible(desublimator.isSidedTransferAugmented());
     }
 
     @Override

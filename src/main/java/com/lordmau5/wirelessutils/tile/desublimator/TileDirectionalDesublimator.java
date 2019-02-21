@@ -11,6 +11,7 @@ import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
@@ -28,7 +29,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 @Machine(name = "directional_desublimator")
-public class TileDirectionalDesublimator extends TileBaseDesublimator implements IRangeAugmentable, IDirectionalMachine {
+public class TileDirectionalDesublimator extends TileBaseDesublimator implements
+        IRangeAugmentable, IDirectionalMachine {
 
     private EnumFacing facing = EnumFacing.NORTH;
     private boolean rotationX = false;
@@ -147,6 +149,27 @@ public class TileDirectionalDesublimator extends TileBaseDesublimator implements
         super.setDefaultColor(color);
         if ( validTargets != null )
             calculateTargets();
+    }
+
+    public Iterable<Tuple<Entity, ItemStack>> getEntityTargets() {
+        return null;
+
+        /*World world = getWorld();
+        if ( world == null )
+            return null;
+
+        BlockPosDimension origin = getPosition();
+        List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, getTargetBoundingBox(origin));
+
+        List<Tuple<Entity, ItemStack>> output = new ArrayList<>();
+        for (Entity entity : entities) {
+            if ( !(entity instanceof EntityMinecart) )
+                continue;
+
+            output.add(new Tuple<>(entity, ItemStack.EMPTY));
+        }
+
+        return output;*/
     }
 
     public void calculateTargets() {

@@ -3,16 +3,12 @@ package com.lordmau5.wirelessutils.tile.condenser;
 import cofh.core.fluid.FluidTankCore;
 import cofh.core.network.PacketBase;
 import cofh.core.util.CoreUtils;
-import cofh.core.util.TimeTracker;
 import cofh.core.util.helpers.FluidHelper;
 import cofh.core.util.helpers.InventoryHelper;
 import cofh.core.util.helpers.MathHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
-import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
-import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
-import com.lordmau5.wirelessutils.tile.base.Worker;
+import com.lordmau5.wirelessutils.tile.base.*;
 import com.lordmau5.wirelessutils.tile.base.augmentable.*;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
 import com.lordmau5.wirelessutils.utils.FluidTank;
@@ -26,6 +22,7 @@ import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -38,6 +35,8 @@ import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fluids.*;
 import net.minecraftforge.fluids.capability.*;
 import net.minecraftforge.fluids.capability.wrappers.BlockLiquidWrapper;
@@ -49,17 +48,17 @@ import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy implements
         IChunkLoadAugmentable, IRoundRobinMachine, IWorldAugmentable, ITransferAugmentable,
         ICapacityAugmentable, IInventoryAugmentable, IInvertAugmentable, ITickable,
-        IFluidGenAugmentable,
+        IFluidGenAugmentable, ISidedTransfer, ISidedTransferAugmentable,
         IWorkProvider<TileEntityBaseCondenser.CondenserTarget> {
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
-    protected final TimeTracker fluidTracker = new TimeTracker();
 
     protected final FluidTank tank;
     protected final IFluidHandler fluidHandler;
@@ -89,14 +88,20 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     private int maxEnergyPerTick;
     private boolean processBlocks = false;
     private boolean processItems = false;
+    private boolean processEntities = false;
 
     private boolean fluidGen = false;
     private FluidStack fluidGenStack = null;
     private int fluidGenCost = 0;
 
+    private boolean sideTransferAugment = false;
+    private boolean[] sideTransfer;
+
 
     public TileEntityBaseCondenser() {
         super();
+        sideTransfer = new boolean[6];
+        Arrays.fill(sideTransfer, false);
         worker = new Worker<>(this);
 
         tank = new FluidTank(calculateFluidCapacity());
@@ -334,6 +339,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         System.out.println("      Fluid Gen: " + fluidGen);
         System.out.println("Fluid Gen Fluid: " + fluidGenStack);
         System.out.println(" Fluid Gen Cost: " + fluidGenCost);
+        System.out.println("  Side Transfer: " + Arrays.toString(sideTransfer));
     }
 
     /* Tank Stuff */
@@ -617,6 +623,16 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     @Override
+    public void setSidedTransferAugmented(boolean augmented) {
+        sideTransferAugment = augmented;
+    }
+
+    @Override
+    public boolean isSidedTransferAugmented() {
+        return sideTransferAugment;
+    }
+
+    @Override
     public boolean canRemoveAugment(EntityPlayer player, int slot, ItemStack augment, ItemStack replacement) {
         if ( !super.canRemoveAugment(player, slot, augment, replacement) )
             return false;
@@ -681,8 +697,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             markChunkDirty();
     }
 
-    public CondenserTarget createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile) {
-        return new CondenserTarget(target, tile, getEnergyCost(target, source));
+    public CondenserTarget createInfo(@Nullable BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile, @Nullable Entity entity) {
+        // TODO: Entity target cost.
+        return new CondenserTarget(target, tile, entity, target == null ? 0 : getEnergyCost(target, source));
     }
 
     public int getEnergyCost(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
@@ -733,6 +750,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     public boolean shouldProcessItems() {
         return processItems;
+    }
+
+    public boolean shouldProcessEntities() {
+        return true;
+        //return processEntities;
     }
 
     public BlockPosDimension getPosition() {
@@ -790,19 +812,21 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         return true;
     }
 
-    public boolean canWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
+    public boolean canWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nullable BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nullable TileEntity tile, @Nullable Entity entity) {
         if ( stack.isEmpty() )
             return false;
 
+        int cost = target == null ? 0 : getEnergyCost(target);
+
         if ( stack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null) ) {
             validTargetsPerTick++;
-            maxEnergyPerTick += level.baseEnergyPerOperation + getEnergyCost(target);
+            maxEnergyPerTick += level.baseEnergyPerOperation + cost;
             return true;
         }
 
         if ( !inverted && FluidHelper.isFillableEmptyContainer(stack) ) {
             validTargetsPerTick++;
-            maxEnergyPerTick += level.baseEnergyPerOperation + getEnergyCost(target);
+            maxEnergyPerTick += level.baseEnergyPerOperation + cost;
             return true;
         }
 
@@ -812,7 +836,19 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         CondenserRecipeManager.CondenserRecipe recipe = CondenserRecipeManager.getRecipe(getTankFluid(), stack);
         if ( recipe != null ) {
             validTargetsPerTick++;
-            maxEnergyPerTick += level.baseEnergyPerOperation + getEnergyCost(target) + recipe.cost;
+            maxEnergyPerTick += level.baseEnergyPerOperation + cost + recipe.cost;
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean canWorkEntity(@Nonnull ItemStack source, @Nonnull World world, @Nonnull Entity entity) {
+        if ( entity.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null) ) {
+            validTargetsPerTick++;
+            // TODO: Entity energy calculations
+            maxEnergyPerTick += level.baseEnergyPerOperation;
             return true;
         }
 
@@ -913,7 +949,32 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     @Nonnull
-    public WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile) {
+    @Override
+    public WorkResult performWorkEntity(@Nonnull CondenserTarget target, @Nonnull World world, @Nonnull Entity entity) {
+        if ( getEnergyStored() < level.baseEnergyPerOperation )
+            return WorkResult.FAILURE_STOP;
+        else if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
+            return WorkResult.FAILURE_CONTINUE;
+
+        FluidStack stack = tank.getFluid();
+        if ( inverted ) {
+            if ( stack != null && stack.amount >= tank.getCapacity() )
+                return WorkResult.FAILURE_STOP;
+        } else {
+            if ( stack == null || stack.amount <= 0 )
+                return WorkResult.FAILURE_STOP;
+        }
+
+        IFluidHandler handler = entity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
+        if ( handler != null )
+            // TODO: Entity distance energy calculations
+            return fillContainer(handler, 0);
+
+        return WorkResult.FAILURE_REMOVE;
+    }
+
+    @Nonnull
+    public WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile, @Nullable Entity entity) {
         if ( stack.isEmpty() )
             return WorkResult.FAILURE_REMOVE;
 
@@ -1062,6 +1123,67 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         return getInfoMaxEnergyPerTick();
     }
 
+    /* Sided Transfer */
+
+    public boolean isSideTransferEnabled(TransferSide side) {
+        return sideTransfer[side.ordinal()];
+    }
+
+    public void setSideTransferEnabled(TransferSide side, boolean enabled) {
+        int index = side.ordinal();
+        if ( sideTransfer[index] == enabled )
+            return;
+
+        sideTransfer[index] = enabled;
+        if ( !world.isRemote ) {
+            sendTilePacket(Side.CLIENT);
+            markChunkDirty();
+        }
+
+        callBlockUpdate();
+    }
+
+    public void transferSide(TransferSide side) {
+        if ( world == null || pos == null || world.isRemote )
+            return;
+
+        EnumFacing facing = getFacingForSide(side);
+        BlockPos target = pos.offset(facing);
+
+        TileEntity tile = world.getTileEntity(target);
+        if ( tile == null )
+            return;
+
+        EnumFacing opposite = facing.getOpposite();
+
+        // Energy
+        long maxReceive = getFullMaxEnergyStored() - getFullEnergyStored();
+        if ( maxReceive > getMaxReceive() )
+            maxReceive = getMaxReceive();
+
+        if ( maxReceive > 0 && tile.hasCapability(CapabilityEnergy.ENERGY, opposite) ) {
+            IEnergyStorage storage = tile.getCapability(CapabilityEnergy.ENERGY, opposite);
+            if ( storage != null && storage.canExtract() ) {
+                int received = storage.extractEnergy((int) maxReceive, false);
+                if ( received > 0 )
+                    receiveEnergy(received, false);
+            }
+        }
+
+        // Fluid
+        if ( !tile.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, opposite) )
+            return;
+
+        IFluidHandler handler = tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, opposite);
+        if ( handler == null )
+            return;
+
+        if ( inverted )
+            FluidUtil.tryFluidTransfer(handler, fluidHandler, fluidRate, true);
+        else
+            FluidUtil.tryFluidTransfer(fluidHandler, handler, fluidRate, true);
+    }
+
     public void update() {
         worker.tickDown();
 
@@ -1071,6 +1193,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         activeTargetsPerTick = 0;
         energyPerTick = 0;
+        fluidPerTick = 0;
 
         if ( fluidGen && getEnergyStored() >= fluidGenCost ) {
             int filled = fluidHandler.fill(fluidGenStack, true);
@@ -1078,9 +1201,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                 extractEnergy(fluidGenCost, false);
         }
 
-        if ( !redstoneControlOrDisable() ) {
+        if ( sideTransferAugment && redstoneControlOrDisable() )
+            updateSidedTransfer();
+
+        if ( !redstoneControlOrDisable() || getEnergyStored() < level.baseEnergyPerOperation ) {
             setActive(false);
-            fluidPerTick = 0;
             updateTrackers();
             return;
         }
@@ -1132,6 +1257,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         roundRobin = tag.hasKey("RoundRobin") ? tag.getInteger("RoundRobin") : -1;
         fluidRate = calculateFluidRate();
 
+        for (int i = 0; i < sideTransfer.length; i++)
+            sideTransfer[i] = tag.getBoolean("TransferSide" + i);
+
         boolean locked = tag.getBoolean("Locked");
         if ( locked ) {
             NBTTagCompound lock = tag.hasKey("LockStack") ? tag.getCompoundTag("LockStack") : null;
@@ -1155,6 +1283,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( roundRobin >= 0 )
             tag.setInteger("RoundRobin", roundRobin);
 
+        for (int i = 0; i < sideTransfer.length; i++)
+            tag.setBoolean("TransferSide" + i, sideTransfer[i]);
+
         tag.setBoolean("Locked", locked);
         if ( lockStack != null ) {
             NBTTagCompound lock = new NBTTagCompound();
@@ -1170,6 +1301,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     public PacketBase getTilePacket() {
         PacketBase payload = super.getTilePacket();
         payload.addFluidStack(tank.getFluid());
+        for (int i = 0; i < sideTransfer.length; i++)
+            payload.addBool(sideTransfer[i]);
         return payload;
     }
 
@@ -1178,6 +1311,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     public void handleTilePacket(PacketBase payload) {
         super.handleTilePacket(payload);
         tank.setFluid(payload.getFluidStack());
+        for (int i = 0; i < sideTransfer.length; i++)
+            sideTransfer[i] = payload.getBool();
         callBlockUpdate();
     }
 
@@ -1223,6 +1358,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         payload.addFluidStack(lockStack);
         payload.addByte(iterationMode.ordinal());
         payload.addInt(roundRobin);
+        for (int i = 0; i < sideTransfer.length; i++)
+            payload.addBool(sideTransfer[i]);
         return payload;
     }
 
@@ -1238,6 +1375,10 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getInt());
+
+        TransferSide[] values = TransferSide.values();
+        for (int i = 0; i < sideTransfer.length; i++)
+            setSideTransferEnabled(values[i], payload.getBool());
     }
 
     /* Capabilities */
@@ -1264,8 +1405,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         public final int cost;
         public boolean canCraft = true;
 
-        public CondenserTarget(BlockPosDimension target, TileEntity tile, int cost) {
-            super(target, tile);
+        public CondenserTarget(BlockPosDimension target, TileEntity tile, Entity entity, int cost) {
+            super(target, tile, entity);
             this.cost = cost;
         }
 

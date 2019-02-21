@@ -7,6 +7,7 @@ import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
@@ -141,6 +142,11 @@ public class TileDirectionalXNetNetwork extends TileXNetNetworkBase implements I
     @Override
     public boolean usesDefaultColor() {
         return true;
+    }
+
+    @Override
+    public Iterable<Tuple<Entity, ItemStack>> getEntityTargets() {
+        return null;
     }
 
     public void calculateTargets() {

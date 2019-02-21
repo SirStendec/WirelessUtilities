@@ -1,0 +1,29 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "wirelessutils:auto_transfer_augment_enabled"
+		}
+	],
+	"pattern": [
+		" P ",
+		"EAE",
+		"P P"
+	],
+	"key": {
+		"P": {
+			"item": "#STICKY_PISTON"
+		},
+		"E": {
+			"item": "#ENDER_PEARL"
+		},
+		"A": {
+			"item": "wirelessutils:base_augment"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:auto_transfer_augment",
+		"count": 1
+	}
+}

@@ -6,9 +6,11 @@ import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.utils.constants.NiceColors;
 import com.lordmau5.wirelessutils.utils.location.BlockArea;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -49,6 +51,16 @@ public class TileEntityChunkCharger extends TileEntityBaseCharger {
     }
 
     @Override
+    public EnumFacing getEnumFacing() {
+        return EnumFacing.NORTH;
+    }
+
+    @Override
+    public boolean getRotationX() {
+        return false;
+    }
+
+    @Override
     public int getEnergyCost(double distance, boolean isInterdimensional) {
         return 0;
     }
@@ -73,6 +85,11 @@ public class TileEntityChunkCharger extends TileEntityBaseCharger {
 
         // TODO: Fix this.
         // return () -> BlockPosDimension.iterateWithDimension(world.provider.getDimension(), entities.keySet());
+    }
+
+    @Override
+    public Iterable<Tuple<Entity, ItemStack>> getEntityTargets() {
+        return null;
     }
 
     /* GUI */

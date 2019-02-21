@@ -11,4 +11,12 @@ public class Properties {
     public final static PropertyEnum<EnumFacingRotation> FACING_ROTATION = PropertyEnum.create("facing", EnumFacingRotation.class);
     public final static PropertyBool ACTIVE = PropertyBool.create("active");
     public final static PropertyInteger LEVEL = PropertyInteger.create("level", 0, 9);
+
+    public final static PropertyBool[] SIDES = new PropertyBool[6];
+
+    static {
+        for (int i = 0; i < 6; i++)
+            SIDES[i] = PropertyBool.create("side_" + i);
+    }
+
 }

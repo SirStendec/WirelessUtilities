@@ -5,6 +5,7 @@ import com.lordmau5.wirelessutils.utils.location.TargetInfo;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
@@ -30,7 +31,6 @@ public class Worker<T extends TargetInfo> {
 
     private int cachePosition = -1;
     private boolean cacheInInventory = false;
-    private boolean cacheDidWork = false;
     private int cacheInvPosition = -1;
 
     private final Random random;
@@ -66,13 +66,19 @@ public class Worker<T extends TargetInfo> {
             return;
 
         BlockPosDimension oldPos = null;
+        Entity oldEnt = null;
+
         if ( cacheList == null )
             cacheList = new ObjectArrayList<>();
         else {
             if ( cachePosition >= 0 && cachePosition < cacheList.size() ) {
                 T target = cacheList.get(cachePosition);
-                if ( target != null )
-                    oldPos = target.pos;
+                if ( target != null ) {
+                    if ( target.entity != null )
+                        oldEnt = target.entity;
+                    else
+                        oldPos = target.pos;
+                }
             }
 
             cacheList.clear();
@@ -90,93 +96,165 @@ public class Worker<T extends TargetInfo> {
         boolean processBlocks = provider.shouldProcessBlocks();
         boolean processTiles = provider.shouldProcessTiles();
         boolean processItems = provider.shouldProcessItems();
+        boolean processEntities = provider.shouldProcessEntities();
 
         int[] tempSlots = new int[ModConfig.augments.inventory.maximumScanSlots];
 
         Iterable<Tuple<BlockPosDimension, ItemStack>> targets = provider.getTargets();
-        if ( targets == null )
-            return;
+        Iterable<Tuple<Entity, ItemStack>> entityTargets = provider.getEntityTargets();
 
-        for (Tuple<BlockPosDimension, ItemStack> pair : targets) {
-            BlockPosDimension target = pair.getFirst();
-            ItemStack source = pair.getSecond();
+        if ( entityTargets != null ) {
+            for (Tuple<Entity, ItemStack> pair : entityTargets) {
+                Entity entity = pair.getFirst();
+                ItemStack source = pair.getSecond();
 
-            if ( target == oldPos )
-                passedOldPos = true;
+                if ( entity == null )
+                    continue;
 
-            World world = DimensionManager.getWorld(target.getDimension());
-            if ( world == null || !world.isBlockLoaded(target) )
-                continue;
+                if ( entity == oldEnt )
+                    passedOldPos = true;
 
-            IBlockState state = processBlocks ? world.getBlockState(target) : null;
-            TileEntity tile = (processTiles || processItems) ? world.getTileEntity(target) : null;
-            T info = null;
-            boolean useSingleChest = false;
+                World world = entity.getEntityWorld();
+                if ( world == null )
+                    continue;
 
-            if ( !processBlocks && tile == null )
-                continue;
+                T info = null;
 
-            if ( processBlocks && state != null && provider.canWorkBlock(target, source, world, state, tile) ) {
-                info = provider.createInfo(target, source, world, state, tile);
-                info.processBlock = true;
-            }
+                if ( processEntities && provider.canWorkEntity(source, world, entity) ) {
+                    info = provider.createInfo(null, source, world, null, null, entity);
+                    info.processEntity = true;
+                }
 
-            if ( processTiles && tile != null && provider.canWorkTile(target, source, world, state, tile) ) {
-                if ( info == null )
-                    info = provider.createInfo(target, source, world, state, tile);
-                info.processTile = true;
-            }
+                if ( processItems && entity.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null) ) {
+                    int inventoryTarget = -1;
+                    if ( entity == oldEnt && wasInInventory )
+                        inventoryTarget = oldInvPosition;
 
-            if ( processItems && tile != null && tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, target.getFacing()) ) {
-                int inventoryTarget = -1;
-                if ( target == oldPos && wasInInventory )
-                    inventoryTarget = oldInvPosition;
+                    IItemHandler handler = entity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+                    if ( handler != null ) {
+                        int totalSlots = Math.min(handler.getSlots(), ModConfig.augments.inventory.maximumScanSlots);
+                        int count = 0;
 
-                IItemHandler handler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, target.getFacing());
-                if ( handler != null ) {
-                    if ( handler instanceof VanillaDoubleChestItemHandler && tile instanceof TileEntityChest ) {
-                        handler = ((TileEntityChest) tile).getSingleChestHandler();
-                        useSingleChest = true;
-                    }
+                        boolean hitTarget = false;
 
-                    int totalSlots = Math.min(handler.getSlots(), ModConfig.augments.inventory.maximumScanSlots);
-                    int count = 0;
+                        for (int i = 0; i < totalSlots; i++) {
+                            if ( i == inventoryTarget && inventoryTarget >= 0 )
+                                hitTarget = true;
 
-                    boolean hitTarget = false;
+                            ItemStack stack = handler.getStackInSlot(i);
+                            if ( provider.canWorkItem(stack, i, handler, null, source, world, null, null, entity) ) {
+                                if ( hitTarget && cacheInvPosition == -1 ) {
+                                    cacheInvPosition = count;
+                                    cacheInInventory = true;
+                                }
 
-                    for (int i = 0; i < totalSlots; i++) {
-                        if ( i == inventoryTarget && inventoryTarget >= 0 )
-                            hitTarget = true;
-
-                        ItemStack stack = handler.getStackInSlot(i);
-                        if ( provider.canWorkItem(stack, i, handler, target, source, world, state, tile) ) {
-                            if ( hitTarget && cacheInvPosition == -1 ) {
-                                cacheInvPosition = count;
-                                cacheInInventory = true;
+                                tempSlots[count] = i;
+                                count++;
                             }
+                        }
 
-                            tempSlots[count] = i;
-                            count++;
+                        if ( count > 0 ) {
+                            if ( info == null )
+                                info = provider.createInfo(null, source, world, null, null, entity);
+
+                            info.processInventory = true;
+                            info.slots = new int[count];
+                            info.liveSlots = count;
+                            System.arraycopy(tempSlots, 0, info.slots, 0, count);
                         }
                     }
+                }
 
-                    if ( count > 0 ) {
-                        if ( info == null )
-                            info = provider.createInfo(target, source, world, state, tile);
-
-                        info.processInventory = true;
-                        info.useSingleChest = useSingleChest;
-                        info.slots = new int[count];
-                        info.liveSlots = count;
-                        System.arraycopy(tempSlots, 0, info.slots, 0, count);
-                    }
+                if ( info != null ) {
+                    cacheList.add(info);
+                    if ( passedOldPos && cachePosition == -1 )
+                        cachePosition = cacheList.size() - 1;
                 }
             }
+        }
 
-            if ( info != null ) {
-                cacheList.add(info);
-                if ( passedOldPos && cachePosition == -1 )
-                    cachePosition = cacheList.size() - 1;
+        if ( targets != null ) {
+            for (Tuple<BlockPosDimension, ItemStack> pair : targets) {
+                BlockPosDimension target = pair.getFirst();
+                ItemStack source = pair.getSecond();
+
+                if ( target == oldPos )
+                    passedOldPos = true;
+
+                World world = DimensionManager.getWorld(target.getDimension());
+                if ( world == null || !world.isBlockLoaded(target) )
+                    continue;
+
+                IBlockState state = processBlocks ? world.getBlockState(target) : null;
+                TileEntity tile = (processTiles || processItems) ? world.getTileEntity(target) : null;
+                T info = null;
+                boolean useSingleChest = false;
+
+                if ( !processBlocks && tile == null )
+                    continue;
+
+                if ( processBlocks && state != null && provider.canWorkBlock(target, source, world, state, tile) ) {
+                    info = provider.createInfo(target, source, world, state, tile, null);
+                    info.processBlock = true;
+                }
+
+                if ( processTiles && tile != null && provider.canWorkTile(target, source, world, state, tile) ) {
+                    if ( info == null )
+                        info = provider.createInfo(target, source, world, state, tile, null);
+                    info.processTile = true;
+                }
+
+                if ( processItems && tile != null && tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, target.getFacing()) ) {
+                    int inventoryTarget = -1;
+                    if ( target == oldPos && wasInInventory )
+                        inventoryTarget = oldInvPosition;
+
+                    IItemHandler handler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, target.getFacing());
+                    if ( handler != null ) {
+                        if ( handler instanceof VanillaDoubleChestItemHandler && tile instanceof TileEntityChest ) {
+                            handler = ((TileEntityChest) tile).getSingleChestHandler();
+                            useSingleChest = true;
+                        }
+
+                        int totalSlots = Math.min(handler.getSlots(), ModConfig.augments.inventory.maximumScanSlots);
+                        int count = 0;
+
+                        boolean hitTarget = false;
+
+                        for (int i = 0; i < totalSlots; i++) {
+                            if ( i == inventoryTarget && inventoryTarget >= 0 )
+                                hitTarget = true;
+
+                            ItemStack stack = handler.getStackInSlot(i);
+                            if ( provider.canWorkItem(stack, i, handler, target, source, world, state, tile, null) ) {
+                                if ( hitTarget && cacheInvPosition == -1 ) {
+                                    cacheInvPosition = count;
+                                    cacheInInventory = true;
+                                }
+
+                                tempSlots[count] = i;
+                                count++;
+                            }
+                        }
+
+                        if ( count > 0 ) {
+                            if ( info == null )
+                                info = provider.createInfo(target, source, world, state, tile, null);
+
+                            info.processInventory = true;
+                            info.useSingleChest = useSingleChest;
+                            info.slots = new int[count];
+                            info.liveSlots = count;
+                            System.arraycopy(tempSlots, 0, info.slots, 0, count);
+                        }
+                    }
+                }
+
+                if ( info != null ) {
+                    cacheList.add(info);
+                    if ( passedOldPos && cachePosition == -1 )
+                        cachePosition = cacheList.size() - 1;
+                }
             }
         }
 
@@ -246,10 +324,8 @@ public class Worker<T extends TargetInfo> {
         updateTargetCache();
         boolean worked = false;
 
-        if ( cacheList == null || cacheList.isEmpty() ) {
-            cacheDidWork = false;
+        if ( cacheList == null || cacheList.isEmpty() )
             return worked;
-        }
 
         IWorkProvider.IterationMode mode = provider.getIterationMode();
         if ( !cacheInInventory ) {
@@ -273,8 +349,6 @@ public class Worker<T extends TargetInfo> {
         boolean didWork = false;
         boolean started = false;
 
-        cacheDidWork = false;
-
         while ( steps > 0 ) {
             loops++;
             if ( loops > 1000000000 )
@@ -284,12 +358,9 @@ public class Worker<T extends TargetInfo> {
                 if ( started ) {
                     incrementTarget(mode, didWork, didRemove);
 
-                    if ( cachePosition == startingPosition ) {
-                        if ( worked )
-                            cacheDidWork = true;
-
+                    if ( cachePosition == startingPosition )
                         return worked;
-                    }
+
                 } else
                     started = true;
             }
@@ -302,47 +373,78 @@ public class Worker<T extends TargetInfo> {
                 cacheInvPosition = -1;
             }
 
-            if ( target == null || (!target.processTile && !target.processInventory && !target.processBlock) )
+            if ( target == null )
                 continue;
 
-            World world = DimensionManager.getWorld(target.pos.getDimension());
-            if ( world == null || !world.isBlockLoaded(target.pos) ) {
-                target.processBlock = false;
+            if ( target.entity != null && target.entity.isDead ) {
+                target.entity = null;
+                target.processEntity = false;
 
-                if ( target.tile != null ) {
-                    target.tile = null;
-                    target.processTile = false;
-                    target.processInventory = false;
-                }
-
-                if ( cacheInInventory ) {
-                    cacheInInventory = false;
-                    cacheInvPosition = -1;
-                }
-
-                continue;
+            } else if ( target.entity == null && target.processEntity ) {
+                target.processEntity = false;
             }
 
             if ( target.tile != null && target.tile.isInvalid() ) {
                 target.tile = null;
                 target.processTile = false;
+
+            } else if ( target.tile == null && target.processTile ) {
+                target.processTile = false;
+            }
+
+            World world = target.entity != null ? target.entity.getEntityWorld() :
+                    target.tile != null ? target.tile.getWorld() :
+                            target.pos != null ? DimensionManager.getWorld(target.pos.getDimension()) : null;
+
+            if ( world == null || (target.pos != null && !world.isBlockLoaded(target.pos)) ) {
+                target.processBlock = false;
+
+                if ( target.tile != null ) {
+                    target.tile = null;
+                    target.processTile = false;
+                }
+            }
+
+            if ( target.processInventory && target.tile == null && target.entity == null ) {
                 target.processInventory = false;
                 if ( cacheInInventory ) {
                     cacheInInventory = false;
                     cacheInvPosition = -1;
                 }
-            } else if ( target.tile == null && (target.processInventory || target.processTile) ) {
-                target.processInventory = false;
-                target.processTile = false;
             }
 
+            if ( !target.processTile && !target.processInventory && !target.processBlock && !target.processEntity )
+                continue;
+
             IBlockState state = null;
+            BlockPosDimension pos = target.pos;
             TileEntity tile = target.tile;
+            Entity entity = target.entity;
 
             boolean keepWorking = true;
             boolean wasRemoved = false;
 
-            if ( !cacheInInventory && target.processBlock ) {
+            if ( !cacheInInventory && target.processEntity && entity != null ) {
+                IWorkProvider.WorkResult result = provider.performWorkEntity(target, world, entity);
+                if ( result == null )
+                    result = IWorkProvider.WorkResult.SKIPPED;
+
+                steps -= result.cost;
+                if ( result.success ) {
+                    worked = true;
+                    didWork = true;
+                }
+
+                if ( !result.keepProcessing )
+                    keepWorking = false;
+
+                if ( result.remove ) {
+                    wasRemoved = true;
+                    target.processEntity = false;
+                }
+            }
+
+            if ( !cacheInInventory && target.processBlock && pos != null ) {
                 IWorkProvider.WorkResult result = provider.performWorkBlock(target, world, state, tile);
                 if ( result == null )
                     result = IWorkProvider.WorkResult.SKIPPED;
@@ -382,16 +484,16 @@ public class Worker<T extends TargetInfo> {
                 }
             }
 
-            if ( target.processInventory && tile != null ) {
+            if ( target.processInventory && (tile != null || entity != null) ) {
                 if ( steps <= 0 || !keepWorking ) {
                     cacheInInventory = true;
-                    if ( worked )
-                        cacheDidWork = true;
                     return worked;
                 }
 
-                IItemHandler handler = (target.useSingleChest && tile instanceof TileEntityChest) ? ((TileEntityChest) tile).getSingleChestHandler() : tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, target.pos.getFacing());
+                IItemHandler handler = entity != null ? entity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null) :
+                        (target.useSingleChest && tile instanceof TileEntityChest) ? ((TileEntityChest) tile).getSingleChestHandler() : tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, target.pos.getFacing());
                 if ( handler == null ) {
+                    target.processInventory = false;
                     cacheInInventory = false;
                     cacheInvPosition = -1;
                     continue;
@@ -445,7 +547,7 @@ public class Worker<T extends TargetInfo> {
 
                         invWorked = false;
                         ItemStack stack = handler.getStackInSlot(slot);
-                        IWorkProvider.WorkResult result = provider.performWorkItem(stack, slot, handler, target, world, state, tile);
+                        IWorkProvider.WorkResult result = provider.performWorkItem(stack, slot, handler, target, world, state, tile, entity);
                         if ( result == null )
                             result = IWorkProvider.WorkResult.SKIPPED;
 
@@ -472,9 +574,6 @@ public class Worker<T extends TargetInfo> {
                             } else
                                 cacheInInventory = false;
 
-                            if ( worked )
-                                cacheDidWork = true;
-
                             return worked;
                         }
                     }
@@ -483,15 +582,12 @@ public class Worker<T extends TargetInfo> {
                 cacheInInventory = false;
             }
 
-            if ( wasRemoved && !target.processBlock && !target.processInventory && !target.processTile )
+            if ( wasRemoved && !target.processBlock && !target.processInventory && !target.processTile && !target.processEntity )
                 didRemove = true;
 
             if ( !keepWorking )
                 return worked;
         }
-
-        if ( worked )
-            cacheDidWork = true;
 
         return worked;
     }

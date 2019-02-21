@@ -12,6 +12,7 @@ import com.lordmau5.wirelessutils.utils.constants.NiceColors;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
@@ -127,6 +128,11 @@ public class TilePositionalXNetNetwork extends TileXNetNetworkBase implements IS
     }
 
     /* Targeting */
+
+    @Override
+    public Iterable<Tuple<Entity, ItemStack>> getEntityTargets() {
+        return null;
+    }
 
     public void calculateTargets() {
         if ( validTargets == null )

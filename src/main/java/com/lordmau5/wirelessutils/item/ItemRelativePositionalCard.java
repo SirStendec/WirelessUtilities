@@ -109,8 +109,6 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard {
 
     @Override
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
-
         if ( isCardConfigured(stack) ) {
             NBTTagCompound tag = stack.getTagCompound();
 
@@ -127,6 +125,8 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard {
                         TextHelpers.getComponent(EnumFacing.byIndex(tag.getByte("Facing")).getName())
                 ).setStyle(TextHelpers.GRAY).getFormattedText());
         }
+
+        super.addInformation(stack, worldIn, tooltip, flagIn);
     }
 
     @Override

@@ -18,6 +18,7 @@ import net.minecraft.util.text.TextFormatting;
 public class GuiPositionalCharger extends BaseGuiPositional {
 
     private final TileEntityPositionalCharger charger;
+    private TabSideControl sideControl;
 
     public GuiPositionalCharger(InventoryPlayer playerInventory, TileEntityPositionalCharger charger) {
         super(new ContainerPositionalCharger(playerInventory, charger), charger, new ResourceLocation(WirelessUtils.MODID, "textures/gui/positional_machine.png"));
@@ -41,6 +42,9 @@ public class GuiPositionalCharger extends BaseGuiPositional {
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));
         addTab(new TabRedstoneControl(this, charger));
         addTab(new TabRoundRobin(this, charger));
+
+        sideControl = new TabSideControl(this, charger);
+        addTab(sideControl);
     }
 
     @Override
@@ -53,5 +57,12 @@ public class GuiPositionalCharger extends BaseGuiPositional {
 
         drawRightAlignedText(StringHelper.localize("btn." + WirelessUtils.MODID + ".range"), 80, 40, 0x404040);
         fontRenderer.drawString(range, 84, 40, 0);
+    }
+
+    @Override
+    protected void updateElementInformation() {
+        super.updateElementInformation();
+
+        sideControl.setVisible(charger.isSidedTransferAugmented());
     }
 }

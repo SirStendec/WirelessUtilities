@@ -6,8 +6,8 @@ import cofh.core.gui.element.tab.TabEnergy;
 import cofh.core.gui.element.tab.TabInfo;
 import cofh.core.gui.element.tab.TabRedstoneControl;
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.gui.client.BaseGuiContainer;
 import com.lordmau5.wirelessutils.gui.client.SharedState;
+import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.gui.client.elements.*;
 import com.lordmau5.wirelessutils.gui.container.condenser.ContainerDirectionalCondenser;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityDirectionalCondenser;
@@ -32,6 +32,7 @@ public class GuiDirectionalCondenser extends BaseGuiContainer {
 
     private FluidStack fluid;
     private TabWorkInfo workInfo;
+    private TabSideControl sideControl;
 
     public GuiDirectionalCondenser(InventoryPlayer player, TileEntityDirectionalCondenser condenser) {
         super(new ContainerDirectionalCondenser(player, condenser), condenser, TEXTURE);
@@ -55,6 +56,7 @@ public class GuiDirectionalCondenser extends BaseGuiContainer {
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));
         addTab(new TabRedstoneControl(this, condenser));
         addTab(new TabRoundRobin(this, condenser));
+        sideControl = (TabSideControl) addTab(new TabSideControl(this, condenser));
 
         btnMode = new ElementDynamicContainedButton(this, "Mode", 116, 69, 16, 16, Textures.SIZE);
         addElement(btnMode);
@@ -95,6 +97,8 @@ public class GuiDirectionalCondenser extends BaseGuiContainer {
 
         rangeControls.setVisible(!offsetMode);
         offsetControls.setVisible(offsetMode);
+
+        sideControl.setVisible(condenser.isSidedTransferAugmented());
 
         FluidStack fluid = condenser.getTankFluid();
         if ( (fluid == null && this.fluid == null) || (fluid != null && fluid.isFluidEqual(this.fluid)) )

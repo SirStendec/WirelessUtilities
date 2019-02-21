@@ -27,6 +27,8 @@ public class GuiPositionalCondenser extends BaseGuiPositional {
     private final TileEntityPositionalCondenser condenser;
 
     private TabWorkInfo workInfo;
+    private TabSideControl sideControl;
+
     private FluidStack fluid;
 
     public GuiPositionalCondenser(InventoryPlayer player, TileEntityPositionalCondenser condenser) {
@@ -51,7 +53,8 @@ public class GuiPositionalCondenser extends BaseGuiPositional {
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));
         addTab(new TabRedstoneControl(this, condenser));
         addTab(new TabRoundRobin(this, condenser));
-        
+        sideControl = (TabSideControl) addTab(new TabSideControl(this, condenser));
+
         addElement(new ElementFluidTankCondenser(this, 34, 22, condenser).setAlwaysShow(true).setSmall().drawTank(true).setInfinite(condenser.isCreative()));
         addElement(new ElementFluidLock(this, condenser, 33, 58));
     }
@@ -63,6 +66,8 @@ public class GuiPositionalCondenser extends BaseGuiPositional {
         FluidStack fluid = condenser.getTankFluid();
         if ( (fluid == null && this.fluid == null) || (fluid != null && fluid.isFluidEqual(this.fluid)) )
             return;
+
+        sideControl.setVisible(condenser.isSidedTransferAugmented());
 
         this.fluid = fluid;
         ItemStack stack = fluid == null ? null : FluidUtil.getFilledBucket(fluid);

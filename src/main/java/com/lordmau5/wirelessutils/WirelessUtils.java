@@ -52,6 +52,12 @@ public class WirelessUtils {
         }
     }.setBackgroundImageName("wirelessutils.png");
 
+    // GUIs
+    private static int guiIndex = 10;
+
+    public static final int GUI_PLAYER_CARD = guiIndex++;
+
+
     static {
         if ( !FluidRegistry.isUniversalBucketEnabled() )
             FluidRegistry.enableUniversalBucket();

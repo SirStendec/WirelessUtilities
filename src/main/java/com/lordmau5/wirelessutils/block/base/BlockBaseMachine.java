@@ -4,6 +4,7 @@ import cofh.api.tileentity.IInventoryRetainer;
 import cofh.core.util.helpers.FluidHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.base.IJEIInformationItem;
+import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.constants.Properties;
@@ -85,8 +86,16 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
 
     /* Block State */
 
+    public boolean hasSidedTransfer() {
+        return false;
+    }
+
+
     @Override
     protected BlockStateContainer createBlockState() {
+        if ( hasSidedTransfer() )
+            return new BlockStateContainer(this, Properties.ACTIVE, Properties.LEVEL, Properties.SIDES[0], Properties.SIDES[1], Properties.SIDES[2], Properties.SIDES[3], Properties.SIDES[4], Properties.SIDES[5]);
+
         return new BlockStateContainer(this, Properties.ACTIVE, Properties.LEVEL);
     }
 
@@ -97,6 +106,13 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
         if ( tile instanceof TileEntityBaseMachine ) {
             TileEntityBaseMachine machine = (TileEntityBaseMachine) tile;
             state = state.withProperty(Properties.ACTIVE, machine.isActive);
+        }
+
+        if ( hasSidedTransfer() && tile instanceof ISidedTransfer ) {
+            ISidedTransfer transfer = (ISidedTransfer) tile;
+            ISidedTransfer.TransferSide[] sides = ISidedTransfer.TransferSide.values();
+            for (int i = 0; i < sides.length; i++)
+                state = state.withProperty(Properties.SIDES[i], transfer.isSideTransferEnabled(sides[i]));
         }
 
         return state;

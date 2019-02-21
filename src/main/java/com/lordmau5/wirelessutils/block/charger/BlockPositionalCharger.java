@@ -7,10 +7,16 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 public class BlockPositionalCharger extends BlockBaseDirectionalMachine {
+
     public BlockPositionalCharger() {
         super();
 
         setName("positional_charger");
+    }
+
+    @Override
+    public boolean hasSidedTransfer() {
+        return true;
     }
 
     @Override

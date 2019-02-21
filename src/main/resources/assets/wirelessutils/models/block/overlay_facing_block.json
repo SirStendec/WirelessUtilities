@@ -23,7 +23,15 @@
 		"mark_top": "#mark",
 		"mark_bottom": "#mark",
 		"mark_left": "#mark",
-		"mark_right": "#mark"
+		"mark_right": "#mark",
+		"mark_two": "wirelessutils:block/blank",
+		"two_side": "#mark_two",
+		"two_front": "#mark_two",
+		"two_back": "#mark_two",
+		"two_top": "#mark_two",
+		"two_bottom": "#mark_two",
+		"two_left": "#mark_two",
+		"two_right": "#mark_two"
 	},
 	"elements": [
 		{
@@ -57,11 +65,11 @@
 					"cullface": "south"
 				},
 				"west": {
-					"texture": "#left",
+					"texture": "#right",
 					"cullface": "west"
 				},
 				"east": {
-					"texture": "#right",
+					"texture": "#left",
 					"cullface": "east",
 					"rotation": 180
 				}
@@ -102,12 +110,12 @@
 					"tintindex": 1
 				},
 				"west": {
-					"texture": "#mark_left",
+					"texture": "#mark_right",
 					"cullface": "west",
 					"tintindex": 1
 				},
 				"east": {
-					"texture": "#mark_right",
+					"texture": "#mark_left",
 					"cullface": "east",
 					"rotation": 180,
 					"tintindex": 1
@@ -149,15 +157,62 @@
 					"tintindex": 2
 				},
 				"west": {
-					"texture": "#overlay_left",
+					"texture": "#overlay_right",
 					"cullface": "west",
 					"tintindex": 2
 				},
 				"east": {
-					"texture": "#overlay_right",
+					"texture": "#overlay_left",
 					"cullface": "east",
 					"rotation": 180,
 					"tintindex": 2
+				}
+			}
+		},
+		{
+			"from": [
+				0,
+				0,
+				0
+			],
+			"to": [
+				16,
+				16,
+				16
+			],
+			"faces": {
+				"down": {
+					"texture": "#two_bottom",
+					"cullface": "down",
+					"rotation": 270,
+					"tintindex": 3
+				},
+				"up": {
+					"texture": "#two_top",
+					"cullface": "up",
+					"rotation": 90,
+					"tintindex": 3
+				},
+				"north": {
+					"texture": "#two_front",
+					"cullface": "north",
+					"tintindex": 3
+				},
+				"south": {
+					"texture": "#two_back",
+					"cullface": "south",
+					"tintindex": 3
+				},
+				"west": {
+					"texture": "#two_right",
+					"cullface": "west",
+					"tintindex": 3
+				},
+				"east": {
+					"texture": "#two_left",
+					"cullface": "east",
+					"rotation": 180,
+					"tintindex": 3
 				}
 			}
 		}

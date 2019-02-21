@@ -37,6 +37,9 @@ public class ModItems {
     @GameRegistry.ObjectHolder("wirelessutils:relative_positional_card")
     public static ItemRelativePositionalCard itemRelativePositionalCard;
 
+    @GameRegistry.ObjectHolder("wirelessutils:player_positional_card")
+    public static ItemPlayerPositionalCard itemPlayerPositionalCard;
+
     @GameRegistry.ObjectHolder("wirelessutils:fluxed_pearl")
     public static ItemFluxedPearl itemFluxedPearl;
 
@@ -102,6 +105,9 @@ public class ModItems {
 
     @GameRegistry.ObjectHolder("wirelessutils:fluid_gen_augment")
     public static ItemFluidGenAugment itemFluidGenAugment;
+
+    @GameRegistry.ObjectHolder("wirelessutils:auto_transfer_augment")
+    public static ItemSidedTransferAugment itemSidedTransferAugment;
 
     public static void initLootTables() {
         LootTableList.register(new ResourceLocation(WirelessUtils.MODID, "charged_pearl_drops"));
@@ -188,6 +194,8 @@ public class ModItems {
         itemCropAugment.initModel();
         itemChunkLoadAugment.initModel();
         itemFluidGenAugment.initModel();
+        itemPlayerPositionalCard.initModel();
+        itemSidedTransferAugment.initModel();
     }
 
     @SideOnly(Side.CLIENT)

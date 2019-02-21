@@ -1,8 +1,10 @@
 package com.lordmau5.wirelessutils.tile.base;
 
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
 import java.util.HashMap;
@@ -18,11 +20,18 @@ public interface ITargetProvider {
     void calculateTargets();
 
     /**
-     * Fetch a list of potential targets.
+     * Fetch a list of potential block/tile targets.
      *
      * @return List of target locations.
      */
     Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets();
+
+    /**
+     * Fetch a list of potential entity targets.
+     *
+     * @return List of target entities.
+     */
+    Iterable<Tuple<Entity, ItemStack>> getEntityTargets();
 
     /**
      * Calculate the distance between two positions, adding a penalty of 1000 for
@@ -43,8 +52,12 @@ public interface ITargetProvider {
         z2 = target.getZ();
 
         if ( origin.getDimension() != target.getDimension() ) {
-            double originFactor = DimensionManager.getProvider(origin.getDimension()).getMovementFactor();
-            double targetFactor = DimensionManager.getProvider(target.getDimension()).getMovementFactor();
+            World originWorld = DimensionManager.getWorld(origin.getDimension());
+            World targetWorld = DimensionManager.getWorld(target.getDimension());
+
+            double originFactor = (originWorld == null || targetWorld.provider == null) ? 0 : originWorld.provider.getMovementFactor();
+            double targetFactor = (targetWorld == null || targetWorld.provider == null) ? 0 : targetWorld.provider.getMovementFactor();
+
             double factor = originFactor / targetFactor;
 
             x1 *= factor;

@@ -14,6 +14,11 @@ public class BlockPositionalDesublimator extends BlockBaseDirectionalMachine {
     }
 
     @Override
+    public boolean hasSidedTransfer() {
+        return true;
+    }
+
+    @Override
     public TileEntity createTileEntity(World world, IBlockState state) {
         return new TilePositionalDesublimator();
     }

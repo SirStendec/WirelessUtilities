@@ -1,7 +1,7 @@
 package com.lordmau5.wirelessutils.gui.client.elements;
 
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.gui.client.BaseGuiContainer;
+import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.tile.desublimator.TileBaseDesublimator;
 import com.lordmau5.wirelessutils.utils.Textures;
 import net.minecraft.util.ResourceLocation;

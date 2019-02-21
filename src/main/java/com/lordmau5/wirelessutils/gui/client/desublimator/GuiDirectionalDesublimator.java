@@ -8,8 +8,8 @@ import cofh.core.gui.element.tab.TabRedstoneControl;
 import cofh.core.inventory.ComparableItemStackValidatedNBT;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.gui.client.BaseGuiContainer;
 import com.lordmau5.wirelessutils.gui.client.SharedState;
+import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.gui.client.elements.*;
 import com.lordmau5.wirelessutils.gui.container.desublimator.ContainerDirectionalDesublimator;
 import com.lordmau5.wirelessutils.tile.desublimator.TileDirectionalDesublimator;
@@ -30,6 +30,8 @@ public class GuiDirectionalDesublimator extends BaseGuiContainer {
     private ElementDynamicContainedButton btnMode;
     private ElementRangeControls rangeControls;
     private ElementOffsetControls offsetControls;
+
+    private TabSideControl sideControl;
 
     public GuiDirectionalDesublimator(InventoryPlayer player, TileDirectionalDesublimator desublimator) {
         super(new ContainerDirectionalDesublimator(player, desublimator), desublimator, TEXTURE);
@@ -55,6 +57,7 @@ public class GuiDirectionalDesublimator extends BaseGuiContainer {
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));
         addTab(new TabRedstoneControl(this, desublimator));
         addTab(new TabRoundRobin(this, desublimator));
+        sideControl = (TabSideControl) addTab(new TabSideControl(this, desublimator));
 
         btnMode = new ElementDynamicContainedButton(this, "Mode", 116, 69, 16, 16, Textures.SIZE);
         addElement(btnMode);
@@ -88,6 +91,8 @@ public class GuiDirectionalDesublimator extends BaseGuiContainer {
         btnMode.setIcon(offsetMode ? Textures.OFFSET : Textures.SIZE);
         btnMode.setToolTip("btn." + WirelessUtils.MODID + ".mode." + (offsetMode ? "offset" : "range"));
         btnMode.setVisible(desublimator.getRange() > 0);
+
+        sideControl.setVisible(desublimator.isSidedTransferAugmented());
 
         rangeControls.setVisible(!offsetMode);
         offsetControls.setVisible(offsetMode);

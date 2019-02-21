@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.utils.location;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 
 public class TargetInfo {
@@ -8,18 +9,21 @@ public class TargetInfo {
     public final BlockPosDimension pos;
 
     public TileEntity tile;
+    public Entity entity;
 
     public boolean processBlock;
     public boolean processTile;
     public boolean processInventory;
+    public boolean processEntity;
 
     public boolean useSingleChest = false;
     public int liveSlots;
     public int[] slots;
 
-    public TargetInfo(BlockPosDimension pos, TileEntity tile) {
+    public TargetInfo(BlockPosDimension pos, TileEntity tile, Entity entity) {
         this.pos = pos;
         this.tile = tile;
+        this.entity = entity;
     }
 
     public MoreObjects.ToStringHelper getStringBuilder() {
@@ -28,7 +32,9 @@ public class TargetInfo {
                 .add("pBlock", processBlock)
                 .add("pTile", processTile)
                 .add("pInv", processInventory)
+                .add("pEnt", processEntity)
                 .add("tile", tile)
+                .add("entity", entity)
                 .add("singleChest", useSingleChest)
                 .add("liveSlots", liveSlots)
                 .add("slots", slots);

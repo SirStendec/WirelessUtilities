@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.tile.condenser;
 import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.gui.client.condenser.GuiPositionalCondenser;
 import com.lordmau5.wirelessutils.gui.container.condenser.ContainerPositionalCondenser;
+import com.lordmau5.wirelessutils.item.base.ItemBaseEntityPositionalCard;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.*;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
@@ -11,6 +12,7 @@ import com.lordmau5.wirelessutils.utils.constants.NiceColors;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
@@ -18,10 +20,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRangeAugment;
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRelativePositionalCard;
@@ -54,6 +58,11 @@ public class TileEntityPositionalCondenser extends TileEntityBaseCondenser imple
     }
 
     /* IFacing */
+
+    @Override
+    public boolean canSideTransfer(TransferSide side) {
+        return true;
+    }
 
     @Override
     public boolean onWrench(EntityPlayer player, EnumFacing side) {
@@ -140,6 +149,9 @@ public class TileEntityPositionalCondenser extends TileEntityBaseCondenser imple
         if ( card == null )
             return false;
 
+        if ( card instanceof ItemBaseEntityPositionalCard )
+            return card.isCardConfigured(stack);
+
         BlockPosDimension origin = getPosition();
         if ( origin == null )
             return false;
@@ -184,6 +196,51 @@ public class TileEntityPositionalCondenser extends TileEntityBaseCondenser imple
     }
 
     /* Targeting */
+
+    @Override
+    public Iterable<Tuple<Entity, ItemStack>> getEntityTargets() {
+        if ( world == null )
+            return null;
+
+        List<Tuple<Entity, ItemStack>> output = new ArrayList<>();
+        BlockPosDimension origin = getPosition();
+
+        int slots = itemStackHandler.getSlots();
+        for (int i = 0; i < slots; i++) {
+            ItemStack slotted = itemStackHandler.getStackInSlot(i);
+            if ( !isPositionalCardValid(slotted) )
+                continue;
+
+            ItemBasePositionalCard card = (ItemBasePositionalCard) slotted.getItem();
+            if ( !(card instanceof ItemBaseEntityPositionalCard) )
+                continue;
+
+            ItemBaseEntityPositionalCard entityCard = (ItemBaseEntityPositionalCard) card;
+
+            if ( card.updateCard(slotted, this) ) {
+                itemStackHandler.setStackInSlot(i, slotted);
+                markDirty();
+            }
+
+            Entity entity = entityCard.getEntityTarget(slotted, origin);
+            if ( entity == null )
+                continue;
+
+            if ( !card.shouldIgnoreDistance(slotted) ) {
+                World world = entity.getEntityWorld();
+                if ( world == null )
+                    continue;
+
+                BlockPosDimension target = new BlockPosDimension(entity.getPosition(), world.provider.getDimension());
+                if ( !isTargetInRange(target) )
+                    continue;
+            }
+
+            output.add(new Tuple<>(entity, slotted));
+        }
+
+        return output;
+    }
 
     public void calculateTargets() {
         if ( world == null )

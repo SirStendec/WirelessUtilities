@@ -1,7 +1,7 @@
 package com.lordmau5.wirelessutils.gui.client.base;
 
-import com.lordmau5.wirelessutils.gui.client.BaseGuiContainer;
 import com.lordmau5.wirelessutils.gui.container.BaseContainerPositional;
+import com.lordmau5.wirelessutils.item.base.ItemBaseEntityPositionalCard;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
@@ -49,9 +49,14 @@ public class BaseGuiPositional extends BaseGuiContainer {
         if ( !held.isEmpty() && pos.isPositionalCardValid(held) ) {
             ItemBasePositionalCard card = (ItemBasePositionalCard) held.getItem();
             if ( card != null && !card.shouldIgnoreDistance(held) ) {
-                BlockPosDimension target = card.getTarget(held, pos.getPosition());
-                if ( target == null || !pos.isTargetInRange(target) )
-                    hasInvalidStack = true;
+                if ( card instanceof ItemBaseEntityPositionalCard ) {
+                    // TODO: Distance to entity?
+
+                } else {
+                    BlockPosDimension target = card.getTarget(held, pos.getPosition());
+                    if ( target == null || !pos.isTargetInRange(target) )
+                        hasInvalidStack = true;
+                }
             }
         }
 

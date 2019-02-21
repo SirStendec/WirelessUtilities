@@ -4,7 +4,7 @@ import cofh.core.gui.element.ElementBase;
 import cofh.core.gui.element.tab.TabBase;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.gui.client.BaseGuiContainer;
+import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.tile.base.IWorkInfoProvider;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import net.minecraft.client.gui.FontRenderer;

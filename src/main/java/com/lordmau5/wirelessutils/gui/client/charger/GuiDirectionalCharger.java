@@ -6,8 +6,8 @@ import cofh.core.gui.element.tab.TabInfo;
 import cofh.core.gui.element.tab.TabRedstoneControl;
 import cofh.core.init.CoreTextures;
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.gui.client.BaseGuiContainer;
 import com.lordmau5.wirelessutils.gui.client.SharedState;
+import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.gui.client.elements.*;
 import com.lordmau5.wirelessutils.gui.container.charger.ContainerDirectionalCharger;
 import com.lordmau5.wirelessutils.tile.charger.TileEntityDirectionalCharger;
@@ -24,6 +24,8 @@ public class GuiDirectionalCharger extends BaseGuiContainer {
     private ElementDynamicContainedButton btnMode;
     private ElementRangeControls rangeControls;
     private ElementOffsetControls offsetControls;
+
+    private TabSideControl sideControl;
 
     public GuiDirectionalCharger(InventoryPlayer playerInventory, TileEntityDirectionalCharger charger) {
         super(new ContainerDirectionalCharger(playerInventory, charger), charger, TEXTURE);
@@ -47,6 +49,9 @@ public class GuiDirectionalCharger extends BaseGuiContainer {
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));
         addTab(new TabRedstoneControl(this, charger));
         addTab(new TabRoundRobin(this, charger));
+
+        sideControl = new TabSideControl(this, charger);
+        addTab(sideControl);
 
         btnMode = new ElementDynamicContainedButton(this, "Mode", 116, 69, 16, 16, Textures.SIZE);
         addElement(btnMode);
@@ -80,6 +85,8 @@ public class GuiDirectionalCharger extends BaseGuiContainer {
         btnMode.setIcon(offsetMode ? Textures.OFFSET : Textures.SIZE);
         btnMode.setToolTip("btn." + WirelessUtils.MODID + ".mode." + (offsetMode ? "offset" : "range"));
         btnMode.setVisible(charger.getRange() > 0);
+
+        sideControl.setVisible(charger.isSidedTransferAugmented());
 
         rangeControls.setVisible(!offsetMode);
         offsetControls.setVisible(offsetMode);

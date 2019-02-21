@@ -7,7 +7,8 @@
 			"side": "wirelessutils:block/machine_base",
 			"front": "wirelessutils:block/positional_front",
 			"mark_top": "wirelessutils:block/charger_mark",
-			"overlay": "wirelessutils:block/overlay"
+			"overlay": "wirelessutils:block/overlay",
+			"output": "wirelessutils:block/side_neutral"
 		}
 	},
 	"variants": {
@@ -31,6 +32,54 @@
 			"true": {
 				"textures": {
 					"mark_top": "wirelessutils:block/charger_mark_active"
+				}
+			}
+		},
+		"side_0": {
+			"false": {},
+			"true": {
+				"textures": {
+					"two_front": "#output"
+				}
+			}
+		},
+		"side_1": {
+			"false": {},
+			"true": {
+				"textures": {
+					"two_back": "#output"
+				}
+			}
+		},
+		"side_2": {
+			"false": {},
+			"true": {
+				"textures": {
+					"two_left": "#output"
+				}
+			}
+		},
+		"side_3": {
+			"false": {},
+			"true": {
+				"textures": {
+					"two_right": "#output"
+				}
+			}
+		},
+		"side_4": {
+			"false": {},
+			"true": {
+				"textures": {
+					"two_top": "#output"
+				}
+			}
+		},
+		"side_5": {
+			"false": {},
+			"true": {
+				"textures": {
+					"two_bottom": "#output"
 				}
 			}
 		},

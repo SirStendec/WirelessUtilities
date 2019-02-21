@@ -158,6 +158,11 @@ public class ModConfig {
         @Config.Comment("When enabled, installing an augment into a machine requires that the machine also has the previous tier augments.")
         public boolean requirePreviousTiers = false;
 
+        @Config.Name("Require Auto Transfer Augment")
+        @Config.Comment("When enabled, an Auto Transfer Augment is necessary for a machine to auto transfer. Otherwise, it is enabled for all machines.")
+        @Config.RequiresWorldRestart
+        public boolean requireAutoTransferAugment = false;
+
         @Config.Name("Capacity Augments")
         @Config.Comment("Capacity Augments increase the maximum capacity of machines.")
         public final CapacityAugments capacity = new CapacityAugments();

@@ -101,8 +101,6 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
 
     @Override
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
-
         if ( stack.hasTagCompound() ) {
             BlockPosDimension target = BlockPosDimension.fromTag(stack.getTagCompound());
             if ( target != null ) {
@@ -128,6 +126,8 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
                 ).setStyle(TextHelpers.GRAY).getFormattedText());
             }
         }
+
+        super.addInformation(stack, worldIn, tooltip, flagIn);
     }
 
     @Override
@@ -209,7 +209,6 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
             target.writeToTag(tag);
 
             if ( stack.getCount() == 1 ) {
-                target.writeToTag(tag);
                 stack.setTagCompound(tag);
             } else {
                 ItemStack newStack = new ItemStack(this, 1);

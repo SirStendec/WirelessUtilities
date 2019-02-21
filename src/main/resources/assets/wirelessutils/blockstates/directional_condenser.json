@@ -7,7 +7,8 @@
 			"overlay": "wirelessutils:block/overlay",
 			"front": "wirelessutils:block/condenser_front",
 			"side": "wirelessutils:block/machine_side",
-			"mark_front": "wirelessutils:block/condenser_mark"
+			"mark_front": "wirelessutils:block/condenser_mark",
+			"output": "wirelessutils:block/side_neutral"
 		},
 		"uvlock": false
 	},
@@ -32,6 +33,54 @@
 			"true": {
 				"textures": {
 					"mark_front": "wirelessutils:block/condenser_mark_active"
+				}
+			}
+		},
+		"side_0": {
+			"false": {},
+			"true": {
+				"textures": {
+					"two_front": "#output"
+				}
+			}
+		},
+		"side_1": {
+			"false": {},
+			"true": {
+				"textures": {
+					"two_back": "#output"
+				}
+			}
+		},
+		"side_2": {
+			"false": {},
+			"true": {
+				"textures": {
+					"two_left": "#output"
+				}
+			}
+		},
+		"side_3": {
+			"false": {},
+			"true": {
+				"textures": {
+					"two_right": "#output"
+				}
+			}
+		},
+		"side_4": {
+			"false": {},
+			"true": {
+				"textures": {
+					"two_top": "#output"
+				}
+			}
+		},
+		"side_5": {
+			"false": {},
+			"true": {
+				"textures": {
+					"two_bottom": "#output"
 				}
 			}
 		},

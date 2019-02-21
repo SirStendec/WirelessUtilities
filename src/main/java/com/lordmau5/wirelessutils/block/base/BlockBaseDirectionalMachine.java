@@ -3,7 +3,6 @@ package com.lordmau5.wirelessutils.block.base;
 import com.lordmau5.wirelessutils.tile.base.IFacing;
 import com.lordmau5.wirelessutils.utils.EnumFacingRotation;
 import com.lordmau5.wirelessutils.utils.constants.Properties;
-import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
@@ -14,12 +13,27 @@ import net.minecraft.world.World;
 
 public abstract class BlockBaseDirectionalMachine extends BlockBaseMachine {
 
-    public static final PropertyEnum<EnumFacingRotation> FACING = PropertyEnum.create("facing", EnumFacingRotation.class);
-
     protected BlockBaseDirectionalMachine() {
         super();
 
-        setDefaultState(blockState.getBaseState().withProperty(Properties.LEVEL, 0).withProperty(Properties.ACTIVE, false).withProperty(FACING, EnumFacingRotation.NORTH));
+        if ( hasSidedTransfer() )
+            setDefaultState(blockState.getBaseState()
+                    .withProperty(Properties.LEVEL, 0)
+                    .withProperty(Properties.ACTIVE, false)
+                    .withProperty(Properties.FACING_ROTATION, EnumFacingRotation.NORTH)
+                    .withProperty(Properties.SIDES[0], false)
+                    .withProperty(Properties.SIDES[1], false)
+                    .withProperty(Properties.SIDES[2], false)
+                    .withProperty(Properties.SIDES[3], false)
+                    .withProperty(Properties.SIDES[4], false)
+                    .withProperty(Properties.SIDES[5], false)
+            );
+        else
+            setDefaultState(blockState.getBaseState()
+                    .withProperty(Properties.LEVEL, 0)
+                    .withProperty(Properties.ACTIVE, false)
+                    .withProperty(Properties.FACING_ROTATION, EnumFacingRotation.NORTH)
+            );
     }
 
     @Override
@@ -31,7 +45,7 @@ public abstract class BlockBaseDirectionalMachine extends BlockBaseMachine {
             IFacing facing = (IFacing) tile;
 
             EnumFacing side = facing.getEnumFacing();
-            state = state.withProperty(FACING, EnumFacingRotation.fromFacing(side, (side == EnumFacing.DOWN || side == EnumFacing.UP) && facing.getRotationX()));
+            state = state.withProperty(Properties.FACING_ROTATION, EnumFacingRotation.fromFacing(side, (side == EnumFacing.DOWN || side == EnumFacing.UP) && facing.getRotationX()));
         }
 
         return state;
@@ -50,6 +64,9 @@ public abstract class BlockBaseDirectionalMachine extends BlockBaseMachine {
 
     @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, Properties.ACTIVE, Properties.LEVEL, FACING);
+        if ( hasSidedTransfer() )
+            return new BlockStateContainer(this, Properties.ACTIVE, Properties.LEVEL, Properties.FACING_ROTATION, Properties.SIDES[0], Properties.SIDES[1], Properties.SIDES[2], Properties.SIDES[3], Properties.SIDES[4], Properties.SIDES[5]);
+
+        return new BlockStateContainer(this, Properties.ACTIVE, Properties.LEVEL, Properties.FACING_ROTATION);
     }
 }

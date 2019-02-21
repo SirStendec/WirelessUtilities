@@ -1,4 +1,4 @@
-package com.lordmau5.wirelessutils.gui.client;
+package com.lordmau5.wirelessutils.gui.client.base;
 
 import cofh.core.gui.GuiContainerCore;
 import cofh.core.gui.element.ElementBase;
@@ -30,6 +30,20 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements ICont
 
     private final TileEntityBase tile;
     private Slot cachedSlot = null;
+
+    protected BaseGuiContainer(Container container) {
+        super(container);
+        this.tile = null;
+
+        ySize = 176;
+    }
+
+    protected BaseGuiContainer(Container container, ResourceLocation texture) {
+        super(container, texture);
+        this.tile = null;
+
+        ySize = 176;
+    }
 
     protected BaseGuiContainer(Container container, TileEntity tile) {
         super(container);

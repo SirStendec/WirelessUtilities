@@ -10,6 +10,7 @@ import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
@@ -142,6 +143,24 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
         super.setDefaultColor(color);
         if ( validTargets != null )
             calculateTargets();
+    }
+
+    @Override
+    public Iterable<Tuple<Entity, ItemStack>> getEntityTargets() {
+        return null;
+
+        /*World world = getWorld();
+        if ( world == null )
+            return null;
+
+        BlockPosDimension origin = getPosition();
+        List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, getTargetBoundingBox(origin));
+
+        List<Tuple<Entity, ItemStack>> output = new ArrayList<>();
+        for (Entity entity : entities)
+            output.add(new Tuple<>(entity, ItemStack.EMPTY));
+
+        return output;*/
     }
 
     public void calculateTargets() {

@@ -1,6 +1,5 @@
 package com.lordmau5.wirelessutils.proxy;
 
-import cofh.core.gui.GuiHandler;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.block.charger.BlockDirectionalCharger;
 import com.lordmau5.wirelessutils.block.charger.BlockPositionalCharger;
@@ -241,6 +240,7 @@ public class CommonProxy {
 
         registerItem(event, new ItemAbsolutePositionalCard());
         registerItem(event, new ItemRelativePositionalCard());
+        registerItem(event, new ItemPlayerPositionalCard());
         registerItem(event, new ItemGlasses());
 
         registerItem(event, new ItemEnderCoil());
@@ -261,6 +261,7 @@ public class CommonProxy {
         registerItem(event, new ItemCropAugment());
         registerItem(event, new ItemChunkLoadAugment());
         registerItem(event, new ItemFluidGenAugment());
+        registerItem(event, new ItemSidedTransferAugment());
 
         PluginRegistry.registerItems(event);
     }

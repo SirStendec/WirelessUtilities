@@ -2,7 +2,7 @@ package com.lordmau5.wirelessutils.gui.client.elements;
 
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.gui.client.BaseGuiContainer;
+import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import net.minecraft.client.gui.GuiScreen;

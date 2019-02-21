@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"PPP",
+		"SLR",
+		"P  "
+	],
+	"key": {
+		"P": {
+			"item": "#PAPER"
+		},
+		"L": {
+			"item": "#LAPIS"
+		},
+		"S": {
+			"item": "minecraft:skull"
+		},
+		"R": {
+			"item": "#REDSTONE"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:player_positional_card",
+		"count": 1
+	}
+}

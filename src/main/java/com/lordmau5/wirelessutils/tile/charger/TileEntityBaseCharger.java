@@ -3,22 +3,22 @@ package com.lordmau5.wirelessutils.tile.charger;
 import cofh.core.network.PacketBase;
 import cofh.core.util.helpers.MathHelper;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
-import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
-import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
-import com.lordmau5.wirelessutils.tile.base.Worker;
+import com.lordmau5.wirelessutils.tile.base.*;
 import com.lordmau5.wirelessutils.tile.base.augmentable.*;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.location.TargetInfo;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
@@ -29,9 +29,13 @@ import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 
-public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy implements IChunkLoadAugmentable, IInvertAugmentable, IRoundRobinMachine, ICapacityAugmentable, ITransferAugmentable, IInventoryAugmentable, ITickable, IWorkProvider<TileEntityBaseCharger.ChargerTarget> {
+public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy implements
+        IChunkLoadAugmentable, IInvertAugmentable, IRoundRobinMachine, ICapacityAugmentable,
+        ITransferAugmentable, IInventoryAugmentable, ISidedTransfer, ITickable, ISidedTransferAugmentable,
+        IWorkProvider<TileEntityBaseCharger.ChargerTarget> {
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
@@ -52,10 +56,15 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     private int activeTargetsPerTick;
     private int validTargetsPerTick;
 
+    protected boolean sideTransferAugment = false;
+    private boolean[] sideTransfer;
+
     private boolean processItems = false;
 
     public TileEntityBaseCharger() {
         super();
+        sideTransfer = new boolean[6];
+        Arrays.fill(sideTransfer, false);
         worker = new Worker<>(this);
     }
 
@@ -65,23 +74,25 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     public void debugPrint() {
         super.debugPrint();
 
-        System.out.println(" Transfer Limit: " + transferLimit);
-        System.out.println("     Iter. Mode: " + iterationMode);
-        System.out.println("    Round Robin: " + roundRobin);
-        System.out.println("       Inverted: " + inverted);
-        System.out.println("Capacity Factor: " + capacityAugment);
-        System.out.println("Transfer Factor: " + transferAugment);
-        System.out.println("       Capacity: " + getEnergyStorage().getFullMaxEnergyStored());
-        System.out.println("  Stored Energy: " + getEnergyStorage().getFullEnergyStored());
-        System.out.println("    Max Extract: " + getEnergyStorage().getFullMaxExtract());
+        System.out.println("  Transfer Limit: " + transferLimit);
+        System.out.println("      Iter. Mode: " + iterationMode);
+        System.out.println("     Round Robin: " + roundRobin);
+        System.out.println("        Inverted: " + inverted);
+        System.out.println(" Capacity Factor: " + capacityAugment);
+        System.out.println(" Transfer Factor: " + transferAugment);
+        System.out.println("        Capacity: " + getEnergyStorage().getFullMaxEnergyStored());
+        System.out.println("   Stored Energy: " + getEnergyStorage().getFullEnergyStored());
+        System.out.println("     Max Extract: " + getEnergyStorage().getFullMaxExtract());
 
-        System.out.println("  Process Items: " + processItems);
-        System.out.println(" Crafting Ticks: " + craftingTicks);
-        System.out.println("Crafting Energy: " + craftingEnergy);
+        System.out.println("   Process Items: " + processItems);
+        System.out.println("  Crafting Ticks: " + craftingTicks);
+        System.out.println(" Crafting Energy: " + craftingEnergy);
 
-        System.out.println(" Remaining/Tick: " + remainingPerTick);
-        System.out.println("   Maximum/Tick: " + getFullMaxEnergyPerTick());
-        System.out.println("  Valid Targets: " + (validTargets == null ? "NULL" : validTargets.size()));
+        System.out.println("   Side Transfer: " + Arrays.toString(sideTransfer));
+
+        System.out.println("  Remaining/Tick: " + remainingPerTick);
+        System.out.println("    Maximum/Tick: " + getFullMaxEnergyPerTick());
+        System.out.println("   Valid Targets: " + (validTargets == null ? "NULL" : validTargets.size()));
 
         if ( worker != null )
             worker.debugPrint();
@@ -121,6 +132,16 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     @Override
     public void setInvertAugmented(boolean inverted) {
         this.inverted = inverted;
+    }
+
+    @Override
+    public void setSidedTransferAugmented(boolean augmented) {
+        sideTransferAugment = augmented;
+    }
+
+    @Override
+    public boolean isSidedTransferAugmented() {
+        return sideTransferAugment;
     }
 
     @Override
@@ -382,8 +403,15 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         return processItems;
     }
 
-    @Override
-    public ChargerTarget createInfo(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nullable TileEntity tile) {
+    public boolean shouldProcessEntities() {
+        return true;
+    }
+
+    public ChargerTarget createInfo(@Nullable BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nullable TileEntity tile, @Nullable Entity entity) {
+        return new ChargerTarget(target, tile, entity, target == null ? 0 : getEnergyCost(target, source));
+    }
+
+    public int getEnergyCost(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
         int cost = -1;
 
         if ( !source.isEmpty() ) {
@@ -395,7 +423,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         if ( cost == -1 )
             cost = getEnergyCost(target);
 
-        return new ChargerTarget(target, tile, cost);
+        return cost;
     }
 
     public boolean canWorkBlock(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nullable TileEntity tile) {
@@ -404,7 +432,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
     @Nonnull
     public WorkResult performWorkBlock(@Nonnull ChargerTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile) {
-        return null;
+        return WorkResult.FAILURE_REMOVE;
     }
 
     public boolean canWorkTile(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
@@ -415,7 +443,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         return true;
     }
 
-    public boolean canWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
+    public boolean canWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nullable BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nullable TileEntity tile, @Nullable Entity entity) {
         if ( stack.isEmpty() )
             return false;
 
@@ -425,6 +453,25 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         }
 
         return false;
+    }
+
+    public boolean canWorkEntity(@Nonnull ItemStack source, @Nonnull World world, @Nonnull Entity entity) {
+        if ( entity.hasCapability(CapabilityEnergy.ENERGY, null) ) {
+            validTargetsPerTick++;
+            return true;
+        }
+
+        return false;
+    }
+
+    @Nonnull
+    public WorkResult performWorkEntity(@Nonnull ChargerTarget target, @Nonnull World world, @Nonnull Entity entity) {
+        IEnergyStorage storage = entity.getCapability(CapabilityEnergy.ENERGY, null);
+        if ( storage == null )
+            return WorkResult.FAILURE_REMOVE;
+
+        // TODO: Entity cost.
+        return chargeStorage(storage, 0);
     }
 
     @Nonnull
@@ -437,7 +484,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     }
 
     @Nonnull
-    public WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull ChargerTarget target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile) {
+    public WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull ChargerTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile, @Nullable Entity entity) {
         if ( stack.isEmpty() )
             return WorkResult.FAILURE_REMOVE;
 
@@ -454,7 +501,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
         if ( craftingEnergy < recipe.cost && craftingEnergy + getEnergyStored() >= recipe.cost ) {
             long added = Math.min(recipe.cost - craftingEnergy, remainingPerTick);
-            added = getEnergyStorage().extractEnergy(added, false);
+            added = isCreative ? added : getEnergyStorage().extractEnergy(added, false);
             craftingEnergy += added;
             remainingPerTick -= added;
 
@@ -543,6 +590,12 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         roundRobin = tag.hasKey("RoundRobin") ? tag.getLong("RoundRobin") : -1;
         transferLimit = tag.hasKey("TransferLimit") ? tag.getLong("TransferLimit") : -1;
 
+        for (int i = 0; i < sideTransfer.length; i++)
+            sideTransfer[i] = tag.getBoolean("TransferSide" + i);
+
+        for (TransferSide side : TransferSide.values())
+            sideTransfer[side.ordinal()] = tag.getBoolean("TransferSide" + side.ordinal());
+
         getEnergyStorage().setMaxTransfer(calculateEnergyMaxTransfer());
     }
 
@@ -555,7 +608,69 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         if ( roundRobin >= 0 )
             tag.setLong("RoundRobin", roundRobin);
 
+        for (int i = 0; i < sideTransfer.length; i++)
+            tag.setBoolean("TransferSide" + i, sideTransfer[i]);
+
         return tag;
+    }
+
+    /* Sided Transfer */
+
+    public boolean isSideTransferEnabled(TransferSide side) {
+        return sideTransfer[side.ordinal()];
+    }
+
+    public void setSideTransferEnabled(TransferSide side, boolean enabled) {
+        int index = side.ordinal();
+        if ( sideTransfer[index] == enabled )
+            return;
+
+        sideTransfer[index] = enabled;
+        if ( !world.isRemote ) {
+            sendTilePacket(Side.CLIENT);
+            markChunkDirty();
+        }
+
+        callBlockUpdate();
+    }
+
+    public void transferSide(TransferSide transferSide) {
+        if ( world == null || pos == null || world.isRemote )
+            return;
+
+        EnumFacing facing = getFacingForSide(transferSide);
+        BlockPos target = pos.offset(facing);
+
+        TileEntity tile = world.getTileEntity(target);
+        if ( tile == null )
+            return;
+
+        EnumFacing opposite = facing.getOpposite();
+        if ( !tile.hasCapability(CapabilityEnergy.ENERGY, opposite) )
+            return;
+
+        IEnergyStorage storage = tile.getCapability(CapabilityEnergy.ENERGY, opposite);
+        if ( storage == null )
+            return;
+
+        if ( inverted && storage.canReceive() ) {
+            int maxTransfer = getEnergyStored();
+            if ( maxTransfer > getMaxExtract() )
+                maxTransfer = getMaxExtract();
+
+            int received = storage.receiveEnergy(maxTransfer, false);
+            if ( received > 0 )
+                extractEnergy(received, false);
+
+        } else if ( !inverted && storage.canExtract() ) {
+            long maxReceive = getFullMaxEnergyStored() - getFullEnergyStored();
+            if ( maxReceive > getMaxReceive() )
+                maxReceive = getMaxReceive();
+
+            int received = storage.extractEnergy((int) maxReceive, false);
+            if ( received > 0 )
+                receiveEnergy(received, false);
+        }
     }
 
     @Override
@@ -565,7 +680,12 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
         worker.tickDown();
 
-        if ( !redstoneControlOrDisable() || (inverted ? (getFullEnergyStored() == getFullMaxEnergyStored() || getMaxReceive() == 0) : (getEnergyStored() == 0 || getMaxExtract() == 0)) ) {
+        if ( sideTransferAugment && redstoneControlOrDisable() )
+            updateSidedTransfer();
+
+        if ( !redstoneControlOrDisable() || (inverted ?
+                (getFullEnergyStored() == getFullMaxEnergyStored() || getMaxReceive() == 0) :
+                (getEnergyStored() == 0 || getMaxExtract() == 0)) ) {
             activeTargetsPerTick = 0;
             energyPerTick = 0;
             setActive(false);
@@ -597,6 +717,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         payload.addLong(transferLimit);
         payload.addByte(iterationMode.ordinal());
         payload.addLong(roundRobin);
+        for (int i = 0; i < sideTransfer.length; i++)
+            payload.addBool(sideTransfer[i]);
         return payload;
     }
 
@@ -606,6 +728,9 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         setTransferLimit(payload.getLong());
         setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getLong());
+        TransferSide[] values = TransferSide.values();
+        for (int i = 0; i < sideTransfer.length; i++)
+            setSideTransferEnabled(i, payload.getBool());
     }
 
     @Override
@@ -616,6 +741,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         payload.addLong(roundRobin);
         payload.addInt(validTargetsPerTick);
         payload.addInt(activeTargetsPerTick);
+
         return payload;
     }
 
@@ -630,6 +756,23 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         activeTargetsPerTick = payload.getInt();
     }
 
+    @Override
+    public PacketBase getTilePacket() {
+        PacketBase payload = super.getTilePacket();
+        for (int i = 0; i < sideTransfer.length; i++)
+            payload.addBool(sideTransfer[i]);
+        return payload;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void handleTilePacket(PacketBase payload) {
+        super.handleTilePacket(payload);
+        for (int i = 0; i < sideTransfer.length; i++)
+            sideTransfer[i] = payload.getBool();
+        callBlockUpdate();
+    }
+
     /* Target Info */
 
     public static class ChargerTarget extends TargetInfo {
@@ -637,8 +780,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         public final int cost;
         public boolean canCharge = true;
 
-        public ChargerTarget(BlockPosDimension target, TileEntity tile, int cost) {
-            super(target, tile);
+        public ChargerTarget(BlockPosDimension target, TileEntity tile, Entity entity, int cost) {
+            super(target, tile, entity);
             this.cost = cost;
         }
 

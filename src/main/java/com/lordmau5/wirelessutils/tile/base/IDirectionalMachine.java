@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.tile.base;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.math.AxisAlignedBB;
 
 public interface IDirectionalMachine extends IFacing {
 
@@ -34,6 +35,45 @@ public interface IDirectionalMachine extends IFacing {
     void setOffsetHorizontal(int offset);
 
     void setOffsetVertical(int offset);
+
+    default AxisAlignedBB getTargetBoundingBox(BlockPosDimension origin) {
+        Tuple<BlockPosDimension, BlockPosDimension> corners = calculateTargetCorners(origin);
+        BlockPosDimension posA = corners.getFirst();
+        BlockPosDimension posB = corners.getSecond();
+
+        return new AxisAlignedBB(
+                posA.getX(), posA.getY(), posA.getZ(),
+                posB.getX() + 1, posB.getY() + 1, posB.getZ() + 1
+        );
+
+        /*int minX = posA.getX();
+        int minY = posA.getY();
+        int minZ = posA.getZ();
+
+        int maxX = posB.getX();
+        int maxY = posB.getY();
+        int maxZ = posB.getZ();
+
+        if ( maxX < minX ) {
+            int temp = minX;
+            minX = maxX;
+            maxX = temp;
+        }
+
+        if ( maxY < minY ) {
+            int temp = minY;
+            minY = maxY;
+            maxY = temp;
+        }
+
+        if ( maxZ < minZ ) {
+            int temp = minZ;
+            minZ = maxZ;
+            maxZ = temp;
+        }
+
+        return new AxisAlignedBB(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);*/
+    }
 
     default Tuple<BlockPosDimension, BlockPosDimension> calculateTargetCorners(BlockPosDimension origin) {
         EnumFacing facing = getEnumFacing();

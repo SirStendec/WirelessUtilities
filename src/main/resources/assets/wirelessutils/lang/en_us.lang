@@ -78,6 +78,15 @@ item.wirelessutils.accurate_pearl.name=Stabilized %s
 item.wirelessutils.accurate_pearl.info.0=Flies accurately and consistently
 item.wirelessutils.accurate_pearl.info.1=when shot from a Dispenser.
 
+item.wirelessutils.player_positional_card.name=Player Positional Card
+item.wirelessutils.player_positional_card.info.0=Sneak-Use this item to set it
+item.wirelessutils.player_positional_card.info.1=to yourself and to open a GUI
+item.wirelessutils.player_positional_card.info.2=for setting what can
+item.wirelessutils.player_positional_card.info.3=be accessed.
+item.wirelessutils.player_positional_card.highlight=%s (%s)
+item.wirelessutils.player_positional_card.player=Player: %s
+item.wirelessutils.player_positional_card.invalid.unset=No target has been set.
+
 item.wirelessutils.positional_card.name=Absolute Positional Card
 item.wirelessutils.positional_card.info.0=Sneak-Use this item on a block to
 item.wirelessutils.positional_card.info.1=store its position and side.
@@ -153,6 +162,12 @@ item.wirelessutils.invert_augment.name=Invert Augment
 item.wirelessutils.invert_augment.info.0=This augment allows certain machines
 item.wirelessutils.invert_augment.info.1=to behave in an inverted way, such as by
 item.wirelessutils.invert_augment.info.2=extracting fluids instead of inserting them.
+
+item.wirelessutils.auto_transfer_augment.name=Auto Transfer Augment
+item.wirelessutils.auto_transfer_augment.info.0=This augment allows certain machiens
+item.wirelessutils.auto_transfer_augment.info.1=to automatically import or export
+item.wirelessutils.auto_transfer_augment.info.2=resources to or from the
+item.wirelessutils.auto_transfer_augment.info.3=surrounding machinery.
 
 item.wirelessutils.crop_augment.name=Crop Augment
 item.wirelessutils.crop_augment.info.0=This augment allows certain machines
@@ -270,6 +285,18 @@ tab.wirelessutils.positional_ae_network.0=The Positional AE Network connects spe
 tab.wirelessutils.positional_ae_network.1=Place a Positional Card in one of the Positional AE Network's slots to tell it to connect that block.
 tab.wirelessutils.positional_ae_network.2=Using augments, it's possible to add more than one Positional Card.
 tab.wirelessutils.positional_ae_network.3=Augments can also help you connect blocks farther away from the Positional AE Network. Eventually, even across dimensions!
+
+tab.wirelessutils.auto_transfer=Auto Transfer
+tab.wirelessutils.auto_transfer.mode=Mode: %s
+tab.wirelessutils.auto_transfer.mode.input=Input
+tab.wirelessutils.auto_transfer.mode.output=Output
+tab.wirelessutils.auto_transfer.side=Side: %s
+tab.wirelessutils.auto_transfer.side.TOP=Top
+tab.wirelessutils.auto_transfer.side.LEFT=Left
+tab.wirelessutils.auto_transfer.side.RIGHT=Right
+tab.wirelessutils.auto_transfer.side.BOTTOM=Bottom
+tab.wirelessutils.auto_transfer.side.FRONT=Front
+tab.wirelessutils.auto_transfer.side.BACK=Back
 
 btn.wirelessutils.dec_area.one=Decrease by %s
 btn.wirelessutils.dec_area.all=Decrease all by %s
