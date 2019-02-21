@@ -22,7 +22,12 @@ public class CropBehavior implements IHarvestBehavior {
     }
 
     @Override
-    public boolean harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+    public HarvestResult harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+        return doHarvest(state, world, pos, silkTouch, fortune, desublimator) ?
+                HarvestResult.SUCCESS : HarvestResult.FAILED;
+    }
+
+    private boolean doHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
         if ( silkTouch && ModConfig.augments.crop.useActivation )
             return harvestByUsing(state, world, pos, fortune, desublimator);
 

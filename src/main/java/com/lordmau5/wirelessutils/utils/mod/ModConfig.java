@@ -261,6 +261,29 @@ public class ModConfig {
         @Config.Name("Silk Touch Block Activation")
         @Config.Comment("Activate crop blocks (right-click) to harvest them with Silk Touch, rather than breaking them. This behavior will not work correctly if there is no other mod present that adds activation behavior to crops.")
         public boolean useActivation = true;
+
+        @Config.Name("Use Block Breaking Effects")
+        @Config.Comment("Whether or not particles and sound effects should be played when a Crop Augment breaks a block.")
+        public boolean useEffects = true;
+
+        @Config.Name("Process Trees")
+        @Config.Comment("Whether or not Crop Augments should be able to harvest trees.")
+        @Config.RequiresMcRestart
+        public boolean processTrees = true;
+
+        @Config.Name("Tree: Use Block Breaking Effects")
+        @Config.Comment("Whether or not particles and sound effects should be played when a Crop Augment breaks a tree. This will affect multiple blocks at a time.")
+        public boolean treeEffects = false;
+
+        @Config.Name("Tree: Blocks per Tick")
+        @Config.Comment("How many tree blocks should be harvested per tick. Includes leaves and logs.")
+        @Config.RangeInt(min = 1)
+        public int treeBlocksPerTick = 20;
+
+        @Config.Name("Tree: Scan Depth")
+        @Config.Comment("How many blocks from the origin block should be scanned while discovering a tree's layout.")
+        @Config.RangeInt(min = 1)
+        public int treeScanDepth = 150;
     }
 
     public static class BlockAugments {

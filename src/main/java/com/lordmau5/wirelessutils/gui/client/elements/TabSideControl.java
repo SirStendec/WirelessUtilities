@@ -54,12 +54,12 @@ public class TabSideControl extends TabBase implements IContainsButtons {
         maxWidth = 100;
 
         // Front, Back, Left, Right, Top, Bottom
-        buttons[4] = new ElementContainedButton(this, 42, 25, "Top", 190, 84, 190, 98, 190, 112, 14, 14, TEXTURE.toString());
+        buttons[4] = new ElementContainedButton(this, 42, 24, "Top", 190, 84, 190, 98, 190, 112, 14, 14, TEXTURE.toString());
         buttons[2] = new ElementContainedButton(this, 24, 42, "Left", 190, 84, 190, 98, 190, 112, 14, 14, TEXTURE.toString());
         buttons[0] = new ElementContainedButton(this, 42, 42, "Front", 190, 84, 190, 98, 190, 112, 14, 14, TEXTURE.toString());
-        buttons[3] = new ElementContainedButton(this, 59, 42, "Right", 190, 84, 190, 98, 190, 112, 14, 14, TEXTURE.toString());
+        buttons[3] = new ElementContainedButton(this, 60, 42, "Right", 190, 84, 190, 98, 190, 112, 14, 14, TEXTURE.toString());
         buttons[5] = new ElementContainedButton(this, 42, 60, "Bottom", 190, 84, 190, 98, 190, 112, 14, 14, TEXTURE.toString());
-        buttons[1] = new ElementContainedButton(this, 59, 60, "Back", 190, 84, 190, 98, 190, 112, 14, 14, TEXTURE.toString());
+        buttons[1] = new ElementContainedButton(this, 60, 60, "Back", 190, 84, 190, 98, 190, 112, 14, 14, TEXTURE.toString());
 
         for (int i = 0; i < 6; i++)
             addElement(buttons[i]);
@@ -149,7 +149,7 @@ public class TabSideControl extends TabBase implements IContainsButtons {
         float colorG = (backgroundColor >> 8 & 255) / 255.0F * 0.6F;
         float colorB = (backgroundColor & 255) / 255.0F * 0.6F;
         GlStateManager.color(colorR, colorG, colorB, 1.0F);
-        gui.drawTexturedModalRect(18, 19, 16, 20, 61, 61);
+        gui.drawTexturedModalRect(18, 18, 16, 20, 62, 62);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
@@ -160,7 +160,7 @@ public class TabSideControl extends TabBase implements IContainsButtons {
         mouseX -= this.posX;
         mouseY -= this.posY;
 
-        if ( mouseX >= 18 && mouseX < 79 && mouseY >= 19 && mouseY < 80 )
+        if ( mouseX >= 18 && mouseX < 80 && mouseY >= 18 && mouseY < 80 )
             return true;
 
         return shouldStayOpen;

@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
@@ -17,8 +18,25 @@ public class ChargerRecipeManager {
     private static final Set<ItemStack> allBlocks = new ObjectOpenHashSet<>();
     private static final Set<ComparableItemStackValidated> blocks = new ObjectOpenHashSet<>();
 
+    public static Map<ComparableItemStackValidated, ItemStack> smelterOutput = new Object2ObjectOpenHashMap<>();
+
     private static final Map<ComparableItemStackValidated, ChargerRecipe> recipeMap = new Object2ObjectOpenHashMap<>();
     private static final Map<ComparableItemStackValidated, Set<ChargerRecipe>> outputMap = new Object2ObjectOpenHashMap<>();
+
+    public static ItemStack getSmeltingResult(@Nonnull ItemStack input) {
+        if ( input.isEmpty() )
+            return null;
+
+        ComparableItemStackValidated query = new ComparableItemStackValidated(input);
+        ItemStack output = smelterOutput.get(query);
+
+        if ( output == null ) {
+            output = FurnaceRecipes.instance().getSmeltingResult(input);
+            smelterOutput.put(query, output);
+        }
+
+        return output;
+    }
 
     public static ChargerRecipe getRecipe(@Nonnull ItemStack input) {
         if ( input.isEmpty() )
@@ -178,6 +196,7 @@ public class ChargerRecipeManager {
         recipeMap.clear();
         outputMap.clear();
         blocks.clear();
+        smelterOutput.clear();
 
         for (ItemStack stack : allBlocks)
             blocks.add(new ComparableItemStackValidated(stack));

@@ -772,14 +772,21 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                     if ( !behavior.canHarvest(state, world, target.pos, silkyCrops, fortuneCrops, this) )
                         return WorkResult.FAILURE_REMOVE;
 
-                    if ( behavior.harvest(state, world, target.pos, silkyCrops, fortuneCrops, this) ) {
+                    IHarvestBehavior.HarvestResult result = behavior.harvest(state, world, target.pos, silkyCrops, fortuneCrops, this);
+                    if ( result == IHarvestBehavior.HarvestResult.FAILED )
+                        return WorkResult.FAILURE_REMOVE;
+                    else {
                         activeTargetsPerTick++;
                         extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                        if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
+                        if ( result == IHarvestBehavior.HarvestResult.HUGE_SUCCESS )
                             return WorkResult.SUCCESS_STOP_REMOVE;
-                        return WorkResult.SUCCESS_REMOVE;
-                    } else
-                        return WorkResult.FAILURE_REMOVE;
+                        else if ( result == IHarvestBehavior.HarvestResult.PROGRESS )
+                            return WorkResult.SUCCESS_STOP;
+                        else if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation ) {
+                            return WorkResult.SUCCESS_STOP_REMOVE;
+                        } else
+                            return WorkResult.SUCCESS_REMOVE;
+                    }
 
                 } else if ( block instanceof IGrowable ) {
                     if ( fertilizers == 0 )
@@ -823,6 +830,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                     }
                 }
             }
+
+            return WorkResult.FAILURE_REMOVE;
 
         } else if ( processBlocks ) {
             if ( inverted ) {
@@ -939,6 +948,13 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
             boolean gathered = false;
             for (EntityItem item : entityItems) {
+                if ( item == null )
+                    continue;
+
+                NBTTagCompound tag = item.getEntityData();
+                if ( tag != null && tag.getBoolean("PreventRemoteMovement") && !tag.getBoolean("AllowMachineRemoteMovement") )
+                    continue;
+
                 ItemStack stack = item.getItem().copy();
                 int count = stack.getCount();
                 if ( count > itemRatePerTarget ) {
@@ -1033,7 +1049,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             dest = capabilityHandler;
         }
 
-        int result = transferToInventory(source, dest, target.cost, true, true);
+        int result = transferToInventory(source, dest, itemRatePerTarget, target.cost, true, true);
         if ( result == 2 ) {
             if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
                 return WorkResult.SUCCESS_STOP;
@@ -1065,7 +1081,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             dest = capabilityHandler;
         }
 
-        int result = transferToInventory(source, dest, target.cost, true, true);
+        int result = transferToInventory(source, dest, itemRatePerTarget, target.cost, true, true);
         if ( result == 2 ) {
             if ( remainingPerTick <= 0 || getEnergyStored() < level.baseEnergyPerOperation )
                 return WorkResult.SUCCESS_STOP;
@@ -1077,7 +1093,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         return WorkResult.FAILURE_REMOVE;
     }
 
-    public int transferToInventory(IItemHandler source, IItemHandler dest, int cost, boolean drainEnergy, boolean doWorkStats) {
+    public int transferToInventory(IItemHandler source, IItemHandler dest, int maxRate, int cost, boolean drainEnergy, boolean doWorkStats) {
         int slots = source.getSlots();
         boolean had_items = false;
         for (int i = 0; i < slots; i++) {
@@ -1086,8 +1102,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 continue;
 
             int count = stack.getCount();
-            if ( count > itemRatePerTarget )
-                count = itemRatePerTarget;
+            if ( count > maxRate )
+                count = maxRate;
             if ( doWorkStats && count > remainingPerTick )
                 count = remainingPerTick;
 
@@ -1230,7 +1246,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             dest = handler;
         }
 
-        transferToInventory(source, dest, 0, false, false);
+        transferToInventory(source, dest, itemRate, 0, false, false);
     }
 
     /* ITickable */

@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.utils.crops;
 
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 
@@ -19,8 +20,8 @@ public class BehaviorManager {
         addBehavior(new PumpkinMelonBehavior());
         addBehavior(new TallBehavior());
 
-        // TODO: Balance trees.
-        //addBehavior(new TreeBehavior());
+        if ( ModConfig.augments.crop.processTrees )
+            addBehavior(new TreeBehavior());
     }
 
     public static IHarvestBehavior getBehavior(Block block) {

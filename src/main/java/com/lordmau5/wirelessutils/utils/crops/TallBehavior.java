@@ -34,12 +34,17 @@ public class TallBehavior implements IHarvestBehavior {
     }
 
     @Override
-    public boolean harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+    public HarvestResult harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+        return doHarvest(state, world, pos, silkTouch, fortune, desublimator) ?
+                HarvestResult.SUCCESS : HarvestResult.FAILED;
+    }
+
+    private boolean doHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
         Block block = state.getBlock();
         IBlockState above = world.getBlockState(pos.up());
         boolean harvested = false;
         if ( above.getBlock() == block )
-            harvested = harvest(above, world, pos.up(), silkTouch, fortune, desublimator);
+            harvested = doHarvest(above, world, pos.up(), silkTouch, fortune, desublimator);
 
         IBlockState below = world.getBlockState(pos.down());
         if ( below.getBlock() != block )

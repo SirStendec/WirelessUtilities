@@ -4,6 +4,7 @@ import cofh.core.util.CoreUtils;
 import cofh.core.util.helpers.InventoryHelper;
 import com.lordmau5.wirelessutils.tile.desublimator.TileBaseDesublimator;
 import com.lordmau5.wirelessutils.utils.WUFakePlayer;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
@@ -26,6 +27,13 @@ import java.util.List;
 
 public interface IHarvestBehavior {
 
+    enum HarvestResult {
+        HUGE_SUCCESS, // It's hard to overstate my satisfaction.
+        SUCCESS,
+        PROGRESS,
+        FAILED;
+    }
+
     default int getPriority() {
         return 0;
     }
@@ -34,7 +42,7 @@ public interface IHarvestBehavior {
 
     boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator);
 
-    boolean harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator);
+    HarvestResult harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator);
 
     default boolean harvestByUsing(IBlockState state, World world, BlockPos pos, int fortune, TileBaseDesublimator desublimator) {
         NonNullList<ItemStack> drops = NonNullList.create();
@@ -71,6 +79,10 @@ public interface IHarvestBehavior {
     }
 
     default boolean harvestByBreaking(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+        return harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator, false);
+    }
+
+    default boolean harvestByBreaking(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator, boolean isTree) {
         Block block = state.getBlock();
         NonNullList<ItemStack> drops = NonNullList.create();
 
@@ -93,15 +105,17 @@ public interface IHarvestBehavior {
         MinecraftForge.EVENT_BUS.post(event);
 
         List<ItemStack> finalDrops = event.getDrops();
-        if ( finalDrops == null || finalDrops.isEmpty() )
-            return false;
+        if ( finalDrops != null && !finalDrops.isEmpty() ) {
+            if ( !desublimator.canInsertAll(finalDrops) )
+                return false;
 
-        if ( desublimator.canInsertAll(finalDrops) ) {
             desublimator.insertAll(finalDrops);
-            world.setBlockToAir(pos);
-            return true;
         }
 
-        return false;
+        if ( isTree ? ModConfig.augments.crop.treeEffects : ModConfig.augments.crop.useEffects )
+            world.playEvent(null, 2001, pos, Block.getStateId(state));
+
+        world.setBlockToAir(pos);
+        return true;
     }
 }

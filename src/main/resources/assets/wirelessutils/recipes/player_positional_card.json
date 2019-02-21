@@ -14,7 +14,7 @@
 			"item": "#LAPIS"
 		},
 		"S": {
-			"item": "minecraft:skull"
+			"item": "#SKULL"
 		},
 		"R": {
 			"item": "#REDSTONE"

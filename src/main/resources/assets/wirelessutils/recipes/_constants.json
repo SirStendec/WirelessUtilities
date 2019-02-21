@@ -128,6 +128,13 @@
 		}
 	},
 	{
+		"name": "SKULL",
+		"ingredient": {
+			"item": "minecraft:skull",
+			"data": 32767
+		}
+	},
+	{
 		"name": "PAPER",
 		"ingredient": {
 			"type": "forge:ore_dict",

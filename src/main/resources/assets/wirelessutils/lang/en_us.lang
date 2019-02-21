@@ -164,7 +164,7 @@ item.wirelessutils.invert_augment.info.1=to behave in an inverted way, such as b
 item.wirelessutils.invert_augment.info.2=extracting fluids instead of inserting them.
 
 item.wirelessutils.auto_transfer_augment.name=Auto Transfer Augment
-item.wirelessutils.auto_transfer_augment.info.0=This augment allows certain machiens
+item.wirelessutils.auto_transfer_augment.info.0=This augment allows certain machines
 item.wirelessutils.auto_transfer_augment.info.1=to automatically import or export
 item.wirelessutils.auto_transfer_augment.info.2=resources to or from the
 item.wirelessutils.auto_transfer_augment.info.3=surrounding machinery.

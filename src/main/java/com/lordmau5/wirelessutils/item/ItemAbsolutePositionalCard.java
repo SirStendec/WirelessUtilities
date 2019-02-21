@@ -104,7 +104,12 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
         if ( stack.hasTagCompound() ) {
             BlockPosDimension target = BlockPosDimension.fromTag(stack.getTagCompound());
             if ( target != null ) {
-                DimensionType type = DimensionManager.getProviderType(target.getDimension());
+                DimensionType type;
+                try {
+                    type = DimensionManager.getProviderType(target.getDimension());
+                } catch (IllegalArgumentException err) {
+                    type = null;
+                }
 
                 tooltip.add(new TextComponentTranslation(
                         "info." + WirelessUtils.MODID + ".blockpos.basic",
