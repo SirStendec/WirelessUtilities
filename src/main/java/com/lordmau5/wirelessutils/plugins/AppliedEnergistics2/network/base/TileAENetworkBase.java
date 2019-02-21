@@ -8,6 +8,8 @@ import appeng.api.util.AECableType;
 import appeng.api.util.AEColor;
 import appeng.api.util.AEPartLocation;
 import appeng.api.util.DimensionalCoord;
+import appeng.core.AEConfig;
+import appeng.core.features.AEFeature;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.tile.base.ITileInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
@@ -306,6 +308,9 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     @Override
     public List<String> getInfoTooltips(@Nullable NBTTagCompound tag) {
         List<String> tooltips = super.getInfoTooltips(tag);
+
+        if ( !AEConfig.instance().isFeatureEnabled(AEFeature.CHANNELS) )
+            return tooltips;
 
         boolean dense = ModConfig.plugins.appliedEnergistics.denseCableConnection;
 
