@@ -53,10 +53,6 @@ public class PluginRegistry {
         if ( Loader.isModLoaded("appliedenergistics2") ) {
             addPlugin("appliedenergistics2", new AppliedEnergistics2Plugin());
         }
-
-//        if ( Loader.isModLoaded("xnet") ) {
-//            addPlugin("xnet", new XNetPlugin());
-//        }
     }
 
     public static void preInit(FMLPreInitializationEvent event) {
