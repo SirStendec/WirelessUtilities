@@ -24,7 +24,7 @@ public class ContainerPlayerCard extends ContainerCore {
     protected int getPlayerInventoryVerticalOffset() {
         return 94;
     }
-    
+
     @Override
     protected void bindPlayerInventory(InventoryPlayer inventoryPlayer) {
         int xOffset = getPlayerInventoryHorizontalOffset();

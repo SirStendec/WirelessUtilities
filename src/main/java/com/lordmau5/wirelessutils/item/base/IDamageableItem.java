@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public interface IDamageableItem {
-    
+
     default boolean shouldItemTakeDamage(@Nonnull EntityItemEnhanced entity, @Nonnull ItemStack stack, @Nullable DamageSource source, float amount) {
         return true;
     }

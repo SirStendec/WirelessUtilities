@@ -10,6 +10,8 @@ import appeng.api.util.AEPartLocation;
 import appeng.api.util.DimensionalCoord;
 import appeng.core.AEConfig;
 import appeng.core.features.AEFeature;
+import appeng.core.worlddata.WorldData;
+import cofh.core.util.CoreUtils;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.tile.base.ITileInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
@@ -18,11 +20,15 @@ import com.lordmau5.wirelessutils.utils.EventDispatcher;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
@@ -272,15 +278,8 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
 
-        if ( FMLCommonHandler.instance().getEffectiveSide().isServer() ) {
-            unregisterNode();
-            IGridNode node = getNode();
-
-            if ( node != null && tag.hasKey("ae_node") ) {
-                node.loadFromNBT("ae_node", tag);
-            }
-
-            setNeedsRecalculation();
+        if ( this.node != null && tag.hasKey("ae_node") ) {
+            this.node.loadFromNBT("ae_node", tag);
         }
     }
 
@@ -353,6 +352,14 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         }
     }
 
+    @SuppressWarnings("deprecation")
+    private void applyOwnerToNode() {
+        if ( this.node != null ) {
+            int playerID = WorldData.instance().playerData().getPlayerID(this.owner);
+            this.node.setPlayerID(playerID);
+        }
+    }
+
     private IGridNode getNode() {
         if ( getWorld() == null || getWorld().isRemote ) {
             return null;
@@ -360,6 +367,8 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
 
         if ( node == null ) {
             node = AEApi.instance().grid().createGridNode(this);
+            applyOwnerToNode();
+            node.updateState();
         }
 
         return node;
@@ -401,7 +410,18 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
 
     @Override
     public void securityBreak() {
-        // TODO
+        IBlockState state = world.getBlockState(pos);
+
+        NonNullList<ItemStack> drops = NonNullList.create();
+        getBlockType().getDrops(drops, world, pos, state, 0);
+
+        Vec3d vPos = new Vec3d(pos);
+        for (ItemStack stack : drops) {
+            CoreUtils.dropItemStackIntoWorld(stack, world, vPos);
+        }
+
+        world.playEvent(null, 2001, pos, Block.getStateId(state));
+        world.setBlockToAir(pos);
     }
 
     /* IGridBlock */

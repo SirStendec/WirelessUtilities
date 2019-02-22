@@ -1,7 +1,6 @@
 package com.lordmau5.wirelessutils.plugins.RefinedStorage.network.base;
 
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.RefinedStoragePlugin;
-import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
@@ -11,12 +10,10 @@ import com.raoulvdberge.refinedstorage.api.network.node.INetworkNodeManager;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNodeProxy;
 import com.raoulvdberge.refinedstorage.api.util.Action;
 import com.raoulvdberge.refinedstorage.apiimpl.util.OneSixMigrationHelper;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;

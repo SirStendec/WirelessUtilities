@@ -14,8 +14,7 @@ public class WailaPlugin implements IPlugin {
         FMLInterModComms.sendMessage("waila", "register", this.getClass().getName() + ".register");
     }
 
-    public static void register(IWailaRegistrar registrar)
-    {
+    public static void register(IWailaRegistrar registrar) {
         IWailaDataProvider provider = new WirelessUtilitiesWailaDataProvider();
         registrar.registerBodyProvider(provider, ITileInfoProvider.class);
         registrar.registerNBTProvider(provider, ITileInfoProvider.class);

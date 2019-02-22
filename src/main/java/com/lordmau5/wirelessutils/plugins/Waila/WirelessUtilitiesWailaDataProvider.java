@@ -19,7 +19,7 @@ public class WirelessUtilitiesWailaDataProvider implements IWailaDataProvider {
     @Override
     public List<String> getWailaBody(ItemStack itemStack, List<String> tooltip, IWailaDataAccessor accessor, IWailaConfigHandler config) {
         TileEntity tile = accessor.getTileEntity();
-        if (tile instanceof ITileInfoProvider) {
+        if ( tile instanceof ITileInfoProvider ) {
             tooltip.addAll(((ITileInfoProvider) tile).getInfoTooltips(accessor.getNBTData()));
         }
         return tooltip;
@@ -28,7 +28,7 @@ public class WirelessUtilitiesWailaDataProvider implements IWailaDataProvider {
     @Nonnull
     @Override
     public NBTTagCompound getNBTData(EntityPlayerMP player, TileEntity te, NBTTagCompound tag, World world, BlockPos pos) {
-        if (te instanceof ITileInfoProvider) {
+        if ( te instanceof ITileInfoProvider ) {
             tag = ((ITileInfoProvider) te).getInfoNBT(tag);
         }
         return tag;

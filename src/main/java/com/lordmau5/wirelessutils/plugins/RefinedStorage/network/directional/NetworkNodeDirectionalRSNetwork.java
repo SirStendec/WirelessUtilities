@@ -3,9 +3,7 @@ package com.lordmau5.wirelessutils.plugins.RefinedStorage.network.directional;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.base.NetworkNodeBase;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.base.TileRSNetworkBase;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
