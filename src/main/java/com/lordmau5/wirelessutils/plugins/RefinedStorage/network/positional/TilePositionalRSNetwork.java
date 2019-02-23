@@ -21,11 +21,13 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRangeAugment;
@@ -92,6 +94,7 @@ public class TilePositionalRSNetwork extends TileRSNetworkBase<NetworkNodePositi
 
     @Override
     public boolean onWrench(EntityPlayer player, EnumFacing side) {
+        setNeedsRecalculation();
         return rotateBlock(side);
     }
 
@@ -119,6 +122,7 @@ public class TilePositionalRSNetwork extends TileRSNetworkBase<NetworkNodePositi
             return false;
 
         this.facing = facing;
+        setNeedsRecalculation();
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
@@ -416,5 +420,13 @@ public class TilePositionalRSNetwork extends TileRSNetworkBase<NetworkNodePositi
     @Override
     public Object getGuiServer(InventoryPlayer inventory) {
         return new ContainerPositionalRSNetwork(inventory, this);
+    }
+
+    @Override
+    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing side) {
+        if ( side == getEnumFacing() || side == EnumFacing.UP )
+            return ModConfig.positionalConnections;
+
+        return super.hasCapability(capability, side);
     }
 }

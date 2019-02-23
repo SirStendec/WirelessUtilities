@@ -97,6 +97,7 @@ public class TileDirectionalRSNetwork extends TileRSNetworkBase<NetworkNodeDirec
 
     @Override
     public boolean onWrench(EntityPlayer player, EnumFacing side) {
+        setNeedsRecalculation();
         return rotateBlock(side);
     }
 

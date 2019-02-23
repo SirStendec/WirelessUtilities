@@ -360,7 +360,7 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         }
     }
 
-    private IGridNode getNode() {
+    public IGridNode getNode() {
         if ( getWorld() == null || getWorld().isRemote ) {
             return null;
         }

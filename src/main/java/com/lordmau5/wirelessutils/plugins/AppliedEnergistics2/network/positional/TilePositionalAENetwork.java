@@ -27,6 +27,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,6 +65,7 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
 
     @Override
     public boolean onWrench(EntityPlayer player, EnumFacing side) {
+        setNeedsRecalculation();
         return rotateBlock(side);
     }
 
@@ -91,6 +93,7 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
             return false;
 
         this.facing = facing;
+        setNeedsRecalculation();
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
@@ -402,6 +405,17 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
         unlockedSlots = payload.getByte();
         interdimensional = payload.getBool();
         range = payload.getInt();
+    }
+
+    @Nonnull
+    @Override
+    public EnumSet<EnumFacing> getConnectableSides() {
+        EnumSet<EnumFacing> sides = super.getConnectableSides();
+        if ( !ModConfig.positionalConnections ) {
+            sides.remove(getEnumFacing());
+            sides.remove(EnumFacing.UP);
+        }
+        return sides;
     }
 
     /* GUI */

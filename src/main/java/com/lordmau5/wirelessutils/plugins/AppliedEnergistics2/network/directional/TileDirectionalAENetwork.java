@@ -106,6 +106,7 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements IDire
 
     @Override
     public boolean onWrench(EntityPlayer player, EnumFacing side) {
+        setNeedsRecalculation();
         return rotateBlock(side);
     }
 
