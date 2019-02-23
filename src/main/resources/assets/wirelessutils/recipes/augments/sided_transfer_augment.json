@@ -3,7 +3,7 @@
 	"group": "wirelessutils",
 	"conditions": [
 		{
-			"type": "wirelessutils:auto_transfer_augment_enabled"
+			"type": "wirelessutils:sided_transfer_augment_enabled"
 		}
 	],
 	"pattern": [
@@ -23,7 +23,7 @@
 		}
 	},
 	"result": {
-		"item": "wirelessutils:auto_transfer_augment",
+		"item": "wirelessutils:sided_transfer_augment",
 		"count": 1
 	}
 }

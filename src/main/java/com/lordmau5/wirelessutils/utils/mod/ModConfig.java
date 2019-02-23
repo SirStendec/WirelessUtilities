@@ -42,6 +42,11 @@ public class ModConfig {
     @Config.Comment("Configuration for Plugins.")
     public static final Plugins plugins = new Plugins();
 
+    @Config.Name("Positional Machines - Allow Front/Top Connections")
+    @Config.Comment("Whether or not to allow connections to Positional Machines from their tops or fronts.")
+    @Config.RequiresWorldRestart
+    public static boolean positionalConnections = false;
+
     public static class Items {
         @Config.Name("Charged Pearl")
         @Config.Comment({
@@ -158,10 +163,10 @@ public class ModConfig {
         @Config.Comment("When enabled, installing an augment into a machine requires that the machine also has the previous tier augments.")
         public boolean requirePreviousTiers = false;
 
-        @Config.Name("Require Auto Transfer Augment")
-        @Config.Comment("When enabled, an Auto Transfer Augment is necessary for a machine to auto transfer. Otherwise, it is enabled for all machines.")
+        @Config.Name("Require Sided I/O Control Augment")
+        @Config.Comment("When enabled, a Sided I/O Control Augment is necessary for a machine to have configurable sides. Otherwise, it is enabled for all machines.")
         @Config.RequiresWorldRestart
-        public boolean requireAutoTransferAugment = false;
+        public boolean requireSidedTransferAugment = false;
 
         @Config.Name("Capacity Augments")
         @Config.Comment("Capacity Augments increase the maximum capacity of machines.")
@@ -347,7 +352,7 @@ public class ModConfig {
         @Config.Name("Maximum Directional Tier")
         @Config.Comment("This is the maximum tier that can be placed in Directional machines. Due to how they work, allowing them to scan too large an area can be a significant source of server lag.")
         @Config.RangeInt(min = 0)
-        public int maxTierDirectional = 3;
+        public int maxTierDirectional = 5;
 
         @Config.Name("Blocks Per Tier")
         @Config.Comment("Each additional tier adds this many blocks to the range of the charger.")

@@ -19,11 +19,9 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 @Machine(name = "directional_charger")
@@ -411,25 +409,6 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
         setRanges(payload.getByte(), payload.getByte(), payload.getByte());
         setOffsetHorizontal(payload.getByte());
         setOffsetVertical(payload.getByte());
-    }
-
-    /* Capabilities */
-
-    @Override
-    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
-        if ( facing == getEnumFacing() )
-            return false;
-
-        return super.hasCapability(capability, facing);
-    }
-
-    @Nullable
-    @Override
-    public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
-        if ( facing == getEnumFacing() )
-            return null;
-
-        return super.getCapability(capability, facing);
     }
 
     /* NBT Save and Load */

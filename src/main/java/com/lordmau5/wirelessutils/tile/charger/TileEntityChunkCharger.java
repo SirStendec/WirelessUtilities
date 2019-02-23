@@ -1,14 +1,18 @@
 package com.lordmau5.wirelessutils.tile.charger;
 
+import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.gui.client.charger.GuiChunkCharger;
 import com.lordmau5.wirelessutils.gui.container.charger.ContainerChunkCharger;
+import com.lordmau5.wirelessutils.tile.base.IFacing;
+import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.Machine;
-import com.lordmau5.wirelessutils.utils.constants.NiceColors;
-import com.lordmau5.wirelessutils.utils.location.BlockArea;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
@@ -16,48 +20,88 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.fml.relauncher.Side;
 
+import java.util.List;
 import java.util.Map;
 
 @Machine(name = "chunk_charger")
-public class TileEntityChunkCharger extends TileEntityBaseCharger {
+public class TileEntityChunkCharger extends TileEntityBaseCharger implements
+        IFacing {
+
+    private EnumFacing facing = EnumFacing.NORTH;
+    private boolean calculated = false;
 
     @Override
     public void calculateTargets() {
         World world = getWorld();
-        if ( world == null )
+        BlockPos pos = getPos();
+        if ( world == null || pos == null )
             return;
 
+        calculated = true;
         clearRenderAreas();
 
-        BlockPos pos = getPos();
         int chunkX = pos.getX() >> 4;
         int chunkZ = pos.getZ() >> 4;
 
         ChunkPos chunkPos = world.getChunk(chunkX, chunkZ).getPos();
+        int dimension = world.provider.getDimension();
 
-        addRenderArea(new BlockArea(
-                world.provider.getDimension(),
-                chunkPos.getXStart(),
-                0,
-                chunkPos.getZStart(),
-                chunkPos.getXEnd(),
-                255,
-                chunkPos.getZEnd(),
-                null,
-                NiceColors.HANDY_COLORS[0],
-                true
-        ));
+        addRenderArea(
+                new BlockPosDimension(chunkPos.getXStart(), 0, chunkPos.getZStart(), dimension),
+                new BlockPosDimension(chunkPos.getXEnd(), 255, chunkPos.getZEnd(), dimension)
+        );
+    }
+
+    /* IFacing */
+
+    @Override
+    public boolean canSideTransfer(TransferSide side) {
+        return true;
+    }
+
+    @Override
+    public boolean onWrench(EntityPlayer player, EnumFacing side) {
+        return rotateBlock(side);
     }
 
     @Override
     public EnumFacing getEnumFacing() {
-        return EnumFacing.NORTH;
+        return facing;
     }
 
     @Override
     public boolean getRotationX() {
         return false;
+    }
+
+    @Override
+    public boolean setRotationX(boolean rotationX) {
+        return false;
+    }
+
+    @Override
+    public boolean allowYAxisFacing() {
+        return false;
+    }
+
+    @Override
+    public boolean setFacing(EnumFacing facing) {
+        if ( facing == this.facing )
+            return true;
+
+        if ( facing == EnumFacing.UP || facing == EnumFacing.DOWN )
+            return false;
+
+        this.facing = facing;
+        if ( !world.isRemote ) {
+            markChunkDirty();
+            sendTilePacket(Side.CLIENT);
+        }
+
+        return true;
     }
 
     @Override
@@ -67,10 +111,15 @@ public class TileEntityChunkCharger extends TileEntityBaseCharger {
 
     @Override
     public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
+        validTargetsPerTick = 0;
+
         World world = getWorld();
         BlockPos pos = getPos();
         if ( world == null || world.provider == null || pos == null )
             return null;
+
+        if ( !calculated )
+            calculateTargets();
 
         int chunkX = pos.getX() >> 4;
         int chunkZ = pos.getZ() >> 4;
@@ -80,16 +129,58 @@ public class TileEntityChunkCharger extends TileEntityBaseCharger {
             return null;
 
         Map<BlockPos, TileEntity> entities = chunk.getTileEntityMap();
+        if ( entities == null )
+            return null;
 
-        return null;
+        List<Tuple<BlockPosDimension, ItemStack>> output = new ObjectArrayList<>();
+        int dimension = world.provider.getDimension();
 
-        // TODO: Fix this.
-        // return () -> BlockPosDimension.iterateWithDimension(world.provider.getDimension(), entities.keySet());
+        for (Map.Entry<BlockPos, TileEntity> entry : entities.entrySet()) {
+            TileEntity tile = entry.getValue();
+            if ( tile == this )
+                continue;
+
+            if ( tile != null && tile.hasCapability(CapabilityEnergy.ENERGY, null) )
+                output.add(new Tuple<>(new BlockPosDimension(entry.getKey(), dimension), ItemStack.EMPTY));
+        }
+
+        ITargetProvider.sortTargetList(getPosition(), output);
+        return output;
     }
 
     @Override
     public Iterable<Tuple<Entity, ItemStack>> getEntityTargets() {
         return null;
+    }
+
+    /* NBT */
+
+    @Override
+    public void readFromNBT(NBTTagCompound tag) {
+        super.readFromNBT(tag);
+        facing = EnumFacing.byIndex(tag.getByte("Facing"));
+    }
+
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
+        tag = super.writeToNBT(tag);
+        tag.setByte("Facing", (byte) facing.ordinal());
+        return tag;
+    }
+
+    /* Packets */
+
+    @Override
+    public PacketBase getTilePacket() {
+        PacketBase payload = super.getTilePacket();
+        payload.addByte(getFacing());
+        return payload;
+    }
+
+    @Override
+    public void handleTilePacket(PacketBase payload) {
+        super.handleTilePacket(payload);
+        setFacing(payload.getByte(), false);
     }
 
     /* GUI */

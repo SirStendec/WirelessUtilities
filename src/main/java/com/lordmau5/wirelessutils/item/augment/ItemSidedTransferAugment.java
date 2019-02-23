@@ -11,13 +11,13 @@ public class ItemSidedTransferAugment extends ItemAugment {
 
     public ItemSidedTransferAugment() {
         super();
-        setName("auto_transfer_augment");
+        setName("sided_transfer_augment");
     }
 
     @Override
     public void apply(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         if ( augmentable instanceof ISidedTransferAugmentable )
-            ((ISidedTransferAugmentable) augmentable).setSidedTransferAugmented(!ModConfig.augments.requireAutoTransferAugment || !stack.isEmpty());
+            ((ISidedTransferAugmentable) augmentable).setSidedTransferAugmented(!ModConfig.augments.requireSidedTransferAugment || !stack.isEmpty());
     }
 
     @Override

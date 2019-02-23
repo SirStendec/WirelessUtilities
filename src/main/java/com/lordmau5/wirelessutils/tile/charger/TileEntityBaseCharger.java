@@ -20,6 +20,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.relauncher.Side;
@@ -53,18 +54,18 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     private int craftingEnergy = 0;
     private int craftingTicks = 0;
     private long remainingPerTick;
-    private int activeTargetsPerTick;
-    private int validTargetsPerTick;
+    protected int activeTargetsPerTick;
+    protected int validTargetsPerTick;
 
     protected boolean sideTransferAugment = false;
-    private boolean[] sideTransfer;
+    private Mode[] sideTransfer;
 
     private boolean processItems = false;
 
     public TileEntityBaseCharger() {
         super();
-        sideTransfer = new boolean[6];
-        Arrays.fill(sideTransfer, false);
+        sideTransfer = new Mode[6];
+        Arrays.fill(sideTransfer, Mode.PASSIVE);
         worker = new Worker<>(this);
     }
 
@@ -565,67 +566,23 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         }
     }
 
-
-    /* NBT Save and Load */
-
-    @Override
-    public void readFromNBT(NBTTagCompound tag) {
-        super.readFromNBT(tag);
-        craftingTicks = tag.getInteger("CraftingTicks");
-        craftingEnergy = tag.getInteger("CraftingEnergy");
-    }
-
-    @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
-        super.writeToNBT(tag);
-        tag.setInteger("CraftingTicks", craftingTicks);
-        tag.setInteger("CraftingEnergy", craftingEnergy);
-        return tag;
-    }
-
-    @Override
-    public void readExtraFromNBT(NBTTagCompound tag) {
-        super.readExtraFromNBT(tag);
-        iterationMode = IterationMode.fromInt(tag.getByte("IterationMode"));
-        roundRobin = tag.hasKey("RoundRobin") ? tag.getLong("RoundRobin") : -1;
-        transferLimit = tag.hasKey("TransferLimit") ? tag.getLong("TransferLimit") : -1;
-
-        for (int i = 0; i < sideTransfer.length; i++)
-            sideTransfer[i] = tag.getBoolean("TransferSide" + i);
-
-        for (TransferSide side : TransferSide.values())
-            sideTransfer[side.ordinal()] = tag.getBoolean("TransferSide" + side.ordinal());
-
-        getEnergyStorage().setMaxTransfer(calculateEnergyMaxTransfer());
-    }
-
-    @Override
-    public NBTTagCompound writeExtraToNBT(NBTTagCompound tag) {
-        super.writeExtraToNBT(tag);
-        tag.setByte("IterationMode", (byte) iterationMode.ordinal());
-        if ( transferLimit >= 0 )
-            tag.setLong("TransferLimit", transferLimit);
-        if ( roundRobin >= 0 )
-            tag.setLong("RoundRobin", roundRobin);
-
-        for (int i = 0; i < sideTransfer.length; i++)
-            tag.setBoolean("TransferSide" + i, sideTransfer[i]);
-
-        return tag;
-    }
-
     /* Sided Transfer */
 
-    public boolean isSideTransferEnabled(TransferSide side) {
-        return sideTransfer[side.ordinal()];
+    public Mode getSideTransferMode(TransferSide side) {
+        if ( !canSideTransfer(side) )
+            return Mode.DISABLED;
+        else if ( !sideTransferAugment )
+            return Mode.PASSIVE;
+
+        return sideTransfer[side.index];
     }
 
-    public void setSideTransferEnabled(TransferSide side, boolean enabled) {
-        int index = side.ordinal();
-        if ( sideTransfer[index] == enabled )
+    public void setSideTransferMode(TransferSide side, Mode mode) {
+        int index = side.index;
+        if ( sideTransfer[index] == mode )
             return;
 
-        sideTransfer[index] = enabled;
+        sideTransfer[index] = mode;
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
@@ -634,11 +591,11 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         callBlockUpdate();
     }
 
-    public void transferSide(TransferSide transferSide) {
+    public void transferSide(TransferSide side) {
         if ( world == null || pos == null || world.isRemote )
             return;
 
-        EnumFacing facing = getFacingForSide(transferSide);
+        EnumFacing facing = getFacingForSide(side);
         BlockPos target = pos.offset(facing);
 
         TileEntity tile = world.getTileEntity(target);
@@ -681,7 +638,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         worker.tickDown();
 
         if ( sideTransferAugment && redstoneControlOrDisable() )
-            updateSidedTransfer();
+            executeSidedTransfer();
 
         if ( !redstoneControlOrDisable() || (inverted ?
                 (getFullEnergyStored() == getFullMaxEnergyStored() || getMaxReceive() == 0) :
@@ -709,6 +666,51 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         updateTrackers();
     }
 
+    /* NBT Save and Load */
+
+    @Override
+    public void readFromNBT(NBTTagCompound tag) {
+        super.readFromNBT(tag);
+        craftingTicks = tag.getInteger("CraftingTicks");
+        craftingEnergy = tag.getInteger("CraftingEnergy");
+    }
+
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
+        super.writeToNBT(tag);
+        tag.setInteger("CraftingTicks", craftingTicks);
+        tag.setInteger("CraftingEnergy", craftingEnergy);
+        return tag;
+    }
+
+    @Override
+    public void readExtraFromNBT(NBTTagCompound tag) {
+        super.readExtraFromNBT(tag);
+        iterationMode = IterationMode.fromInt(tag.getByte("IterationMode"));
+        roundRobin = tag.hasKey("RoundRobin") ? tag.getLong("RoundRobin") : -1;
+        transferLimit = tag.hasKey("TransferLimit") ? tag.getLong("TransferLimit") : -1;
+
+        for (int i = 0; i < sideTransfer.length; i++)
+            sideTransfer[i] = Mode.byIndex(tag.getByte("TransferSide" + i));
+
+        getEnergyStorage().setMaxTransfer(calculateEnergyMaxTransfer());
+    }
+
+    @Override
+    public NBTTagCompound writeExtraToNBT(NBTTagCompound tag) {
+        super.writeExtraToNBT(tag);
+        tag.setByte("IterationMode", (byte) iterationMode.ordinal());
+        if ( transferLimit >= 0 )
+            tag.setLong("TransferLimit", transferLimit);
+        if ( roundRobin >= 0 )
+            tag.setLong("RoundRobin", roundRobin);
+
+        for (int i = 0; i < sideTransfer.length; i++)
+            tag.setByte("TransferSide" + i, (byte) sideTransfer[i].index);
+
+        return tag;
+    }
+
     /* Packets */
 
     @Override
@@ -718,7 +720,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         payload.addByte(iterationMode.ordinal());
         payload.addLong(roundRobin);
         for (int i = 0; i < sideTransfer.length; i++)
-            payload.addBool(sideTransfer[i]);
+            payload.addByte(sideTransfer[i].index);
         return payload;
     }
 
@@ -728,9 +730,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         setTransferLimit(payload.getLong());
         setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getLong());
-        TransferSide[] values = TransferSide.values();
         for (int i = 0; i < sideTransfer.length; i++)
-            setSideTransferEnabled(i, payload.getBool());
+            setSideTransferMode(i, Mode.byIndex(payload.getByte()));
     }
 
     @Override
@@ -760,7 +761,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     public PacketBase getTilePacket() {
         PacketBase payload = super.getTilePacket();
         for (int i = 0; i < sideTransfer.length; i++)
-            payload.addBool(sideTransfer[i]);
+            payload.addByte(sideTransfer[i].index);
         return payload;
     }
 
@@ -769,8 +770,27 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     public void handleTilePacket(PacketBase payload) {
         super.handleTilePacket(payload);
         for (int i = 0; i < sideTransfer.length; i++)
-            sideTransfer[i] = payload.getBool();
+            sideTransfer[i] = Mode.byIndex(payload.getByte());
         callBlockUpdate();
+    }
+
+    /* Capabilities */
+
+    @Override
+    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
+        if ( getSideTransferMode(facing) == Mode.DISABLED )
+            return false;
+
+        return super.hasCapability(capability, facing);
+    }
+
+    @Nullable
+    @Override
+    public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
+        if ( getSideTransferMode(facing) == Mode.DISABLED )
+            return null;
+
+        return super.getCapability(capability, facing);
     }
 
     /* Target Info */

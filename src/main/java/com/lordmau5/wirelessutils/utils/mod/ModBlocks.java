@@ -66,7 +66,7 @@ public class ModBlocks {
     public static void initColors(BlockColors blockColors) {
         blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockDirectionalCharger);
         blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockPositionalCharger);
-        //blockColors.registerBlockColorHandler(ColorHandler.Charger.handleBlockColor, blockChunkCharger);
+        //blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockChunkCharger);
 
         blockColors.registerBlockColorHandler(ColorHandler.Condenser.handleBlockColor, blockDirectionalCondenser);
         blockColors.registerBlockColorHandler(ColorHandler.Condenser.handleBlockColor, blockPositionalCondenser);

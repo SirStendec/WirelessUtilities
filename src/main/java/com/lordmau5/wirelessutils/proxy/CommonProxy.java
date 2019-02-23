@@ -222,7 +222,7 @@ public class CommonProxy {
     public static void registerItems(RegistryEvent.Register<Item> event) {
         registerItem(event, new ItemBlockMachine(ModBlocks.blockDirectionalCharger).setRegistryName(ModBlocks.blockDirectionalCharger.getRegistryName()));
         registerItem(event, new ItemBlockMachine(ModBlocks.blockPositionalCharger).setRegistryName(ModBlocks.blockPositionalCharger.getRegistryName()));
-        //event.getRegistry().register(new ItemBlockMachine(ModBlocks.blockChunkCharger).setRegistryName(ModBlocks.blockChunkCharger.getRegistryName()));
+        //registerItem(event, new ItemBlockMachine(ModBlocks.blockChunkCharger).setRegistryName(ModBlocks.blockChunkCharger.getRegistryName()));
 
         registerItem(event, new ItemBlockMachine(ModBlocks.blockDirectionalCondenser).setRegistryName(ModBlocks.blockDirectionalCondenser.getRegistryName()));
         registerItem(event, new ItemBlockMachine(ModBlocks.blockPositionalCondenser).setRegistryName(ModBlocks.blockPositionalCondenser.getRegistryName()));

@@ -59,7 +59,7 @@ public class TileEntityPositionalCharger extends TileEntityBaseCharger implement
 
     @Override
     public boolean canSideTransfer(TransferSide side) {
-        return true;
+        return ModConfig.positionalConnections || (side != TransferSide.FRONT && side != TransferSide.TOP);
     }
 
     @Override

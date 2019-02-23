@@ -2,6 +2,6 @@
 	"parent": "item/generated",
 	"textures": {
 		"layer0": "wirelessutils:item/augment_base",
-		"layer1": "wirelessutils:item/auto_transfer_mark"
+		"layer1": "wirelessutils:item/sided_transfer_mark"
 	}
 }

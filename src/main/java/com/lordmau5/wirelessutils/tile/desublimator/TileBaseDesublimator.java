@@ -109,12 +109,12 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     private ItemStack pickaxe = ItemStack.EMPTY;
 
     private boolean sideTransferAugment = false;
-    private boolean[] sideTransfer;
+    private Mode[] sideTransfer;
 
     public TileBaseDesublimator() {
         super();
-        sideTransfer = new boolean[6];
-        Arrays.fill(sideTransfer, false);
+        sideTransfer = new Mode[6];
+        Arrays.fill(sideTransfer, Mode.PASSIVE);
         worker = new Worker<>(this);
     }
 
@@ -1184,17 +1184,21 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     /* Sided Transfer */
 
-    public boolean isSideTransferEnabled(TransferSide side) {
-        return sideTransfer[side.ordinal()];
+    public Mode getSideTransferMode(TransferSide side) {
+        if ( !canSideTransfer(side) )
+            return Mode.DISABLED;
+        else if ( !sideTransferAugment )
+            return Mode.PASSIVE;
+
+        return sideTransfer[side.index];
     }
 
-    @Override
-    public void setSideTransferEnabled(TransferSide side, boolean enabled) {
-        int index = side.ordinal();
-        if ( sideTransfer[index] == enabled )
+    public void setSideTransferMode(TransferSide side, Mode mode) {
+        int index = side.index;
+        if ( sideTransfer[index] == mode )
             return;
 
-        sideTransfer[index] = enabled;
+        sideTransfer[index] = mode;
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
@@ -1267,7 +1271,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         boolean canRun = inverted ? full < totalSlots : empty < totalSlots;
 
         if ( sideTransferAugment && redstoneControlOrDisable() && (inverted ? empty < totalSlots : full < totalSlots) )
-            updateSidedTransfer();
+            executeSidedTransfer();
 
         if ( !redstoneControlOrDisable() || !canRun || getEnergyStored() < level.baseEnergyPerOperation ) {
             setActive(false);
@@ -1353,15 +1357,21 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing from) {
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        if ( getSideTransferMode(getSideForFacing(facing)) == Mode.DISABLED )
+            return false;
+
         if ( capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY )
             return capabilityHandler != null;
 
-        return super.hasCapability(capability, from);
+        return super.hasCapability(capability, facing);
     }
 
     @Override
     public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        if ( getSideTransferMode(getSideForFacing(facing)) == Mode.DISABLED )
+            return null;
+
         if ( capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ) {
             if ( capabilityHandler == null )
                 return null;
@@ -1382,7 +1392,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         itemRatePerTarget = calculateMaxPerTarget();
 
         for (int i = 0; i < sideTransfer.length; i++)
-            sideTransfer[i] = tag.getBoolean("TransferSide" + i);
+            sideTransfer[i] = Mode.byIndex(tag.getByte("TransferSide" + i));
 
         NBTTagList locks = tag.getTagList("Locks", 10);
         if ( locks != null && !locks.isEmpty() ) {
@@ -1405,7 +1415,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             tag.setInteger("RoundRobin", roundRobin);
 
         for (int i = 0; i < sideTransfer.length; i++)
-            tag.setBoolean("TransferSide" + i, sideTransfer[i]);
+            tag.setByte("TransferSide" + i, (byte) sideTransfer[i].index);
 
         if ( this.locks != null ) {
             NBTTagList locks = new NBTTagList();
@@ -1469,7 +1479,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         payload.addByte(iterationMode.ordinal());
         payload.addInt(roundRobin);
         for (int i = 0; i < sideTransfer.length; i++)
-            payload.addBool(sideTransfer[i]);
+            payload.addByte(sideTransfer[i].index);
         return payload;
     }
 
@@ -1483,14 +1493,14 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         setRoundRobin(payload.getInt());
 
         for (int i = 0; i < sideTransfer.length; i++)
-            setSideTransferEnabled(i, payload.getBool());
+            setSideTransferMode(i, Mode.byIndex(payload.getByte()));
     }
 
     @Override
     public PacketBase getTilePacket() {
         PacketBase payload = super.getTilePacket();
         for (int i = 0; i < sideTransfer.length; i++)
-            payload.addBool(sideTransfer[i]);
+            payload.addByte(sideTransfer[i].index);
         return payload;
     }
 
@@ -1499,7 +1509,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     public void handleTilePacket(PacketBase payload) {
         super.handleTilePacket(payload);
         for (int i = 0; i < sideTransfer.length; i++)
-            sideTransfer[i] = payload.getBool();
+            sideTransfer[i] = Mode.byIndex(payload.getByte());
         callBlockUpdate();
     }
 

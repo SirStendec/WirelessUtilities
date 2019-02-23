@@ -110,9 +110,8 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
 
         if ( hasSidedTransfer() && tile instanceof ISidedTransfer ) {
             ISidedTransfer transfer = (ISidedTransfer) tile;
-            ISidedTransfer.TransferSide[] sides = ISidedTransfer.TransferSide.values();
-            for (int i = 0; i < sides.length; i++)
-                state = state.withProperty(Properties.SIDES[i], transfer.isSideTransferEnabled(sides[i]));
+            for (ISidedTransfer.TransferSide side : ISidedTransfer.TransferSide.VALUES)
+                state = state.withProperty(Properties.SIDES[side.index], transfer.getSideTransferMode(side) == ISidedTransfer.Mode.ACTIVE);
         }
 
         return state;

@@ -106,7 +106,7 @@ public class ModItems {
     @GameRegistry.ObjectHolder("wirelessutils:fluid_gen_augment")
     public static ItemFluidGenAugment itemFluidGenAugment;
 
-    @GameRegistry.ObjectHolder("wirelessutils:auto_transfer_augment")
+    @GameRegistry.ObjectHolder("wirelessutils:sided_transfer_augment")
     public static ItemSidedTransferAugment itemSidedTransferAugment;
 
     public static void initLootTables() {
@@ -212,7 +212,7 @@ public class ModItems {
 
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockDirectionalCharger));
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockPositionalCharger));
-        itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockChunkCharger));
+        //itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockChunkCharger));
 
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockDirectionalCondenser));
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockPositionalCondenser));

@@ -95,13 +95,13 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     private int fluidGenCost = 0;
 
     private boolean sideTransferAugment = false;
-    private boolean[] sideTransfer;
+    private Mode[] sideTransfer;
 
 
     public TileEntityBaseCondenser() {
         super();
-        sideTransfer = new boolean[6];
-        Arrays.fill(sideTransfer, false);
+        sideTransfer = new Mode[6];
+        Arrays.fill(sideTransfer, Mode.PASSIVE);
         worker = new Worker<>(this);
 
         tank = new FluidTank(calculateFluidCapacity());
@@ -1125,16 +1125,21 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     /* Sided Transfer */
 
-    public boolean isSideTransferEnabled(TransferSide side) {
-        return sideTransfer[side.ordinal()];
+    public Mode getSideTransferMode(TransferSide side) {
+        if ( !canSideTransfer(side) )
+            return Mode.DISABLED;
+        else if ( !sideTransferAugment )
+            return Mode.PASSIVE;
+
+        return sideTransfer[side.index];
     }
 
-    public void setSideTransferEnabled(TransferSide side, boolean enabled) {
-        int index = side.ordinal();
-        if ( sideTransfer[index] == enabled )
+    public void setSideTransferMode(TransferSide side, Mode mode) {
+        int index = side.index;
+        if ( sideTransfer[index] == mode )
             return;
 
-        sideTransfer[index] = enabled;
+        sideTransfer[index] = mode;
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
@@ -1202,7 +1207,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         }
 
         if ( sideTransferAugment && redstoneControlOrDisable() )
-            updateSidedTransfer();
+            executeSidedTransfer();
 
         if ( !redstoneControlOrDisable() || getEnergyStored() < level.baseEnergyPerOperation ) {
             setActive(false);
@@ -1258,7 +1263,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         fluidRate = calculateFluidRate();
 
         for (int i = 0; i < sideTransfer.length; i++)
-            sideTransfer[i] = tag.getBoolean("TransferSide" + i);
+            sideTransfer[i] = Mode.byIndex(tag.getByte("TransferSide" + i));
 
         boolean locked = tag.getBoolean("Locked");
         if ( locked ) {
@@ -1284,7 +1289,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             tag.setInteger("RoundRobin", roundRobin);
 
         for (int i = 0; i < sideTransfer.length; i++)
-            tag.setBoolean("TransferSide" + i, sideTransfer[i]);
+            tag.setByte("TransferSide" + i, (byte) sideTransfer[i].index);
 
         tag.setBoolean("Locked", locked);
         if ( lockStack != null ) {
@@ -1302,7 +1307,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         PacketBase payload = super.getTilePacket();
         payload.addFluidStack(tank.getFluid());
         for (int i = 0; i < sideTransfer.length; i++)
-            payload.addBool(sideTransfer[i]);
+            payload.addByte(sideTransfer[i].index);
         return payload;
     }
 
@@ -1312,7 +1317,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         super.handleTilePacket(payload);
         tank.setFluid(payload.getFluidStack());
         for (int i = 0; i < sideTransfer.length; i++)
-            sideTransfer[i] = payload.getBool();
+            sideTransfer[i] = Mode.byIndex(payload.getByte());
         callBlockUpdate();
     }
 
@@ -1359,7 +1364,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         payload.addByte(iterationMode.ordinal());
         payload.addInt(roundRobin);
         for (int i = 0; i < sideTransfer.length; i++)
-            payload.addBool(sideTransfer[i]);
+            payload.addByte(sideTransfer[i].index);
         return payload;
     }
 
@@ -1376,23 +1381,28 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getInt());
 
-        TransferSide[] values = TransferSide.values();
         for (int i = 0; i < sideTransfer.length; i++)
-            setSideTransferEnabled(values[i], payload.getBool());
+            setSideTransferMode(i, Mode.byIndex(payload.getByte()));
     }
 
     /* Capabilities */
 
     @Override
-    public boolean hasCapability(Capability<?> capability, EnumFacing from) {
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        if ( getSideTransferMode(facing) == Mode.DISABLED )
+            return false;
+
         if ( capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY )
             return true;
 
-        return super.hasCapability(capability, from);
+        return super.hasCapability(capability, facing);
     }
 
     @Override
     public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        if ( getSideTransferMode(facing) == Mode.DISABLED )
+            return null;
+
         if ( capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY )
             return CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY.cast(fluidHandler);
 

@@ -41,6 +41,13 @@ public class TreeBehavior implements IHarvestBehavior {
 
         Block block = state.getBlock();
         if ( block.isWood(world, pos) || block.isLeaves(state, world, pos) ) {
+            // Make sure that we only harvest trees starting at the bottom, for efficiency.
+            BlockPos below = pos.down();
+            IBlockState belowState = world.getBlockState(below);
+            Block belowBlock = belowState.getBlock();
+            if ( belowBlock.isWood(world, below) || belowBlock.isLeaves(belowState, world, below) )
+                return false;
+
             TreeCache cache = new TreeCache(world, pos);
             cache.scan();
 

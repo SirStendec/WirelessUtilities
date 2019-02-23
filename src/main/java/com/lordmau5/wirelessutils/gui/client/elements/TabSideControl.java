@@ -5,6 +5,7 @@ import cofh.core.gui.element.ElementBase;
 import cofh.core.gui.element.tab.TabBase;
 import cofh.core.init.CoreTextures;
 import cofh.core.util.helpers.StringHelper;
+import com.google.common.collect.Lists;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
@@ -83,19 +84,40 @@ public class TabSideControl extends TabBase implements IContainsButtons {
 
         for (ISidedTransfer.TransferSide side : ISidedTransfer.TransferSide.values()) {
             ElementContainedButton btn = buttons[side.ordinal()];
-            boolean enabled = transfer.isSideTransferEnabled(side);
+            ISidedTransfer.Mode mode = transfer.getSideTransferMode(side);
 
-            btn.setToolTipLocalized(new TextComponentTranslation(
-                    "tab." + WirelessUtils.MODID + ".auto_transfer.side",
+            btn.setTooltipList(Lists.newArrayList(
                     new TextComponentTranslation(
-                            "tab." + WirelessUtils.MODID + ".auto_transfer.side." + side.name()
-                    ).setStyle(TextHelpers.YELLOW)
-            ).getFormattedText());
+                            "tab." + WirelessUtils.MODID + ".auto_transfer.side",
+                            new TextComponentTranslation(
+                                    "tab." + WirelessUtils.MODID + ".auto_transfer.side." + side.name()
+                            ).setStyle(TextHelpers.YELLOW)
+                    ).getFormattedText(),
+                    new TextComponentTranslation(
+                            "tab." + WirelessUtils.MODID + ".auto_transfer.mode",
+                            new TextComponentTranslation(
+                                    "tab." + WirelessUtils.MODID + ".auto_transfer.mode." + mode.name()
+                            ).setStyle(TextHelpers.YELLOW)
+                    ).getFormattedText()
+            ));
 
             btn.setVisible(transfer.canSideTransfer(side));
-            btn.setSheetX(enabled ? 190 : 204);
-            btn.setHoverX(enabled ? 190 : 204);
-            btn.setDisabledX(enabled ? 190 : 204);
+            int offset = getOffset(mode);
+            btn.setSheetX(offset);
+            btn.setHoverX(offset);
+            btn.setDisabledX(offset);
+        }
+    }
+
+    public static int getOffset(ISidedTransfer.Mode mode) {
+        switch (mode) {
+            case PASSIVE:
+                return 204;
+            case ACTIVE:
+                return 190;
+            case DISABLED:
+            default:
+                return 218;
         }
     }
 
@@ -129,12 +151,14 @@ public class TabSideControl extends TabBase implements IContainsButtons {
                 return;
         }
 
-        boolean enabled = !transfer.isSideTransferEnabled(side);
-        if ( button != 0 )
-            enabled = false;
+        ISidedTransfer.Mode mode = transfer.getSideTransferMode(side);
+        if ( button == 0 )
+            mode = mode.next();
+        else
+            mode = mode.prev();
 
-        GuiContainerCore.playClickSound(enabled ? 1F : 0.7F);
-        transfer.setSideTransferEnabled(side, enabled);
+        GuiContainerCore.playClickSound(button == 0 ? 1F : 0.7F);
+        transfer.setSideTransferMode(side, mode);
         machine.sendModePacket();
     }
 

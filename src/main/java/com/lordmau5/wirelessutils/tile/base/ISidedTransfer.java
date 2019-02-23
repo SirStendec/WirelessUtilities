@@ -1,16 +1,79 @@
 package com.lordmau5.wirelessutils.tile.base;
 
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.MathHelper;
 
 public interface ISidedTransfer {
 
     enum TransferSide {
-        FRONT,
-        BACK,
-        LEFT,
-        RIGHT,
-        TOP,
-        BOTTOM
+        FRONT(0),
+        BACK(1),
+        LEFT(2),
+        RIGHT(3),
+        TOP(4),
+        BOTTOM(5);
+
+        public final int index;
+        public static final TransferSide[] VALUES = new TransferSide[6];
+
+        TransferSide(int index) {
+            this.index = index;
+        }
+
+        static {
+            for (TransferSide side : values()) {
+                VALUES[side.index] = side;
+            }
+        }
+
+        public static TransferSide byIndex(int index) {
+            return VALUES[MathHelper.abs(index % VALUES.length)];
+        }
+    }
+
+    enum Mode {
+        PASSIVE(0),
+        ACTIVE(1),
+        DISABLED(2);
+
+        public final int index;
+        public static final Mode[] VALUES = new Mode[3];
+
+        Mode(int index) {
+            this.index = index;
+        }
+
+        public Mode next() {
+            switch (this) {
+                case PASSIVE:
+                    return ACTIVE;
+                case ACTIVE:
+                    return DISABLED;
+                default:
+                    return PASSIVE;
+            }
+        }
+
+        public Mode prev() {
+            switch (this) {
+                case PASSIVE:
+                    return DISABLED;
+                case ACTIVE:
+                    return PASSIVE;
+                default:
+                    return ACTIVE;
+            }
+        }
+
+        static {
+            for (Mode mode : values()) {
+                VALUES[mode.ordinal()] = mode;
+            }
+        }
+
+        public static Mode byIndex(int index) {
+            return VALUES[MathHelper.abs(index % VALUES.length)];
+        }
     }
 
     EnumFacing getEnumFacing();
@@ -19,6 +82,7 @@ public interface ISidedTransfer {
 
     default TransferSide getSideForFacing(EnumFacing face) {
         EnumFacing facing = getEnumFacing();
+        boolean rot = getRotationX();
 
         if ( facing == face )
             return TransferSide.FRONT;
@@ -26,27 +90,38 @@ public interface ISidedTransfer {
         else if ( facing.getOpposite() == face )
             return TransferSide.BACK;
 
-        else if ( facing.rotateY() == face )
-            return TransferSide.RIGHT;
+        switch (facing) {
+            case NORTH:
+            case SOUTH:
+            case EAST:
+            case WEST:
+                if ( face == EnumFacing.UP )
+                    return TransferSide.TOP;
+                else if ( face == EnumFacing.DOWN )
+                    return TransferSide.BOTTOM;
+                else if ( facing.rotateY() == face )
+                    return TransferSide.LEFT;
 
-        else if ( facing.rotateYCCW() == face )
-            return TransferSide.LEFT;
+                return TransferSide.RIGHT;
 
-        else if ( facing.rotateAround(getRotationX() ? EnumFacing.Axis.X : EnumFacing.Axis.Z) == face )
-            return TransferSide.BOTTOM;
+            case UP:
+                if ( face == EnumFacing.NORTH )
+                    return rot ? TransferSide.RIGHT : TransferSide.BOTTOM;
+                else if ( face == EnumFacing.EAST )
+                    return rot ? TransferSide.BOTTOM : TransferSide.LEFT;
+                else if ( face == EnumFacing.WEST )
+                    return rot ? TransferSide.TOP : TransferSide.RIGHT;
+                return rot ? TransferSide.LEFT : TransferSide.TOP;
 
-        return TransferSide.TOP;
-    }
-
-    default int getSideProperty() {
-        int out = 0;
-
-        TransferSide[] sides = TransferSide.values();
-        for (int i = 0; i < sides.length; i++)
-            if ( isSideTransferEnabled(sides[i]) )
-                out += 1 << i;
-
-        return out;
+            default:
+                if ( face == EnumFacing.NORTH )
+                    return rot ? TransferSide.RIGHT : TransferSide.TOP;
+                else if ( face == EnumFacing.EAST )
+                    return rot ? TransferSide.TOP : TransferSide.LEFT;
+                else if ( face == EnumFacing.WEST )
+                    return rot ? TransferSide.BOTTOM : TransferSide.RIGHT;
+                return rot ? TransferSide.LEFT : TransferSide.BOTTOM;
+        }
     }
 
     default EnumFacing getFacingForSide(TransferSide side) {
@@ -99,20 +174,23 @@ public interface ISidedTransfer {
         return side != TransferSide.FRONT;
     }
 
-    boolean isSideTransferEnabled(TransferSide side);
-
-    default void setSideTransferEnabled(int side, boolean enabled) {
-        TransferSide[] values = TransferSide.values();
-        setSideTransferEnabled(values[side % values.length], enabled);
+    default Mode getSideTransferMode(EnumFacing face) {
+        return getSideTransferMode(getSideForFacing(face));
     }
 
-    void setSideTransferEnabled(TransferSide side, boolean enabled);
+    Mode getSideTransferMode(TransferSide side);
+
+    default void setSideTransferMode(int side, Mode mode) {
+        setSideTransferMode(TransferSide.byIndex(side), mode);
+    }
+
+    void setSideTransferMode(TransferSide side, Mode mode);
 
     void transferSide(TransferSide side);
 
-    default void updateSidedTransfer() {
-        for (TransferSide side : TransferSide.values()) {
-            if ( isSideTransferEnabled(side) )
+    default void executeSidedTransfer() {
+        for (TransferSide side : TransferSide.VALUES) {
+            if ( getSideTransferMode(side) == Mode.ACTIVE )
                 transferSide(side);
         }
     }

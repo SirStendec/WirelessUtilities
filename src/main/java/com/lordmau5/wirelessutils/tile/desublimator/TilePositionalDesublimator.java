@@ -61,7 +61,7 @@ public class TilePositionalDesublimator extends TileBaseDesublimator implements
 
     @Override
     public boolean canSideTransfer(TransferSide side) {
-        return true;
+        return ModConfig.positionalConnections || (side != TransferSide.FRONT && side != TransferSide.TOP);
     }
 
     @Override
