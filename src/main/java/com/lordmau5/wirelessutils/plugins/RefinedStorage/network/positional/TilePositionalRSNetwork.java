@@ -422,11 +422,21 @@ public class TilePositionalRSNetwork extends TileRSNetworkBase<NetworkNodePositi
         return new ContainerPositionalRSNetwork(inventory, this);
     }
 
+    /* Capabilities */
+
     @Override
     public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing side) {
-        if ( side == getEnumFacing() || side == EnumFacing.UP )
-            return ModConfig.positionalConnections;
+        if ( !ModConfig.positionalConnections && (side == EnumFacing.UP || side == getEnumFacing()) )
+            return false;
 
         return super.hasCapability(capability, side);
+    }
+
+    @Override
+    public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing side) {
+        if ( !ModConfig.positionalConnections && (side == EnumFacing.UP || side == getEnumFacing()) )
+            return null;
+
+        return super.getCapability(capability, side);
     }
 }
