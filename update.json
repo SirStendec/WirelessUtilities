@@ -1,15 +1,16 @@
 {
 	"homepage": "https://minecraft.curseforge.com/projects/wireless-utilities",
 	"1.12.2": {
-		"1.6": "Added: Player Positional Card\nAdded: Sided I/O Control\nChanged: Positional Machines no longer connect via their fronts/tops by default. Configurable.\nFixed: Do not display AE2 Channel Count when AE2 Channels are disabled.\nFixed: Issue with AE2 machines not connecting to secured networks.\n\nFor full changes, see GitHub or CurseForge.",
-		"1.5": "Added: Auxiliary Condenser Augment\nAdded: /wu_fluidgen Command\nAdded: Russian Language Support.\nChanged: Positional Machines now face a direction.\nFixed: Recipe for Chunk Load Augment.\n\nFor full changes, see GitHub or CurseForge.",
-		"1.4": "Added: Chunk Load Augment.\nAdded: Machines track who placed them. Used for chunk loading.\nFixed: Energy duplication bug with Chargers.\nFixed: Machines keeping targets chunk loaded via frequent access.\nChanged: Throttle Condensers to only place/drain fluid blocks once every 10 ticks.\nChanged: Additional caching for performance.\n\nFor full changes, see GitHub or CurseForge.",
-		"1.3": "Added: Relative Positional Card.\nAdded: Comparator output for machines.\nAdded: World Augment in Desublimator drops/picks up items.\nAdded: Block Augment in Desublimator places/breaks blocks.\nChanged: Rename Positional Card to Absolute Positional Card.\nChanged: Condensers with bright fluids now emit light.\nChanged: Clean up different iteration modes to work nicer.\nChanged: AE2 Machines now act as a dense cable. 32 channels vs 8.\nFixed: Rendering work areas at extreme world positions.\n\nFor full changes, see GitHub or CurseForge.",
-		"1.2": "Added: Crop Augment\nAdded: Alternate Iteration Modes (Nearest First, Furthest First, Random, Round Robin)\nAdded: JEI Integration\nFixed: Crash with Charged Pearls falling into water/lava.\nFixed: Issue with Condenser filling/draining items in inventories that turn into other items when filled/drained.\n\nFor full changes, see GitHub or CurseForge.",
-		"1.1": "See GitHub commits for changelog"
+		"1.6.51": "Changed: Updated Russian language files.\nFixed: Excessive memory usage.",
+		"1.6.48": "Added: Player Positional Card\nAdded: Sided I/O Control\nChanged: Positional Machines no longer connect via their fronts/tops by default. Configurable.\nFixed: Do not display AE2 Channel Count when AE2 Channels are disabled.\nFixed: Issue with AE2 machines not connecting to secured networks.\n\nFor full changes, see GitHub or CurseForge.",
+		"1.5.40": "Added: Auxiliary Condenser Augment\nAdded: /wu_fluidgen Command\nAdded: Russian Language Support.\nChanged: Positional Machines now face a direction.\nFixed: Recipe for Chunk Load Augment.\n\nFor full changes, see GitHub or CurseForge.",
+		"1.4.32": "Added: Chunk Load Augment.\nAdded: Machines track who placed them. Used for chunk loading.\nFixed: Energy duplication bug with Chargers.\nFixed: Machines keeping targets chunk loaded via frequent access.\nChanged: Throttle Condensers to only place/drain fluid blocks once every 10 ticks.\nChanged: Additional caching for performance.\n\nFor full changes, see GitHub or CurseForge.",
+		"1.3.31": "Added: Relative Positional Card.\nAdded: Comparator output for machines.\nAdded: World Augment in Desublimator drops/picks up items.\nAdded: Block Augment in Desublimator places/breaks blocks.\nChanged: Rename Positional Card to Absolute Positional Card.\nChanged: Condensers with bright fluids now emit light.\nChanged: Clean up different iteration modes to work nicer.\nChanged: AE2 Machines now act as a dense cable. 32 channels vs 8.\nFixed: Rendering work areas at extreme world positions.\n\nFor full changes, see GitHub or CurseForge.",
+		"1.2.22": "Added: Crop Augment\nAdded: Alternate Iteration Modes (Nearest First, Furthest First, Random, Round Robin)\nAdded: JEI Integration\nFixed: Crash with Charged Pearls falling into water/lava.\nFixed: Issue with Condenser filling/draining items in inventories that turn into other items when filled/drained.\n\nFor full changes, see GitHub or CurseForge.",
+		"1.1.11": "See GitHub commits for changelog"
 	},
 	"promos": {
-		"1.12.2-latest": "1.6",
-		"1.12.2-recommended": "1.6"
+		"1.12.2-latest": "1.6.51",
+		"1.12.2-recommended": "1.6.51"
 	}
 }
