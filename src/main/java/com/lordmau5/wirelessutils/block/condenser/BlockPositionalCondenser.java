@@ -13,10 +13,10 @@ public class BlockPositionalCondenser extends BlockBaseDirectionalMachine {
         setName("positional_condenser");
     }
 
-    @Override
+    /*@Override
     public boolean hasSidedTransfer() {
         return true;
-    }
+    }*/
 
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {

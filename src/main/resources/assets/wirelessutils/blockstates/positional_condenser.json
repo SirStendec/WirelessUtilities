@@ -36,54 +36,6 @@
 				}
 			}
 		},
-		"side_0": {
-			"false": {},
-			"true": {
-				"textures": {
-					"two_front": "#output"
-				}
-			}
-		},
-		"side_1": {
-			"false": {},
-			"true": {
-				"textures": {
-					"two_back": "#output"
-				}
-			}
-		},
-		"side_2": {
-			"false": {},
-			"true": {
-				"textures": {
-					"two_left": "#output"
-				}
-			}
-		},
-		"side_3": {
-			"false": {},
-			"true": {
-				"textures": {
-					"two_right": "#output"
-				}
-			}
-		},
-		"side_4": {
-			"false": {},
-			"true": {
-				"textures": {
-					"two_top": "#output"
-				}
-			}
-		},
-		"side_5": {
-			"false": {},
-			"true": {
-				"textures": {
-					"two_bottom": "#output"
-				}
-			}
-		},
 		"facing": {
 			"north": {},
 			"south": {

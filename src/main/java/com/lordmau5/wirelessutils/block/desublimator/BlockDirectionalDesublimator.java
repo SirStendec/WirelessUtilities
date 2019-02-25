@@ -16,10 +16,10 @@ public class BlockDirectionalDesublimator extends BlockBaseDirectionalMachine {
         setName("directional_desublimator");
     }
 
-    @Override
+    /*@Override
     public boolean hasSidedTransfer() {
         return true;
-    }
+    }*/
 
     @Nullable
     @Override

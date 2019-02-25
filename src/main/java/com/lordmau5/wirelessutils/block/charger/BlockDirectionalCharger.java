@@ -13,10 +13,10 @@ public class BlockDirectionalCharger extends BlockBaseDirectionalMachine {
         setName("directional_charger");
     }
 
-    @Override
+    /*@Override
     public boolean hasSidedTransfer() {
         return true;
-    }
+    }*/
 
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {

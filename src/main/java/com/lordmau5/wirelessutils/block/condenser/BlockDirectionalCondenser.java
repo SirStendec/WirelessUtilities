@@ -17,10 +17,10 @@ public class BlockDirectionalCondenser extends BlockBaseDirectionalMachine {
         setName("directional_condenser");
     }
 
-    @Override
+    /*@Override
     public boolean hasSidedTransfer() {
         return true;
-    }
+    }*/
 
     @Nullable
     @Override
