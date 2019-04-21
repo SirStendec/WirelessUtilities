@@ -8,8 +8,19 @@ import cofh.core.util.helpers.InventoryHelper;
 import cofh.core.util.helpers.MathHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
-import com.lordmau5.wirelessutils.tile.base.*;
-import com.lordmau5.wirelessutils.tile.base.augmentable.*;
+import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
+import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
+import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
+import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
+import com.lordmau5.wirelessutils.tile.base.Worker;
+import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IFluidGenAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IInventoryAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
 import com.lordmau5.wirelessutils.utils.FluidTank;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
@@ -37,8 +48,16 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fluids.*;
-import net.minecraftforge.fluids.capability.*;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidActionResult;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.fluids.IFluidBlock;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.FluidTankProperties;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraftforge.fluids.capability.wrappers.BlockLiquidWrapper;
 import net.minecraftforge.fluids.capability.wrappers.FluidBlockWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -1190,6 +1209,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     public void update() {
+        super.update();
+
         worker.tickDown();
 
         gatherTick--;

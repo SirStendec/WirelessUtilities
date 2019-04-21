@@ -1,6 +1,6 @@
 package com.lordmau5.wirelessutils.plugins.RefinedStorage.network.directional;
 
-import com.lordmau5.wirelessutils.block.base.BlockBaseDirectionalMachine;
+import com.lordmau5.wirelessutils.block.base.BlockBaseMachine;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.RefinedStoragePlugin;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.base.TileRSNetworkBase;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNode;
@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
-public class BlockDirectionalRSNetwork extends BlockBaseDirectionalMachine {
+public class BlockDirectionalRSNetwork extends BlockBaseMachine {
 
     public BlockDirectionalRSNetwork() {
         super();

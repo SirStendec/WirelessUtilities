@@ -1,20 +1,35 @@
 {
 	"forge_marker": 1,
 	"defaults": {
-		"model": "wirelessutils:overlay_facing_block",
+		"model": "wirelessutils:layered_template",
+		"transform": "forge:default-block",
 		"textures": {
-			"base": "wirelessutils:block/machine_base",
-			"side": "wirelessutils:block/machine_side",
-			"overlay": "wirelessutils:block/overlay",
-			"mark_front": "wirelessutils:block/charger_mark",
-			"output": "wirelessutils:block/side_neutral"
+			"layer0:solid:base": "wirelessutils:block/machine_base",
+			"layer0:solid:side": "wirelessutils:block/machine_side",
+			"layer0:solid:front": "#layer0:solid:base",
+			"layer1:cutout:mark": "wirelessutils:block/charger_mark",
+			"layer2:cutout:level": "wirelessutils:block/overlay",
+			"layer3:cutout:config_bottom": "model_property:machine.config.bottom",
+			"layer3:cutout:config_top": "model_property:machine.config.top",
+			"layer3:cutout:config_front": "model_property:machine.config.front",
+			"layer3:cutout:config_back": "model_property:machine.config.back",
+			"layer3:cutout:config_right": "model_property:machine.config.right",
+			"layer3:cutout:config_left": "model_property:machine.config.left"
+		},
+		"custom": {
+			"template": "wirelessutils:block/directional_machine"
 		},
 		"uvlock": false
 	},
 	"variants": {
-		"inventory": {
-			"model": "wirelessutils:overlay_facing_block"
-		},
+		"inventory": [
+			{
+				"textures": {
+					"layer1:solid:mark": "wirelessutils:block/charger_mark",
+					"layer2:solid:level": "wirelessutils:block/overlay"
+				}
+			}
+		],
 		"level": {
 			"0": {},
 			"1": {},
@@ -31,12 +46,13 @@
 			"false": {},
 			"true": {
 				"textures": {
-					"mark_front": "wirelessutils:block/charger_mark_active"
+					"layer1:cutout:mark": "wirelessutils:block/charger_mark_active"
 				}
 			}
 		},
 		"facing": {
-			"north": {},
+			"north": {
+			},
 			"south": {
 				"y": 180
 			},

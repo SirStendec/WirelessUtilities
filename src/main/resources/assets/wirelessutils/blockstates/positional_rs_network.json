@@ -1,20 +1,28 @@
 {
 	"forge_marker": 1,
 	"defaults": {
-		"model": "wirelessutils:overlay_facing_block",
+		"model": "wirelessutils:layered_template",
+		"transform": "forge:default-block",
 		"textures": {
-			"base": "wirelessutils:block/machine_base",
-			"side": "wirelessutils:block/machine_base",
-			"front": "wirelessutils:block/positional_front",
-			"top": "wirelessutils:block/rs/rs_network",
-			"mark_top": "refinedstorage:blocks/controller/cutouts/off",
-			"overlay": "wirelessutils:block/overlay"
+			"layer0:solid:base": "wirelessutils:block/machine_base",
+			"layer0:solid:top": "#layer0:solid:base",
+			"layer0:solid:front": "wirelessutils:block/positional_front",
+			"layer1:cutout:mark": "refinedstorage:blocks/controller/cutouts/off",
+			"layer2:cutout:level": "wirelessutils:block/overlay"
+		},
+		"custom": {
+			"template": "wirelessutils:block/positional_machine"
 		}
 	},
 	"variants": {
-		"inventory": {
-			"model": "wirelessutils:overlay_facing_block"
-		},
+		"inventory": [
+			{
+				"textures": {
+					"layer1:solid:mark": "refinedstorage:blocks/controller/cutouts/off",
+					"layer2:solid:level": "wirelessutils:block/overlay"
+				}
+			}
+		],
 		"level": {
 			"0": {},
 			"1": {},
@@ -31,7 +39,7 @@
 			"false": {},
 			"true": {
 				"textures": {
-					"mark_top": "refinedstorage:blocks/controller/cutouts/on"
+					"layer1:cutout:mark": "refinedstorage:blocks/controller/cutouts/on"
 				}
 			}
 		},

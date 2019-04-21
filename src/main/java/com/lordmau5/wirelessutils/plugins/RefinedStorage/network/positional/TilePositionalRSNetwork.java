@@ -361,6 +361,8 @@ public class TilePositionalRSNetwork extends TileRSNetworkBase<NetworkNodePositi
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
         facing = EnumFacing.byIndex(tag.getByte("Facing"));
+        if ( facing == EnumFacing.UP || facing == EnumFacing.DOWN )
+            facing = EnumFacing.DOWN;
     }
 
     @Override

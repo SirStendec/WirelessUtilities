@@ -1,12 +1,16 @@
 package com.lordmau5.wirelessutils.block.base;
 
 import cofh.api.block.IConfigGui;
+import cofh.api.core.ISecurable;
 import cofh.core.block.BlockCoreTile;
+import cofh.core.block.TileCore;
 import cofh.core.block.TileNameable;
+import cofh.core.util.CoreUtils;
 import cofh.core.util.RayTracer;
 import cofh.core.util.helpers.ItemHelper;
 import cofh.core.util.helpers.ServerHelper;
 import cofh.core.util.helpers.WrenchHelper;
+import com.google.common.collect.Lists;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import net.minecraft.block.SoundType;
@@ -14,6 +18,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -33,6 +38,10 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 
 public class BlockBaseTile extends BlockCoreTile implements IConfigGui {
 
@@ -60,15 +69,71 @@ public class BlockBaseTile extends BlockCoreTile implements IConfigGui {
         ModelLoader.setCustomMeshDefinition(item, stack -> new ModelResourceLocation(stack.getItem().getRegistryName(), "inventory"));
     }
 
-    @Override
-    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+    @Nonnull
+    public ItemStack getItemStack(@Nullable IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
         Item item = Item.getItemFromBlock(this);
         if ( item == Items.AIR )
             return ItemStack.EMPTY;
 
-        ItemStack stack = new ItemStack(item, 1, state.getBlock().getMetaFromState(state));
-        stack.setTagCompound(getBasicItemStackTag(world, pos));
+        if ( state == null )
+            state = world.getBlockState(pos);
+
+        return new ItemStack(item, 1, state.getBlock().getMetaFromState(state));
+    }
+
+    @Override
+    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+        ItemStack stack = getItemStack(state, world, pos);
+        if ( !stack.isEmpty() )
+            stack.setTagCompound(getBasicItemStackTag(world, pos));
+
         return stack;
+    }
+
+    @Override
+    public ArrayList<ItemStack> dropDelegate(NBTTagCompound tag, IBlockAccess world, BlockPos pos, int fortune) {
+        ItemStack drop = getItemStack(null, world, pos);
+        if ( tag != null )
+            drop.setTagCompound(tag);
+
+        return Lists.newArrayList(drop);
+    }
+
+    @Override
+    public ArrayList<ItemStack> dismantleDelegate(NBTTagCompound tag, World world, BlockPos pos, EntityPlayer player, boolean returnDrops, boolean simulate) {
+        TileEntity tile = world.getTileEntity(pos);
+        IBlockState state = world.getBlockState(pos);
+
+        if ( state.getBlock() != this )
+            return Lists.newArrayList();
+
+        ItemStack drop = getItemStack(state, world, pos);
+        if ( tag != null )
+            drop.setTagCompound(tag);
+
+        if ( !simulate ) {
+            if ( tile instanceof TileCore )
+                ((TileCore) tile).blockDismantled();
+
+            world.setBlockToAir(pos);
+
+            if ( !returnDrops ) {
+                double xOffset = world.rand.nextFloat() * 0.3F + (1.0F - 0.3F) * 0.5D;
+                double yOffset = world.rand.nextFloat() * 0.3F + (1.0F - 0.3F) * 0.5D;
+                double zOffset = world.rand.nextFloat() * 0.3F + (1.0F - 0.3F) * 0.5D;
+
+                EntityItem entity = new EntityItem(world, pos.getX() + xOffset, pos.getY() + yOffset, pos.getZ() + zOffset, drop);
+                entity.setPickupDelay(10);
+                if ( tile instanceof ISecurable && !((ISecurable) tile).getAccess().isPublic() )
+                    entity.setOwner(player.getName());
+
+                world.spawnEntity(entity);
+                if ( player != null )
+                    CoreUtils.dismantleLog(player.getName(), state.getBlock(), drop.getMetadata(), pos);
+            }
+        }
+
+        return Lists.newArrayList(drop);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.directional;
 
-import com.lordmau5.wirelessutils.block.base.BlockBaseDirectionalMachine;
+import com.lordmau5.wirelessutils.block.base.BlockBaseMachine;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -8,7 +8,7 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
-public class BlockDirectionalAENetwork extends BlockBaseDirectionalMachine {
+public class BlockDirectionalAENetwork extends BlockBaseMachine {
 
     public BlockDirectionalAENetwork() {
         super();

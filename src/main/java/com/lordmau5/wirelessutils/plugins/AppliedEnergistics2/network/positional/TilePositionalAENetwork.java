@@ -271,7 +271,7 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
     @Nullable
     @Override
     public ItemStack getMachineRepresentation() {
-        return new ItemStack(AppliedEnergistics2Plugin.blockPositionalRSNetwork);
+        return new ItemStack(AppliedEnergistics2Plugin.blockPositionalAENetwork);
     }
 
     /* Range */
@@ -366,6 +366,8 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
         facing = EnumFacing.byIndex(tag.getByte("Facing"));
+        if ( facing == EnumFacing.UP || facing == EnumFacing.DOWN )
+            facing = EnumFacing.DOWN;
     }
 
     @Override

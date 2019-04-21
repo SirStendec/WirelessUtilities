@@ -4,8 +4,10 @@ import cofh.api.tileentity.IInventoryRetainer;
 import cofh.core.util.helpers.FluidHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.base.IJEIInformationItem;
-import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
+import com.lordmau5.wirelessutils.tile.base.IFacing;
+import com.lordmau5.wirelessutils.tile.base.ILevellingBlock;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
+import com.lordmau5.wirelessutils.utils.EnumFacingRotation;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.constants.Properties;
 import com.lordmau5.wirelessutils.utils.crafting.INBTPreservingIngredient;
@@ -19,6 +21,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
@@ -33,6 +36,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInformationItem, IInventoryRetainer, INBTPreservingIngredient {
 
     private String name;
@@ -44,6 +50,11 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
         setResistance(10F);
         setSoundType(SoundType.METAL);
         setHarvestLevel("pickaxe", 1);
+        setDefaultState(blockState.getBaseState()
+                .withProperty(Properties.LEVEL, 0)
+                .withProperty(Properties.ACTIVE, false)
+                .withProperty(Properties.FACING_ROTATION, EnumFacingRotation.NORTH)
+        );
     }
 
     @Override
@@ -90,13 +101,16 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
         return false;
     }
 
-
     @Override
     protected BlockStateContainer createBlockState() {
-        if ( hasSidedTransfer() )
-            return new BlockStateContainer(this, Properties.ACTIVE, Properties.LEVEL, Properties.SIDES[0], Properties.SIDES[1], Properties.SIDES[2], Properties.SIDES[3], Properties.SIDES[4], Properties.SIDES[5]);
+        BlockStateContainer.Builder builder = new BlockStateContainer.Builder(this);
 
-        return new BlockStateContainer(this, Properties.ACTIVE, Properties.LEVEL);
+        builder.add(Properties.LEVEL);
+        builder.add(Properties.ACTIVE);
+        builder.add(Properties.FACING_ROTATION);
+        builder.add(Properties.MODEL_PROPERTIES);
+
+        return builder.build();
     }
 
     @SuppressWarnings("deprecation")
@@ -108,13 +122,47 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
             state = state.withProperty(Properties.ACTIVE, machine.isActive);
         }
 
-        if ( hasSidedTransfer() && tile instanceof ISidedTransfer ) {
-            ISidedTransfer transfer = (ISidedTransfer) tile;
-            for (ISidedTransfer.TransferSide side : ISidedTransfer.TransferSide.VALUES)
-                state = state.withProperty(Properties.SIDES[side.index], transfer.getSideTransferMode(side) == ISidedTransfer.Mode.ACTIVE);
+        if ( tile instanceof IFacing ) {
+            IFacing facing = (IFacing) tile;
+
+            EnumFacing side = facing.getEnumFacing();
+            state = state.withProperty(Properties.FACING_ROTATION, EnumFacingRotation.fromFacing(side, (side == EnumFacing.DOWN || side == EnumFacing.UP) && facing.getRotationX()));
         }
 
         return state;
+    }
+
+
+    @Override
+    public boolean rotateBlock(World world, BlockPos pos, EnumFacing axis) {
+        TileEntity tile = world.getTileEntity(pos);
+        if ( tile instanceof IFacing ) {
+            IFacing facing = (IFacing) tile;
+            return facing.rotateBlock(axis);
+        }
+
+        return false;
+    }
+
+    @Nonnull
+    @Override
+    public ItemStack getItemStack(@Nullable IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
+        Item item = Item.getItemFromBlock(this);
+        if ( item == Items.AIR )
+            return ItemStack.EMPTY;
+
+        TileEntity tile = world.getTileEntity(pos);
+        if ( tile instanceof TileEntityBaseMachine ) {
+            TileEntityBaseMachine machine = (TileEntityBaseMachine) tile;
+            return new ItemStack(item, 1, machine.getLevel().toInt());
+        }
+
+        return super.getItemStack(state, world, pos);
+    }
+
+    @Override
+    public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer, EnumHand hand) {
+        return this.getDefaultState();
     }
 
     @Override
@@ -165,6 +213,7 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
         super.onBlockPlacedBy(world, pos, state, placer, stack);
     }
 
+
     @Override
     public NBTTagCompound getItemStackTag(IBlockAccess world, BlockPos pos) {
         NBTTagCompound tag = super.getItemStackTag(world, pos);
@@ -213,10 +262,20 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
         return super.onBlockActivatedDelegate(world, pos, state, player, hand, side, hitX, hitY, hitZ);
     }
 
+    @SuppressWarnings("deprecation")
+    @Override
+    public float getBlockHardness(IBlockState state, World world, BlockPos pos) {
+        TileEntity tile = world.getTileEntity(pos);
+        if ( tile instanceof ILevellingBlock && ((ILevellingBlock) tile).isCreative() ) {
+            return -1.0F;
+        }
+        return super.getBlockHardness(state, world, pos);
+    }
+
     /* Rendering */
 
     @Override
     public boolean canRenderInLayer(IBlockState state, BlockRenderLayer layer) {
-        return layer == BlockRenderLayer.CUTOUT_MIPPED;
+        return layer == BlockRenderLayer.SOLID || layer == BlockRenderLayer.CUTOUT;
     }
 }

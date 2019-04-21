@@ -1,21 +1,29 @@
 {
 	"forge_marker": 1,
 	"defaults": {
-		"model": "wirelessutils:overlay_facing_block",
+		"model": "wirelessutils:layered_template",
+		"transform": "forge:default-block",
 		"textures": {
-			"base": "wirelessutils:block/machine_base",
-			"overlay": "wirelessutils:block/overlay",
-			"front": "wirelessutils:block/condenser_front",
-			"side": "wirelessutils:block/machine_side",
-			"mark_front": "wirelessutils:block/condenser_mark",
-			"output": "wirelessutils:block/side_neutral"
+			"layer0:solid:base": "wirelessutils:block/machine_base",
+			"layer0:solid:side": "wirelessutils:block/machine_side",
+			"layer0:solid:front": "wirelessutils:block/condenser_front",
+			"layer1:cutout:mark": "wirelessutils:block/condenser_mark",
+			"layer2:cutout:level": "wirelessutils:block/overlay"
+		},
+		"custom": {
+			"template": "wirelessutils:block/directional_machine"
 		},
 		"uvlock": false
 	},
 	"variants": {
-		"inventory": {
-			"model": "wirelessutils:overlay_facing_block"
-		},
+		"inventory": [
+			{
+				"textures": {
+					"layer1:solid:mark": "wirelessutils:block/condenser_mark",
+					"layer2:solid:level": "wirelessutils:block/overlay"
+				}
+			}
+		],
 		"level": {
 			"0": {},
 			"1": {},
@@ -32,12 +40,13 @@
 			"false": {},
 			"true": {
 				"textures": {
-					"mark_front": "wirelessutils:block/condenser_mark_active"
+					"layer1:cutout:mark": "wirelessutils:block/condenser_mark_active"
 				}
 			}
 		},
 		"facing": {
-			"north": {},
+			"north": {
+			},
 			"south": {
 				"y": 180
 			},

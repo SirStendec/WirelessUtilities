@@ -1,0 +1,150 @@
+{
+	"parent": "block/cube",
+	"textures": {
+		"particle": "#layer0:base"
+	},
+	"elements": [
+		{
+			"from": [
+				0,
+				0,
+				0
+			],
+			"to": [
+				16,
+				16,
+				16
+			],
+			"faces": {
+				"down": {
+					"texture": "#layer0:base",
+					"cullface": "down",
+					"rotation": 270
+				},
+				"up": {
+					"texture": "#layer0:top",
+					"cullface": "up",
+					"rotation": 90
+				},
+				"north": {
+					"texture": "#layer0:front",
+					"cullface": "north"
+				},
+				"south": {
+					"texture": "#layer0:base",
+					"cullface": "south"
+				},
+				"west": {
+					"texture": "#layer0:base",
+					"cullface": "west"
+				},
+				"east": {
+					"texture": "#layer0:base",
+					"cullface": "east",
+					"rotation": 180
+				}
+			}
+		},
+		{
+			"from": [
+				0,
+				0,
+				0
+			],
+			"to": [
+				16,
+				16,
+				16
+			],
+			"faces": {
+				"up": {
+					"texture": "#layer1:mark",
+					"cullface": "up",
+					"rotation": 90
+				}
+			}
+		},
+		{
+			"from": [
+				0,
+				0,
+				0
+			],
+			"to": [
+				16,
+				16,
+				16
+			],
+			"faces": {
+				"down": {
+					"texture": "#layer2:level",
+					"cullface": "down",
+					"rotation": 270
+				},
+				"up": {
+					"texture": "#layer2:level",
+					"cullface": "up",
+					"rotation": 90
+				},
+				"north": {
+					"texture": "#layer2:level",
+					"cullface": "north"
+				},
+				"south": {
+					"texture": "#layer2:level",
+					"cullface": "south"
+				},
+				"west": {
+					"texture": "#layer2:level",
+					"cullface": "west"
+				},
+				"east": {
+					"texture": "#layer2:level",
+					"cullface": "east",
+					"rotation": 180
+				}
+			}
+		},
+		{
+			"from": [
+				0,
+				0,
+				0
+			],
+			"to": [
+				16,
+				16,
+				16
+			],
+			"faces": {
+				"down": {
+					"texture": "#layer3:config_bottom",
+					"cullface": "down",
+					"rotation": 270
+				},
+				"up": {
+					"texture": "#layer3:config_top",
+					"cullface": "up",
+					"rotation": 90
+				},
+				"north": {
+					"texture": "#layer3:config_front",
+					"cullface": "north"
+				},
+				"south": {
+					"texture": "#layer3:config_back",
+					"cullface": "south"
+				},
+				"west": {
+					"texture": "#layer3:config_right",
+					"cullface": "west"
+				},
+				"east": {
+					"texture": "#layer3:config_left",
+					"cullface": "east",
+					"rotation": 180
+				}
+			}
+		}
+	]
+}

@@ -1,7 +1,7 @@
 package com.lordmau5.wirelessutils.utils;
 
+import com.lordmau5.wirelessutils.tile.base.ILevellingBlock;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityBaseCondenser;
-import com.lordmau5.wirelessutils.utils.constants.Properties;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockRedstoneWire;
 import net.minecraft.block.state.IBlockState;
@@ -43,12 +43,13 @@ public class ColorHandler {
         return fluid.getColor(stack);
     }
 
+    // TODO: Convert to model_properties system from LayeredTemplateModel?
     public static class Machine {
         public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
             if ( tintIndex == 2 ) {
                 Level level = Level.getMinLevel();
                 if ( !stack.isEmpty() )
-                    level = Level.fromInt(stack.getMetadata());
+                    level = Level.fromItemStack(stack);
 
                 return level.color;
             }
@@ -58,8 +59,12 @@ public class ColorHandler {
 
         public static final IBlockColor handleBlockColor = (IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex) -> {
             if ( tintIndex == 2 ) {
-                Level level = Level.fromInt(state.getValue(Properties.LEVEL));
-                return level.color;
+                if ( worldIn != null && pos != null ) {
+                    TileEntity tile = worldIn.getTileEntity(pos);
+                    if ( tile instanceof ILevellingBlock ) {
+                        return ((ILevellingBlock) tile).getLevel().color;
+                    }
+                }
             }
 
             return 0xFFFFFF;
@@ -79,8 +84,12 @@ public class ColorHandler {
             }
 
             if ( tintIndex == 2 ) {
-                Level level = Level.fromInt(state.getValue(Properties.LEVEL));
-                return level.color;
+                if ( worldIn != null && pos != null ) {
+                    TileEntity tile = worldIn.getTileEntity(pos);
+                    if ( tile instanceof ILevellingBlock ) {
+                        return ((ILevellingBlock) tile).getLevel().color;
+                    }
+                }
             }
 
             return 0xFFFFFF;

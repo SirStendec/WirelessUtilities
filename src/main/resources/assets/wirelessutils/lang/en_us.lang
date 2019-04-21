@@ -372,7 +372,7 @@ info.wirelessutils.configured=%s (Configured)
 
 info.wirelessutils.tiered.name=%s (%s)
 info.wirelessutils.tiered.tier=Tier %s
-info.wirelessutils.tiered.level.5=Creative
+info.wirelessutils.tiered.level.creative=Creative
 
 info.wirelessutils.tiered.upgrade.info.0=This item will upgrade machines
 info.wirelessutils.tiered.upgrade.info.1=from %s to %s.

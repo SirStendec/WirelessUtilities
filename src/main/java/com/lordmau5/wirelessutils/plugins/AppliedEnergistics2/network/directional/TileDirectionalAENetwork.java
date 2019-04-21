@@ -232,7 +232,7 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements IDire
     @Nullable
     @Override
     public ItemStack getMachineRepresentation() {
-        return new ItemStack(AppliedEnergistics2Plugin.blockDirectionalRSNetwork);
+        return new ItemStack(AppliedEnergistics2Plugin.blockDirectionalAENetwork);
     }
 
     /* Offset */

@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.tile.base;
 import cofh.core.block.TileRSControl;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
+import com.lordmau5.wirelessutils.utils.constants.Properties;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -10,15 +11,21 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.IWorldNameable;
 import net.minecraft.world.World;
+import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class TileEntityBase extends TileRSControl implements EventDispatcher.IEventListener, IWorldNameable {
     private boolean watchUnload = false;
+
+    private final Map<String, String> MODEL_PROPERTIES = new HashMap<>();
 
     @Override
     protected Object getMod() {
@@ -171,5 +178,22 @@ public abstract class TileEntityBase extends TileRSControl implements EventDispa
     }
 
     public void readExtraFromNBT(NBTTagCompound tag) {
+    }
+
+    public void setProperty(String key, String value) {
+        synchronized (MODEL_PROPERTIES) {
+            MODEL_PROPERTIES.put(key, value);
+        }
+    }
+
+    @Override
+    public IBlockState getExtendedState(IBlockState state, IBlockAccess world, BlockPos pos) {
+        state = super.getExtendedState(state, world, pos);
+        if ( state instanceof IExtendedBlockState ) {
+            synchronized (MODEL_PROPERTIES) {
+                state = ((IExtendedBlockState) state).withProperty(Properties.MODEL_PROPERTIES, new HashMap<>(MODEL_PROPERTIES));
+            }
+        }
+        return state;
     }
 }

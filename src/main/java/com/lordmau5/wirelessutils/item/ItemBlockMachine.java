@@ -16,15 +16,10 @@ public class ItemBlockMachine extends ItemBlockExplainable implements IExplainab
         super(block);
     }
 
-    @Nonnull
-    public Level getLevel(ItemStack stack) {
-        return Level.fromInt(stack.getMetadata());
-    }
-
     @Override
     @Nonnull
     public EnumRarity getRarity(ItemStack stack) {
-        return getLevel(stack).rarity;
+        return Level.fromItemStack(stack).rarity;
     }
 
     @Override
@@ -33,7 +28,7 @@ public class ItemBlockMachine extends ItemBlockExplainable implements IExplainab
         String out = new TextComponentTranslation(
                 "info." + WirelessUtils.MODID + ".tiered.name",
                 new TextComponentTranslation(getTranslationKey(stack) + ".name"),
-                getLevel(stack).getName()
+                Level.fromItemStack(stack).getName()
         ).getUnformattedText();
 
         if ( stack.hasTagCompound() && stack.getTagCompound().hasKey("Configured") )

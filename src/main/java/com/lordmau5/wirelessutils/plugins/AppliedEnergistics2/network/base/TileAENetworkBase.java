@@ -2,7 +2,13 @@ package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base;
 
 import appeng.api.AEApi;
 import appeng.api.exceptions.FailedConnectionException;
-import appeng.api.networking.*;
+import appeng.api.networking.GridFlags;
+import appeng.api.networking.GridNotification;
+import appeng.api.networking.IGrid;
+import appeng.api.networking.IGridBlock;
+import appeng.api.networking.IGridConnection;
+import appeng.api.networking.IGridHost;
+import appeng.api.networking.IGridNode;
 import appeng.api.networking.events.MENetworkPowerIdleChange;
 import appeng.api.util.AECableType;
 import appeng.api.util.AEColor;
@@ -119,6 +125,8 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
 
     @Override
     public void update() {
+        super.update();
+
         if ( needsRecalculation && recalculationDelay-- < 0 ) {
             needsRecalculation = false;
 

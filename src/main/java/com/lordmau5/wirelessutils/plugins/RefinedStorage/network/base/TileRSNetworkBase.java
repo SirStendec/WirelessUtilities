@@ -77,6 +77,8 @@ public abstract class TileRSNetworkBase<N extends NetworkNodeBase> extends TileE
 
     @Override
     public void update() {
+        super.update();
+
         if ( needsRecalculation && recalculationDelay-- < 0 ) {
             needsRecalculation = false;
 

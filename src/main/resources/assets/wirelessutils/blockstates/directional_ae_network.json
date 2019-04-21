@@ -1,19 +1,29 @@
 {
 	"forge_marker": 1,
 	"defaults": {
-		"model": "wirelessutils:overlay_facing_block",
+		"model": "wirelessutils:layered_template",
+		"transform": "forge:default-block",
 		"textures": {
-			"base": "wirelessutils:block/machine_base",
-			"overlay": "wirelessutils:block/overlay",
-			"front": "wirelessutils:block/ae2/ae_network",
-			"side": "wirelessutils:block/machine_side"
+			"layer0:solid:base": "wirelessutils:block/machine_base",
+			"layer0:solid:side": "wirelessutils:block/machine_side",
+			"layer0:solid:front": "#layer0:solid:base",
+			"layer1:cutout:mark": "wirelessutils:block/ae2/ae_network",
+			"layer2:cutout:level": "wirelessutils:block/overlay"
+		},
+		"custom": {
+			"template": "wirelessutils:block/directional_machine"
 		},
 		"uvlock": false
 	},
 	"variants": {
-		"inventory": {
-			"model": "wirelessutils:overlay_facing_block"
-		},
+		"inventory": [
+			{
+				"textures": {
+					"layer1:solid:mark": "wirelessutils:block/ae2/ae_network",
+					"layer2:solid:level": "wirelessutils:block/overlay"
+				}
+			}
+		],
 		"level": {
 			"0": {},
 			"1": {},
@@ -30,12 +40,13 @@
 			"false": {},
 			"true": {
 				"textures": {
-					"mark_front": "appliedenergistics2:blocks/controller_lights"
+					"layer1:cutout:mark": "appliedenergistics2:blocks/controller_lights"
 				}
 			}
 		},
 		"facing": {
-			"north": {},
+			"north": {
+			},
 			"south": {
 				"y": 180
 			},

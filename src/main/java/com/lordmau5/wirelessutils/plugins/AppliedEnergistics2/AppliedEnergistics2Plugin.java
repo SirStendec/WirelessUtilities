@@ -22,9 +22,9 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public class AppliedEnergistics2Plugin implements IPlugin {
-    public static BlockDirectionalAENetwork blockDirectionalRSNetwork;
+    public static BlockDirectionalAENetwork blockDirectionalAENetwork;
 
-    public static BlockPositionalAENetwork blockPositionalRSNetwork;
+    public static BlockPositionalAENetwork blockPositionalAENetwork;
 
     @GameRegistry.ObjectHolder("appliedenergistics2:quartz_ore")
     public static Item itemQuartzOre;
@@ -42,11 +42,11 @@ public class AppliedEnergistics2Plugin implements IPlugin {
 
     @Override
     public void registerBlocks(RegistryEvent.Register<Block> event) {
-        blockDirectionalRSNetwork = new BlockDirectionalAENetwork();
-        blockPositionalRSNetwork = new BlockPositionalAENetwork();
+        blockDirectionalAENetwork = new BlockDirectionalAENetwork();
+        blockPositionalAENetwork = new BlockPositionalAENetwork();
 
-        event.getRegistry().register(blockDirectionalRSNetwork);
-        event.getRegistry().register(blockPositionalRSNetwork);
+        event.getRegistry().register(blockDirectionalAENetwork);
+        event.getRegistry().register(blockPositionalAENetwork);
 
         GameRegistry.registerTileEntity(TileDirectionalAENetwork.class, new ResourceLocation(WirelessUtils.MODID, "directional_ae_network"));
         GameRegistry.registerTileEntity(TilePositionalAENetwork.class, new ResourceLocation(WirelessUtils.MODID, "positional_ae_network"));
@@ -54,8 +54,8 @@ public class AppliedEnergistics2Plugin implements IPlugin {
 
     @Override
     public void registerItems(RegistryEvent.Register<Item> event) {
-        CommonProxy.registerItem(event, new ItemBlockMachine(blockDirectionalRSNetwork).setRegistryName(blockDirectionalRSNetwork.getRegistryName()));
-        CommonProxy.registerItem(event, new ItemBlockMachine(blockPositionalRSNetwork).setRegistryName(blockPositionalRSNetwork.getRegistryName()));
+        CommonProxy.registerItem(event, new ItemBlockMachine(blockDirectionalAENetwork).setRegistryName(blockDirectionalAENetwork.getRegistryName()));
+        CommonProxy.registerItem(event, new ItemBlockMachine(blockPositionalAENetwork).setRegistryName(blockPositionalAENetwork.getRegistryName()));
     }
 
     @Override
@@ -69,19 +69,19 @@ public class AppliedEnergistics2Plugin implements IPlugin {
 
     @Override
     public void registerModels(ModelRegistryEvent event) {
-        blockDirectionalRSNetwork.initModel();
-        blockPositionalRSNetwork.initModel();
+        blockDirectionalAENetwork.initModel();
+        blockPositionalAENetwork.initModel();
     }
 
     @Override
     public void initColors(BlockColors blockColors) {
-        blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockDirectionalRSNetwork);
-        blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockPositionalRSNetwork);
+        blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockDirectionalAENetwork);
+        blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockPositionalAENetwork);
     }
 
     @Override
     public void initColors(ItemColors itemColors) {
-        itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(blockDirectionalRSNetwork));
-        itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(blockPositionalRSNetwork));
+        itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(blockDirectionalAENetwork));
+        itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(blockPositionalAENetwork));
     }
 }

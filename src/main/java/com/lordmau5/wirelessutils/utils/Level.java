@@ -16,7 +16,6 @@ public class Level {
     private static final ArrayList<Level> levels = new ArrayList<>();
 
     static {
-        // baseEnergyPerOperation, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity
         addLevel(new Level(1, EnumRarity.COMMON, 0xFFFFFF, 5000, 100000, 10, 5, 5000, 25, 4000, 4));
         addLevel(new Level(2, EnumRarity.COMMON, 0xFF0000, 10000, 200000, 15, 10, 10000, 100, 16000, 8));
         addLevel(new Level(3, EnumRarity.UNCOMMON, 0xFFFF00, 25000, 500000, 30, 20, 25000, 250, 40000, 16));
@@ -34,7 +33,7 @@ public class Level {
     }
 
     public static boolean addLevel(Level level) {
-        if ( levels.size() >= 10 )
+        if ( levels.size() >= Byte.MAX_VALUE )
             return false;
 
         return levels.add(level);
@@ -49,7 +48,7 @@ public class Level {
     }
 
     public static boolean insertLevel(int index, Level level) {
-        if ( levels.size() >= 10 )
+        if ( levels.size() >= Byte.MAX_VALUE )
             return false;
 
         levels.add(index, level);
@@ -65,6 +64,20 @@ public class Level {
             return fromInt(stack.getMetadata());
 
         return Level.getMinLevel();
+    }
+
+    public static Level fromItemStack(ItemStack stack) {
+        if ( stack == null || stack.isEmpty() )
+            return Level.getMinLevel();
+
+//        // Preparation for 1.13
+//        if ( stack.hasTagCompound() ) {
+//            NBTTagCompound tag = stack.getTagCompound();
+//            if ( tag != null && tag.hasKey("Level") ) {
+//                return Level.getLevel(tag.getByte("Level"));
+//            }
+//        }
+        return Level.fromInt(stack.getMetadata());
     }
 
     public static Level[] values() {
@@ -162,7 +175,7 @@ public class Level {
         if ( name != null )
             return name;
 
-        String key = "info." + WirelessUtils.MODID + ".tiered.level." + toInt();
+        String key = "info." + WirelessUtils.MODID + ".tiered.level." + (isCreative ? "creative" : toInt());
         if ( StringHelper.canLocalize(key) )
             return StringHelper.localize(key);
 

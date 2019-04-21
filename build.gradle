@@ -67,6 +67,10 @@ repositories {
         name = "oc"
         url = "http://maven.cil.li/"
     }
+    maven {
+        name = "CodeChicken"
+        url = "http://chickenbones.net/maven"
+    }
 }
 
 dependencies {
@@ -80,6 +84,7 @@ dependencies {
     runtime "CraftTweaker2:CraftTweaker2-MC1120-Main:${config.ct_version}"
     deobfCompile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
     deobfCompile "mcp.mobius.waila:Hwyla:${config.hwyla_version}"
+    deobfCompile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:universal"
 }
 
 minecraft {
@@ -97,21 +102,16 @@ processResources {
 
         expand 'version': project.version, 'mcversion': project.minecraft.version
     }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
+    rename '(.+_at.cfg)', 'META-INF/$1'
 }
 
 version = "${project.minecraft.version}-${project.version}"
 
 jar {
     classifier = 'universal'
-}
-
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    classifier = 'deobf'
+    manifest {
+        attributes 'FMLAT': 'wirelessutils_at.cfg'
+    }
 }
 
 task srcJar(type: Jar) {
@@ -120,6 +120,5 @@ task srcJar(type: Jar) {
 }
 
 artifacts {
-    archives deobfJar
     archives srcJar
 }

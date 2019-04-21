@@ -27,6 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PreYggdrasilConverter;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -36,9 +37,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
-public abstract class TileEntityBaseMachine extends TileEntityBaseArea implements ITileInfoProvider, IUpgradeable, ILevellingBlock {
+public abstract class TileEntityBaseMachine extends TileEntityBaseArea implements ITileInfoProvider, IUpgradeable, ILevellingBlock, ITickable {
 
     /* Security */
     protected GameProfile owner = CoreProps.DEFAULT_OWNER;
@@ -58,8 +64,25 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     protected final TimeTracker tracker = new TimeTracker();
     private boolean activeCooldown = false;
 
-    /* Compartor-ing */
+    /* Comparator-ing */
     private int comparatorState = 0;
+
+    /* 1.7 to 1.8 placeholder */
+    private boolean resetLevelState = false;
+
+    @Override
+    public void update() {
+        if ( world != null && !world.isRemote && !resetLevelState ) {
+            IBlockState state = world.getBlockState(pos);
+            if ( state.getValue(Properties.LEVEL) != 0 ) {
+                world.setBlockState(pos, state.withProperty(Properties.LEVEL, 0));
+            }
+
+            resetLevelState = true;
+        }
+    }
+
+    /* --- */
 
     @Override
     public String getTileName() {
@@ -121,8 +144,8 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
 
         if ( world != null && !world.isRemote ) {
             IBlockState state = world.getBlockState(pos);
-            if ( state.getValue(Properties.LEVEL) != level.toInt() ) {
-                world.setBlockState(pos, state.withProperty(Properties.LEVEL, level.toInt()));
+            if ( state.getValue(Properties.LEVEL) != 0 ) {
+                world.setBlockState(pos, state.withProperty(Properties.LEVEL, 0));
             }
         }
 
@@ -262,7 +285,7 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
             return;
 
         NBTTagCompound inventory = itemStackHandler.serializeNBT();
-        if ( inventory.getInteger("Size") > 0 )
+        if ( inventory.getInteger("Size") > 0 && !inventory.getTagList("Items", 9).isEmpty() )
             tag.setTag("Inventory", inventory);
     }
 

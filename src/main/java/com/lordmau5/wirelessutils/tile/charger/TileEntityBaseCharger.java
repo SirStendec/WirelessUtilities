@@ -3,8 +3,17 @@ package com.lordmau5.wirelessutils.tile.charger;
 import cofh.core.network.PacketBase;
 import cofh.core.util.helpers.MathHelper;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
-import com.lordmau5.wirelessutils.tile.base.*;
-import com.lordmau5.wirelessutils.tile.base.augmentable.*;
+import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
+import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
+import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
+import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
+import com.lordmau5.wirelessutils.tile.base.Worker;
+import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IInventoryAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.location.TargetInfo;
@@ -67,6 +76,10 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         sideTransfer = new Mode[6];
         Arrays.fill(sideTransfer, Mode.PASSIVE);
         worker = new Worker<>(this);
+
+        for (TransferSide side : TransferSide.values()) {
+            setProperty("machine.config." + side.name().toLowerCase(), null);
+        }
     }
 
     /* Debugging */
@@ -583,6 +596,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
             return;
 
         sideTransfer[index] = mode;
+        String texture = "wirelessutils:block/side_" + (mode == Mode.ACTIVE ? "active" : (mode == Mode.DISABLED ? "disabled" : ""));
+        setProperty("machine.config." + side.name().toLowerCase(), mode == Mode.PASSIVE ? null : texture);
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
@@ -632,6 +647,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
     @Override
     public void update() {
+        super.update();
+
         if ( world.isRemote )
             return;
 

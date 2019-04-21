@@ -1,20 +1,28 @@
 {
 	"forge_marker": 1,
 	"defaults": {
-		"model": "wirelessutils:overlay_facing_block",
+		"model": "wirelessutils:layered_template",
+		"transform": "forge:default-block",
 		"textures": {
-			"base": "wirelessutils:block/machine_base",
-			"side": "wirelessutils:block/machine_base",
-			"front": "wirelessutils:block/positional_front",
-			"mark_top": "wirelessutils:block/charger_mark",
-			"overlay": "wirelessutils:block/overlay",
-			"output": "wirelessutils:block/side_neutral"
+			"layer0:solid:base": "wirelessutils:block/machine_base",
+			"layer0:solid:top": "#layer0:solid:base",
+			"layer0:solid:front": "wirelessutils:block/positional_front",
+			"layer1:cutout:mark": "wirelessutils:block/charger_mark",
+			"layer2:cutout:level": "wirelessutils:block/overlay"
+		},
+		"custom": {
+			"template": "wirelessutils:block/positional_machine"
 		}
 	},
 	"variants": {
-		"inventory": {
-			"model": "wirelessutils:overlay_facing_block"
-		},
+		"inventory": [
+			{
+				"textures": {
+					"layer1:solid:mark": "wirelessutils:block/charger_mark",
+					"layer2:solid:level": "wirelessutils:block/overlay"
+				}
+			}
+		],
 		"level": {
 			"0": {},
 			"1": {},
@@ -31,7 +39,7 @@
 			"false": {},
 			"true": {
 				"textures": {
-					"mark_top": "wirelessutils:block/charger_mark_active"
+					"layer1:cutout:mark": "wirelessutils:block/charger_mark_active"
 				}
 			}
 		},

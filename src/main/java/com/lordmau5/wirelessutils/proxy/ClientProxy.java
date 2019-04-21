@@ -1,5 +1,7 @@
 package com.lordmau5.wirelessutils.proxy;
 
+import com.lordmau5.repack.net.covers1624.model.LayeredTemplateModel;
+import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.plugins.PluginRegistry;
 import com.lordmau5.wirelessutils.render.RenderManager;
 import com.lordmau5.wirelessutils.utils.Textures;
@@ -7,8 +9,10 @@ import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
 import com.lordmau5.wirelessutils.utils.mod.ModEntities;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.TextureStitchEvent;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -23,7 +27,7 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void preInit(FMLPreInitializationEvent e) {
         super.preInit(e);
-
+        ModelLoaderRegistry.registerLoader(LayeredTemplateModel.Loader.INSTANCE);
         if ( RenderManager.INSTANCE.isEnabled() )
             MinecraftForge.EVENT_BUS.register(RenderManager.INSTANCE);
     }
@@ -43,6 +47,9 @@ public class ClientProxy extends CommonProxy {
     @SubscribeEvent
     public static void preStitch(TextureStitchEvent.Pre event) {
         Textures.registerIcons(event.getMap());
+
+        event.getMap().registerSprite(new ResourceLocation(WirelessUtils.MODID, "block/side_active"));
+        event.getMap().registerSprite(new ResourceLocation(WirelessUtils.MODID, "block/side_disabled"));
     }
 
     @SuppressWarnings("unused")

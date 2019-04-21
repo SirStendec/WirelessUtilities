@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.utils.constants;
 
+import com.lordmau5.repack.net.covers1624.model.UnlistedMapProperty;
 import com.lordmau5.wirelessutils.utils.EnumFacingRotation;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
@@ -12,11 +13,6 @@ public class Properties {
     public final static PropertyBool ACTIVE = PropertyBool.create("active");
     public final static PropertyInteger LEVEL = PropertyInteger.create("level", 0, 9);
 
-    public final static PropertyBool[] SIDES = new PropertyBool[6];
-
-    static {
-        for (int i = 0; i < 6; i++)
-            SIDES[i] = PropertyBool.create("side_" + i);
-    }
+    public static final UnlistedMapProperty<String, String> MODEL_PROPERTIES = new UnlistedMapProperty<>("model_properties");
 
 }
