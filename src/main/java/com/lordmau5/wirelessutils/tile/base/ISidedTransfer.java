@@ -170,6 +170,13 @@ public interface ISidedTransfer {
         return isSideTransferEnabled(getSideForFacing(face));
     }*/
 
+    default String getTextureForMode(Mode mode, boolean input) {
+        if ( mode == Mode.PASSIVE )
+            return null;
+
+        return "wirelessutils:block/side_" + (mode == Mode.DISABLED ? "disabled" : input ? "input" : "output");
+    }
+
     default boolean canSideTransfer(TransferSide side) {
         return side != TransferSide.FRONT;
     }

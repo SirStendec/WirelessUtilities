@@ -1,5 +1,10 @@
 {
 	"type": "wirelessutils:copy_nbt_shapeless",
+	"conditions": [
+		{
+			"type": "wirelessutils:upgrade_allowed"
+		}
+	],
 	"ingredients": [
 		{
 			"item": "wirelessutils:positional_condenser",

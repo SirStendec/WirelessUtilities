@@ -6,6 +6,7 @@
 	"conditions": {
 		"sided_transfer_augment_enabled": "com.lordmau5.wirelessutils.utils.crafting.ConditionSidedTransferAugmentEnabled",
 		"level_exists": "com.lordmau5.wirelessutils.utils.crafting.ConditionLevelExists",
-		"ore_exists": "com.lordmau5.wirelessutils.utils.crafting.ConditionOreExists"
+		"ore_exists": "com.lordmau5.wirelessutils.utils.crafting.ConditionOreExists",
+		"upgrade_allowed": "com.lordmau5.wirelessutils.utils.crafting.ConditionUpgradeEnabled"
 	}
 }

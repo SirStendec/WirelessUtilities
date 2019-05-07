@@ -18,6 +18,10 @@ public class ModConfig {
     @Config.Comment("Augments are used to upgrade the working capacities of machines in various ways.")
     public static final Augments augments = new Augments();
 
+    @Config.Name("Upgrades")
+    @Config.Comment("Upgrades increase the capabilities of machines.")
+    public static final Upgrades upgrades = new Upgrades();
+
     @Config.Name("Chargers")
     @Config.Comment("Chargers are machines that transfer energy into other blocks.")
     public static final Chargers chargers = new Chargers();
@@ -158,10 +162,24 @@ public class ModConfig {
         public int radius = 16;
     }
 
+    public static class Upgrades {
+        @Config.Name("Allow Upgrade Crafting")
+        @Config.Comment("When enabled, machines can be upgraded by crafting them together with an upgrade kit or conversion kit.")
+        public boolean allowCrafting = true;
+
+        @Config.Name("Allow In-World Upgrading")
+        @Config.Comment("When enabled, machines can be upgraded by using an upgrade kit or conversion kit on them in the world with right-click.")
+        public boolean allowInWorld = true;
+    }
+
     public static class Augments {
         @Config.Name("Require Previous Tiers")
         @Config.Comment("When enabled, installing an augment into a machine requires that the machine also has the previous tier augments.")
         public boolean requirePreviousTiers = false;
+
+        @Config.Name("Require Machine Level")
+        @Config.Comment("When enabled, installing an augment into a machine requires that the machine is at least the same level as that augment.")
+        public boolean requireMachineLevel = false;
 
         @Config.Name("Require Sided I/O Control Augment")
         @Config.Comment("When enabled, a Sided I/O Control Augment is necessary for a machine to have configurable sides. Otherwise, it is enabled for all machines.")

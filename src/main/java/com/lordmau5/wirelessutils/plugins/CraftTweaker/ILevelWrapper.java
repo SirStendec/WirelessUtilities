@@ -5,6 +5,7 @@ import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenGetter;
 import stanhebben.zenscript.annotations.ZenSetter;
 
+@SuppressWarnings("unused")
 @ZenClass("mods.wirelessutils.ILevelWrapper")
 @ZenRegister
 public interface ILevelWrapper {

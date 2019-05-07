@@ -3,17 +3,8 @@ package com.lordmau5.wirelessutils.tile.charger;
 import cofh.core.network.PacketBase;
 import cofh.core.util.helpers.MathHelper;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
-import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
-import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
-import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
-import com.lordmau5.wirelessutils.tile.base.Worker;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IInventoryAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
+import com.lordmau5.wirelessutils.tile.base.*;
+import com.lordmau5.wirelessutils.tile.base.augmentable.*;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.location.TargetInfo;
@@ -77,9 +68,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         Arrays.fill(sideTransfer, Mode.PASSIVE);
         worker = new Worker<>(this);
 
-        for (TransferSide side : TransferSide.values()) {
-            setProperty("machine.config." + side.name().toLowerCase(), null);
-        }
+        updateTextures();
     }
 
     /* Debugging */
@@ -145,7 +134,11 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
     @Override
     public void setInvertAugmented(boolean inverted) {
+        if ( inverted == this.inverted )
+            return;
+
         this.inverted = inverted;
+        updateTextures();
     }
 
     @Override
@@ -590,14 +583,24 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         return sideTransfer[side.index];
     }
 
+    public void updateTextures() {
+        for (TransferSide side : TransferSide.VALUES)
+            updateTexture(side);
+    }
+
+    public void updateTexture(TransferSide side) {
+        Mode mode = sideTransfer[side.index];
+        setProperty("machine.config." + side.name().toLowerCase(), canSideTransfer(side) ? getTextureForMode(mode, !inverted) : null);
+    }
+
     public void setSideTransferMode(TransferSide side, Mode mode) {
         int index = side.index;
         if ( sideTransfer[index] == mode )
             return;
 
         sideTransfer[index] = mode;
-        String texture = "wirelessutils:block/side_" + (mode == Mode.ACTIVE ? "active" : (mode == Mode.DISABLED ? "disabled" : ""));
-        setProperty("machine.config." + side.name().toLowerCase(), mode == Mode.PASSIVE ? null : texture);
+        updateTexture(side);
+
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
@@ -671,10 +674,20 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         if ( craftingTicks < 0 )
             craftingTicks = 0;
 
-        long total = getFullMaxEnergyPerTick();
-        long stored = getFullEnergyStored();
-        if ( stored < total )
-            total = stored;
+        long total;
+
+        if ( inverted ) {
+            total = getMaxReceive();
+            long remaining = getFullMaxEnergyStored() - getFullEnergyStored();
+            if ( remaining < total )
+                total = remaining;
+
+        } else {
+            total = getMaxExtract();
+            long stored = getFullEnergyStored();
+            if ( stored < total )
+                total = stored;
+        }
 
         remainingPerTick = total;
         activeTargetsPerTick = 0;
@@ -709,6 +722,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
         for (int i = 0; i < sideTransfer.length; i++)
             sideTransfer[i] = Mode.byIndex(tag.getByte("TransferSide" + i));
+
+        updateTextures();
 
         getEnergyStorage().setMaxTransfer(calculateEnergyMaxTransfer());
     }
@@ -777,8 +792,9 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     @Override
     public PacketBase getTilePacket() {
         PacketBase payload = super.getTilePacket();
-        for (int i = 0; i < sideTransfer.length; i++)
-            payload.addByte(sideTransfer[i].index);
+        for (TransferSide side : TransferSide.VALUES)
+            payload.addByte(getSideTransferMode(side).index);
+        payload.addBool(isInverted());
         return payload;
     }
 
@@ -786,8 +802,9 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     @SideOnly(Side.CLIENT)
     public void handleTilePacket(PacketBase payload) {
         super.handleTilePacket(payload);
-        for (int i = 0; i < sideTransfer.length; i++)
-            sideTransfer[i] = Mode.byIndex(payload.getByte());
+        for (TransferSide side : TransferSide.VALUES)
+            setSideTransferMode(side, Mode.byIndex(payload.getByte()));
+        setInvertAugmented(payload.getBool());
         callBlockUpdate();
     }
 

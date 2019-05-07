@@ -48,7 +48,8 @@ public class ClientProxy extends CommonProxy {
     public static void preStitch(TextureStitchEvent.Pre event) {
         Textures.registerIcons(event.getMap());
 
-        event.getMap().registerSprite(new ResourceLocation(WirelessUtils.MODID, "block/side_active"));
+        event.getMap().registerSprite(new ResourceLocation(WirelessUtils.MODID, "block/side_input"));
+        event.getMap().registerSprite(new ResourceLocation(WirelessUtils.MODID, "block/side_output"));
         event.getMap().registerSprite(new ResourceLocation(WirelessUtils.MODID, "block/side_disabled"));
     }
 

@@ -8,19 +8,8 @@ import cofh.core.util.helpers.InventoryHelper;
 import cofh.core.util.helpers.MathHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
-import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
-import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
-import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
-import com.lordmau5.wirelessutils.tile.base.Worker;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IFluidGenAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IInventoryAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
+import com.lordmau5.wirelessutils.tile.base.*;
+import com.lordmau5.wirelessutils.tile.base.augmentable.*;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
 import com.lordmau5.wirelessutils.utils.FluidTank;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
@@ -48,16 +37,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidActionResult;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.IFluidBlock;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.FluidTankProperties;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
-import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import net.minecraftforge.fluids.*;
+import net.minecraftforge.fluids.capability.*;
 import net.minecraftforge.fluids.capability.wrappers.BlockLiquidWrapper;
 import net.minecraftforge.fluids.capability.wrappers.FluidBlockWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -126,6 +107,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         tank = new FluidTank(calculateFluidCapacity());
         fluidMaxRate = calculateMaxFluidRate();
         fluidRate = calculateFluidRate();
+
+        updateTextures();
 
         internalHandler = new IFluidHandler() {
             @Override
@@ -629,6 +612,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             return;
 
         this.inverted = inverted;
+        updateTextures();
+
         if ( !isCreative )
             return;
 
@@ -1153,12 +1138,24 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         return sideTransfer[side.index];
     }
 
+    public void updateTextures() {
+        for (TransferSide side : TransferSide.VALUES)
+            updateTexture(side);
+    }
+
+    public void updateTexture(TransferSide side) {
+        Mode mode = sideTransfer[side.index];
+        setProperty("machine.config." + side.name().toLowerCase(), canSideTransfer(side) ? getTextureForMode(mode, !inverted) : null);
+    }
+
     public void setSideTransferMode(TransferSide side, Mode mode) {
         int index = side.index;
         if ( sideTransfer[index] == mode )
             return;
 
         sideTransfer[index] = mode;
+        updateTexture(side);
+
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
@@ -1286,6 +1283,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         for (int i = 0; i < sideTransfer.length; i++)
             sideTransfer[i] = Mode.byIndex(tag.getByte("TransferSide" + i));
 
+        updateTextures();
+
         boolean locked = tag.getBoolean("Locked");
         if ( locked ) {
             NBTTagCompound lock = tag.hasKey("LockStack") ? tag.getCompoundTag("LockStack") : null;
@@ -1327,8 +1326,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     public PacketBase getTilePacket() {
         PacketBase payload = super.getTilePacket();
         payload.addFluidStack(tank.getFluid());
-        for (int i = 0; i < sideTransfer.length; i++)
-            payload.addByte(sideTransfer[i].index);
+        for (TransferSide side : TransferSide.VALUES)
+            payload.addByte(getSideTransferMode(side).index);
+        payload.addBool(isInverted());
         return payload;
     }
 
@@ -1337,8 +1337,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     public void handleTilePacket(PacketBase payload) {
         super.handleTilePacket(payload);
         tank.setFluid(payload.getFluidStack());
-        for (int i = 0; i < sideTransfer.length; i++)
-            sideTransfer[i] = Mode.byIndex(payload.getByte());
+        for (TransferSide side : TransferSide.VALUES)
+            setSideTransferMode(side, Mode.byIndex(payload.getByte()));
+        setInvertAugmented(payload.getBool());
         callBlockUpdate();
     }
 

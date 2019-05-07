@@ -8,20 +8,8 @@ import cofh.core.util.helpers.MathHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
-import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
-import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
-import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
-import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
-import com.lordmau5.wirelessutils.tile.base.Worker;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IBlockAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
-import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
+import com.lordmau5.wirelessutils.tile.base.*;
+import com.lordmau5.wirelessutils.tile.base.augmentable.*;
 import com.lordmau5.wirelessutils.utils.ItemStackHandler;
 import com.lordmau5.wirelessutils.utils.StackHelper;
 import com.lordmau5.wirelessutils.utils.WUFakePlayer;
@@ -42,22 +30,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBed;
-import net.minecraft.item.ItemDoor;
-import net.minecraft.item.ItemDye;
-import net.minecraft.item.ItemSeeds;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Tuple;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -139,6 +116,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         sideTransfer = new Mode[6];
         Arrays.fill(sideTransfer, Mode.PASSIVE);
         worker = new Worker<>(this);
+
+        updateTextures();
     }
 
     @Override
@@ -466,7 +445,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     public void setInvertAugmented(boolean augmented) {
+        if ( inverted == augmented )
+            return;
+
         inverted = augmented;
+        updateTextures();
     }
 
     @Override
@@ -1216,12 +1199,24 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         return sideTransfer[side.index];
     }
 
+    public void updateTextures() {
+        for (TransferSide side : TransferSide.VALUES)
+            updateTexture(side);
+    }
+
+    public void updateTexture(TransferSide side) {
+        Mode mode = sideTransfer[side.index];
+        setProperty("machine.config." + side.name().toLowerCase(), canSideTransfer(side) ? getTextureForMode(mode, !inverted) : null);
+    }
+
     public void setSideTransferMode(TransferSide side, Mode mode) {
         int index = side.index;
         if ( sideTransfer[index] == mode )
             return;
 
         sideTransfer[index] = mode;
+        updateTexture(side);
+
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
@@ -1419,6 +1414,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         for (int i = 0; i < sideTransfer.length; i++)
             sideTransfer[i] = Mode.byIndex(tag.getByte("TransferSide" + i));
 
+        updateTextures();
+
         NBTTagList locks = tag.getTagList("Locks", 10);
         if ( locks != null && !locks.isEmpty() ) {
             int length = Math.min(this.locks.length, locks.tagCount());
@@ -1524,8 +1521,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     @Override
     public PacketBase getTilePacket() {
         PacketBase payload = super.getTilePacket();
-        for (int i = 0; i < sideTransfer.length; i++)
-            payload.addByte(sideTransfer[i].index);
+        for (TransferSide side : TransferSide.VALUES)
+            payload.addByte(getSideTransferMode(side).index);
+        payload.addBool(isInverted());
         return payload;
     }
 
@@ -1533,8 +1531,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     @SideOnly(Side.CLIENT)
     public void handleTilePacket(PacketBase payload) {
         super.handleTilePacket(payload);
-        for (int i = 0; i < sideTransfer.length; i++)
-            sideTransfer[i] = Mode.byIndex(payload.getByte());
+        for (TransferSide side : TransferSide.VALUES)
+            setSideTransferMode(side, Mode.byIndex(payload.getByte()));
+        setInvertAugmented(payload.getBool());
         callBlockUpdate();
     }
 

@@ -110,6 +110,9 @@ public interface ILevellingBlock extends IAugmentableTwoElectricBoogaloo {
         if ( ModConfig.augments.requirePreviousTiers && !hasLowerTierAugment(augment) )
             return false;
 
+        if ( ModConfig.augments.requireMachineLevel && getLevel().toInt() < item.getLevel(augment).toInt() )
+            return false;
+
         if ( !item.canApplyTo(augment, this) )
             return false;
 
