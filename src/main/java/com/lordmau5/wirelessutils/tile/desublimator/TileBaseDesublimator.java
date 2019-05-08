@@ -44,6 +44,7 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
@@ -537,14 +538,19 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         String unit;
         if ( value != 0 && value < 1 ) {
             value *= 20;
-            unit = StringHelper.localize("info." + WirelessUtils.MODID + ".item_rate.second");
+            if ( value < 1 ) {
+                value = 1 / value;
+                unit = StringHelper.localize("info." + WirelessUtils.MODID + ".item_rate.item");
+            } else
+                unit = StringHelper.localize("info." + WirelessUtils.MODID + ".item_rate.second");
+
         } else
             unit = StringHelper.localize("info." + WirelessUtils.MODID + ".item_rate.tick");
 
         if ( value == Math.floor(value) )
-            return String.format("%s %s", (long) value, unit);
+            return String.format("%.0f %s", value, unit);
 
-        return String.format("%s %s", value, unit);
+        return String.format("%.2f %s", value, unit);
     }
 
     public String getWorkUnit() {
@@ -1468,7 +1474,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
         updateTextures();
 
-        NBTTagList locks = tag.getTagList("Locks", 10);
+        NBTTagList locks = tag.getTagList("Locks", Constants.NBT.TAG_COMPOUND);
         if ( locks != null && !locks.isEmpty() ) {
             int length = Math.min(this.locks.length, locks.tagCount());
             for (int i = 0; i < length; i++) {

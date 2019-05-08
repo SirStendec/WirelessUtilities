@@ -8,6 +8,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraftforge.common.util.Constants;
 
 import java.util.Arrays;
 
@@ -197,7 +198,7 @@ public interface ILevellingBlock extends IAugmentableTwoElectricBoogaloo {
         if ( !tag.hasKey("Augments") )
             return;
 
-        NBTTagList list = tag.getTagList("Augments", 10);
+        NBTTagList list = tag.getTagList("Augments", Constants.NBT.TAG_COMPOUND);
         int count = list.tagCount();
         for (int i = 0; i < count; i++) {
             NBTTagCompound item = list.getCompoundTagAt(i);

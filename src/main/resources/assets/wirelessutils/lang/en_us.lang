@@ -326,6 +326,7 @@ info.wirelessutils.work_info.targets.info=%s of %s
 
 info.wirelessutils.item_rate.second=Items/s
 info.wirelessutils.item_rate.tick=Items/t
+info.wirelessutils.item_rate.item=s/Item
 info.wirelessutils.buffer=Buffer
 
 jei.wirelessutils.charger=Item Charging

@@ -31,18 +31,14 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public abstract class TileEntityBaseMachine extends TileEntityBaseArea implements ITileInfoProvider, IUpgradeable, ILevellingBlock, ITickable {
 
@@ -285,7 +281,7 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
             return;
 
         NBTTagCompound inventory = itemStackHandler.serializeNBT();
-        if ( inventory.getInteger("Size") > 0 && !inventory.getTagList("Items", 9).isEmpty() )
+        if ( inventory.getInteger("Size") > 0 && !inventory.getTagList("Items", Constants.NBT.TAG_COMPOUND).isEmpty() )
             tag.setTag("Inventory", inventory);
     }
 
