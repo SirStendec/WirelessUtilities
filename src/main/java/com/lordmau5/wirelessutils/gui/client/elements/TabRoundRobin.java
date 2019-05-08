@@ -133,7 +133,7 @@ public class TabRoundRobin extends TabBase implements IContainsButtons {
         IRoundRobinMachine machine = (IRoundRobinMachine) this.machine;
         long newValue = machine.getRoundRobin();
         if ( newValue == -1 )
-            newValue = machine.getWorkMaxRate();
+            newValue = (long) machine.getWorkMaxRate();
 
         newValue += value;
         if ( newValue >= machine.getWorkMaxRate() )
@@ -171,7 +171,7 @@ public class TabRoundRobin extends TabBase implements IContainsButtons {
             change = 5;
             change2 = 1;
         } else if ( GuiScreen.isAltKeyDown() ) {
-            change = (machine instanceof IRoundRobinMachine) ? ((IRoundRobinMachine) machine).getWorkMaxRate() : 0;
+            change = (machine instanceof IRoundRobinMachine) ? (long) ((IRoundRobinMachine) machine).getWorkMaxRate() : 0;
             change2 = Math.floorDiv(change, 10);
         } else {
             change = 50;
@@ -199,7 +199,7 @@ public class TabRoundRobin extends TabBase implements IContainsButtons {
         Tuple<Long, Long> rates = getRates();
 
         long value = machine.getRoundRobin();
-        long maxValue = machine.getWorkMaxRate();
+        long maxValue = (long) machine.getWorkMaxRate();
         if ( value == -1 )
             value = maxValue;
 
@@ -236,7 +236,7 @@ public class TabRoundRobin extends TabBase implements IContainsButtons {
             editor.setMaxLength((short) ("10" + machine.getWorkMaxRate()).length());
             long limit = machine.getRoundRobin();
             if ( limit == -1 )
-                limit = machine.getWorkMaxRate();
+                limit = (long) machine.getWorkMaxRate();
 
             editor.setText("" + limit);
             editor.setFocused(true);

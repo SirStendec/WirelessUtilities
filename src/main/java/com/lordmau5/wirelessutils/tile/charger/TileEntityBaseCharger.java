@@ -185,11 +185,11 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         return "RF/t";
     }
 
-    public long getWorkLastTick() {
+    public double getWorkLastTick() {
         return energyPerTick;
     }
 
-    public long getWorkMaxRate() {
+    public double getWorkMaxRate() {
         return calculateEnergyMaxTransfer();
     }
 
@@ -208,7 +208,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     }
 
     public void setRoundRobin(long value) {
-        long max = getWorkMaxRate();
+        long max = (long) getWorkMaxRate();
         if ( value >= max )
             value = -1;
 

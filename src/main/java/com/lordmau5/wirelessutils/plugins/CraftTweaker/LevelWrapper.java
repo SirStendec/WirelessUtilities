@@ -136,11 +136,36 @@ public class LevelWrapper implements ILevelWrapper {
     }
 
     public void setMaxItemsPerTick(int items) {
-        level.maxItemsPerTick = items;
+        level.budgetPerTick = items * level.costPerItem;
+        level.maxBudget = level.budgetPerTick;
     }
 
     public int getMaxItemsPerTick() {
-        return level.maxItemsPerTick;
+        return level.budgetPerTick / level.costPerItem;
+    }
+
+    public void setBudgetPerTick(int budget) {
+        level.budgetPerTick = budget;
+    }
+
+    public int getBudgetPerTick() {
+        return level.budgetPerTick;
+    }
+
+    public void setMaxBudget(int budget) {
+        level.maxBudget = budget;
+    }
+
+    public int getMaxBudget() {
+        return level.maxBudget;
+    }
+
+    public void setCostPerItem(int cost) {
+        level.costPerItem = cost;
+    }
+
+    public int getCostPerItem() {
+        return level.costPerItem;
     }
 
     public int getIndex() {

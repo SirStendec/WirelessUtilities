@@ -8,16 +8,17 @@ public interface IWorkInfoProvider {
 
     String getWorkUnit();
 
-    default String formatWorkUnit(long value) {
-        if ( value < 1000000000 || GuiScreen.isShiftKeyDown() )
-            return String.format("%s %s", StringHelper.formatNumber(value), getWorkUnit());
+    default String formatWorkUnit(double value) {
+        long val = (long) value;
+        if ( val < 1000000000 || GuiScreen.isShiftKeyDown() )
+            return String.format("%s %s", StringHelper.formatNumber(val), getWorkUnit());
 
-        return TextHelpers.getScaledNumber(value, getWorkUnit(), true);
+        return TextHelpers.getScaledNumber(val, getWorkUnit(), true);
     }
 
-    long getWorkMaxRate();
+    double getWorkMaxRate();
 
-    long getWorkLastTick();
+    double getWorkLastTick();
 
     int getValidTargetCount();
 

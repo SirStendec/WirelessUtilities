@@ -175,10 +175,12 @@ public class ModConfig {
     public static class Augments {
         @Config.Name("Require Previous Tiers")
         @Config.Comment("When enabled, installing an augment into a machine requires that the machine also has the previous tier augments.")
+        @Config.RequiresWorldRestart
         public boolean requirePreviousTiers = false;
 
         @Config.Name("Require Machine Level")
         @Config.Comment("When enabled, installing an augment into a machine requires that the machine is at least the same level as that augment.")
+        @Config.RequiresWorldRestart
         public boolean requireMachineLevel = false;
 
         @Config.Name("Require Sided I/O Control Augment")
@@ -220,6 +222,12 @@ public class ModConfig {
     }
 
     public static class FluidGenAugments {
+        @Config.Name("Required Level")
+        @Config.Comment("Machines must be at least this level in order to be augmented with a Fluid Gen Augment.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
         @Config.Name("Default Fluid")
         @Config.Comment("Generate this fluid.")
         @Config.RequiresWorldRestart
@@ -271,6 +279,12 @@ public class ModConfig {
     }
 
     public static class CropAugments {
+        @Config.Name("Required Level")
+        @Config.Comment("Machines must be at least this level in order to be augmented with a Crop Augment.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
         @Config.Name("Allow Silk Touch")
         @Config.Comment("Allow Crop Augments to be enchanted with Silk Touch, changing harvesting behavior to use Silk Touch when possible.")
         @Config.RequiresWorldRestart
@@ -310,6 +324,12 @@ public class ModConfig {
     }
 
     public static class BlockAugments {
+        @Config.Name("Required Level")
+        @Config.Comment("Machines must be at least this level in order to be augmented with a Block Augment.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
         @Config.Name("Allow Silk Touch")
         @Config.Comment("Allow Block Augments to be enchanted with Silk Touch, so that blocks are harvested with Silk Touch.")
         @Config.RequiresWorldRestart
@@ -379,6 +399,12 @@ public class ModConfig {
     }
 
     public static class InventoryAugments {
+        @Config.Name("Required Level")
+        @Config.Comment("Machines must be at least this level in order to be augmented with an Inventory Augment.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
         @Config.Name("Maximum Scan Slots")
         @Config.Comment("Scan up to this many slots when searching inventories for chargeable items. Slots after this number will be ignored to minimize performance impact.")
         public int maximumScanSlots = 54;

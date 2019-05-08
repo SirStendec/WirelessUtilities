@@ -446,18 +446,19 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         return "Mb/t";
     }
 
-    public String formatWorkUnit(long value) {
-        if ( value < 1000000 || GuiScreen.isShiftKeyDown() )
-            return String.format("%s %s", StringHelper.formatNumber(value), getWorkUnit());
+    public String formatWorkUnit(double value) {
+        long val = (long) value;
+        if ( val < 1000000 || GuiScreen.isShiftKeyDown() )
+            return String.format("%s %s", StringHelper.formatNumber(val), getWorkUnit());
 
-        return TextHelpers.getScaledNumber(value / 1000, "B/t", true);
+        return TextHelpers.getScaledNumber(val / 1000, "B/t", true);
     }
 
-    public long getWorkLastTick() {
+    public double getWorkLastTick() {
         return fluidPerTick;
     }
 
-    public long getWorkMaxRate() {
+    public double getWorkMaxRate() {
         return fluidMaxRate;
     }
 

@@ -156,7 +156,29 @@ public class CraftTweakerPlugin implements IPlugin {
             augmentSlots = Math.min(9, Math.max(0, augmentSlots));
             rarity = Math.min(EnumRarity.values().length, Math.max(0, rarity));
 
-            Level level = new Level(name, augmentSlots, EnumRarity.values()[rarity], color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, maxItemsPerTick);
+            Level level = new Level(name, augmentSlots, EnumRarity.values()[rarity], color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, maxItemsPerTick, maxItemsPerTick, 1);
+            Level.addLevel(level);
+            return new LevelWrapper(level);
+        }
+
+        @SuppressWarnings("unused")
+        @ZenMethod
+        public static ILevelWrapper add(@Optional String name, @Optional int augmentSlots, @Optional int rarity,
+                                        @Optional int color, @Optional long maxChargerTransfer,
+                                        @Optional long maxChargerCapacity, @Optional int craftingTPT,
+                                        @Optional int baseEnergyPerOperation, @Optional long maxEnergyCapacity,
+                                        @Optional int maxCondenserTransfer, @Optional int maxCondenserCapacity,
+                                        @Optional int budgetPerTick, @Optional int maxBudget, @Optional int costPerItem) {
+            augmentSlots = Math.min(9, Math.max(0, augmentSlots));
+            rarity = Math.min(EnumRarity.values().length, Math.max(0, rarity));
+
+            if ( budgetPerTick == 0 && maxBudget == 0 && costPerItem == 0 ) {
+                budgetPerTick = 1;
+                maxBudget = 1;
+                costPerItem = 1;
+            }
+
+            Level level = new Level(name, augmentSlots, EnumRarity.values()[rarity], color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, budgetPerTick, maxBudget, costPerItem);
             Level.addLevel(level);
             return new LevelWrapper(level);
         }

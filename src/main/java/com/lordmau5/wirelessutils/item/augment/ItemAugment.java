@@ -56,6 +56,16 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
 
     @Override
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
+        if ( ModConfig.augments.requireMachineLevel ) {
+            Level level = getLevel(stack);
+            if ( !level.equals(Level.getMinLevel()) ) {
+                tooltip.add(new TextComponentTranslation(
+                        "item." + WirelessUtils.MODID + ".augment.min_level",
+                        level.getTextComponent()
+                ).getFormattedText());
+            }
+        }
+
         super.addInformation(stack, worldIn, tooltip, flagIn);
 
         if ( StringHelper.isControlKeyDown() ) {

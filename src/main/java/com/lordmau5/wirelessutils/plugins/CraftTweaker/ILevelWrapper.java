@@ -82,6 +82,24 @@ public interface ILevelWrapper {
     @ZenGetter("maxCondenserCapacity")
     int getMaxCondenserCapacity();
 
+    @ZenSetter("budgetPerTick")
+    void setBudgetPerTick(int budget);
+
+    @ZenGetter("budgetPerTick")
+    int getBudgetPerTick();
+
+    @ZenSetter("maxBudget")
+    void setMaxBudget(int budget);
+
+    @ZenGetter("maxBudget")
+    int getMaxBudget();
+
+    @ZenSetter("costPerItem")
+    void setCostPerItem(int cost);
+
+    @ZenGetter("costPerItem")
+    int getCostPerItem();
+
     @ZenSetter("maxItemsPerTick")
     void setMaxItemsPerTick(int items);
 
