@@ -38,6 +38,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -77,10 +78,8 @@ public class CommonProxy {
         ModAdvancements.initTriggers();
 
         ModItems.initLootTables();
-        ModItems.initRecipes();
 
         PluginRegistry.init(e);
-        PluginRegistry.registerRecipes();
     }
 
     public void postInit(FMLPostInitializationEvent e) {
@@ -215,6 +214,13 @@ public class CommonProxy {
 
         MACHINES.add(klass);
         GameRegistry.registerTileEntity(klass, new ResourceLocation(WirelessUtils.MODID, "tile_" + machine.name()));
+    }
+
+    @SuppressWarnings("unused")
+    @SubscribeEvent
+    public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
+        ModItems.initRecipes();
+        PluginRegistry.registerRecipes();
     }
 
     @SuppressWarnings("unused")
