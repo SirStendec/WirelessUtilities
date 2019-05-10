@@ -144,7 +144,7 @@ item.wirelessutils.block_augment.name=Block Augment
 item.wirelessutils.block_augment.info.0=This augment allows Desublimators to
 item.wirelessutils.block_augment.info.1=place and break blocks, rather than
 item.wirelessutils.block_augment.info.2=merely dropping and picking up items
-item.wirelessutils.block_augment.info.3=with a World Augment.
+item.wirelessutils.block_augment.info.3=as they do with a World Augment.
 
 item.wirelessutils.fluid_gen_augment.name=Auxiliary Condenser Augment
 item.wirelessutils.fluid_gen_augment.info.0=This augment attaches an extra

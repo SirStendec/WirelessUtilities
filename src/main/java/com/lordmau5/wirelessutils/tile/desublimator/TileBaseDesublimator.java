@@ -768,7 +768,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return WorkResult.FAILURE_CONTINUE;
 
         if ( getEnergyStored() < level.baseEnergyPerOperation || itemStackHandler == null || remainingBudget < costPerItem )
-            return WorkResult.FAILURE_STOP;
+            return WorkResult.FAILURE_STOP_IN_PLACE;
 
         if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
             return WorkResult.FAILURE_CONTINUE;
@@ -832,7 +832,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                         if ( result == IHarvestBehavior.HarvestResult.HUGE_SUCCESS )
                             return WorkResult.SUCCESS_STOP_REMOVE;
                         else if ( result == IHarvestBehavior.HarvestResult.PROGRESS )
-                            return WorkResult.SUCCESS_STOP;
+                            return WorkResult.SUCCESS_STOP_IN_PLACE;
                         else if ( remainingBudget < costPerItem || getEnergyStored() < level.baseEnergyPerOperation ) {
                             return WorkResult.SUCCESS_STOP_REMOVE;
                         } else
@@ -1089,7 +1089,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     @Nonnull
     public WorkResult performWorkEntity(@Nonnull DesublimatorTarget target, @Nonnull World world, @Nonnull Entity entity) {
         if ( getEnergyStored() < level.baseEnergyPerOperation || itemStackHandler == null || remainingBudget < costPerItem )
-            return WorkResult.FAILURE_STOP;
+            return WorkResult.FAILURE_STOP_IN_PLACE;
 
         if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
             return WorkResult.FAILURE_CONTINUE;
@@ -1121,7 +1121,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     @Nonnull
     public WorkResult performWorkTile(@Nonnull DesublimatorTarget target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile) {
         if ( getEnergyStored() < level.baseEnergyPerOperation || itemStackHandler == null || remainingBudget < costPerItem )
-            return WorkResult.FAILURE_STOP;
+            return WorkResult.FAILURE_STOP_IN_PLACE;
 
         if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
             return WorkResult.FAILURE_CONTINUE;

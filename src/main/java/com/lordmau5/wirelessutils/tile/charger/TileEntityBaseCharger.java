@@ -515,10 +515,10 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
             if ( craftingEnergy < recipe.cost || remainingPerTick <= 0 ) {
                 if ( added > 0 ) {
                     activeTargetsPerTick++;
-                    return WorkResult.SUCCESS_STOP;
+                    return WorkResult.SUCCESS_STOP_IN_PLACE;
                 }
 
-                return WorkResult.FAILURE_STOP;
+                return WorkResult.FAILURE_STOP_IN_PLACE;
             }
         }
 
@@ -558,7 +558,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         long transferred = transmitEnergy(remainingPerTick, storage, cost);
         remainingPerTick -= transferred;
 
-        boolean cont = remainingPerTick >= 0;
+        boolean cont = remainingPerTick > 0;
         if ( inverted )
             cont &= getFullEnergyStored() < getFullMaxEnergyStored();
         else

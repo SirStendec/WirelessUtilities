@@ -212,55 +212,69 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
          * This work item was skipped and should not count against the maximum
          * operations per tick.
          */
-        SKIPPED(0, false, true, false),
+        SKIPPED(0, false, true, false, false),
 
         /**
          * Work was a success. This operation should count against the maximum
          * operations per tick and work processing should continue.
          */
-        SUCCESS_CONTINUE(1, true, true, false),
+        SUCCESS_CONTINUE(1, true, true, false, false),
 
         /**
          * Work was a failure. This operation should count against the maximum
          * operations per tick and work processing should continue.
          */
-        FAILURE_CONTINUE(1, false, true, false),
+        FAILURE_CONTINUE(1, false, true, false, false),
 
         /**
          * Work was a success. Work can no longer be performed on this target
          * and the target should be removed from the work list.
          */
-        SUCCESS_REMOVE(1, true, true, true),
+        SUCCESS_REMOVE(1, true, true, true, false),
 
         /**
          * Work was a failure. Work is not currently possible on this target
          * and the target should be removed from the work list.
          */
-        FAILURE_REMOVE(1, false, true, true),
+        FAILURE_REMOVE(1, false, true, true, false),
 
         /**
          * Work was a success. We should stop working though, so stop iterating.
          */
-        SUCCESS_STOP(1, true, false, false),
+        SUCCESS_STOP(1, true, false, false, false),
+
+        /**
+         * Work was a success. We should stop working. We should also resume on this item
+         * on the next loop.
+         */
+        SUCCESS_STOP_IN_PLACE(1, true, false, false, true),
 
         /**
          * Work was a failure. We should also stop working, so stop iterating.
          */
-        FAILURE_STOP(1, false, false, false),
+        FAILURE_STOP(1, false, false, false, false),
 
-        SUCCESS_STOP_REMOVE(1, true, false, true),
-        FAILURE_STOP_REMOVE(1, false, false, true);
+        /**
+         * Work was a failure. We should stop working. We should also resume on this item
+         * on the next loop.
+         */
+        FAILURE_STOP_IN_PLACE(1, false, false, false, true),
+
+        SUCCESS_STOP_REMOVE(1, true, false, true, false),
+        FAILURE_STOP_REMOVE(1, false, false, true, false);
 
         public final int cost;
         public final boolean success;
         public final boolean keepProcessing;
         public final boolean remove;
+        public final boolean noAdvance;
 
-        WorkResult(int cost, boolean success, boolean keepProcessing, boolean remove) {
+        WorkResult(int cost, boolean success, boolean keepProcessing, boolean remove, boolean noAdvance) {
             this.cost = cost;
             this.success = success;
             this.keepProcessing = keepProcessing;
             this.remove = remove;
+            this.noAdvance = noAdvance;
         }
     }
 }

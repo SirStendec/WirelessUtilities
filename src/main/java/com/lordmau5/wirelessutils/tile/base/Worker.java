@@ -345,6 +345,7 @@ public class Worker<T extends TargetInfo> {
 
         int startingPosition = cachePosition;
         int loops = 0;
+        boolean keepWorking = true;
         boolean didRemove = false;
         boolean didWork = false;
         boolean started = false;
@@ -358,7 +359,7 @@ public class Worker<T extends TargetInfo> {
                 if ( started ) {
                     incrementTarget(mode, didWork, didRemove);
 
-                    if ( cachePosition == startingPosition )
+                    if ( !keepWorking || cachePosition == startingPosition )
                         return worked;
 
                 } else
@@ -421,7 +422,8 @@ public class Worker<T extends TargetInfo> {
             TileEntity tile = target.tile;
             Entity entity = target.entity;
 
-            boolean keepWorking = true;
+            keepWorking = true;
+            boolean noAdvance = false;
             boolean wasRemoved = false;
 
             if ( !cacheInInventory && target.processEntity && entity != null ) {
@@ -437,6 +439,8 @@ public class Worker<T extends TargetInfo> {
 
                 if ( !result.keepProcessing )
                     keepWorking = false;
+
+                noAdvance = result.noAdvance;
 
                 if ( result.remove ) {
                     wasRemoved = true;
@@ -458,6 +462,8 @@ public class Worker<T extends TargetInfo> {
                 if ( !result.keepProcessing )
                     keepWorking = false;
 
+                noAdvance = result.noAdvance;
+
                 if ( result.remove ) {
                     wasRemoved = true;
                     target.processBlock = false;
@@ -477,6 +483,8 @@ public class Worker<T extends TargetInfo> {
 
                 if ( !result.keepProcessing )
                     keepWorking = false;
+
+                noAdvance = result.noAdvance;
 
                 if ( result.remove ) {
                     wasRemoved = true;
@@ -570,7 +578,7 @@ public class Worker<T extends TargetInfo> {
                         if ( steps < 1 || !result.keepProcessing ) {
                             if ( target.processInventory ) {
                                 cacheInInventory = true;
-                                cacheInvPosition = i + 1;
+                                cacheInvPosition = i + (result.noAdvance ? 0 : 1);
                             } else
                                 cacheInInventory = false;
 
@@ -585,7 +593,7 @@ public class Worker<T extends TargetInfo> {
             if ( wasRemoved && !target.processBlock && !target.processInventory && !target.processTile && !target.processEntity )
                 didRemove = true;
 
-            if ( !keepWorking )
+            if ( !keepWorking && noAdvance )
                 return worked;
         }
 
