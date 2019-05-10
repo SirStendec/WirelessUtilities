@@ -57,10 +57,7 @@ import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implements
         IWorldAugmentable, IBlockAugmentable, IChunkLoadAugmentable,
@@ -88,6 +85,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     private int roundRobin = -1;
     private int itemRatePerTarget;
 
+    private boolean fullGather;
     private byte gatherTick;
 
     private int itemsPerTick;
@@ -273,7 +271,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             max = slot_max;
 
         boolean slotEmpty = stack.isEmpty();
-        boolean slotFull = stack.getCount() == max;
+        boolean slotFull = !slotEmpty && stack.getCount() == max;
 
         if ( emptySlots[slot] != slotEmpty ) {
             emptySlots[slot] = slotEmpty;
@@ -386,7 +384,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     public int calculateMaxPerTarget() {
-        int budget = maximumBudget / costPerItem;
+        int budget = costPerItem == 0 ? 0 : maximumBudget / costPerItem;
         if ( iterationMode == IterationMode.ROUND_ROBIN && roundRobin != -1 && roundRobin < maximumBudget )
             return roundRobin;
 
@@ -562,6 +560,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     public double getWorkMaxRate() {
+        if ( costPerItem == 0 )
+            return 0;
+
         int budgetPerSecond = budgetPerTick * 20;
         return (budgetPerSecond / (double) costPerItem) / 20;
     }
@@ -993,12 +994,27 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return WorkResult.FAILURE_REMOVE;
 
         if ( inverted ) {
-            List<EntityItem> entityItems = world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(target.pos));
+            if ( fullGather )
+                return WorkResult.FAILURE_CONTINUE;
+
+            List<EntityItem> entityItems;
+            if ( canFullGather() ) {
+                entityItems = world.getEntitiesWithinAABB(EntityItem.class, getFullGatherAABB());
+                fullGather = true;
+
+            } else
+                entityItems = world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(target.pos));
+
             if ( entityItems == null || entityItems.isEmpty() )
                 return WorkResult.FAILURE_CONTINUE;
 
             boolean gathered = false;
             int budgeted = remainingBudget / costPerItem;
+
+            long storedEnergy = getFullEnergyStored();
+            HashSet<BlockPos> visitedTargets = null;
+            if ( fullGather )
+                visitedTargets = new HashSet<>();
 
             for (EntityItem item : entityItems) {
                 if ( item == null )
@@ -1007,6 +1023,18 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 NBTTagCompound tag = item.getEntityData();
                 if ( tag != null && tag.getBoolean("PreventRemoteMovement") && !tag.getBoolean("AllowMachineRemoteMovement") )
                     continue;
+
+                int cost = 0;
+                if ( fullGather ) {
+                    BlockPos itemPos = item.getPosition();
+                    if ( !visitedTargets.contains(itemPos) ) {
+                        cost = level.baseEnergyPerOperation + getEnergyCost(pos.getDistance(itemPos.getX(), itemPos.getY(), itemPos.getZ()), item.world != world);
+                        if ( cost > storedEnergy )
+                            continue;
+
+                        visitedTargets.add(itemPos);
+                    }
+                }
 
                 ItemStack stack = item.getItem().copy();
                 int count = stack.getCount();
@@ -1023,6 +1051,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 ItemStack result = InventoryHelper.insertStackIntoInventory(capabilityHandler, stack, false);
                 int inserted = count - result.getCount();
                 if ( inserted > 0 ) {
+                    if ( cost > 0 ) {
+                        extractEnergy(cost, false);
+                        activeTargetsPerTick++;
+                    }
+
                     gathered = true;
                     itemsPerTick += inserted;
                     remainingBudget -= (inserted * costPerItem);
@@ -1039,8 +1072,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             }
 
             if ( gathered ) {
-                extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                activeTargetsPerTick++;
+                if ( !fullGather ) {
+                    extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                    activeTargetsPerTick++;
+                }
+
                 if ( remainingBudget < costPerItem || getEnergyStored() < level.baseEnergyPerOperation )
                     return WorkResult.SUCCESS_STOP;
 
@@ -1072,6 +1108,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
             CoreUtils.dropItemStackIntoWorld(move, world, new Vec3d(target.pos));
             stack.shrink(count);
+            itemStackHandler.setStackInSlot(i, stack);
             extractEnergy(level.baseEnergyPerOperation + target.cost, false);
             activeTargetsPerTick++;
             itemsPerTick += count;
@@ -1084,6 +1121,15 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         }
 
         return WorkResult.FAILURE_STOP;
+    }
+
+    public boolean canFullGather() {
+        return false;
+    }
+
+    @Nullable
+    public AxisAlignedBB getFullGatherAABB() {
+        return null;
     }
 
     @Nonnull
@@ -1153,7 +1199,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     public int transferToInventory(IItemHandler source, IItemHandler dest, int maxRate, int cost, boolean drainEnergy, boolean doWorkStats) {
         int slots = source.getSlots();
         boolean had_items = false;
-        int budget = remainingBudget / costPerItem;
+        int budget = costPerItem == 0 ? 0 : remainingBudget / costPerItem;
+        if ( budget == 0 )
+            return 0;
 
         for (int i = 0; i < slots; i++) {
             ItemStack stack = source.getStackInSlot(i);
@@ -1306,7 +1354,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             }
         }
 
-        if ( !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, opposite) )
+        if ( !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, opposite) || costPerItem == 0 )
             return;
 
         IItemHandler handler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, opposite);
@@ -1331,6 +1379,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         super.update();
 
         worker.tickDown();
+        fullGather = false;
 
         if ( remainingBudget < maximumBudget ) {
             if ( remainingBudget < 0 )

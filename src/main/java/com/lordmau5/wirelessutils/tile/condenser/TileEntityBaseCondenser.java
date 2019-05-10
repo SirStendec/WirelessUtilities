@@ -74,6 +74,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     private int fluidRate;
     private int fluidMaxRate;
+    private boolean burstTick = false;
     private int burstAmount = -1;
     protected IterationMode iterationMode = IterationMode.ROUND_ROBIN;
     private int roundRobin = -1;
@@ -844,9 +845,28 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         int cost = target == null ? 0 : getEnergyCost(target);
 
         if ( stack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null) ) {
-            validTargetsPerTick++;
-            maxEnergyPerTick += level.baseEnergyPerOperation + cost;
-            return true;
+            IFluidHandlerItem handler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+            if ( handler != null ) {
+                FluidStack filled = getTankFluid();
+                IFluidTankProperties[] props = handler.getTankProperties();
+                if ( props != null )
+                    for (IFluidTankProperties prop : props) {
+                        boolean canUse;
+                        FluidStack fs = prop.getContents();
+                        if ( filled != null && fs != null && !filled.isFluidEqual(fs) )
+                            canUse = false;
+                        else if ( inverted )
+                            canUse = (filled != null ? prop.canDrainFluidType(filled) : prop.canDrain());
+                        else
+                            canUse = (filled != null ? prop.canFillFluidType(filled) : prop.canFill());
+
+                        if ( canUse ) {
+                            validTargetsPerTick++;
+                            maxEnergyPerTick += level.baseEnergyPerOperation + cost;
+                            return true;
+                        }
+                    }
+            }
         }
 
         if ( !inverted && FluidHelper.isFillableEmptyContainer(stack) ) {
@@ -928,7 +948,10 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                     return WorkResult.FAILURE_REMOVE;
 
                 if ( burstAmount < Fluid.BUCKET_VOLUME ) {
-                    burstAmount += remainingPerTick;
+                    if ( !burstTick ) {
+                        burstAmount += remainingPerTick;
+                        burstTick = true;
+                    }
                     if ( burstAmount > Fluid.BUCKET_VOLUME )
                         burstAmount = Fluid.BUCKET_VOLUME;
                     else if ( burstAmount < Fluid.BUCKET_VOLUME ) {
@@ -950,7 +973,10 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             return WorkResult.FAILURE_REMOVE;
 
         if ( burstAmount < Fluid.BUCKET_VOLUME ) {
-            burstAmount += remainingPerTick;
+            if ( !burstTick ) {
+                burstAmount += remainingPerTick;
+                burstTick = true;
+            }
             if ( burstAmount > Fluid.BUCKET_VOLUME )
                 burstAmount = Fluid.BUCKET_VOLUME;
             else if ( burstAmount < Fluid.BUCKET_VOLUME ) {
@@ -1038,20 +1064,33 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         IFluidHandlerItem handler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
         if ( handler != null ) {
+            if ( burstAmount < Fluid.BUCKET_VOLUME ) {
+                if ( !burstTick ) {
+                    burstAmount += remainingPerTick;
+                    burstTick = true;
+                }
+                if ( burstAmount > Fluid.BUCKET_VOLUME )
+                    burstAmount = Fluid.BUCKET_VOLUME;
+            }
+
+            int amount = burstAmount < remainingPerTick ? remainingPerTick : burstAmount;
+
             FluidActionResult result;
             if ( inverted )
-                result = FluidUtil.tryEmptyContainerAndStow(stack, internalHandler, inventory, remainingPerTick, null, true);
+                result = FluidUtil.tryEmptyContainerAndStow(stack, internalHandler, inventory, amount, null, true);
             else
-                result = FluidUtil.tryFillContainerAndStow(stack, internalHandler, inventory, remainingPerTick, null, true);
+                result = FluidUtil.tryFillContainerAndStow(stack, internalHandler, inventory, amount, null, true);
 
             if ( result.isSuccess() ) {
                 ItemStack outStack = result.getResult();
-                stack.shrink(stack.getCount());
-                ItemStack remaining = inventory.insertItem(slot, outStack, false);
-                if ( !remaining.isEmpty() ) {
-                    remaining = InventoryHelper.insertStackIntoInventory(inventory, remaining, false);
-                    if ( !remaining.isEmpty() )
-                        CoreUtils.dropItemStackIntoWorldWithVelocity(remaining, world, target.pos);
+                if ( !outStack.equals(stack) ) {
+                    inventory.extractItem(slot, stack.getCount(), false);
+                    ItemStack remaining = inventory.insertItem(slot, outStack, false);
+                    if ( !remaining.isEmpty() ) {
+                        remaining = InventoryHelper.insertStackIntoInventory(inventory, remaining, false);
+                        if ( !remaining.isEmpty() )
+                            CoreUtils.dropItemStackIntoWorldWithVelocity(remaining, world, target.pos);
+                    }
                 }
 
                 activeTargetsPerTick++;
@@ -1105,7 +1144,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             return WorkResult.FAILURE_REMOVE;
         }
 
-        stack.shrink(1);
+        inventory.extractItem(slot, 1, false);
         destination.insertItem(destSlot, outStack, false);
         extractEnergy(totalCost, false);
         tank.drain(craftingFluid.amount, true);
@@ -1259,6 +1298,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( gatherTick < 0 )
             gatherTick = 10;
 
+        burstTick = false;
         activeTargetsPerTick = 0;
         energyPerTick = 0;
         fluidPerTick = 0;

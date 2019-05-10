@@ -19,11 +19,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 @Machine(name = "directional_desublimator")
@@ -136,6 +138,17 @@ public class TileDirectionalDesublimator extends TileBaseDesublimator implements
     }
 
     /* Targeting */
+
+    @Override
+    public boolean canFullGather() {
+        return true;
+    }
+
+    @Nullable
+    @Override
+    public AxisAlignedBB getFullGatherAABB() {
+        return getTargetBoundingBox(getPosition());
+    }
 
     @Override
     public boolean usesDefaultColor() {

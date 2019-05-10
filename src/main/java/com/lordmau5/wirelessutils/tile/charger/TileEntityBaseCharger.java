@@ -541,7 +541,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
             return WorkResult.FAILURE_REMOVE;
         }
 
-        stack.shrink(1);
+        inventory.extractItem(slot, 1, false);
         destination.insertItem(destSlot, outStack, false);
         remainingPerTick -= getEnergyStorage().extractEnergy(target.cost, false);
         craftingEnergy -= recipe.cost;
