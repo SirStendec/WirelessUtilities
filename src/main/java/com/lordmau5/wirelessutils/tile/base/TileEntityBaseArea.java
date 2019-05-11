@@ -91,17 +91,6 @@ public abstract class TileEntityBaseArea extends TileEntityBase implements IArea
         liveAreas = null;
     }
 
-    /*protected void touchRendering() {
-        if ( !isLive || liveAreas == null || liveAreas.isEmpty() )
-            return;
-
-        long now = Minecraft.getSystemTime();
-        if ( now - lastTouch > 1000 ) {
-            lastTouch = now;
-            RenderManager.INSTANCE.touchAreas(liveAreas);
-        }
-    }*/
-
     // There isn't really a good method for a tile entity unloading, so
     // we just kind of throw events at a wall to see what sticks.
     @Override

@@ -16,11 +16,6 @@ public class BlockDirectionalDesublimator extends BlockBaseMachine {
         setName("directional_desublimator");
     }
 
-    /*@Override
-    public boolean hasSidedTransfer() {
-        return true;
-    }*/
-
     @Nullable
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {

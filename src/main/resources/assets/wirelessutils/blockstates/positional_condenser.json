@@ -8,7 +8,13 @@
 			"layer0:solid:top": "wirelessutils:block/condenser_front",
 			"layer0:solid:front": "wirelessutils:block/positional_front",
 			"layer1:cutout:mark": "wirelessutils:block/condenser_mark",
-			"layer2:cutout:level": "wirelessutils:block/overlay"
+			"layer2:cutout:level": "wirelessutils:block/overlay",
+			"layer3:cutout:config_bottom": "model_property:machine.config.bottom",
+			"layer3:cutout:config_top": "model_property:machine.config.top",
+			"layer3:cutout:config_front": "model_property:machine.config.front",
+			"layer3:cutout:config_back": "model_property:machine.config.back",
+			"layer3:cutout:config_right": "model_property:machine.config.right",
+			"layer3:cutout:config_left": "model_property:machine.config.left"
 		},
 		"custom": {
 			"template": "wirelessutils:block/positional_machine"

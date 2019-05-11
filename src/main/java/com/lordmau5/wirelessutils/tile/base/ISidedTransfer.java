@@ -166,10 +166,6 @@ public interface ISidedTransfer {
             return facing;
     }
 
-    /*default boolean isSideTransferEnabled(EnumFacing face) {
-        return isSideTransferEnabled(getSideForFacing(face));
-    }*/
-
     default String getTextureForMode(Mode mode, boolean input) {
         if ( mode == Mode.PASSIVE )
             return null;

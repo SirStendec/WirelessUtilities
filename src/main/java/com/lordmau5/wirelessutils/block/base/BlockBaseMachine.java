@@ -97,10 +97,6 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
 
     /* Block State */
 
-    public boolean hasSidedTransfer() {
-        return false;
-    }
-
     @Override
     protected BlockStateContainer createBlockState() {
         BlockStateContainer.Builder builder = new BlockStateContainer.Builder(this);
