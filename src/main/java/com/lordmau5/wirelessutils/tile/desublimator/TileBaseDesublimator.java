@@ -481,7 +481,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     @Override
     public void setSidedTransferAugmented(boolean augmented) {
+        if ( sideTransferAugment == augmented )
+            return;
+
         sideTransferAugment = augmented;
+        updateTextures();
     }
 
     @Override
@@ -1512,6 +1516,19 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     /* NBT Read and Write */
 
     @Override
+    public void readFromNBT(NBTTagCompound tag) {
+        super.readFromNBT(tag);
+        remainingBudget = tag.getInteger("Budget");
+    }
+
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound tag) {
+        NBTTagCompound out = super.writeToNBT(tag);
+        out.setInteger("Budget", remainingBudget);
+        return out;
+    }
+
+    @Override
     public void readExtraFromNBT(NBTTagCompound tag) {
         super.readExtraFromNBT(tag);
         iterationMode = IterationMode.fromInt(tag.getByte("IterationMode"));
@@ -1528,9 +1545,10 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             int length = Math.min(this.locks.length, locks.tagCount());
             for (int i = 0; i < length; i++) {
                 NBTTagCompound itemTag = locks.getCompoundTagAt(i);
-                if ( itemTag != null && !itemTag.isEmpty() )
-                    this.locks[i] = new ComparableItemStackValidatedNBT(new ItemStack(itemTag));
-                else
+                if ( itemTag != null && !itemTag.isEmpty() ) {
+                    ItemStack lockStack = new ItemStack(itemTag);
+                    this.locks[i] = lockStack.isEmpty() ? null : new ComparableItemStackValidatedNBT(lockStack);
+                } else
                     this.locks[i] = null;
             }
         }
@@ -1631,6 +1649,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         for (TransferSide side : TransferSide.VALUES)
             payload.addByte(getSideTransferMode(side).index);
         payload.addBool(isInverted());
+        payload.addBool(isSidedTransferAugmented());
         return payload;
     }
 
@@ -1641,6 +1660,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         for (TransferSide side : TransferSide.VALUES)
             setSideTransferMode(side, Mode.byIndex(payload.getByte()));
         setInvertAugmented(payload.getBool());
+        setSidedTransferAugmented(payload.getBool());
         callBlockUpdate();
     }
 

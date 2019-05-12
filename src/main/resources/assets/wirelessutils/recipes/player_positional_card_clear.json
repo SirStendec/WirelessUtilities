@@ -1,0 +1,13 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"group": "wirelessutils",
+	"ingredients": [
+		{
+			"item": "wirelessutils:player_positional_card"
+		}
+	],
+	"result": {
+		"item": "wirelessutils:player_positional_card",
+		"count": 1
+	}
+}

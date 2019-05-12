@@ -4,7 +4,6 @@ import cofh.api.core.IAugmentable;
 import cofh.core.util.CoreUtils;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.tile.base.ILevellingBlock;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IFluidGenAugmentable;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
@@ -116,16 +115,14 @@ public class ItemFluidGenAugment extends ItemAugment {
         return displayName;
     }
 
+    @Nullable
+    @Override
+    public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {
+        return Level.fromInt(ModConfig.augments.fluidGen.requiredLevel);
+    }
+
     @Override
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
-        Level level = Level.getLevel(ModConfig.augments.fluidGen.requiredLevel);
-        if ( !level.equals(Level.getMinLevel()) ) {
-            tooltip.add(new TextComponentTranslation(
-                    "item." + WirelessUtils.MODID + ".augment.min_level",
-                    level.getTextComponent()
-            ).getFormattedText());
-        }
-
         FluidStack fluid = getFluid(stack);
         int energy = getEnergy(stack);
 
@@ -366,10 +363,6 @@ public class ItemFluidGenAugment extends ItemAugment {
 
     @Override
     public boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
-        if ( augmentable instanceof ILevellingBlock )
-            if ( ((ILevellingBlock) augmentable).getLevel().toInt() < ModConfig.augments.fluidGen.requiredLevel )
-                return false;
-
         return augmentable instanceof IFluidGenAugmentable;
     }
 }

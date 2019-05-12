@@ -143,7 +143,11 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
     @Override
     public void setSidedTransferAugmented(boolean augmented) {
+        if ( sideTransferAugment == augmented )
+            return;
+
         sideTransferAugment = augmented;
+        updateTextures();
     }
 
     @Override
@@ -795,6 +799,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         for (TransferSide side : TransferSide.VALUES)
             payload.addByte(getSideTransferMode(side).index);
         payload.addBool(isInverted());
+        payload.addBool(isSidedTransferAugmented());
         return payload;
     }
 
@@ -805,6 +810,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         for (TransferSide side : TransferSide.VALUES)
             setSideTransferMode(side, Mode.byIndex(payload.getByte()));
         setInvertAugmented(payload.getBool());
+        setSidedTransferAugmented(payload.getBool());
         callBlockUpdate();
     }
 

@@ -1,24 +1,19 @@
 package com.lordmau5.wirelessutils.item.augment;
 
 import cofh.api.core.IAugmentable;
-import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.tile.base.ILevellingBlock;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBlockAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.init.Enchantments;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.world.World;
+import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
 public class ItemBlockAugment extends ItemAugment {
     public ItemBlockAugment() {
@@ -26,17 +21,10 @@ public class ItemBlockAugment extends ItemAugment {
         setName("block_augment");
     }
 
+    @Nullable
     @Override
-    public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
-        Level level = Level.getLevel(ModConfig.augments.block.requiredLevel);
-        if ( !level.equals(Level.getMinLevel()) ) {
-            tooltip.add(new TextComponentTranslation(
-                    "item." + WirelessUtils.MODID + ".augment.min_level",
-                    level.getTextComponent()
-            ).getFormattedText());
-        }
-
-        super.addInformation(stack, worldIn, tooltip, flagIn);
+    public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {
+        return Level.fromInt(ModConfig.augments.block.requiredLevel);
     }
 
     @Override
@@ -65,8 +53,10 @@ public class ItemBlockAugment extends ItemAugment {
         boolean silky = false;
         int fortune = 0;
         if ( !stack.isEmpty() ) {
-            silky = ModConfig.augments.block.allowSilkTouch && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0;
-            fortune = ModConfig.augments.block.allowFortune ? EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack) : 0;
+            NBTTagCompound tag = stack.getTagCompound();
+
+            silky = (tag != null && tag.hasKey("SilkTouch")) ? tag.getBoolean("SilkTouch") : ModConfig.augments.block.allowSilkTouch && EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0;
+            fortune = (tag != null && tag.hasKey("Fortune")) ? tag.getByte("Fortune") : ModConfig.augments.block.allowFortune ? EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack) : 0;
         }
 
         if ( augmentable instanceof IBlockAugmentable )
@@ -80,10 +70,6 @@ public class ItemBlockAugment extends ItemAugment {
 
     @Override
     public boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
-        if ( augmentable instanceof ILevellingBlock )
-            if ( ((ILevellingBlock) augmentable).getLevel().toInt() < ModConfig.augments.block.requiredLevel )
-                return false;
-
         if ( augmentable instanceof ICropAugmentable && ((ICropAugmentable) augmentable).isCropAugmented() )
             return false;
 

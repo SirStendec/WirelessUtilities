@@ -183,14 +183,21 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public boolean requireMachineLevel = false;
 
-        @Config.Name("Require Sided I/O Control Augment")
-        @Config.Comment("When enabled, a Sided I/O Control Augment is necessary for a machine to have configurable sides. Otherwise, it is enabled for all machines.")
-        @Config.RequiresWorldRestart
-        public boolean requireSidedTransferAugment = false;
+        @Config.Name("Sided I/O Control Augments")
+        @Config.Comment("Sided I/O Control Augments allow machines to automatically import or export via their sides.")
+        public final SidedTransferAugments sidedTransfer = new SidedTransferAugments();
 
         @Config.Name("Capacity Augments")
         @Config.Comment("Capacity Augments increase the maximum capacity of machines.")
         public final CapacityAugments capacity = new CapacityAugments();
+
+        @Config.Name("Invert Augments")
+        @Config.Comment("Invert Augments reverse the operational flow of a machine. Chargers will drain power, etc.")
+        public final InvertAugments invert = new InvertAugments();
+
+        @Config.Name("Chunk Load Augments")
+        @Config.Comment("Chunk Load Augments cause a machine to keep its target blocks loaded whenever the machine itself is loaded.")
+        public final ChunkLoadAugments chunkLoad = new ChunkLoadAugments();
 
         @Config.Name("Transfer Augments")
         @Config.Comment("Transfer Augments increase the maximum transfer rate of machines.")
@@ -216,9 +223,50 @@ public class ModConfig {
         @Config.Comment("Block Augments allow Desublimators to place and break blocks.")
         public final BlockAugments block = new BlockAugments();
 
+        @Config.Name("World Augments")
+        @Config.Comment("World Augments allow machines to directly interact with the world, such as by placing or sucking up fluids.")
+        public final WorldAugments world = new WorldAugments();
+
         @Config.Name("Auxiliary Condenser Augments")
         @Config.Comment("Auxiliary Condenser Augments allow machines to generate fluid with energy.")
         public final FluidGenAugments fluidGen = new FluidGenAugments();
+    }
+
+    public static class WorldAugments {
+        @Config.Name("Required Level")
+        @Config.Comment("Machines must be at least this level in order to be augmented with a World Augment.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+    }
+
+    public static class ChunkLoadAugments {
+        @Config.Name("Required Level")
+        @Config.Comment("Machines must be at least this level in order to be augmented with a Chunk Load Augment.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+    }
+
+    public static class InvertAugments {
+        @Config.Name("Required Level")
+        @Config.Comment("Machines must be at least this level in order to be augmented with an Invert Augment.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+    }
+
+    public static class SidedTransferAugments {
+        @Config.Name("Require for Sided I/O")
+        @Config.Comment("When enabled, an installed augment is required to configure a machine's sided transfer settings.")
+        @Config.RequiresWorldRestart
+        public boolean required = false;
+
+        @Config.Name("Required Level")
+        @Config.Comment("Machines must be at least this level in order to be augmented with a Sided I/O Control Augment.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
     }
 
     public static class FluidGenAugments {
@@ -386,6 +434,12 @@ public class ModConfig {
         @Config.Comment("An interdimensional range augment will allow Positional machines to work across dimensions.")
         @Config.RequiresWorldRestart
         public boolean enableInterdimensional = true;
+
+        @Config.Name("Required Level for Interdimensional Tier")
+        @Config.Comment("Machines must be at least this level in order to be augmented with an Interdimensional Range Augment.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int interdimensionalLevel = 0;
 
         @Config.Name("Maximum Directional Tier")
         @Config.Comment("This is the maximum tier that can be placed in Directional machines. Due to how they work, allowing them to scan too large an area can be a significant source of server lag.")

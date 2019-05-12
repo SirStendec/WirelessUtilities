@@ -10,6 +10,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.Style;
@@ -28,6 +29,15 @@ public class ItemRangeAugment extends ItemAugment {
     public ItemRangeAugment() {
         super();
         setName("range_augment");
+    }
+
+    @Nullable
+    @Override
+    public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {
+        if ( isInterdimensional(stack) )
+            return Level.fromInt(ModConfig.augments.range.interdimensionalLevel);
+
+        return super.getRequiredLevelDelegate(stack);
     }
 
     @Override
@@ -60,7 +70,16 @@ public class ItemRangeAugment extends ItemAugment {
     }
 
     public boolean isInterdimensional(@Nonnull ItemStack stack) {
-        return stack.getItem() == this && stack.getMetadata() == INTERDIMENSIONAL_VALUE;
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return false;
+
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("Interdimensional") )
+                return tag.getBoolean("Interdimensional");
+        }
+
+        return stack.getMetadata() == INTERDIMENSIONAL_VALUE;
     }
 
     @Override
@@ -72,12 +91,24 @@ public class ItemRangeAugment extends ItemAugment {
         if ( stack.isEmpty() || stack.getItem() != this )
             return 0;
 
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("DirectionalRange") )
+                return tag.getInteger("DirectionalRange");
+        }
+
         return 3 * (stack.getMetadata() + 1);
     }
 
     public int getPositionalRange(@Nonnull ItemStack stack) {
         if ( stack.isEmpty() || stack.getItem() != this )
             return ModConfig.augments.range.blocksPerTier;
+
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("PositionalRange") )
+                return tag.getInteger("PositionalRange");
+        }
 
         return (stack.getMetadata() + 2) * ModConfig.augments.range.blocksPerTier;
     }

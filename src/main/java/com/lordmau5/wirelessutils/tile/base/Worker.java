@@ -576,6 +576,9 @@ public class Worker<T extends TargetInfo> {
                         }
 
                         if ( steps < 1 || !result.keepProcessing ) {
+                            if ( didWork )
+                                performEffect(target);
+
                             if ( target.processInventory ) {
                                 cacheInInventory = true;
                                 cacheInvPosition = i + (result.noAdvance ? 0 : 1);
@@ -593,10 +596,27 @@ public class Worker<T extends TargetInfo> {
             if ( wasRemoved && !target.processBlock && !target.processInventory && !target.processTile && !target.processEntity )
                 didRemove = true;
 
+            if ( didWork )
+                performEffect(target);
+
             if ( !keepWorking && noAdvance )
                 return worked;
         }
 
         return worked;
+    }
+
+    public void performEffect(T target) {
+        BlockPosDimension pos = target.pos;
+        World world = DimensionManager.getWorld(pos.getDimension());
+        if ( world == null || !world.isBlockLoaded(pos) )
+            return;
+
+        long now = world.getTotalWorldTime();
+        if ( now - target.lastEffect < 20 )
+            return;
+
+        target.lastEffect = now;
+        provider.performEffect(target, world);
     }
 }

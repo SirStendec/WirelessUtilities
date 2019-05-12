@@ -196,7 +196,7 @@ public class TabSideControl extends TabBase implements IContainsButtons {
         if ( machine instanceof IInvertAugmentable )
             inverted = ((IInvertAugmentable) machine).isInverted();
 
-        drawTabIcon(inverted ? CoreTextures.ICON_INPUT : CoreTextures.ICON_OUTPUT);
+        drawTabIcon(inverted ? CoreTextures.ICON_OUTPUT : CoreTextures.ICON_INPUT);
         if ( !isFullyOpened() )
             return;
 
@@ -213,7 +213,7 @@ public class TabSideControl extends TabBase implements IContainsButtons {
                 list.add(new TextComponentTranslation(
                         "tab." + WirelessUtils.MODID + ".auto_transfer.mode",
                         new TextComponentTranslation(
-                                "tab." + WirelessUtils.MODID + ".auto_transfer.mode." + (inverted ? "input" : "output")
+                                "tab." + WirelessUtils.MODID + ".auto_transfer.mode." + (inverted ? "output" : "input")
                         ).setStyle(TextHelpers.YELLOW)
                 ).getFormattedText());
             }

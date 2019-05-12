@@ -11,6 +11,6 @@ import java.util.function.BooleanSupplier;
 public class ConditionSidedTransferAugmentEnabled implements IConditionFactory {
     @Override
     public BooleanSupplier parse(JsonContext context, JsonObject json) {
-        return () -> ModConfig.augments.requireSidedTransferAugment;
+        return () -> ModConfig.augments.sidedTransfer.required;
     }
 }

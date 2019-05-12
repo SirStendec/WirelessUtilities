@@ -17,6 +17,7 @@ public class TargetInfo {
     public boolean processEntity;
 
     public boolean useSingleChest = false;
+    public long lastEffect = 0;
     public int liveSlots;
     public int[] slots;
 
@@ -35,6 +36,7 @@ public class TargetInfo {
                 .add("pEnt", processEntity)
                 .add("tile", tile)
                 .add("entity", entity)
+                .add("effect", lastEffect)
                 .add("singleChest", useSingleChest)
                 .add("liveSlots", liveSlots)
                 .add("slots", slots);

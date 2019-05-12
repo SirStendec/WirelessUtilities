@@ -6,15 +6,23 @@ import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityBaseCondenser;
 import com.lordmau5.wirelessutils.tile.desublimator.TileBaseDesublimator;
+import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class ItemWorldAugment extends ItemAugment {
     public ItemWorldAugment() {
         super();
         setName("world_augment");
+    }
+
+    @Nullable
+    @Override
+    public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {
+        return Level.fromInt(ModConfig.augments.world.requiredLevel);
     }
 
     @Override

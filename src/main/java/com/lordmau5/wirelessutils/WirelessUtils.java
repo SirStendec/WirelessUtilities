@@ -15,16 +15,21 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 @Mod(modid = WirelessUtils.MODID, name = WirelessUtils.NAME, version = WirelessUtils.VERSION, dependencies = WirelessUtils.DEPENDENCIES, updateJSON = WirelessUtils.UPDATE_URL)
 public class WirelessUtils {
     public static final String MODID = "wirelessutils";
     public static final String NAME = "Wireless Utilities";
+    public static final int DATA_VERSION = 1;
 
-    public static final String VERSION = "1.6";
+    public static final String VERSION = "1.7";
     public static final String UPDATE_URL = "https://raw.github.com/sirstendec/wirelessutilities/master/update.json";
 
     public static final String DEPENDENCIES = CoFHCore.VERSION_GROUP;
+
+    public static final Logger logger = LogManager.getLogManager().getLogger(MODID);
 
     @SidedProxy(clientSide = "com.lordmau5.wirelessutils.proxy.ClientProxy", serverSide = "com.lordmau5.wirelessutils.proxy.ServerProxy")
     private static CommonProxy proxy;

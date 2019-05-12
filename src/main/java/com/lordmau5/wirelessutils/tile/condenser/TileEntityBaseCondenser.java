@@ -650,7 +650,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     @Override
     public void setSidedTransferAugmented(boolean augmented) {
+        if ( sideTransferAugment == augmented )
+            return;
+
         sideTransferAugment = augmented;
+        updateTextures();
     }
 
     @Override

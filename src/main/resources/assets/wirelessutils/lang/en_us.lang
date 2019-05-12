@@ -80,9 +80,10 @@ item.wirelessutils.accurate_pearl.info.1=when shot from a Dispenser.
 
 item.wirelessutils.player_positional_card.name=Player Positional Card
 item.wirelessutils.player_positional_card.info.0=Sneak-Use this item to set it
-item.wirelessutils.player_positional_card.info.1=to yourself and to open a GUI
-item.wirelessutils.player_positional_card.info.2=for setting what can
-item.wirelessutils.player_positional_card.info.3=be accessed.
+item.wirelessutils.player_positional_card.info.1=to yourself.
+#item.wirelessutils.player_positional_card.info.1=to yourself and to open a GUI
+#item.wirelessutils.player_positional_card.info.2=for setting what can
+#item.wirelessutils.player_positional_card.info.3=be accessed.
 item.wirelessutils.player_positional_card.highlight=%s (%s)
 item.wirelessutils.player_positional_card.player=Player: %s
 item.wirelessutils.player_positional_card.invalid.unset=No target has been set.

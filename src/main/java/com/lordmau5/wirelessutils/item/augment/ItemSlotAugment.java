@@ -6,6 +6,7 @@ import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 
 import javax.annotation.Nonnull;
@@ -23,8 +24,16 @@ public class ItemSlotAugment extends ItemAugment {
     }
 
     public int getAvailableSlots(@Nonnull ItemStack stack) {
-        int tier = (stack.isEmpty() || stack.getItem() != this) ? 0 : stack.getMetadata() + 1;
-        return getAvailableSlots(tier, 1, ModConfig.augments.slot.slotsPerTier);
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return getAvailableSlots(0, 1, ModConfig.augments.slot.slotsPerTier);
+
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("Slots") )
+                return tag.getByte("Slots");
+        }
+
+        return getAvailableSlots(stack.getMetadata() + 1, 1, ModConfig.augments.slot.slotsPerTier);
     }
 
     public int getAvailableSlots(int tier, int baseSlots, int slotsPerTier) {
@@ -45,7 +54,7 @@ public class ItemSlotAugment extends ItemAugment {
         if ( augmentable instanceof ISlotAugmentable ) {
             ISlotAugmentable slots = (ISlotAugmentable) augmentable;
             int tier = (stack.isEmpty() || stack.getItem() != this) ? 0 : stack.getMetadata() + 1;
-            slots.setUnlockedSlots(getAvailableSlots(tier, slots.getBaseUnlockedSlots(), slots.getUnlockedSlotsPerTier()), tier);
+            slots.setUnlockedSlots(getAvailableSlots(stack), tier);
         }
     }
 

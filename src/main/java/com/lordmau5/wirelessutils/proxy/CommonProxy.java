@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.proxy;
 
+import com.google.common.collect.ImmutableSet;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.block.charger.BlockDirectionalCharger;
 import com.lordmau5.wirelessutils.block.charger.BlockPositionalCharger;
@@ -14,6 +15,8 @@ import com.lordmau5.wirelessutils.commands.DebugCommand;
 import com.lordmau5.wirelessutils.commands.FluidGenCommand;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.entity.pearl.*;
+import com.lordmau5.wirelessutils.fixers.InventoryWalker;
+import com.lordmau5.wirelessutils.fixers.NullableItemListWalker;
 import com.lordmau5.wirelessutils.item.*;
 import com.lordmau5.wirelessutils.item.augment.*;
 import com.lordmau5.wirelessutils.item.base.IEnhancedItem;
@@ -23,6 +26,7 @@ import com.lordmau5.wirelessutils.item.upgrade.ItemLevelUpgrade;
 import com.lordmau5.wirelessutils.plugins.PluginRegistry;
 import com.lordmau5.wirelessutils.tile.TileAngledSlime;
 import com.lordmau5.wirelessutils.tile.base.Machine;
+import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import com.lordmau5.wirelessutils.tile.charger.TileEntityDirectionalCharger;
 import com.lordmau5.wirelessutils.tile.charger.TileEntityPositionalCharger;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityDirectionalCondenser;
@@ -41,10 +45,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.CompoundDataFixer;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -56,7 +63,9 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Mod.EventBusSubscriber
 public class CommonProxy {
@@ -80,6 +89,8 @@ public class CommonProxy {
         ModItems.initLootTables();
 
         PluginRegistry.init(e);
+
+        initFixers();
     }
 
     public void postInit(FMLPostInitializationEvent e) {
@@ -94,6 +105,26 @@ public class CommonProxy {
     public void handleIdMapping(FMLModIdMappingEvent event) {
         ChargerRecipeManager.refresh();
         CondenserRecipeManager.refresh();
+    }
+
+    @SuppressWarnings("deprecation")
+    public void initFixers() {
+        CompoundDataFixer global_fixer = FMLCommonHandler.instance().getDataFixer();
+
+        /*ModFixs fixer = global_fixer.init(WirelessUtils.MODID, WirelessUtils.DATA_VERSION);
+        fixer.registerFix(FixTypes.CHUNK, new FixBlockLevels());*/
+
+        Set<Class<?>> machines = new HashSet<>();
+        for (Class<? extends TileEntity> machine : MACHINES) {
+            if ( TileEntityBaseMachine.class.isAssignableFrom(machine) )
+                machines.add(machine);
+        }
+
+        global_fixer.registerWalker(FixTypes.BLOCK_ENTITY, new InventoryWalker(machines, "Inventory"));
+        global_fixer.registerWalker(FixTypes.BLOCK_ENTITY, new NullableItemListWalker(ImmutableSet.of(
+                TileDirectionalDesublimator.class,
+                TilePositionalDesublimator.class
+        ), "Locks"));
     }
 
     @SuppressWarnings("unused")

@@ -20,6 +20,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
@@ -54,16 +55,40 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
         ModelLoader.setCustomMeshDefinition(this, stack -> new ModelResourceLocation(stack.getItem().getRegistryName(), "inventory"));
     }
 
+    @Nonnull
+    public Level getRequiredLevel(@Nonnull ItemStack stack) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return Level.getMinLevel();
+
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound itemTag = stack.getTagCompound();
+            if ( itemTag != null && itemTag.hasKey("RequiredLevel") )
+                return Level.fromInt(itemTag.getByte("RequiredLevel"));
+        }
+
+        Level out = getRequiredLevelDelegate(stack);
+        if ( out == null )
+            return Level.getMinLevel();
+
+        return out;
+    }
+
+    @Nullable
+    public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {
+        if ( ModConfig.augments.requireMachineLevel )
+            return getLevel(stack);
+
+        return null;
+    }
+
     @Override
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
-        if ( ModConfig.augments.requireMachineLevel ) {
-            Level level = getLevel(stack);
-            if ( !level.equals(Level.getMinLevel()) ) {
-                tooltip.add(new TextComponentTranslation(
-                        "item." + WirelessUtils.MODID + ".augment.min_level",
-                        level.getTextComponent()
-                ).getFormattedText());
-            }
+        Level minLevel = getRequiredLevel(stack);
+        if ( !minLevel.equals(Level.getMinLevel()) ) {
+            tooltip.add(new TextComponentTranslation(
+                    "item." + WirelessUtils.MODID + ".augment.min_level",
+                    minLevel.getTextComponent()
+            ).getFormattedText());
         }
 
         super.addInformation(stack, worldIn, tooltip, flagIn);

@@ -168,6 +168,16 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
     @Nonnull
     WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull T target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile, @Nullable Entity entity);
 
+    /**
+     * Attempt to render an effect on the provided target. Generally this is a
+     * particle effect or something similar.
+     *
+     * @param target The TargetInfo returned from canWork.
+     * @param world  The world the target is in.
+     */
+    default void performEffect(@Nonnull T target, @Nonnull World world) {
+
+    }
 
     enum IterationMode {
         ROUND_ROBIN,
