@@ -81,16 +81,42 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
         return null;
     }
 
-    @Override
-    public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
-        Level minLevel = getRequiredLevel(stack);
-        if ( !minLevel.equals(Level.getMinLevel()) ) {
-            tooltip.add(new TextComponentTranslation(
-                    "item." + WirelessUtils.MODID + ".augment.min_level",
-                    minLevel.getTextComponent()
-            ).getFormattedText());
+    public double getEnergyMultiplier(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return 1;
+
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound itemTag = stack.getTagCompound();
+            if ( itemTag != null && itemTag.hasKey("EnergyMult") )
+                return itemTag.getDouble("EnergyMult");
         }
 
+        return getEnergyMultiplierDelegate(stack, augmentable);
+    }
+
+    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return 1;
+    }
+
+    public int getEnergyAddition(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return 0;
+
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound itemTag = stack.getTagCompound();
+            if ( itemTag != null && itemTag.hasKey("EnergyAdd") )
+                return itemTag.getInteger("EnergyAdd");
+        }
+
+        return getEnergyAdditionDelegate(stack, augmentable);
+    }
+
+    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return 0;
+    }
+
+    @Override
+    public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
 
         if ( StringHelper.isControlKeyDown() ) {
@@ -122,6 +148,26 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
 
         } else
             tooltip.add(StringHelper.localize("item." + WirelessUtils.MODID + ".augment_ctrl.inactive"));
+
+        Level minLevel = getRequiredLevel(stack);
+        if ( !minLevel.equals(Level.getMinLevel()) ) {
+            tooltip.add(new TextComponentTranslation(
+                    "item." + WirelessUtils.MODID + ".augment.min_level",
+                    minLevel.getTextComponent()
+            ).getFormattedText());
+        }
+
+        double multiplier = getEnergyMultiplier(stack, null);
+        int addition = getEnergyAddition(stack, null);
+
+        if ( multiplier != 1 || addition != 0 ) {
+            String unit = StringHelper.localize("item." + WirelessUtils.MODID + ".augment.energy_unit");
+            tooltip.add(new TextComponentTranslation(
+                    "item." + WirelessUtils.MODID + ".augment.energy",
+                    String.format("%.2f", multiplier),
+                    addition > 1000 ? TextHelpers.getScaledNumber(addition, unit, true) : addition + unit
+            ).getFormattedText());
+        }
     }
 
     @Nonnull

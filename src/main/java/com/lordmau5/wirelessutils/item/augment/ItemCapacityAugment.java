@@ -11,12 +11,39 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class ItemCapacityAugment extends ItemAugment {
     public ItemCapacityAugment() {
         super();
         setName("capacity_augment");
+    }
+
+    @Override
+    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        double[] multipliers = ModConfig.augments.capacity.energyMultiplier;
+        if ( multipliers.length == 0 )
+            return 1;
+
+        int idx = getLevel(stack).toInt();
+        if ( idx >= multipliers.length )
+            idx = multipliers.length - 1;
+
+        return multipliers[idx];
+    }
+
+    @Override
+    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        int[] additions = ModConfig.augments.capacity.energyAddition;
+        if ( additions.length == 0 )
+            return 0;
+
+        int idx = getLevel(stack).toInt();
+        if ( idx >= additions.length )
+            idx = additions.length - 1;
+
+        return additions[idx];
     }
 
     @Override

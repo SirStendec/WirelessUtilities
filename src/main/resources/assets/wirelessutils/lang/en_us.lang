@@ -176,6 +176,10 @@ item.wirelessutils.crop_augment.info.0=This augment allows certain machines
 item.wirelessutils.crop_augment.info.1=to interact with crops, such as by harvesting
 item.wirelessutils.crop_augment.info.2=the crops or using bonemeal on them.
 
+item.wirelessutils.crop_augment.tree.0=Crop Augments will also harvest trees
+item.wirelessutils.crop_augment.tree.1=so long as they have the base of the
+item.wirelessutils.crop_augment.tree.2=tree within their work area.
+
 item.wirelessutils.inventory_augment.name=Inventory Augment
 item.wirelessutils.inventory_augment.info.0=This augment allows a machine to
 item.wirelessutils.inventory_augment.info.1=operate on items within the inventories
@@ -207,6 +211,8 @@ item.wirelessutils.range_augment.lock.2=Augment to be within range.
 item.wirelessutils.disabled=This item is disabled in configuration.
 
 item.wirelessutils.augment.min_level=Required Machine Level: %s
+item.wirelessutils.augment.energy=Energy Usage: %sx + %s
+item.wirelessutils.augment.energy_unit= RF/action
 
 item.wirelessutils.augment_ctrl.inactive=Hold §e§oCtrl§r§7 for Valid Machines
 item.wirelessutils.augment_ctrl.active=Valid Machines:

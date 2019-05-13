@@ -27,6 +27,9 @@ public class TallBehavior implements IHarvestBehavior {
 
     @Override
     public boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+        if ( TileBaseDesublimator.isBlacklisted(state) )
+            return false;
+
         IBlockState above = world.getBlockState(pos.up());
         IBlockState below = world.getBlockState(pos.down());
         Block block = state.getBlock();

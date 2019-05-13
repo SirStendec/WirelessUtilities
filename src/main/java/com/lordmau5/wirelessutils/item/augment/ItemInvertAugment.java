@@ -15,6 +15,16 @@ public class ItemInvertAugment extends ItemAugment {
         setName("invert_augment");
     }
 
+    @Override
+    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.invert.energyMultiplier;
+    }
+
+    @Override
+    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.invert.energyAddition;
+    }
+
     @Nullable
     @Override
     public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {

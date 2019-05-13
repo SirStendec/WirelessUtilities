@@ -16,6 +16,9 @@ public class NetherWartBehavior implements IHarvestBehavior {
 
     @Override
     public boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+        if ( TileBaseDesublimator.isBlacklisted(state) )
+            return false;
+
         return state.getBlock() instanceof BlockNetherWart && state.getValue(BlockNetherWart.AGE) >= 3;
     }
 

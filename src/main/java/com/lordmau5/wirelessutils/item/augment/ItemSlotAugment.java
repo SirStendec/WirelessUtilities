@@ -10,12 +10,39 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class ItemSlotAugment extends ItemAugment {
     public ItemSlotAugment() {
         super();
         setName("slot_augment");
+    }
+
+    @Override
+    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        double[] multipliers = ModConfig.augments.slot.energyMultiplier;
+        if ( multipliers.length == 0 )
+            return 1;
+
+        int idx = getLevel(stack).toInt();
+        if ( idx >= multipliers.length )
+            idx = multipliers.length - 1;
+
+        return multipliers[idx];
+    }
+
+    @Override
+    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        int[] additions = ModConfig.augments.slot.energyAddition;
+        if ( additions.length == 0 )
+            return 0;
+
+        int idx = getLevel(stack).toInt();
+        if ( idx >= additions.length )
+            idx = additions.length - 1;
+
+        return additions[idx];
     }
 
     @Override

@@ -16,6 +16,16 @@ public class ItemSidedTransferAugment extends ItemAugment {
         setName("sided_transfer_augment");
     }
 
+    @Override
+    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.sidedTransfer.energyMultiplier;
+    }
+
+    @Override
+    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.sidedTransfer.energyAddition;
+    }
+
     @Nullable
     @Override
     public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {

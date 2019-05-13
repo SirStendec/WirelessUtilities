@@ -17,6 +17,9 @@ public class CropBehavior implements IHarvestBehavior {
 
     @Override
     public boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+        if ( TileBaseDesublimator.isBlacklisted(state) )
+            return false;
+
         Block block = state.getBlock();
         return block instanceof BlockCrops && ((BlockCrops) block).isMaxAge(state);
     }

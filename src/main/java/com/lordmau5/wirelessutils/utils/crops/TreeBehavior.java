@@ -31,6 +31,9 @@ public class TreeBehavior implements IHarvestBehavior {
         if ( world == null )
             return false;
 
+        if ( TileBaseDesublimator.isBlacklisted(state) )
+            return false;
+
         int dimension = world.provider.getDimension();
         Map<BlockPos, TreeCache> worldTrees = trees.get(dimension);
         if ( worldTrees != null ) {
@@ -89,6 +92,9 @@ public class TreeBehavior implements IHarvestBehavior {
                 break;
 
             IBlockState currentState = world.getBlockState(current);
+            if ( TileBaseDesublimator.isBlacklisted(state) )
+                continue;
+
             Block block = currentState.getBlock();
             if ( block != cache.log && !block.isLeaves(currentState, world, current) )
                 continue;
@@ -152,6 +158,9 @@ public class TreeBehavior implements IHarvestBehavior {
         public void scan(BlockPos pos, int depth, Set<BlockPos> visited) {
             visited.add(pos);
             IBlockState state = world.getBlockState(pos);
+            if ( TileBaseDesublimator.isBlacklisted(state) )
+                return;
+
             Block block = state.getBlock();
             if ( block != log ) {
                 if ( block.isWood(world, pos) && log == null )

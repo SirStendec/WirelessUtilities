@@ -123,6 +123,12 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     }
 
     @Override
+    public void energyChanged() {
+        if ( world != null && !world.isRemote )
+            calculateTargets();
+    }
+
+    @Override
     public void setChunkLoadAugmented(boolean augmented) {
         if ( augmented == chunkLoading )
             return;

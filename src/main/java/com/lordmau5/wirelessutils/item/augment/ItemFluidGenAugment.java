@@ -47,6 +47,16 @@ public class ItemFluidGenAugment extends ItemAugment {
     }
 
     @Override
+    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.fluidGen.energyMultiplier;
+    }
+
+    @Override
+    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.fluidGen.energyAddition;
+    }
+
+    @Override
     public void apply(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         if ( !(augmentable instanceof IFluidGenAugmentable) )
             return;

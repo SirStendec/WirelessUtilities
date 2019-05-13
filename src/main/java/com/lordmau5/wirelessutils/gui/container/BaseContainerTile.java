@@ -1,11 +1,12 @@
 package com.lordmau5.wirelessutils.gui.container;
 
 import cofh.core.gui.container.ContainerTileAugmentable;
-import cofh.core.util.helpers.AugmentHelper;
 import com.lordmau5.wirelessutils.gui.slot.SlotAugmentLockable;
+import com.lordmau5.wirelessutils.item.augment.ItemAugment;
 import com.lordmau5.wirelessutils.tile.base.IAugmentableTwoElectricBoogaloo;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
@@ -68,10 +69,9 @@ public class BaseContainerTile extends ContainerTileAugmentable {
         if ( slotIndex < invAugment ) {
             return mergeItemStack(stack, invAugment, invFull, true);
         } else if ( slotIndex < invFull ) {
-            if ( !augmentLock && invAugment > 0 ) {
-                if ( (baseTile instanceof IAugmentableTwoElectricBoogaloo) ? ((IAugmentableTwoElectricBoogaloo) baseTile).isValidAugment(stack) : AugmentHelper.isAugmentItem(stack) )
-                    return mergeItemStack(stack, 0, invAugment, false);
-            }
+            Item item = stack.getItem();
+            if ( !augmentLock && invAugment > 0 && item instanceof ItemAugment )
+                return mergeItemStack(stack, 0, invAugment, false);
 
             return mergeItemStack(stack, invFull, invTile, false);
         }

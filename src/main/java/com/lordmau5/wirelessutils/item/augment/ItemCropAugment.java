@@ -1,6 +1,8 @@
 package com.lordmau5.wirelessutils.item.augment;
 
 import cofh.api.core.IAugmentable;
+import cofh.core.util.helpers.StringHelper;
+import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBlockAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
@@ -14,11 +16,29 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class ItemCropAugment extends ItemAugment {
     public ItemCropAugment() {
         super();
         setName("crop_augment");
+    }
+
+    @Override
+    public void addExplanation(@Nonnull List<String> tooltip, @Nonnull String name, Object... args) {
+        super.addExplanation(tooltip, name, args);
+        if ( ModConfig.augments.crop.processTrees && StringHelper.isShiftKeyDown() )
+            addLocalizedLines(tooltip, "item." + WirelessUtils.MODID + ".crop_augment.tree");
+    }
+
+    @Override
+    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.crop.energyMultiplier;
+    }
+
+    @Override
+    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.crop.energyAddition;
     }
 
     @Nullable

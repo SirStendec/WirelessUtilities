@@ -7,11 +7,38 @@ import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class ItemTransferAugment extends ItemAugment {
     public ItemTransferAugment() {
         super();
         setName("transfer_augment");
+    }
+
+    @Override
+    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        double[] multipliers = ModConfig.augments.transfer.energyMultiplier;
+        if ( multipliers.length == 0 )
+            return 1;
+
+        int idx = getLevel(stack).toInt();
+        if ( idx >= multipliers.length )
+            idx = multipliers.length - 1;
+
+        return multipliers[idx];
+    }
+
+    @Override
+    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        int[] additions = ModConfig.augments.transfer.energyAddition;
+        if ( additions.length == 0 )
+            return 0;
+
+        int idx = getLevel(stack).toInt();
+        if ( idx >= additions.length )
+            idx = additions.length - 1;
+
+        return additions[idx];
     }
 
     @Override

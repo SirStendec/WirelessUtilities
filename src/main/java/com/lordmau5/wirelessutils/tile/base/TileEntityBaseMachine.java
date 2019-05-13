@@ -60,6 +60,11 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     protected final TimeTracker tracker = new TimeTracker();
     private boolean activeCooldown = false;
 
+    /* Energy */
+    protected int baseEnergy = 0;
+    protected double augmentMultiplier = 1;
+    protected int augmentEnergy = 0;
+
     /* Comparator-ing */
     private int comparatorState = 0;
 
@@ -234,6 +239,9 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     public void updateAugmentStatus() {
         Map<ItemAugment, ItemStack> augments = new Object2ObjectOpenHashMap<>();
 
+        augmentMultiplier = 1;
+        augmentEnergy = 0;
+
         for (ItemStack stack : getAugmentSlots()) {
             if ( stack.isEmpty() )
                 continue;
@@ -250,7 +258,32 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         for (ItemAugment item : ItemAugment.AUGMENT_TYPES) {
             ItemStack stack = augments.getOrDefault(item, ItemStack.EMPTY);
             item.apply(stack, this);
+            augmentMultiplier *= item.getEnergyMultiplier(stack, this);
+            augmentEnergy += item.getEnergyAddition(stack, this);
         }
+
+        updateBaseEnergy();
+    }
+
+    public void updateBaseEnergy() {
+        int newEnergy = (int) (level.baseEnergyPerOperation * augmentMultiplier) + augmentEnergy;
+        if ( newEnergy == baseEnergy )
+            return;
+
+        baseEnergy = newEnergy;
+        energyChanged();
+    }
+
+    /**
+     * This is called when baseEnergy is updated.
+     */
+    public void energyChanged() {
+
+    }
+
+    @Override
+    public void updateLevel() {
+        updateBaseEnergy();
     }
 
     /* Inventory */

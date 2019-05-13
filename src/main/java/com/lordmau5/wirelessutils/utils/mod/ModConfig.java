@@ -238,6 +238,17 @@ public class ModConfig {
         @Config.RangeInt(min = 0)
         @Config.RequiresWorldRestart
         public int requiredLevel = 0;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
     }
 
     public static class ChunkLoadAugments {
@@ -246,6 +257,17 @@ public class ModConfig {
         @Config.RangeInt(min = 0)
         @Config.RequiresWorldRestart
         public int requiredLevel = 0;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
     }
 
     public static class InvertAugments {
@@ -254,6 +276,17 @@ public class ModConfig {
         @Config.RangeInt(min = 0)
         @Config.RequiresWorldRestart
         public int requiredLevel = 0;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
     }
 
     public static class SidedTransferAugments {
@@ -267,6 +300,17 @@ public class ModConfig {
         @Config.RangeInt(min = 0)
         @Config.RequiresWorldRestart
         public int requiredLevel = 0;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
     }
 
     public static class FluidGenAugments {
@@ -324,6 +368,17 @@ public class ModConfig {
         @Config.Comment("When Mushroom Stew production is at at least this rate of mB/t, players can eat from the augment like it's an infinite bowl of mushroom stew. Set to zero to disable. Recommended: 250")
         @Config.RangeInt(min = 0)
         public int stewEat = 0;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
     }
 
     public static class CropAugments {
@@ -369,6 +424,17 @@ public class ModConfig {
         @Config.Comment("How many blocks from the origin block should be scanned while discovering a tree's layout.")
         @Config.RangeInt(min = 1)
         public int treeScanDepth = 150;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
     }
 
     public static class BlockAugments {
@@ -392,6 +458,17 @@ public class ModConfig {
         @Config.Comment("The maximum harvest level for blocks that should be harvestable via a Block Augment. Defaults to diamond.")
         @Config.RangeInt(min = 0)
         public int harvestLevel = 3;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
     }
 
     public static class CapacityAugments {
@@ -400,6 +477,17 @@ public class ModConfig {
         @Config.RangeInt(min = 0, max = Short.MAX_VALUE - 1)
         @Config.RequiresMcRestart
         public int availableTiers = 5;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] energyMultiplier = {1, 1, 1, 1, 1};
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] energyAddition = {0, 0, 0, 0, 0};
     }
 
     public static class TransferAugments {
@@ -408,6 +496,17 @@ public class ModConfig {
         @Config.RangeInt(min = 0, max = Short.MAX_VALUE - 1)
         @Config.RequiresMcRestart
         public int availableTiers = 5;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] energyMultiplier = {1, 1, 1, 1, 1};
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] energyAddition = {0, 0, 0, 0, 0};
     }
 
     public static class SlotAugments {
@@ -421,6 +520,17 @@ public class ModConfig {
         @Config.Comment("Each additional tier unlocks this many slots.")
         @Config.RangeInt(min = 1)
         public int slotsPerTier = 3;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] energyMultiplier = {1, 1, 1};
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] energyAddition = {0, 0, 0};
     }
 
     public static class RangeAugments {
@@ -462,6 +572,17 @@ public class ModConfig {
         @Config.Name("Maximum Scan Slots")
         @Config.Comment("Scan up to this many slots when searching inventories for chargeable items. Slots after this number will be ignored to minimize performance impact.")
         public int maximumScanSlots = 54;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
     }
 
     public static class Chargers {
@@ -573,6 +694,10 @@ public class ModConfig {
         @Config.Name("Allow World Augment")
         @Config.Comment("A World Augment allows Desublimators to place blocks in the world.")
         public boolean allowWorldAugment = true;
+
+        @Config.Name("Block Blacklist")
+        @Config.Comment("Desublimators should not interact with blocks in this list.")
+        public String[] blockBlacklist = {};
     }
 
     public static class PositionalDesublimator {

@@ -629,6 +629,12 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     @Override
+    public void energyChanged() {
+        if ( world != null && !world.isRemote )
+            calculateTargets();
+    }
+
+    @Override
     public void setInvertAugmented(boolean inverted) {
         if ( this.inverted == inverted )
             return;
@@ -829,7 +835,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         }
 
         validTargetsPerTick++;
-        maxEnergyPerTick += level.baseEnergyPerOperation + getEnergyCost(target, source);
+        maxEnergyPerTick += baseEnergy + getEnergyCost(target, source);
         return true;
     }
 
@@ -838,7 +844,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             return false;
 
         validTargetsPerTick++;
-        maxEnergyPerTick += level.baseEnergyPerOperation + getEnergyCost(target, source);
+        maxEnergyPerTick += baseEnergy + getEnergyCost(target, source);
         return true;
     }
 
@@ -866,7 +872,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
                         if ( canUse ) {
                             validTargetsPerTick++;
-                            maxEnergyPerTick += level.baseEnergyPerOperation + cost;
+                            maxEnergyPerTick += baseEnergy + cost;
                             return true;
                         }
                     }
@@ -875,7 +881,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         if ( !inverted && FluidHelper.isFillableEmptyContainer(stack) ) {
             validTargetsPerTick++;
-            maxEnergyPerTick += level.baseEnergyPerOperation + cost;
+            maxEnergyPerTick += baseEnergy + cost;
             return true;
         }
 
@@ -885,7 +891,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         CondenserRecipeManager.CondenserRecipe recipe = CondenserRecipeManager.getRecipe(getTankFluid(), stack);
         if ( recipe != null ) {
             validTargetsPerTick++;
-            maxEnergyPerTick += level.baseEnergyPerOperation + cost + recipe.cost;
+            maxEnergyPerTick += baseEnergy + cost + recipe.cost;
             return true;
         }
 
@@ -897,7 +903,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( entity.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null) ) {
             validTargetsPerTick++;
             // TODO: Entity energy calculations
-            maxEnergyPerTick += level.baseEnergyPerOperation;
+            maxEnergyPerTick += baseEnergy;
             return true;
         }
 
@@ -919,9 +925,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( gatherTick != 0 )
             return WorkResult.FAILURE_CONTINUE;
 
-        if ( getEnergyStored() < level.baseEnergyPerOperation )
+        if ( getEnergyStored() < baseEnergy )
             return WorkResult.FAILURE_STOP_IN_PLACE;
-        else if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
+        else if ( getEnergyStored() < (baseEnergy + target.cost) )
             return WorkResult.FAILURE_CONTINUE;
 
         FluidStack stack = tank.getFluid();
@@ -993,7 +999,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         if ( FluidUtil.tryPlaceFluid(null, world, target.pos, internalHandler, tank.getFluid()) ) {
             activeTargetsPerTick++;
-            extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+            extractEnergy(baseEnergy + target.cost, false);
 
             if ( remainingPerTick > 0 )
                 return WorkResult.SUCCESS_REMOVE;
@@ -1006,9 +1012,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     @Nonnull
     public WorkResult performWorkTile(@Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile) {
-        if ( getEnergyStored() < level.baseEnergyPerOperation )
+        if ( getEnergyStored() < baseEnergy )
             return WorkResult.FAILURE_STOP_IN_PLACE;
-        else if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
+        else if ( getEnergyStored() < (baseEnergy + target.cost) )
             return WorkResult.FAILURE_CONTINUE;
 
         FluidStack stack = tank.getFluid();
@@ -1030,9 +1036,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     @Nonnull
     @Override
     public WorkResult performWorkEntity(@Nonnull CondenserTarget target, @Nonnull World world, @Nonnull Entity entity) {
-        if ( getEnergyStored() < level.baseEnergyPerOperation )
+        if ( getEnergyStored() < baseEnergy )
             return WorkResult.FAILURE_STOP_IN_PLACE;
-        else if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
+        else if ( getEnergyStored() < (baseEnergy + target.cost) )
             return WorkResult.FAILURE_CONTINUE;
 
         FluidStack stack = tank.getFluid();
@@ -1057,9 +1063,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( stack.isEmpty() )
             return WorkResult.FAILURE_REMOVE;
 
-        if ( getEnergyStored() < level.baseEnergyPerOperation )
+        if ( getEnergyStored() < baseEnergy )
             return WorkResult.FAILURE_STOP_IN_PLACE;
-        else if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
+        else if ( getEnergyStored() < (baseEnergy + target.cost) )
             return WorkResult.FAILURE_CONTINUE;
 
         FluidStack fluid = tank.getFluid();
@@ -1098,7 +1104,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                 }
 
                 activeTargetsPerTick++;
-                extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                extractEnergy(baseEnergy + target.cost, false);
                 if ( remainingPerTick > 0 )
                     return WorkResult.SUCCESS_CONTINUE;
                 return WorkResult.SUCCESS_STOP;
@@ -1123,7 +1129,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             remainingPerTick -= added;
         }
 
-        int totalCost = recipe.cost + level.baseEnergyPerOperation + target.cost;
+        int totalCost = recipe.cost + baseEnergy + target.cost;
         if ( craftingTicks < recipe.ticks || craftingFluid.amount < recipe.fluid.amount || fluid.amount < craftingFluid.amount || getEnergyStored() < totalCost ) {
             if ( added > 0 ) {
                 activeTargetsPerTick++;
@@ -1174,7 +1180,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         FluidStack result = FluidUtil.tryFluidTransfer(destination, source, burstAmount == -1 ? remainingPerTick : burstAmount, true);
         if ( result != null ) {
             activeTargetsPerTick++;
-            extractEnergy(level.baseEnergyPerOperation + cost, false);
+            extractEnergy(baseEnergy + cost, false);
             if ( remainingPerTick > 0 )
                 return WorkResult.SUCCESS_CONTINUE;
             return WorkResult.SUCCESS_STOP;
@@ -1316,7 +1322,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( sideTransferAugment && redstoneControlOrDisable() )
             executeSidedTransfer();
 
-        if ( !redstoneControlOrDisable() || getEnergyStored() < level.baseEnergyPerOperation ) {
+        if ( !redstoneControlOrDisable() || getEnergyStored() < baseEnergy ) {
             setActive(false);
             updateTrackers();
             return;

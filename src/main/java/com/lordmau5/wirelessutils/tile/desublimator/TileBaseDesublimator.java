@@ -466,6 +466,12 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             calculateTargets();
     }
 
+    @Override
+    public void energyChanged() {
+        if ( world != null && !world.isRemote )
+            calculateTargets();
+    }
+
     public void setInvertAugmented(boolean augmented) {
         if ( inverted == augmented )
             return;
@@ -567,7 +573,10 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( costPerItem == 0 )
             return 0;
 
-        int budgetPerSecond = budgetPerTick * 20;
+        else if ( costPerItem == 1 )
+            return budgetPerTick;
+
+        long budgetPerSecond = budgetPerTick * 20;
         return (budgetPerSecond / (double) costPerItem) / 20;
     }
 
@@ -690,6 +699,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     @Override
     public boolean canWorkBlock(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState state, @Nullable TileEntity tile) {
+        if ( isBlacklisted(state) )
+            return false;
+
         if ( processCrops ) {
             Block block = state.getBlock();
             if ( inverted ) {
@@ -711,17 +723,21 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return false;
 
         validTargetsPerTick++;
-        maxEnergyPerTick += level.baseEnergyPerOperation + getEnergyCost(target, source);
+        maxEnergyPerTick += baseEnergy + getEnergyCost(target, source);
         return true;
     }
 
     @Override
     public boolean canWorkTile(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
+        IBlockState state = block == null ? world.getBlockState(target) : block;
+        if ( isBlacklisted(state) )
+            return false;
+
         if ( !InventoryHelper.hasItemHandlerCap(tile, target.getFacing()) )
             return false;
 
         validTargetsPerTick++;
-        maxEnergyPerTick += level.baseEnergyPerOperation + getEnergyCost(target, source);
+        maxEnergyPerTick += baseEnergy + getEnergyCost(target, source);
         return true;
     }
 
@@ -751,7 +767,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( entity.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null) ) {
             validTargetsPerTick++;
             // TODO: Energy?
-            maxEnergyPerTick += level.baseEnergyPerOperation;
+            maxEnergyPerTick += baseEnergy;
             return true;
         }
 
@@ -772,14 +788,17 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( gatherTick != 0 )
             return WorkResult.FAILURE_CONTINUE;
 
-        if ( getEnergyStored() < level.baseEnergyPerOperation || itemStackHandler == null || remainingBudget < costPerItem )
+        if ( getEnergyStored() < baseEnergy || itemStackHandler == null || remainingBudget < costPerItem )
             return WorkResult.FAILURE_STOP_IN_PLACE;
 
-        if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
+        if ( getEnergyStored() < (baseEnergy + target.cost) )
             return WorkResult.FAILURE_CONTINUE;
 
         if ( state == null )
             state = world.getBlockState(target.pos);
+
+        if ( isBlacklisted(state) )
+            return WorkResult.FAILURE_REMOVE;
 
         Block block = state.getBlock();
         if ( processCrops ) {
@@ -811,8 +830,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                         itemsPerTick++;
                         remainingBudget -= costPerItem;
                         activeTargetsPerTick++;
-                        extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                        if ( remainingBudget < costPerItem || getEnergyStored() < level.baseEnergyPerOperation )
+                        extractEnergy(baseEnergy + target.cost, false);
+                        if ( remainingBudget < costPerItem || getEnergyStored() < baseEnergy )
                             return WorkResult.SUCCESS_STOP_REMOVE;
                         return WorkResult.SUCCESS_REMOVE;
                     } else
@@ -833,12 +852,12 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                         return WorkResult.FAILURE_REMOVE;
                     else {
                         activeTargetsPerTick++;
-                        extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                        extractEnergy(baseEnergy + target.cost, false);
                         if ( result == IHarvestBehavior.HarvestResult.HUGE_SUCCESS )
                             return WorkResult.SUCCESS_STOP_REMOVE;
                         else if ( result == IHarvestBehavior.HarvestResult.PROGRESS )
                             return WorkResult.SUCCESS_STOP_IN_PLACE;
-                        else if ( remainingBudget < costPerItem || getEnergyStored() < level.baseEnergyPerOperation ) {
+                        else if ( remainingBudget < costPerItem || getEnergyStored() < baseEnergy ) {
                             return WorkResult.SUCCESS_STOP_REMOVE;
                         } else
                             return WorkResult.SUCCESS_REMOVE;
@@ -877,8 +896,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                             itemsPerTick++;
                             remainingBudget -= costPerItem;
                             activeTargetsPerTick++;
-                            extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                            if ( remainingBudget < costPerItem || getEnergyStored() < level.baseEnergyPerOperation )
+                            extractEnergy(baseEnergy + target.cost, false);
+                            if ( remainingBudget < costPerItem || getEnergyStored() < baseEnergy )
                                 return WorkResult.SUCCESS_STOP;
                             return WorkResult.SUCCESS_CONTINUE;
                         } else
@@ -947,8 +966,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 world.setBlockToAir(target.pos);
 
                 activeTargetsPerTick++;
-                extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                if ( remainingBudget < costPerItem || getEnergyStored() < level.baseEnergyPerOperation )
+                extractEnergy(baseEnergy + target.cost, false);
+                if ( remainingBudget < costPerItem || getEnergyStored() < baseEnergy )
                     return WorkResult.SUCCESS_STOP_REMOVE;
                 return WorkResult.SUCCESS_REMOVE;
 
@@ -974,18 +993,24 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                     player.setHeldItem(EnumHand.MAIN_HAND, stack);
                     player.rotationYaw = opposite.getHorizontalAngle();
 
+                    BlockPos targetPos = target.pos;
+
                     Item item = stack.getItem();
                     if ( item instanceof ItemBed || item instanceof ItemDoor )
                         opposite = EnumFacing.UP;
 
-                    EnumActionResult result = ForgeHooks.onPlaceItemIntoWorld(stack, player, world, target.pos, opposite, 0.5F, 0.5F, 0.5F, EnumHand.MAIN_HAND);
+                    else if ( item instanceof ItemFlintAndSteel ) {
+                        targetPos = targetPos.offset(facing);
+                    }
+
+                    EnumActionResult result = ForgeHooks.onPlaceItemIntoWorld(stack, player, world, targetPos, opposite, 0.5F, 0.5F, 0.5F, EnumHand.MAIN_HAND);
 
                     if ( result == EnumActionResult.SUCCESS ) {
                         itemsPerTick++;
                         remainingBudget -= costPerItem;
                         activeTargetsPerTick++;
-                        extractEnergy(level.baseEnergyPerOperation + target.cost, false);
-                        if ( remainingBudget < costPerItem || getEnergyStored() < level.baseEnergyPerOperation )
+                        extractEnergy(baseEnergy + target.cost, false);
+                        if ( remainingBudget < costPerItem || getEnergyStored() < baseEnergy )
                             return WorkResult.SUCCESS_STOP_REMOVE;
                         return WorkResult.SUCCESS_REMOVE;
                     }
@@ -1032,7 +1057,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 if ( fullGather ) {
                     BlockPos itemPos = item.getPosition();
                     if ( !visitedTargets.contains(itemPos) ) {
-                        cost = level.baseEnergyPerOperation + getEnergyCost(pos.getDistance(itemPos.getX(), itemPos.getY(), itemPos.getZ()), item.world != world);
+                        cost = baseEnergy + getEnergyCost(pos.getDistance(itemPos.getX(), itemPos.getY(), itemPos.getZ()), item.world != world);
                         if ( cost > storedEnergy )
                             continue;
 
@@ -1077,11 +1102,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
             if ( gathered ) {
                 if ( !fullGather ) {
-                    extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+                    extractEnergy(baseEnergy + target.cost, false);
                     activeTargetsPerTick++;
                 }
 
-                if ( remainingBudget < costPerItem || getEnergyStored() < level.baseEnergyPerOperation )
+                if ( remainingBudget < costPerItem || getEnergyStored() < baseEnergy )
                     return WorkResult.SUCCESS_STOP;
 
                 return WorkResult.SUCCESS_CONTINUE;
@@ -1113,12 +1138,12 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             CoreUtils.dropItemStackIntoWorld(move, world, new Vec3d(target.pos));
             stack.shrink(count);
             itemStackHandler.setStackInSlot(i, stack);
-            extractEnergy(level.baseEnergyPerOperation + target.cost, false);
+            extractEnergy(baseEnergy + target.cost, false);
             activeTargetsPerTick++;
             itemsPerTick += count;
             remainingBudget -= (count * costPerItem);
 
-            if ( remainingBudget < costPerItem || getEnergyStored() < level.baseEnergyPerOperation )
+            if ( remainingBudget < costPerItem || getEnergyStored() < baseEnergy )
                 return WorkResult.SUCCESS_STOP;
 
             return WorkResult.SUCCESS_CONTINUE;
@@ -1138,10 +1163,10 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     @Nonnull
     public WorkResult performWorkEntity(@Nonnull DesublimatorTarget target, @Nonnull World world, @Nonnull Entity entity) {
-        if ( getEnergyStored() < level.baseEnergyPerOperation || itemStackHandler == null || remainingBudget < costPerItem )
+        if ( getEnergyStored() < baseEnergy || itemStackHandler == null || remainingBudget < costPerItem )
             return WorkResult.FAILURE_STOP_IN_PLACE;
 
-        if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
+        if ( getEnergyStored() < (baseEnergy + target.cost) )
             return WorkResult.FAILURE_CONTINUE;
 
         IItemHandler handler = entity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
@@ -1158,7 +1183,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
         int result = transferToInventory(source, dest, itemRatePerTarget, target.cost, true, true);
         if ( result == 2 ) {
-            if ( remainingBudget < costPerItem || getEnergyStored() < level.baseEnergyPerOperation )
+            if ( remainingBudget < costPerItem || getEnergyStored() < baseEnergy )
                 return WorkResult.SUCCESS_STOP;
 
             return WorkResult.SUCCESS_CONTINUE;
@@ -1170,10 +1195,10 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     @Nonnull
     public WorkResult performWorkTile(@Nonnull DesublimatorTarget target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile) {
-        if ( getEnergyStored() < level.baseEnergyPerOperation || itemStackHandler == null || remainingBudget < costPerItem )
+        if ( getEnergyStored() < baseEnergy || itemStackHandler == null || remainingBudget < costPerItem )
             return WorkResult.FAILURE_STOP_IN_PLACE;
 
-        if ( getEnergyStored() < (level.baseEnergyPerOperation + target.cost) )
+        if ( getEnergyStored() < (baseEnergy + target.cost) )
             return WorkResult.FAILURE_CONTINUE;
 
         IItemHandler handler = InventoryHelper.getItemHandlerCap(tile, target.pos.getFacing());
@@ -1190,7 +1215,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
         int result = transferToInventory(source, dest, itemRatePerTarget, target.cost, true, true);
         if ( result == 2 ) {
-            if ( remainingBudget < costPerItem || getEnergyStored() < level.baseEnergyPerOperation )
+            if ( remainingBudget < costPerItem || getEnergyStored() < baseEnergy )
                 return WorkResult.SUCCESS_STOP;
 
             return WorkResult.SUCCESS_CONTINUE;
@@ -1231,7 +1256,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 source.extractItem(i, inserted, false);
 
                 if ( drainEnergy )
-                    extractEnergy(level.baseEnergyPerOperation + cost, false);
+                    extractEnergy(baseEnergy + cost, false);
 
                 if ( doWorkStats ) {
                     activeTargetsPerTick++;
@@ -1405,7 +1430,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( sideTransferAugment && redstoneControlOrDisable() && (inverted ? empty < totalSlots : full < totalSlots) )
             executeSidedTransfer();
 
-        if ( !redstoneControlOrDisable() || !canRun || getEnergyStored() < level.baseEnergyPerOperation ) {
+        if ( !redstoneControlOrDisable() || !canRun || getEnergyStored() < baseEnergy ) {
             setActive(false);
             updateTrackers();
             return;
@@ -1665,6 +1690,23 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     /* Target Info */
+
+    public static boolean isBlacklisted(IBlockState state) {
+        if ( state == null )
+            return false;
+
+        Block block = state.getBlock();
+        int metadata = block.getMetaFromState(state);
+
+        String name = block.getRegistryName().toString().toLowerCase();
+        String name_meta = name + "@" + metadata;
+
+        for (String key : ModConfig.desublimators.blockBlacklist)
+            if ( key.equals(name) || key.equals(name_meta) )
+                return true;
+
+        return false;
+    }
 
     public static class DesublimatorTarget extends TargetInfo {
         public final int cost;
