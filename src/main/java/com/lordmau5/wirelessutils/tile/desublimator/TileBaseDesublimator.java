@@ -9,6 +9,7 @@ import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.block.BlockDirectionalAir;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
+import com.lordmau5.wirelessutils.tile.base.IConfigurableWorldTickRate;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
@@ -98,6 +99,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implements
+        IConfigurableWorldTickRate,
         IWorldAugmentable, IBlockAugmentable, IChunkLoadAugmentable, IDispenserAugmentable,
         ICropAugmentable, IInvertAugmentable, ITransferAugmentable, ICapacityAugmentable,
         IUnlockableSlots, IRoundRobinMachine, ITickable, ISidedTransfer, ISidedTransferAugmentable,
@@ -125,6 +127,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     private boolean fullGather;
     private byte gatherTick;
+    private int gatherTickRate = -1;
 
     private int itemsPerTick;
     private int remainingBudget;
@@ -187,6 +190,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         System.out.println("Capacity Augment: " + capacityAugment);
         System.out.println("      Iter. Mode: " + iterationMode);
         System.out.println("     Round Robin: " + roundRobin);
+        System.out.println(" World Tick Rate: " + gatherTickRate);
         System.out.println("       Item Cost: " + costPerItem);
         System.out.println("          Budget: " + remainingBudget + " (max: " + maximumBudget + ")");
         System.out.println("        Budget/t: " + budgetPerTick);
@@ -758,12 +762,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return false;
 
         if ( processCrops ) {
-            Block block = state.getBlock();
             if ( inverted ) {
                 if ( world.isAirBlock(target) )
                     return false;
 
-                IHarvestBehavior behavior = BehaviorManager.getBehavior(block);
+                IHarvestBehavior behavior = BehaviorManager.getBehavior(state);
                 if ( behavior == null )
                     return false;
 
@@ -771,6 +774,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                     return false;
 
             } else {
+                Block block = state.getBlock();
                 if ( !world.isAirBlock(target) && !(block instanceof IPlantable || block instanceof IGrowable) )
                     return false;
             }
@@ -813,12 +817,22 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return false;
 
         // Bonemeal
-        if ( stack.getItem().equals(Items.DYE) && stack.getMetadata() == 15 )
+        Item item = stack.getItem();
+        if ( item.equals(Items.DYE) && stack.getMetadata() == 15 )
             return true;
 
-        ResourceLocation name = stack.getItem().getRegistryName();
-        if ( name != null && name.toString().equalsIgnoreCase("thermalfoundation:fertilizer") )
-            return true;
+        ResourceLocation rl = item.getRegistryName();
+        String name = rl == null ? null : rl.toString().toLowerCase();
+
+        if ( name != null ) {
+            if ( name.equals("thermalfoundation:fertilizer") )
+                return true;
+
+            String name_meta = name + "@" + stack.getMetadata();
+            for (String key : ModConfig.augments.crop.extraFertilizers)
+                if ( key.equals(name) || key.equals(name_meta) )
+                    return true;
+        }
 
         // Theoretical Ore Dictionary Stuff
         int id = OreDictionary.getOreID("fertilizer");
@@ -921,7 +935,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
             } else if ( !isAir ) {
                 if ( inverted ) {
-                    IHarvestBehavior behavior = BehaviorManager.getBehavior(block);
+                    IHarvestBehavior behavior = BehaviorManager.getBehavior(state);
                     if ( behavior == null )
                         return WorkResult.FAILURE_REMOVE;
 
@@ -1505,6 +1519,52 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         transferToInventory(source, dest, maximumBudget / costPerItem, 0, false, false);
     }
 
+    /* IConfigurableWorldTickRate */
+
+    public boolean hasWorldTick() {
+        return shouldProcessBlocks();
+    }
+
+    public int getWorldTickRate() {
+        return gatherTickRate;
+    }
+
+    public int getMinWorldTickRate() {
+        return level.gatherTicks;
+    }
+
+    public void setWorldTickRate(int value) {
+        int max = getMaxWorldTickRate();
+        if ( value > max )
+            value = max;
+
+        int min = getMinWorldTickRate();
+        if ( value <= min )
+            value = -1;
+
+        if ( gatherTickRate == value )
+            return;
+
+        gatherTickRate = value;
+        if ( world != null && !world.isRemote )
+            markChunkDirty();
+    }
+
+    public int getActualWorldTickRate() {
+        if ( gatherTickRate == -1 )
+            return level.gatherTicks;
+
+        int min = getMinWorldTickRate();
+        if ( gatherTickRate == -1 || gatherTickRate < min )
+            return min;
+
+        int max = getMaxWorldTickRate();
+        if ( gatherTickRate > max )
+            return max;
+
+        return gatherTickRate;
+    }
+
     /* ITickable */
 
     @Override
@@ -1522,7 +1582,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
         gatherTick--;
         if ( gatherTick < 0 )
-            gatherTick = 10;
+            gatherTick = (byte) getActualWorldTickRate();
 
         itemsPerTick = 0;
         energyPerTick = 0;
@@ -1653,12 +1713,14 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
         remainingBudget = tag.getInteger("Budget");
+        gatherTick = tag.getByte("GatherTick");
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         NBTTagCompound out = super.writeToNBT(tag);
         out.setInteger("Budget", remainingBudget);
+        out.setByte("GatherTick", gatherTick);
         return out;
     }
 
@@ -1666,6 +1728,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     public void readExtraFromNBT(NBTTagCompound tag) {
         super.readExtraFromNBT(tag);
         iterationMode = IterationMode.fromInt(tag.getByte("IterationMode"));
+        gatherTickRate = tag.hasKey("WorldTickRate") ? tag.getInteger("WorldTickRate") : -1;
         roundRobin = tag.hasKey("RoundRobin") ? tag.getInteger("RoundRobin") : -1;
         itemRatePerTarget = calculateMaxPerTarget();
 
@@ -1692,6 +1755,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     public NBTTagCompound writeExtraToNBT(NBTTagCompound tag) {
         tag = super.writeExtraToNBT(tag);
         tag.setByte("IterationMode", (byte) iterationMode.ordinal());
+        if ( gatherTickRate != -1 )
+            tag.setInteger("WorldTickRate", gatherTickRate);
+
         if ( roundRobin >= 0 )
             tag.setInteger("RoundRobin", roundRobin);
 
@@ -1729,6 +1795,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         payload.addShort(activeTargetsPerTick);
         payload.addByte(iterationMode.ordinal());
         payload.addInt(roundRobin);
+        payload.addInt(gatherTickRate);
         payload.addInt(itemsPerTick);
 
         return payload;
@@ -1748,6 +1815,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         activeTargetsPerTick = payload.getShort();
         setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getInt());
+        setWorldTickRate(payload.getInt());
         itemsPerTick = payload.getInt();
     }
 
@@ -1759,6 +1827,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             payload.addItemStack(locks[i] == null ? ItemStack.EMPTY : locks[i].toItemStack());
         payload.addByte(iterationMode.ordinal());
         payload.addInt(roundRobin);
+        payload.addInt(gatherTickRate);
         for (int i = 0; i < sideTransfer.length; i++)
             payload.addByte(sideTransfer[i].index);
         return payload;
@@ -1772,6 +1841,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             setLock(i, payload.getItemStack());
         setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getInt());
+        setWorldTickRate(payload.getInt());
 
         for (int i = 0; i < sideTransfer.length; i++)
             setSideTransferMode(i, Mode.byIndex(payload.getByte()));

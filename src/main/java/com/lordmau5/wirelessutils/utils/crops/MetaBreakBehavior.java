@@ -1,29 +1,43 @@
 package com.lordmau5.wirelessutils.utils.crops;
 
+import com.google.common.collect.ImmutableSet;
 import com.lordmau5.wirelessutils.tile.desublimator.TileBaseDesublimator;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockMelon;
-import net.minecraft.block.BlockPumpkin;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class PumpkinMelonBehavior implements IHarvestBehavior {
+import java.util.Set;
 
-    public boolean appliesTo(Block block) {
-        return block instanceof BlockMelon || block instanceof BlockPumpkin;
+public class MetaBreakBehavior implements IHarvestBehavior {
+
+    public final Set<IBlockState> targets;
+
+    public int priority = 0;
+
+    public MetaBreakBehavior(IBlockState... targets) {
+        this(ImmutableSet.copyOf(targets));
+    }
+
+    public MetaBreakBehavior(Set<IBlockState> targets) {
+        this.targets = targets;
     }
 
     @Override
+    public int getPriority() {
+        return priority;
+    }
+
+    public boolean appliesTo(IBlockState state) {
+        return targets.contains(state);
+    }
+
     public boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
         if ( TileBaseDesublimator.isBlacklisted(state) )
             return false;
 
-        Block block = state.getBlock();
-        return block instanceof BlockMelon || block instanceof BlockPumpkin;
+        return targets.contains(state);
     }
 
-    @Override
     public HarvestResult harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
         return harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator) ?
                 HarvestResult.SUCCESS : HarvestResult.FAILED;

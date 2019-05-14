@@ -8,6 +8,7 @@ import cofh.core.util.helpers.InventoryHelper;
 import cofh.core.util.helpers.MathHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
+import com.lordmau5.wirelessutils.tile.base.IConfigurableWorldTickRate;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
@@ -71,6 +72,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy implements
+        IConfigurableWorldTickRate,
         IChunkLoadAugmentable, IRoundRobinMachine, IWorldAugmentable, ITransferAugmentable,
         ICapacityAugmentable, IInventoryAugmentable, IInvertAugmentable, ITickable,
         IFluidGenAugmentable, ISidedTransfer, ISidedTransferAugmentable,
@@ -101,6 +103,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     private FluidStack craftingFluid = null;
     private int craftingTicks = 0;
     private byte gatherTick = 0;
+    private int gatherTickRate = -1;
 
     private int remainingPerTick;
     private int fluidPerTick;
@@ -368,6 +371,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         System.out.println("       Inverted: " + inverted);
         System.out.println("     Iter. Mode: " + iterationMode);
         System.out.println("    Round Robin: " + roundRobin);
+        System.out.println("World Tick Rate: " + gatherTickRate);
         System.out.println(" Max Fluid Rate: " + fluidMaxRate);
         System.out.println(" Fluid per Tick: " + fluidPerTick);
         System.out.println("  Valid Targets: " + validTargetsPerTick);
@@ -1318,6 +1322,52 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             FluidUtil.tryFluidTransfer(fluidHandler, handler, fluidRate, true);
     }
 
+    /* IConfigurableWorldTickRate */
+
+    public boolean hasWorldTick() {
+        return shouldProcessBlocks();
+    }
+
+    public int getWorldTickRate() {
+        return gatherTickRate;
+    }
+
+    public int getMinWorldTickRate() {
+        return level.gatherTicks;
+    }
+
+    public void setWorldTickRate(int value) {
+        int max = getMaxWorldTickRate();
+        if ( value > max )
+            value = max;
+
+        int min = getMinWorldTickRate();
+        if ( value <= min )
+            value = -1;
+
+        if ( gatherTickRate == value )
+            return;
+
+        gatherTickRate = value;
+        if ( world != null && !world.isRemote )
+            markChunkDirty();
+    }
+
+    public int getActualWorldTickRate() {
+        if ( gatherTickRate == -1 )
+            return level.gatherTicks;
+
+        int min = getMinWorldTickRate();
+        if ( gatherTickRate == -1 || gatherTickRate < min )
+            return min;
+
+        int max = getMaxWorldTickRate();
+        if ( gatherTickRate > max )
+            return max;
+
+        return gatherTickRate;
+    }
+
     public void update() {
         super.update();
 
@@ -1325,7 +1375,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         gatherTick--;
         if ( gatherTick < 0 )
-            gatherTick = 10;
+            gatherTick = (byte) getActualWorldTickRate();
 
         burstTick = false;
         activeTargetsPerTick = 0;
@@ -1374,6 +1424,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         super.readFromNBT(tag);
         burstAmount = tag.hasKey("Burst") ? tag.getInteger("Burst") : -1;
         craftingTicks = tag.getInteger("CraftingTicks");
+        gatherTick = tag.getByte("GatherTick");
         NBTTagCompound crafting = tag.hasKey("CraftingFluid") ? tag.getCompoundTag("CraftingFluid") : null;
         if ( crafting != null )
             craftingFluid = FluidStack.loadFluidStackFromNBT(crafting);
@@ -1384,6 +1435,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         tag = super.writeToNBT(tag);
         tag.setInteger("Burst", burstAmount);
         tag.setInteger("CraftingTicks", craftingTicks);
+        tag.setByte("GatherTick", gatherTick);
         if ( craftingFluid != null && craftingFluid.amount > 0 ) {
             NBTTagCompound fluid = new NBTTagCompound();
             craftingFluid.writeToNBT(fluid);
@@ -1397,6 +1449,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         super.readExtraFromNBT(tag);
         tank.readFromNBT(tag);
         iterationMode = IterationMode.fromInt(tag.getByte("IterationMode"));
+        gatherTickRate = tag.hasKey("WorldTickRate") ? tag.getInteger("WorldTickRate") : -1;
         roundRobin = tag.hasKey("RoundRobin") ? tag.getInteger("RoundRobin") : -1;
         fluidRate = calculateFluidRate();
 
@@ -1425,6 +1478,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         tag = super.writeExtraToNBT(tag);
         tank.writeToNBT(tag);
         tag.setByte("IterationMode", (byte) iterationMode.ordinal());
+        if ( gatherTickRate != -1 )
+            tag.setInteger("WorldTickRate", gatherTickRate);
+
         if ( roundRobin >= 0 )
             tag.setInteger("RoundRobin", roundRobin);
 
@@ -1472,6 +1528,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         payload.addInt(activeTargetsPerTick);
         payload.addByte(iterationMode.ordinal());
         payload.addInt(roundRobin);
+        payload.addInt(gatherTickRate);
         payload.addInt(fluidPerTick);
         payload.addBool(locked);
         payload.addFluidStack(lockStack);
@@ -1488,6 +1545,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         activeTargetsPerTick = payload.getInt();
         setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getInt());
+        setWorldTickRate(payload.getInt());
         fluidPerTick = payload.getInt();
 
         boolean locked = payload.getBool();
@@ -1505,6 +1563,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         payload.addFluidStack(lockStack);
         payload.addByte(iterationMode.ordinal());
         payload.addInt(roundRobin);
+        payload.addInt(gatherTickRate);
         for (int i = 0; i < sideTransfer.length; i++)
             payload.addByte(sideTransfer[i].index);
         return payload;
@@ -1522,6 +1581,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         setIterationMode(IterationMode.fromInt(payload.getByte()));
         setRoundRobin(payload.getInt());
+        setWorldTickRate(payload.getInt());
 
         for (int i = 0; i < sideTransfer.length; i++)
             setSideTransferMode(i, Mode.byIndex(payload.getByte()));

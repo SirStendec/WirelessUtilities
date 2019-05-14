@@ -13,6 +13,7 @@ import com.lordmau5.wirelessutils.gui.client.elements.TabChargerConfiguration;
 import com.lordmau5.wirelessutils.gui.client.elements.TabRoundRobin;
 import com.lordmau5.wirelessutils.gui.client.elements.TabSideControl;
 import com.lordmau5.wirelessutils.gui.client.elements.TabWorkInfo;
+import com.lordmau5.wirelessutils.gui.client.elements.TabWorldTickRate;
 import com.lordmau5.wirelessutils.gui.container.charger.ContainerChunkCharger;
 import com.lordmau5.wirelessutils.tile.charger.TileEntityChunkCharger;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -42,6 +43,7 @@ public class GuiChunkCharger extends BaseGuiContainer {
 
         addTab(new TabWorkInfo(this, charger).setIcon(CoreTextures.ICON_ENERGY));
         addTab(new TabChargerConfiguration(this, charger));
+        addTab(new TabWorldTickRate(this, charger));
         addTab(new TabInfo(this, myInfo));
 
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));

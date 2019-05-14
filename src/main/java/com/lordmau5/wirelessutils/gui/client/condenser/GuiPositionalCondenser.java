@@ -16,6 +16,7 @@ import com.lordmau5.wirelessutils.gui.client.elements.TabAugmentTwoElectricBooga
 import com.lordmau5.wirelessutils.gui.client.elements.TabRoundRobin;
 import com.lordmau5.wirelessutils.gui.client.elements.TabSideControl;
 import com.lordmau5.wirelessutils.gui.client.elements.TabWorkInfo;
+import com.lordmau5.wirelessutils.gui.client.elements.TabWorldTickRate;
 import com.lordmau5.wirelessutils.gui.container.condenser.ContainerPositionalCondenser;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityPositionalCondenser;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -55,6 +56,7 @@ public class GuiPositionalCondenser extends BaseGuiPositional {
 
         addTab(new TabEnergy(this, condenser, false));
         workInfo = (TabWorkInfo) addTab(new TabWorkInfo(this, condenser).setItem(BUCKET));
+        addTab(new TabWorldTickRate(this, condenser));
         addTab(new TabInfo(this, myInfo));
 
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));

@@ -28,9 +28,8 @@ public class TreeBehavior implements IHarvestBehavior {
 
     private final ItemStack SHEARS = new ItemStack(Items.SHEARS);
 
-    @Override
-    public boolean appliesTo(Block block) {
-        return block instanceof BlockLog;
+    public boolean appliesTo(IBlockState state) {
+        return state.getBlock() instanceof BlockLog;
     }
 
     @Override
@@ -72,7 +71,6 @@ public class TreeBehavior implements IHarvestBehavior {
         return true;
     }
 
-    @Override
     public HarvestResult harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
         if ( world == null || desublimator == null )
             return HarvestResult.FAILED;

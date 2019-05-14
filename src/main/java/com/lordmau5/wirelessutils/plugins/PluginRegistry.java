@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.plugins;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics2Plugin;
 import com.lordmau5.wirelessutils.plugins.CraftTweaker.CraftTweakerPlugin;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.RefinedStoragePlugin;
+import com.lordmau5.wirelessutils.plugins.SimpleCorn.SimpleCornPlugin;
 import com.lordmau5.wirelessutils.plugins.TConstruct.TConstructPlugin;
 import com.lordmau5.wirelessutils.plugins.TheOneProbe.TOPPlugin;
 import com.lordmau5.wirelessutils.plugins.Waila.WailaPlugin;
@@ -53,6 +54,9 @@ public class PluginRegistry {
         if ( Loader.isModLoaded("appliedenergistics2") ) {
             addPlugin("appliedenergistics2", new AppliedEnergistics2Plugin());
         }
+
+        if ( Loader.isModLoaded("simplecorn") )
+            addPlugin("simplecorn", new SimpleCornPlugin());
     }
 
     public static void preInit(FMLPreInitializationEvent event) {

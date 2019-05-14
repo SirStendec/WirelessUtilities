@@ -38,7 +38,7 @@ public interface IHarvestBehavior {
         return 0;
     }
 
-    boolean appliesTo(Block block);
+    boolean appliesTo(IBlockState state);
 
     boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator);
 

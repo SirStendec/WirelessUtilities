@@ -168,6 +168,14 @@ public class LevelWrapper implements ILevelWrapper {
         return level.costPerItem;
     }
 
+    public void setWorldTickRate(int ticks) {
+        level.gatherTicks = (byte) ticks;
+    }
+
+    public int getWorldTickRate() {
+        return level.gatherTicks;
+    }
+
     public int getIndex() {
         return level.toInt();
     }

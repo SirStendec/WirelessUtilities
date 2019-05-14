@@ -331,6 +331,11 @@ info.wirelessutils.round_robin.name=Round Robin
 info.wirelessutils.round_robin.per_target=Per Target:
 info.wirelessutils.round_robin.maximum=Maximum
 
+info.wirelessutils.world_tick.name=World Tick Rate
+info.wirelessutils.world_tick.minimum=Minimum
+info.wirelessutils.world_tick.ticks=%s Ticks
+info.wirelessutils.world_tick.frequency=Run Every:
+
 info.wirelessutils.work_info.name=Work
 info.wirelessutils.work_info.tooltip.rate=Rate: %s
 info.wirelessutils.work_info.tooltip.targets=Targets: %s of %s
@@ -380,6 +385,8 @@ btn.wirelessutils.range.width=Width:
 
 info.wirelessutils.slot_lock=This item cannot be removed.
 info.wirelessutils.max=Max: %s
+info.wirelessutils.min=Min: %s
+info.wirelessutils.range=Range: %s to %s
 
 info.wirelessutils.blockpos.full=X: %s Y: %s Z: %s D: %s
 info.wirelessutils.blockpos.basic=X: %s Y: %s Z: %s

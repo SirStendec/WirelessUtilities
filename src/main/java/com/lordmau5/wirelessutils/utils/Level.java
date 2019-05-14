@@ -16,12 +16,12 @@ public class Level {
     private static final ArrayList<Level> levels = new ArrayList<>();
 
     static {
-        addLevel(new Level(1, EnumRarity.COMMON, 0xFFFFFF, 5000, 100000, 10, 5, 5000, 25, 4000, 4, 4, 1));
-        addLevel(new Level(2, EnumRarity.COMMON, 0xFF0000, 10000, 200000, 15, 10, 10000, 100, 16000, 8, 8, 1));
-        addLevel(new Level(3, EnumRarity.UNCOMMON, 0xFFFF00, 25000, 500000, 30, 20, 25000, 250, 40000, 16, 16, 1));
-        addLevel(new Level(4, EnumRarity.UNCOMMON, 0x00FF00, 100000, 2000000, 60, 50, 50000, 1000, 160000, 32, 32, 1));
-        addLevel(new Level(6, EnumRarity.RARE, 0x00FFFF, 1000000, 20000000, 120, 100, 200000, 16000, 2560000, 64, 64, 1));
-        addLevel(new Level(9, EnumRarity.EPIC, 0xFF00FF, Long.MAX_VALUE, Long.MAX_VALUE, Integer.MAX_VALUE, 5, Long.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 1, true));
+        addLevel(new Level(1, EnumRarity.COMMON, 0xFFFFFF, 5000, 100000, 10, 5, (byte) 30, 5000, 25, 4000, 4, 4, 1));
+        addLevel(new Level(2, EnumRarity.COMMON, 0xFF0000, 10000, 200000, 15, 10, (byte) 20, 10000, 100, 16000, 8, 8, 1));
+        addLevel(new Level(3, EnumRarity.UNCOMMON, 0xFFFF00, 25000, 500000, 30, 20, (byte) 15, 25000, 250, 40000, 16, 16, 1));
+        addLevel(new Level(4, EnumRarity.UNCOMMON, 0x00FF00, 100000, 2000000, 60, 50, (byte) 10, 50000, 1000, 160000, 32, 32, 1));
+        addLevel(new Level(6, EnumRarity.RARE, 0x00FFFF, 1000000, 20000000, 120, 100, (byte) 5, 200000, 16000, 2560000, 64, 64, 1));
+        addLevel(new Level(9, EnumRarity.EPIC, 0xFF00FF, Long.MAX_VALUE, Long.MAX_VALUE, Integer.MAX_VALUE, 5, (byte) 0, Long.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 1, true));
     }
 
     public static Level getMinLevel() {
@@ -114,6 +114,7 @@ public class Level {
     // Other Machines
     public long maxEnergyCapacity;
     public int baseEnergyPerOperation;
+    public byte gatherTicks;
 
     // Condensers
     public int maxCondenserCapacity;
@@ -125,25 +126,25 @@ public class Level {
     public int costPerItem;
 
     public Level(int augmentSlots, EnumRarity rarity, int color, long maxChargerTransfer,
-                 long maxChargerCapacity, int craftingTPT, int baseEnergyPerOperation,
+                 long maxChargerCapacity, int craftingTPT, int baseEnergyPerOperation, byte gatherTicks,
                  long maxEnergyCapacity, int maxCondenserTransfer, int maxCondenserCapacity, int budgetPerTick, int maxBudget, int costPerItem) {
-        this(null, augmentSlots, rarity, color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, budgetPerTick, maxBudget, costPerItem, false);
+        this(null, augmentSlots, rarity, color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, gatherTicks, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, budgetPerTick, maxBudget, costPerItem, false);
     }
 
     public Level(String name, int augmentSlots, EnumRarity rarity, int color, long maxChargerTransfer,
-                 long maxChargerCapacity, int craftingTPT, int baseEnergyPerOperation,
+                 long maxChargerCapacity, int craftingTPT, int baseEnergyPerOperation, byte gatherTicks,
                  long maxEnergyCapacity, int maxCondenserTransfer, int maxCondenserCapacity, int budgetPerTick, int maxBudget, int costPerItem) {
-        this(name, augmentSlots, rarity, color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, budgetPerTick, maxBudget, costPerItem, false);
+        this(name, augmentSlots, rarity, color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, gatherTicks, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, budgetPerTick, maxBudget, costPerItem, false);
     }
 
     public Level(int augmentSlots, EnumRarity rarity, int color, long maxChargerTransfer,
-                 long maxChargerCapacity, int craftingTPT, int baseEnergyPerOperation, long maxEnergyCapacity,
+                 long maxChargerCapacity, int craftingTPT, int baseEnergyPerOperation, byte gatherTicks, long maxEnergyCapacity,
                  int maxCondenserTransfer, int maxCondenserCapacity, int budgetPerTick, int maxBudget, int costPerItem, boolean isCreative) {
-        this(null, augmentSlots, rarity, color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, budgetPerTick, maxBudget, costPerItem, isCreative);
+        this(null, augmentSlots, rarity, color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, gatherTicks, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, budgetPerTick, maxBudget, costPerItem, isCreative);
     }
 
     public Level(String name, int augmentSlots, EnumRarity rarity, int color, long maxChargerTransfer,
-                 long maxChargerCapacity, int craftingTPT, int baseEnergyPerOperation,
+                 long maxChargerCapacity, int craftingTPT, int baseEnergyPerOperation, byte gatherTicks,
                  long maxEnergyCapacity, int maxCondenserTransfer, int maxCondenserCapacity,
                  int budgetPerTick, int maxBudget, int costPerItem, boolean isCreative) {
         this.name = name;
@@ -156,6 +157,7 @@ public class Level {
         this.craftingTPT = craftingTPT;
         this.maxEnergyCapacity = maxEnergyCapacity;
         this.baseEnergyPerOperation = baseEnergyPerOperation;
+        this.gatherTicks = gatherTicks;
         this.maxCondenserTransfer = maxCondenserTransfer;
         this.maxCondenserCapacity = maxCondenserCapacity;
         this.budgetPerTick = budgetPerTick;

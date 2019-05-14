@@ -7,13 +7,23 @@ import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
 import com.lordmau5.wirelessutils.utils.ColorHandler;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
 import com.lordmau5.wirelessutils.utils.Level;
+import com.lordmau5.wirelessutils.utils.crops.BehaviorManager;
+import com.lordmau5.wirelessutils.utils.crops.CropBehavior;
+import com.lordmau5.wirelessutils.utils.crops.MetaBreakBehavior;
+import com.lordmau5.wirelessutils.utils.crops.MetaTallBehavior;
+import com.lordmau5.wirelessutils.utils.crops.SimpleBreakBehavior;
+import com.lordmau5.wirelessutils.utils.crops.TallBehavior;
+import com.lordmau5.wirelessutils.utils.crops.TallCropBehavior;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.liquid.ILiquidStack;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumRarity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlockSpecial;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
@@ -23,6 +33,9 @@ import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CraftTweakerPlugin implements IPlugin {
     @Override
@@ -32,6 +45,7 @@ public class CraftTweakerPlugin implements IPlugin {
         CraftTweakerAPI.registerClass(LevelIntegration.class);
         CraftTweakerAPI.registerClass(PearlReactions.class);
         CraftTweakerAPI.registerClass(FluidColors.class);
+        CraftTweakerAPI.registerClass(CropBehaviors.class);
     }
 
     private static FluidStack getFluidStack(ILiquidStack stack) {
@@ -55,6 +69,117 @@ public class CraftTweakerPlugin implements IPlugin {
             return (ItemStack) internal;
 
         return ItemStack.EMPTY;
+    }
+
+    @Nullable
+    private static Set<Block> getBlockList(IItemStack[] blocks) {
+        Set<Block> targets = new HashSet<>();
+        if ( blocks != null )
+            for (IItemStack iStack : blocks) {
+                ItemStack stack = getItemStack(iStack);
+                Item item = stack.getItem();
+                Block block = item instanceof ItemBlockSpecial ? ((ItemBlockSpecial) item).getBlock() : Block.getBlockFromItem(item);
+                if ( block != null && block != Blocks.AIR )
+                    targets.add(block);
+            }
+
+        if ( targets.isEmpty() ) {
+            CraftTweakerAPI.logError("Invalid Crop Behavior: No valid blocks found. Blocks must be instances of BlockCrop");
+            return null;
+        }
+
+        return targets;
+    }
+
+    @SuppressWarnings("deprecation")
+    @Nullable
+    private static Set<IBlockState> getBlockStateList(IItemStack[] blocks) {
+        Set<IBlockState> targets = new HashSet<>();
+        if ( blocks != null )
+            for (IItemStack iStack : blocks) {
+                ItemStack stack = getItemStack(iStack);
+                Item item = stack.getItem();
+                Block block = item instanceof ItemBlockSpecial ? ((ItemBlockSpecial) item).getBlock() : Block.getBlockFromItem(item);
+                if ( block != null && block != Blocks.AIR )
+                    targets.add(block.getStateFromMeta(item.getMetadata(stack)));
+            }
+
+        if ( targets.isEmpty() ) {
+            CraftTweakerAPI.logError("Invalid Crop Behavior: No valid blocks found. Blocks must be instances of BlockCrop");
+            return null;
+        }
+
+        return targets;
+    }
+
+    @SuppressWarnings("unused")
+    @ZenClass("mods.wirelessutils.crop_behaviors")
+    public static class CropBehaviors {
+        @ZenMethod
+        public static void addBreak(int priority, IItemStack[] blocks) {
+            Set<Block> targets = getBlockList(blocks);
+            if ( targets == null )
+                return;
+
+            SimpleBreakBehavior behavior = new SimpleBreakBehavior(targets);
+            behavior.priority = priority;
+            BehaviorManager.addBehavior(behavior);
+        }
+
+        @ZenMethod
+        public static void addTall(int priority, IItemStack[] blocks, @Optional boolean breakBottom) {
+            Set<Block> targets = getBlockList(blocks);
+            if ( targets == null )
+                return;
+
+            TallBehavior behavior = new TallBehavior(targets, breakBottom);
+            behavior.priority = priority;
+            BehaviorManager.addBehavior(behavior);
+        }
+
+        @ZenMethod
+        public static void addMetaBreak(int priority, IItemStack[] blocks) {
+            Set<IBlockState> targets = getBlockStateList(blocks);
+            if ( targets == null )
+                return;
+
+            MetaBreakBehavior behavior = new MetaBreakBehavior(targets);
+            behavior.priority = priority;
+            BehaviorManager.addBehavior(behavior);
+        }
+
+        @ZenMethod
+        public static void addMetaTall(int priority, IItemStack[] blocks, @Optional boolean breakBottom) {
+            Set<IBlockState> targets = getBlockStateList(blocks);
+            if ( targets == null )
+                return;
+
+            MetaTallBehavior behavior = new MetaTallBehavior(targets, breakBottom);
+            behavior.priority = priority;
+            BehaviorManager.addBehavior(behavior);
+        }
+
+        @ZenMethod
+        public static void addCrop(int priority, IItemStack[] blocks) {
+            Set<Block> targets = getBlockList(blocks);
+            if ( targets == null )
+                return;
+
+            CropBehavior behavior = new CropBehavior(targets);
+            behavior.priority = priority;
+            BehaviorManager.addBehavior(behavior);
+        }
+
+        @ZenMethod
+        public static void addTallCrop(int priority, IItemStack[] blocks, @Optional boolean silkTouchAll) {
+            Set<Block> targets = getBlockList(blocks);
+            if ( targets == null )
+                return;
+
+            TallCropBehavior behavior = new TallCropBehavior(targets, silkTouchAll);
+            behavior.priority = priority;
+            BehaviorManager.addBehavior(behavior);
+        }
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -152,11 +277,16 @@ public class CraftTweakerPlugin implements IPlugin {
                                         @Optional long maxChargerCapacity, @Optional int craftingTPT,
                                         @Optional int baseEnergyPerOperation, @Optional long maxEnergyCapacity,
                                         @Optional int maxCondenserTransfer, @Optional int maxCondenserCapacity,
-                                        @Optional int maxItemsPerTick) {
+                                        @Optional int maxItemsPerTick, @Optional int gatherTicks) {
             augmentSlots = Math.min(9, Math.max(0, augmentSlots));
             rarity = Math.min(EnumRarity.values().length, Math.max(0, rarity));
 
-            Level level = new Level(name, augmentSlots, EnumRarity.values()[rarity], color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, maxItemsPerTick, maxItemsPerTick, 1);
+            if ( gatherTicks == 0 )
+                gatherTicks = 10;
+
+            gatherTicks = Math.min(0, Math.max(127, gatherTicks));
+
+            Level level = new Level(name, augmentSlots, EnumRarity.values()[rarity], color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, (byte) gatherTicks, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, maxItemsPerTick, maxItemsPerTick, 1);
             Level.addLevel(level);
             return new LevelWrapper(level);
         }
@@ -168,9 +298,14 @@ public class CraftTweakerPlugin implements IPlugin {
                                         @Optional long maxChargerCapacity, @Optional int craftingTPT,
                                         @Optional int baseEnergyPerOperation, @Optional long maxEnergyCapacity,
                                         @Optional int maxCondenserTransfer, @Optional int maxCondenserCapacity,
-                                        @Optional int budgetPerTick, @Optional int maxBudget, @Optional int costPerItem) {
+                                        @Optional int budgetPerTick, @Optional int maxBudget, @Optional int costPerItem, @Optional int gatherTicks) {
             augmentSlots = Math.min(9, Math.max(0, augmentSlots));
             rarity = Math.min(EnumRarity.values().length, Math.max(0, rarity));
+
+            if ( gatherTicks == 0 )
+                gatherTicks = 10;
+
+            gatherTicks = Math.min(0, Math.max(127, gatherTicks));
 
             if ( budgetPerTick == 0 && maxBudget == 0 && costPerItem == 0 ) {
                 budgetPerTick = 1;
@@ -178,7 +313,7 @@ public class CraftTweakerPlugin implements IPlugin {
                 costPerItem = 1;
             }
 
-            Level level = new Level(name, augmentSlots, EnumRarity.values()[rarity], color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, budgetPerTick, maxBudget, costPerItem);
+            Level level = new Level(name, augmentSlots, EnumRarity.values()[rarity], color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, (byte) gatherTicks, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, budgetPerTick, maxBudget, costPerItem);
             Level.addLevel(level);
             return new LevelWrapper(level);
         }

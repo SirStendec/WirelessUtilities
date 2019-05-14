@@ -106,6 +106,12 @@ public interface ILevelWrapper {
     @ZenGetter("maxItemsPerTick")
     int getMaxItemsPerTick();
 
+    @ZenSetter("worldTickRate")
+    void setWorldTickRate(int ticks);
+
+    @ZenGetter("worldTickRate")
+    int getWorldTickRate();
+
     @ZenGetter("index")
     int getIndex();
 }

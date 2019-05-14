@@ -16,6 +16,7 @@ import com.lordmau5.wirelessutils.gui.client.elements.TabAugmentTwoElectricBooga
 import com.lordmau5.wirelessutils.gui.client.elements.TabRoundRobin;
 import com.lordmau5.wirelessutils.gui.client.elements.TabSideControl;
 import com.lordmau5.wirelessutils.gui.client.elements.TabWorkInfo;
+import com.lordmau5.wirelessutils.gui.client.elements.TabWorldTickRate;
 import com.lordmau5.wirelessutils.gui.container.desublimator.ContainerPositionalDesublimator;
 import com.lordmau5.wirelessutils.tile.desublimator.TilePositionalDesublimator;
 import com.lordmau5.wirelessutils.utils.ItemStackHandler;
@@ -52,6 +53,7 @@ public class GuiPositionalDesublimator extends BaseGuiPositional {
 
         addTab(new TabEnergy(this, desublimator, false));
         addTab(new TabWorkInfo(this, desublimator).setItem(CHEST));
+        addTab(new TabWorldTickRate(this, desublimator));
         addTab(new TabInfo(this, myInfo));
 
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));

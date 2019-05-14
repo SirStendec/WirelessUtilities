@@ -467,6 +467,11 @@ public class ModConfig {
         @Config.Name("Automatically Till Ground")
         @Config.Comment("Whether or not Crop Augments should automatically till dirt and grass.")
         public boolean automaticallyTill = false;
+
+        @Config.Name("Additional Fertilizers")
+        @Config.Comment("Any items listed here will be treated as fertilizers, even if they aren't automatically detected as such.")
+        @Config.RequiresWorldRestart
+        public String[] extraFertilizers = {};
     }
 
     public static class BlockAugments {
