@@ -2,6 +2,7 @@ package com.lordmau5.wirelessutils.proxy;
 
 import com.google.common.collect.ImmutableSet;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.block.BlockDirectionalAir;
 import com.lordmau5.wirelessutils.block.charger.BlockDirectionalCharger;
 import com.lordmau5.wirelessutils.block.charger.BlockPositionalCharger;
 import com.lordmau5.wirelessutils.block.condenser.BlockDirectionalCondenser;
@@ -34,6 +35,7 @@ import com.lordmau5.wirelessutils.item.augment.ItemBlockAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemCapacityAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemChunkLoadAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemCropAugment;
+import com.lordmau5.wirelessutils.item.augment.ItemDispenserAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemFluidGenAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemInventoryAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemInvertAugment;
@@ -50,6 +52,7 @@ import com.lordmau5.wirelessutils.item.pearl.ItemScorchedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemStabilizedEnderPearl;
 import com.lordmau5.wirelessutils.item.upgrade.ItemConversionUpgrade;
 import com.lordmau5.wirelessutils.item.upgrade.ItemLevelUpgrade;
+import com.lordmau5.wirelessutils.packet.PacketParticleLine;
 import com.lordmau5.wirelessutils.plugins.PluginRegistry;
 import com.lordmau5.wirelessutils.tile.TileAngledSlime;
 import com.lordmau5.wirelessutils.tile.base.Machine;
@@ -114,6 +117,8 @@ public class CommonProxy {
 
     public void init(FMLInitializationEvent e) {
         NetworkRegistry.INSTANCE.registerGuiHandler(WirelessUtils.instance, new GuiHandler());
+
+        PacketParticleLine.initialize();
 
         if ( ModItems.itemStabilizedEnderPearl != null )
             OreDictionary.registerOre("enderpearl", ModItems.itemStabilizedEnderPearl);
@@ -255,6 +260,7 @@ public class CommonProxy {
 
         event.getRegistry().register(new BlockPoweredAir());
         event.getRegistry().register(new BlockPoweredRedstoneWire());
+        event.getRegistry().register(new BlockDirectionalAir());
 
         event.getRegistry().register(new BlockAngledSlime());
 
@@ -334,6 +340,7 @@ public class CommonProxy {
         registerItem(event, new ItemChunkLoadAugment());
         registerItem(event, new ItemFluidGenAugment());
         registerItem(event, new ItemSidedTransferAugment());
+        registerItem(event, new ItemDispenserAugment());
 
         PluginRegistry.registerItems(event);
     }

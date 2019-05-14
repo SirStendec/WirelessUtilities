@@ -7,6 +7,7 @@ import cofh.core.util.helpers.InventoryHelper;
 import cofh.core.util.helpers.MathHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.block.BlockDirectionalAir;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
@@ -18,6 +19,7 @@ import com.lordmau5.wirelessutils.tile.base.augmentable.IBlockAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IDispenserAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
@@ -25,17 +27,22 @@ import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
 import com.lordmau5.wirelessutils.utils.ItemStackHandler;
 import com.lordmau5.wirelessutils.utils.StackHelper;
 import com.lordmau5.wirelessutils.utils.WUFakePlayer;
+import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.crops.BehaviorManager;
 import com.lordmau5.wirelessutils.utils.crops.IHarvestBehavior;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.location.TargetInfo;
+import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
+import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockGrass;
+import net.minecraft.block.BlockSourceImpl;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -90,7 +97,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implements
-        IWorldAugmentable, IBlockAugmentable, IChunkLoadAugmentable,
+        IWorldAugmentable, IBlockAugmentable, IChunkLoadAugmentable, IDispenserAugmentable,
         ICropAugmentable, IInvertAugmentable, ITransferAugmentable, ICapacityAugmentable,
         IUnlockableSlots, IRoundRobinMachine, ITickable, ISidedTransfer, ISidedTransferAugmentable,
         IWorkProvider<TileBaseDesublimator.DesublimatorTarget> {
@@ -133,6 +140,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     private boolean processDrops = false;
     private boolean processBlocks = false;
     private boolean processCrops = false;
+    private boolean dispenserMode = false;
     private boolean silkyCrops = false;
     private int fortuneCrops = 0;
 
@@ -183,6 +191,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         System.out.println("        Budget/t: " + budgetPerTick);
         System.out.println("   Process Drops: " + processDrops);
         System.out.println("  Process Blocks: " + processBlocks);
+        System.out.println("  Dispenser Mode: " + dispenserMode);
         System.out.println("   Process Crops: " + processCrops + (silkyCrops ? " (SILKY)" : ""));
         System.out.println("   Valid Targets: " + validTargetsPerTick);
         System.out.println("  Active Targets: " + activeTargetsPerTick);
@@ -439,6 +448,16 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         capacityAugment = calculateMaxSlots(factor);
     }
 
+    @Override
+    public boolean isDispenserAugmented() {
+        return dispenserMode;
+    }
+
+    @Override
+    public void setDispenserAugmented(boolean augmented) {
+        dispenserMode = augmented;
+    }
+
     public void setCropAugmented(boolean augmented, boolean silky, int fortune) {
         processCrops = augmented;
         silkyCrops = silky;
@@ -586,7 +605,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             unit = StringHelper.localize("info." + WirelessUtils.MODID + ".item_rate.tick");
 
         if ( value == Math.floor(value) )
-            return String.format("%.0f %s", value, unit);
+            return StringHelper.isShiftKeyDown() || value < 1000 ?
+                    StringHelper.formatNumber((long) value) + " " + unit :
+                    TextHelpers.getScaledNumber((long) value, unit, true);
 
         return String.format("%.2f %s", value, unit);
     }
@@ -705,7 +726,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     public boolean shouldProcessBlocks() {
-        return processDrops || processBlocks || processCrops;
+        return processDrops || processBlocks || processCrops || dispenserMode;
     }
 
     public boolean shouldProcessTiles() {
@@ -752,6 +773,10 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
         } else if ( processBlocks ) {
             if ( inverted == world.isAirBlock(target) )
+                return false;
+
+        } else if ( dispenserMode ) {
+            if ( (!ModConfig.augments.dispenser.collectItems && inverted) || !world.isAirBlock(target) )
                 return false;
 
         } else if ( processDrops ) {
@@ -1058,7 +1083,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 return WorkResult.FAILURE_STOP;
             }
 
-        } else if ( !processDrops )
+        } else if ( (!processDrops && !dispenserMode) )
             return WorkResult.FAILURE_REMOVE;
 
         if ( inverted ) {
@@ -1163,20 +1188,38 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 continue;
 
             ItemStack move = stack.copy();
-            int count = stack.getCount();
-            if ( count > itemRatePerTarget ) {
-                move.setCount(itemRatePerTarget);
-                count = itemRatePerTarget;
+            boolean shouldDrop = true;
+            int count = 0;
+
+            if ( dispenserMode ) {
+                IBehaviorDispenseItem behavior = BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(move.getItem());
+                if ( behavior != null && behavior != IBehaviorDispenseItem.DEFAULT_BEHAVIOR && world.isAirBlock(target.pos) ) {
+                    world.setBlockState(target.pos, ModBlocks.blockDirectionalAir.getDefaultState().withProperty(BlockDirectionalAir.FACING, target.pos.getFacing()), 16);
+                    move = behavior.dispense(new BlockSourceImpl(world, target.pos), move);
+                    world.setBlockState(target.pos, Blocks.AIR.getDefaultState(), 16);
+                    count = stack.getCount() - move.getCount();
+                    itemStackHandler.setStackInSlot(i, move);
+                    shouldDrop = false;
+                }
             }
 
-            if ( count > budgeted ) {
-                move.setCount(budgeted);
-                count = budgeted;
+            if ( shouldDrop ) {
+                count = stack.getCount();
+                if ( count > itemRatePerTarget ) {
+                    move.setCount(itemRatePerTarget);
+                    count = itemRatePerTarget;
+                }
+
+                if ( count > budgeted ) {
+                    move.setCount(budgeted);
+                    count = budgeted;
+                }
+
+                CoreUtils.dropItemStackIntoWorld(move, world, new Vec3d(target.pos));
+                stack.shrink(count);
+                itemStackHandler.setStackInSlot(i, stack);
             }
 
-            CoreUtils.dropItemStackIntoWorld(move, world, new Vec3d(target.pos));
-            stack.shrink(count);
-            itemStackHandler.setStackInSlot(i, stack);
             extractEnergy(baseEnergy + target.cost, false);
             activeTargetsPerTick++;
             itemsPerTick += count;

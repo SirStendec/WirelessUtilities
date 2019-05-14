@@ -227,6 +227,10 @@ public class ModConfig {
         @Config.Comment("World Augments allow machines to directly interact with the world, such as by placing or sucking up fluids.")
         public final WorldAugments world = new WorldAugments();
 
+        @Config.Name("Dispenser Augments")
+        @Config.Comment("Dispenser Augments allow Desublimators to dispense items into the world, rather than just dropping them.")
+        public final DispenserAugments dispenser = new DispenserAugments();
+
         @Config.Name("Auxiliary Condenser Augments")
         @Config.Comment("Auxiliary Condenser Augments allow machines to generate fluid with energy.")
         public final FluidGenAugments fluidGen = new FluidGenAugments();
@@ -622,6 +626,35 @@ public class ModConfig {
         @Config.Name("Maximum Scan Slots")
         @Config.Comment("Scan up to this many slots when searching inventories for chargeable items. Slots after this number will be ignored to minimize performance impact.")
         public int maximumScanSlots = 54;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
+    }
+
+    public static class DispenserAugments {
+        @Config.Name("Allow Item Collection")
+        @Config.Comment("When enabled, inverted Desublimators with this augment will pick up items in their work area.")
+        @Config.RequiresWorldRestart
+        public boolean collectItems = true;
+
+        @Config.Name("Required Level")
+        @Config.Comment("Machines must be at least this level in order to be augmented with this augment type.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
 
         @Config.Name("Energy Multiplier")
         @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")

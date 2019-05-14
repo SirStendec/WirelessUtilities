@@ -136,6 +136,13 @@ item.wirelessutils.conversion_upgrade.name=Conversion Kit
 
 item.wirelessutils.base_augment.name=Augment Base
 
+item.wirelessutils.dispenser_augment.name=Dispenser Augment
+item.wirelessutils.dispenser_augment.info.0=This augment allows Desublimators
+item.wirelessutils.dispenser_augment.info.1=to dispense items into the world
+item.wirelessutils.dispenser_augment.info.2=rather than merely dropping them.
+item.wirelessutils.dispenser_augment.info.3=Requires an air block at the
+item.wirelessutils.dispenser_augment.info.4=target location.
+
 item.wirelessutils.world_augment.name=World Augment
 item.wirelessutils.world_augment.info.0=This augment allows certain machines
 item.wirelessutils.world_augment.info.1=to modify the world directly, such

@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.utils.mod;
 
+import com.lordmau5.wirelessutils.block.BlockDirectionalAir;
 import com.lordmau5.wirelessutils.block.charger.BlockChunkCharger;
 import com.lordmau5.wirelessutils.block.charger.BlockDirectionalCharger;
 import com.lordmau5.wirelessutils.block.charger.BlockPositionalCharger;
@@ -44,6 +45,9 @@ public class ModBlocks {
 
     @GameRegistry.ObjectHolder("wirelessutils:powered_redstone_wire")
     public static BlockPoweredRedstoneWire blockPoweredRedstoneWire;
+
+    @GameRegistry.ObjectHolder("wirelessutils:directional_air")
+    public static BlockDirectionalAir blockDirectionalAir;
 
     @GameRegistry.ObjectHolder("wirelessutils:angled_slime")
     public static BlockAngledSlime blockAngledSlime;

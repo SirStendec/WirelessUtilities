@@ -591,6 +591,33 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         }
     }
 
+    @Override
+    public void performEffect(@Nonnull ChargerTarget target, @Nonnull World world) {
+        /*if ( world.isRemote || world != this.world )
+            return;
+
+        float x = pos.getX() + 0.5F;
+        float y = pos.getY() + 0.5F;
+        float z = pos.getZ() + 0.5F;
+
+        double x2 = target.entity != null ? target.entity.posX : target.pos.getX() + 0.5;
+        double y2 = target.entity != null ? target.entity.posY : target.pos.getY() + 0.5;
+        double z2 = target.entity != null ? target.entity.posZ : target.pos.getZ() + 0.5;
+
+        int distance = (int) Math.floor(Math.sqrt(Math.pow(x2 - x, 2) + Math.pow(y2 - y, 2) + Math.pow(z2 - z, 2))) * 2;
+        if ( distance == 0 )
+            return;
+
+        float deltaX = (float) ((x2 - x) / distance);
+        float deltaY = (float) ((y2 - y) / distance);
+        float deltaZ = (float) ((z2 - z) / distance);
+
+        PacketHandler.sendToAllAround(
+                new PacketParticleLine(EnumParticleTypes.REDSTONE, false, x, y, z, deltaX, deltaY, deltaZ, distance, 0, 0, 0),
+                this
+        );*/
+    }
+
     /* Sided Transfer */
 
     public Mode getSideTransferMode(TransferSide side) {

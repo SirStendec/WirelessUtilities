@@ -11,7 +11,7 @@
 			"item": "#STICKY_PISTON"
 		},
 		"D": {
-			"item": "minecraft:dropper"
+			"item": "minecraft:dispenser"
 		},
 		"A": {
 			"item": "wirelessutils:base_augment"
@@ -21,7 +21,7 @@
 		}
 	},
 	"result": {
-		"item": "wirelessutils:world_augment",
+		"item": "wirelessutils:dispenser_augment",
 		"count": 1
 	}
 }

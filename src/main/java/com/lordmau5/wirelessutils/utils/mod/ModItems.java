@@ -13,6 +13,7 @@ import com.lordmau5.wirelessutils.item.augment.ItemBlockAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemCapacityAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemChunkLoadAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemCropAugment;
+import com.lordmau5.wirelessutils.item.augment.ItemDispenserAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemFluidGenAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemInventoryAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemInvertAugment;
@@ -130,6 +131,9 @@ public class ModItems {
     @GameRegistry.ObjectHolder("wirelessutils:sided_transfer_augment")
     public static ItemSidedTransferAugment itemSidedTransferAugment;
 
+    @GameRegistry.ObjectHolder("wirelessutils:dispenser_augment")
+    public static ItemDispenserAugment itemDispenserAugment;
+
     public static void initLootTables() {
         LootTableList.register(new ResourceLocation(WirelessUtils.MODID, "charged_pearl_drops"));
     }
@@ -217,6 +221,7 @@ public class ModItems {
         itemFluidGenAugment.initModel();
         itemPlayerPositionalCard.initModel();
         itemSidedTransferAugment.initModel();
+        itemDispenserAugment.initModel();
     }
 
     @SideOnly(Side.CLIENT)

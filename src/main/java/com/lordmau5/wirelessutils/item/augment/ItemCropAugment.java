@@ -5,6 +5,7 @@ import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBlockAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IDispenserAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
@@ -99,6 +100,9 @@ public class ItemCropAugment extends ItemAugment {
             return false;
 
         if ( augmentable instanceof IWorldAugmentable && ((IWorldAugmentable) augmentable).isWorldAugmented() )
+            return false;
+
+        if ( augmentable instanceof IDispenserAugmentable && ((IDispenserAugmentable) augmentable).isDispenserAugmented() )
             return false;
 
         return augmentable instanceof ICropAugmentable;

@@ -1,0 +1,7 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "wirelessutils:item/augment_base",
+		"layer1": "wirelessutils:item/dispenser_augment_mark"
+	}
+}
