@@ -19,7 +19,10 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-import static com.lordmau5.wirelessutils.utils.constants.TextHelpers.*;
+import static com.lordmau5.wirelessutils.utils.constants.TextHelpers.GRAY;
+import static com.lordmau5.wirelessutils.utils.constants.TextHelpers.RED;
+import static com.lordmau5.wirelessutils.utils.constants.TextHelpers.getComponent;
+import static com.lordmau5.wirelessutils.utils.constants.TextHelpers.getStyle;
 
 public abstract class ItemBasePositionalCard extends ItemBase implements ISlotContextTooltip, INBTPreservingIngredient {
 

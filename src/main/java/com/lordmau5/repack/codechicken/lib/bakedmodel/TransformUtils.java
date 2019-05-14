@@ -10,7 +10,14 @@ import javax.vecmath.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.*;
+import static net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND;
+import static net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND;
+import static net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.FIXED;
+import static net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.GROUND;
+import static net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.GUI;
+import static net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.HEAD;
+import static net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND;
+import static net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND;
 
 /**
  * This is mostly just extracted from the ForgeBlockStateV1.

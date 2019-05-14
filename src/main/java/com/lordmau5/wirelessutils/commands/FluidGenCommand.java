@@ -2,7 +2,11 @@ package com.lordmau5.wirelessutils.commands;
 
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
-import net.minecraft.command.*;
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.NumberInvalidException;
+import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;

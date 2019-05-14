@@ -1,6 +1,10 @@
 package com.lordmau5.wirelessutils.utils.mod;
 
-import com.lordmau5.wirelessutils.entity.pearl.*;
+import com.lordmau5.wirelessutils.entity.pearl.EntityChargedPearl;
+import com.lordmau5.wirelessutils.entity.pearl.EntityFluxedPearl;
+import com.lordmau5.wirelessutils.entity.pearl.EntityQuenchedPearl;
+import com.lordmau5.wirelessutils.entity.pearl.EntityScorchedPearl;
+import com.lordmau5.wirelessutils.entity.pearl.EntityStabilizedEnderPearl;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;

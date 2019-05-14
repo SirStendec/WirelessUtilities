@@ -38,7 +38,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public abstract class TileEntityBaseMachine extends TileEntityBaseArea implements ITileInfoProvider, IUpgradeable, ILevellingBlock, ITickable {
 
