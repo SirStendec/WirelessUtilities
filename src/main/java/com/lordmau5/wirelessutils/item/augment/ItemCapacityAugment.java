@@ -47,6 +47,19 @@ public class ItemCapacityAugment extends ItemAugment {
     }
 
     @Override
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        int[] drain = ModConfig.augments.capacity.energyDrain;
+        if ( drain.length == 0 )
+            return 0;
+
+        int idx = getLevel(stack).toInt();
+        if ( idx >= drain.length )
+            idx = drain.length - 1;
+
+        return drain[idx];
+    }
+
+    @Override
     public int getTiers() {
         return Math.min(ModConfig.augments.capacity.availableTiers, Level.values().length);
     }

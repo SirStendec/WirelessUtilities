@@ -31,6 +31,19 @@ public class ItemRangeAugment extends ItemAugment {
         setName("range_augment");
     }
 
+    @Override
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        int[] drain = ModConfig.augments.range.energyDrain;
+        if ( drain.length == 0 )
+            return 0;
+
+        int idx = getLevel(stack).toInt();
+        if ( idx >= drain.length )
+            idx = drain.length - 1;
+
+        return drain[idx];
+    }
+
     @Nullable
     @Override
     public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {

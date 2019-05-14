@@ -64,6 +64,7 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     protected int baseEnergy = 0;
     protected double augmentMultiplier = 1;
     protected int augmentEnergy = 0;
+    protected int augmentDrain = 0;
 
     /* Comparator-ing */
     private int comparatorState = 0;
@@ -242,6 +243,9 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         augmentMultiplier = 1;
         augmentEnergy = 0;
 
+        int oldDrain = augmentDrain;
+        augmentDrain = 0;
+
         for (ItemStack stack : getAugmentSlots()) {
             if ( stack.isEmpty() )
                 continue;
@@ -260,18 +264,21 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
             item.apply(stack, this);
             augmentMultiplier *= item.getEnergyMultiplier(stack, this);
             augmentEnergy += item.getEnergyAddition(stack, this);
+            augmentDrain += item.getEneryDrain(stack, this);
         }
 
-        updateBaseEnergy();
+        if ( !updateBaseEnergy() && augmentDrain != oldDrain )
+            energyChanged();
     }
 
-    public void updateBaseEnergy() {
+    public boolean updateBaseEnergy() {
         int newEnergy = (int) (level.baseEnergyPerOperation * augmentMultiplier) + augmentEnergy;
         if ( newEnergy == baseEnergy )
-            return;
+            return false;
 
         baseEnergy = newEnergy;
         energyChanged();
+        return true;
     }
 
     /**

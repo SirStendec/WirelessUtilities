@@ -31,6 +31,11 @@ public class ItemBlockAugment extends ItemAugment {
         return ModConfig.augments.block.energyAddition;
     }
 
+    @Override
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.block.energyDrain;
+    }
+
     @Nullable
     @Override
     public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {

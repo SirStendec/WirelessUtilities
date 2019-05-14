@@ -29,6 +29,11 @@ public class ItemWorldAugment extends ItemAugment {
         return ModConfig.augments.world.energyAddition;
     }
 
+    @Override
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.world.energyDrain;
+    }
+
     @Nullable
     @Override
     public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {

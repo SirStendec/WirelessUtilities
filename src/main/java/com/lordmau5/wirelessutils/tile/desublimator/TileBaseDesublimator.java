@@ -670,7 +670,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             calculateTargets();
 
         validTargetsPerTick = 0;
-        maxEnergyPerTick = 0;
+        maxEnergyPerTick = augmentDrain;
         return validTargets;
     }
 
@@ -705,8 +705,16 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( processCrops ) {
             Block block = state.getBlock();
             if ( inverted ) {
-                if ( world.isAirBlock(target) || BehaviorManager.getBehavior(block) == null )
+                if ( world.isAirBlock(target) )
                     return false;
+
+                IHarvestBehavior behavior = BehaviorManager.getBehavior(block);
+                if ( behavior == null )
+                    return false;
+
+                if ( !behavior.canHarvest(state, world, target, silkyCrops, fortuneCrops, this) )
+                    return false;
+
             } else {
                 if ( !world.isAirBlock(target) && !(block instanceof IPlantable || block instanceof IGrowable) )
                     return false;
@@ -1424,13 +1432,18 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         energyPerTick = 0;
         activeTargetsPerTick = 0;
 
+        boolean enabled = redstoneControlOrDisable();
+
         int totalSlots = itemStackHandler.getSlots() - getBufferOffset();
         boolean canRun = remainingBudget >= costPerItem && (inverted ? full < totalSlots : empty < totalSlots);
 
-        if ( sideTransferAugment && redstoneControlOrDisable() && (inverted ? empty < totalSlots : full < totalSlots) )
+        if ( sideTransferAugment && enabled && (inverted ? empty < totalSlots : full < totalSlots) )
             executeSidedTransfer();
 
-        if ( !redstoneControlOrDisable() || !canRun || getEnergyStored() < baseEnergy ) {
+        if ( enabled && canRun && augmentDrain > 0 )
+            extractEnergy(augmentDrain, false);
+
+        if ( !enabled || !canRun || getEnergyStored() < baseEnergy ) {
             setActive(false);
             updateTrackers();
             return;

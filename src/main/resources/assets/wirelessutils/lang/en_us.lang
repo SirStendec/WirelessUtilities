@@ -211,8 +211,9 @@ item.wirelessutils.range_augment.lock.2=Augment to be within range.
 item.wirelessutils.disabled=This item is disabled in configuration.
 
 item.wirelessutils.augment.min_level=Required Machine Level: %s
-item.wirelessutils.augment.energy=Energy Usage: %sx + %s
-item.wirelessutils.augment.energy_unit= RF/action
+item.wirelessutils.augment.energy=Energy Usage:
+item.wirelessutils.augment.energy.entry=- %s
+item.wirelessutils.augment.energy.action=%sx + %s RF/action
 
 item.wirelessutils.augment_ctrl.inactive=Hold §e§oCtrl§r§7 for Valid Machines
 item.wirelessutils.augment_ctrl.active=Valid Machines:

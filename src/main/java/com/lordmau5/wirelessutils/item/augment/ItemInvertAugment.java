@@ -25,6 +25,11 @@ public class ItemInvertAugment extends ItemAugment {
         return ModConfig.augments.invert.energyAddition;
     }
 
+    @Override
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.invert.energyDrain;
+    }
+
     @Nullable
     @Override
     public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {

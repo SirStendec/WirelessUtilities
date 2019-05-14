@@ -249,6 +249,11 @@ public class ModConfig {
         @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
         @Config.RequiresWorldRestart
         public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
     }
 
     public static class ChunkLoadAugments {
@@ -268,6 +273,11 @@ public class ModConfig {
         @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
         @Config.RequiresWorldRestart
         public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
     }
 
     public static class InvertAugments {
@@ -287,6 +297,11 @@ public class ModConfig {
         @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
         @Config.RequiresWorldRestart
         public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
     }
 
     public static class SidedTransferAugments {
@@ -311,6 +326,11 @@ public class ModConfig {
         @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
         @Config.RequiresWorldRestart
         public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
     }
 
     public static class FluidGenAugments {
@@ -435,6 +455,11 @@ public class ModConfig {
         @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
         @Config.RequiresWorldRestart
         public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
     }
 
     public static class BlockAugments {
@@ -469,6 +494,11 @@ public class ModConfig {
         @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
         @Config.RequiresWorldRestart
         public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
     }
 
     public static class CapacityAugments {
@@ -488,6 +518,11 @@ public class ModConfig {
         @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
         @Config.RequiresWorldRestart
         public int[] energyAddition = {0, 0, 0, 0, 0};
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int[] energyDrain = {0, 0, 0, 0, 0};
     }
 
     public static class TransferAugments {
@@ -507,6 +542,11 @@ public class ModConfig {
         @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
         @Config.RequiresWorldRestart
         public int[] energyAddition = {0, 0, 0, 0, 0};
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int[] energyDrain = {0, 0, 0, 0, 0};
     }
 
     public static class SlotAugments {
@@ -531,6 +571,11 @@ public class ModConfig {
         @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
         @Config.RequiresWorldRestart
         public int[] energyAddition = {0, 0, 0};
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int[] energyDrain = {0, 0, 0};
     }
 
     public static class RangeAugments {
@@ -560,6 +605,11 @@ public class ModConfig {
         @Config.Comment("Each additional tier adds this many blocks to the range of the charger.")
         @Config.RangeInt(min = 1, max = 128)
         public int blocksPerTier = 16;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int[] energyDrain = {0, 0, 0, 0, 0};
     }
 
     public static class InventoryAugments {
@@ -583,6 +633,11 @@ public class ModConfig {
         @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
         @Config.RequiresWorldRestart
         public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
     }
 
     public static class Chargers {

@@ -26,6 +26,11 @@ public class ItemChunkLoadAugment extends ItemAugment {
         return ModConfig.augments.chunkLoad.energyAddition;
     }
 
+    @Override
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.chunkLoad.energyDrain;
+    }
+
     @Nullable
     @Override
     public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {

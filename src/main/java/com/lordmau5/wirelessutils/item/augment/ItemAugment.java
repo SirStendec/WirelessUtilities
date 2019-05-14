@@ -115,6 +115,23 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
         return 0;
     }
 
+    public int getEneryDrain(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return 0;
+
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound itemTag = stack.getTagCompound();
+            if ( itemTag != null && itemTag.hasKey("EnergyDrain") )
+                return itemTag.getInteger("EnergyDrain");
+        }
+
+        return getEnergyDrainDelegate(stack, augmentable);
+    }
+
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return 0;
+    }
+
     @Override
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
@@ -159,14 +176,27 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
 
         double multiplier = getEnergyMultiplier(stack, null);
         int addition = getEnergyAddition(stack, null);
+        int drain = getEneryDrain(stack, null);
 
-        if ( multiplier != 1 || addition != 0 ) {
-            String unit = StringHelper.localize("item." + WirelessUtils.MODID + ".augment.energy_unit");
-            tooltip.add(new TextComponentTranslation(
-                    "item." + WirelessUtils.MODID + ".augment.energy",
-                    String.format("%.2f", multiplier),
-                    addition > 1000 ? TextHelpers.getScaledNumber(addition, unit, true) : addition + unit
-            ).getFormattedText());
+        if ( multiplier != 1 || addition != 0 || drain != 0 ) {
+            tooltip.add(StringHelper.localize("item." + WirelessUtils.MODID + ".augment.energy"));
+
+            if ( drain != 0 )
+                tooltip.add(new TextComponentTranslation(
+                        "item." + WirelessUtils.MODID + ".augment.energy.entry",
+                        !StringHelper.isShiftKeyDown() && drain >= 1000 ? TextHelpers.getScaledNumber(drain, "RF/t", true) : StringHelper.formatNumber(drain) + " RF/t"
+                ).getFormattedText());
+
+            if ( multiplier != 1 || addition != 0 ) {
+                tooltip.add(new TextComponentTranslation(
+                        "item." + WirelessUtils.MODID + ".augment.energy.entry",
+                        new TextComponentTranslation(
+                                "item." + WirelessUtils.MODID + ".augment.action",
+                                String.format("%.2f", multiplier),
+                                StringHelper.isShiftKeyDown() ? StringHelper.formatNumber(addition) : TextHelpers.getScaledNumber(addition, "", true)
+                        )
+                ).getFormattedText());
+            }
         }
     }
 

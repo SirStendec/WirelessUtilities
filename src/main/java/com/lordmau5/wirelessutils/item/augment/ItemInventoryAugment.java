@@ -25,6 +25,11 @@ public class ItemInventoryAugment extends ItemAugment {
         return ModConfig.augments.inventory.energyAddition;
     }
 
+    @Override
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.inventory.energyDrain;
+    }
+
     @Nullable
     @Override
     public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {

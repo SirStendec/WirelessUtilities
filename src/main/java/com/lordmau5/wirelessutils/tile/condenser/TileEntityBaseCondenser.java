@@ -769,7 +769,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             calculateTargets();
 
         validTargetsPerTick = 0;
-        maxEnergyPerTick = 0;
+        maxEnergyPerTick = augmentDrain;
         if ( fluidGen )
             maxEnergyPerTick = fluidGenCost;
 
@@ -1313,16 +1313,20 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         energyPerTick = 0;
         fluidPerTick = 0;
 
+        boolean enabled = redstoneControlOrDisable();
+        if ( sideTransferAugment && enabled )
+            executeSidedTransfer();
+
+        if ( enabled && augmentDrain > 0 )
+            extractEnergy(augmentDrain, false);
+
         if ( fluidGen && getEnergyStored() >= fluidGenCost ) {
             int filled = fluidHandler.fill(fluidGenStack, true);
             if ( filled > 0 )
                 extractEnergy(fluidGenCost, false);
         }
 
-        if ( sideTransferAugment && redstoneControlOrDisable() )
-            executeSidedTransfer();
-
-        if ( !redstoneControlOrDisable() || getEnergyStored() < baseEnergy ) {
+        if ( !enabled || getEnergyStored() < baseEnergy ) {
             setActive(false);
             updateTrackers();
             return;

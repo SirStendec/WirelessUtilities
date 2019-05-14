@@ -26,6 +26,11 @@ public class ItemSidedTransferAugment extends ItemAugment {
         return ModConfig.augments.sidedTransfer.energyAddition;
     }
 
+    @Override
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.sidedTransfer.energyDrain;
+    }
+
     @Nullable
     @Override
     public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {

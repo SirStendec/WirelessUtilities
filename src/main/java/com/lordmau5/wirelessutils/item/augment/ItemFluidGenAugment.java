@@ -57,6 +57,14 @@ public class ItemFluidGenAugment extends ItemAugment {
     }
 
     @Override
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        if ( augmentable == null )
+            return getEnergy(stack);
+
+        return 0;
+    }
+
+    @Override
     public void apply(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         if ( !(augmentable instanceof IFluidGenAugmentable) )
             return;
@@ -162,11 +170,11 @@ public class ItemFluidGenAugment extends ItemAugment {
                         tag.getByte("Mooshrooms")
                 ).getFormattedText());
 
-            if ( energy > 0 )
+            /*if ( energy > 0 )
                 tooltip.add(new TextComponentTranslation(
                         name + ".energy",
                         TextHelpers.getScaledNumber(energy, "RF/t", true)
-                ).getFormattedText());
+                ).getFormattedText());*/
         }
 
         super.addInformation(stack, worldIn, tooltip, flagIn);

@@ -667,14 +667,16 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
         worker.tickDown();
 
-        if ( sideTransferAugment && redstoneControlOrDisable() )
+        activeTargetsPerTick = 0;
+        energyPerTick = 0;
+
+        boolean enabled = redstoneControlOrDisable();
+        if ( sideTransferAugment && enabled )
             executeSidedTransfer();
 
-        if ( !redstoneControlOrDisable() || (inverted ?
+        if ( !enabled || (inverted ?
                 (getFullEnergyStored() == getFullMaxEnergyStored() || getMaxReceive() == 0) :
                 (getEnergyStored() == 0 || getMaxExtract() == 0)) ) {
-            activeTargetsPerTick = 0;
-            energyPerTick = 0;
             setActive(false);
             updateTrackers();
             return;
@@ -701,6 +703,10 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
         remainingPerTick = total;
         activeTargetsPerTick = 0;
+
+        if ( augmentDrain > 0 )
+            remainingPerTick -= extractEnergy(augmentDrain, false);
+
         setActive(worker.performWork());
         energyPerTick = total - remainingPerTick;
         updateTrackers();
