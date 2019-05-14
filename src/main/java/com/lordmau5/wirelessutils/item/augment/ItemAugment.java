@@ -191,7 +191,7 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
                 tooltip.add(new TextComponentTranslation(
                         "item." + WirelessUtils.MODID + ".augment.energy.entry",
                         new TextComponentTranslation(
-                                "item." + WirelessUtils.MODID + ".augment.action",
+                                "item." + WirelessUtils.MODID + ".augment.energy.action",
                                 String.format("%.2f", multiplier),
                                 StringHelper.isShiftKeyDown() ? StringHelper.formatNumber(addition) : TextHelpers.getScaledNumber(addition, "", true)
                         )
