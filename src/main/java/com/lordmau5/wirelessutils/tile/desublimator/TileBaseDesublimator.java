@@ -8,8 +8,20 @@ import cofh.core.util.helpers.MathHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
-import com.lordmau5.wirelessutils.tile.base.*;
-import com.lordmau5.wirelessutils.tile.base.augmentable.*;
+import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
+import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
+import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
+import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
+import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
+import com.lordmau5.wirelessutils.tile.base.Worker;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IBlockAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
 import com.lordmau5.wirelessutils.utils.ItemStackHandler;
 import com.lordmau5.wirelessutils.utils.StackHelper;
 import com.lordmau5.wirelessutils.utils.WUFakePlayer;
@@ -20,6 +32,8 @@ import com.lordmau5.wirelessutils.utils.location.TargetInfo;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDirt;
+import net.minecraft.block.BlockGrass;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
@@ -30,11 +44,23 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBed;
+import net.minecraft.item.ItemDoor;
+import net.minecraft.item.ItemDye;
+import net.minecraft.item.ItemFlintAndSteel;
+import net.minecraft.item.ItemSeeds;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -57,7 +83,11 @@ import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implements
         IWorldAugmentable, IBlockAugmentable, IChunkLoadAugmentable,
@@ -824,7 +854,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                     if ( stack.isEmpty() || !(item instanceof IPlantable || itemBlock instanceof IPlantable) )
                         continue;
 
-                    if ( item instanceof ItemSeeds && world.getBlockState(target.pos.down()).getBlock() == Blocks.DIRT )
+                    Block blockBelow = world.getBlockState(target.pos.down()).getBlock();
+                    if ( item instanceof ItemSeeds && (blockBelow instanceof BlockDirt || blockBelow instanceof BlockGrass) )
                         world.setBlockState(target.pos.down(), Blocks.FARMLAND.getDefaultState());
 
                     FakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos.up());
