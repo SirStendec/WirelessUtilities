@@ -32,7 +32,7 @@ public interface IPositionalMachine {
         if ( origin.getDimension() != target.getDimension() )
             return false;
 
-        return Math.floor(Math.sqrt(target.distanceSq(target))) <= range;
+        return Math.floor(Math.sqrt(origin.distanceSq(target))) <= range;
     }
 
 }

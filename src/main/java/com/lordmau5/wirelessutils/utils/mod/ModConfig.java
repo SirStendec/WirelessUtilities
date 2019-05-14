@@ -432,7 +432,6 @@ public class ModConfig {
 
         @Config.Name("Process Trees")
         @Config.Comment("Whether or not Crop Augments should be able to harvest trees.")
-        @Config.RequiresMcRestart
         public boolean processTrees = true;
 
         @Config.Name("Tree: Use Block Breaking Effects")
@@ -464,6 +463,10 @@ public class ModConfig {
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
         @Config.RequiresWorldRestart
         public int energyDrain = 0;
+
+        @Config.Name("Automatically Till Ground")
+        @Config.Comment("Whether or not Crop Augments should automatically till dirt and grass.")
+        public boolean automaticallyTill = false;
     }
 
     public static class BlockAugments {

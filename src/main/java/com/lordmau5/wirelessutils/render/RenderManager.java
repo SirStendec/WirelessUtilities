@@ -24,6 +24,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
@@ -219,7 +220,7 @@ public class RenderManager {
     }
 
     @SuppressWarnings("unused")
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public void renderWorldLast(RenderWorldLastEvent event) {
         if ( areas == null || areas.isEmpty() )
             return;

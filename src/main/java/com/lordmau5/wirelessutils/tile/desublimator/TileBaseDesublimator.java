@@ -39,6 +39,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockGrass;
+import net.minecraft.block.BlockGrassPath;
 import net.minecraft.block.BlockSourceImpl;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
@@ -53,10 +54,10 @@ import net.minecraft.init.Enchantments;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBed;
+import net.minecraft.item.ItemBlockSpecial;
 import net.minecraft.item.ItemDoor;
 import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemFlintAndSteel;
-import net.minecraft.item.ItemSeeds;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -296,6 +297,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         ItemStack stack = itemStackHandler.getStackInSlot(slot);
         Item item = stack.getItem();
         Block block = Block.getBlockFromItem(item);
+        if ( item instanceof ItemBlockSpecial ) {
+            block = ((ItemBlockSpecial) item).getBlock();
+        }
         boolean plantable = (item instanceof IPlantable) || (block != Blocks.AIR && block instanceof IPlantable);
         boolean fertilizer = isValidFertilizer(stack);
 
@@ -875,13 +879,26 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                     ItemStack stack = capabilityHandler.getStackInSlot(i);
                     Item item = stack.getItem();
                     Block itemBlock = Block.getBlockFromItem(item);
+                    if ( item instanceof ItemBlockSpecial ) {
+                        itemBlock = ((ItemBlockSpecial) item).getBlock();
+                    }
 
                     if ( stack.isEmpty() || !(item instanceof IPlantable || itemBlock instanceof IPlantable) )
                         continue;
 
-                    Block blockBelow = world.getBlockState(target.pos.down()).getBlock();
-                    if ( item instanceof ItemSeeds && (blockBelow instanceof BlockDirt || blockBelow instanceof BlockGrass) )
-                        world.setBlockState(target.pos.down(), Blocks.FARMLAND.getDefaultState());
+                    IPlantable plantable = item instanceof IPlantable ? (IPlantable) item : (IPlantable) itemBlock;
+                    BlockPos belowPos = target.pos.down();
+                    IBlockState blockStateBelow = world.getBlockState(belowPos);
+                    Block blockBelow = blockStateBelow.getBlock();
+
+                    if ( !blockBelow.canSustainPlant(blockStateBelow, world, belowPos, EnumFacing.UP, plantable) ) {
+                        if ( ModConfig.augments.crop.automaticallyTill && (blockBelow instanceof BlockDirt || blockBelow instanceof BlockGrass || blockBelow instanceof BlockGrassPath)
+                                && Blocks.FARMLAND.canSustainPlant(Blocks.FARMLAND.getDefaultState(), world, belowPos, EnumFacing.UP, plantable) ) {
+                            world.setBlockState(belowPos, Blocks.FARMLAND.getDefaultState());
+                        } else {
+                            continue;
+                        }
+                    }
 
                     FakePlayer player = WUFakePlayer.getFakePlayer(world, target.pos.up());
                     if ( isCreative )
@@ -930,6 +947,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 } else if ( block instanceof IGrowable ) {
                     if ( fertilizers == 0 )
                         return WorkResult.FAILURE_CONTINUE;
+
+                    IGrowable growable = (IGrowable) block;
+                    if ( !growable.canGrow(world, target.pos, state, world.isRemote) ) {
+                        return WorkResult.SKIPPED;
+                    }
 
                     int offset = getBufferOffset();
                     int slots = capabilityHandler.getSlots();
