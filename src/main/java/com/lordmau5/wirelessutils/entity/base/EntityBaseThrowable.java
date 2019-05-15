@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.entity.base;
 
+import com.google.common.base.Predicate;
 import com.lordmau5.wirelessutils.block.slime.BlockAngledSlime;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.item.base.IEnhancedItem;
@@ -9,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -27,6 +29,9 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 
 public abstract class EntityBaseThrowable extends EntityThrowable {
@@ -137,7 +142,15 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         return stack;
     }
 
-    public void dropItemStack(ItemStack stack) {
+    public void setStack(@Nonnull ItemStack stack) {
+        this.stack = stack;
+    }
+
+    public void dropThis() {
+        dropItemStack(getStack());
+    }
+
+    public void dropItemStack(@Nonnull ItemStack stack) {
         EntityItem entity;
         Item item = stack.getItem();
         if ( item instanceof IEnhancedItem )
@@ -171,6 +184,46 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         return reaction;
     }
 
+    public boolean shouldHitEntities() {
+        return false;
+    }
+
+    @Nullable
+    public Predicate<? super Entity> getEntityPredicate() {
+        return null;
+    }
+
+    @Nullable
+    protected RayTraceResult findEntityOnPath(@Nonnull Vec3d start, @Nonnull Vec3d end) {
+        Predicate<? super Entity> predicate = getEntityPredicate();
+        if ( predicate == null )
+            return null;
+
+        RayTraceResult out = null;
+        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, getEntityBoundingBox().expand(motionX, motionY, motionZ).grow(1D), predicate);
+        double closest = 0D;
+
+        for (Entity target : list) {
+            if ( thrower != null && ticksExisted < 2 && ignoreEntity == null )
+                ignoreEntity = target;
+
+            else if ( target != this.ignoreEntity || ticksExisted >= 5 ) {
+                AxisAlignedBB bounds = target.getEntityBoundingBox().grow(0.30000001192092896D);
+                RayTraceResult result = bounds.calculateIntercept(start, end);
+
+                if ( result != null ) {
+                    double distance = start.squareDistanceTo(result.hitVec);
+                    if ( distance < closest || closest == 0D ) {
+                        out = new RayTraceResult(target, result.hitVec);
+                        closest = distance;
+                    }
+                }
+            }
+        }
+
+        return out;
+    }
+
     @Override
     public void onUpdate() {
         if ( !started ) {
@@ -202,11 +255,33 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
 
         boolean isSlowed = false;
 
-        while ( steps < 10 ) {
+        while ( steps < 10 && !isDead ) {
             Vec3d currentPos = new Vec3d(posX, posY, posZ);
             Vec3d targetPos = new Vec3d(posX + remainingX, posY + remainingY, posZ + remainingZ);
 
             RayTraceResult ray = world.rayTraceBlocks(currentPos, targetPos, false, false, false);
+
+            if ( shouldHitEntities() ) {
+                RayTraceResult entityHit = findEntityOnPath(currentPos, ray == null ? targetPos : ray.hitVec);
+                if ( entityHit != null ) {
+                    distance += new Vec3d(entityHit.hitVec.x - posX, 0, entityHit.hitVec.z - posZ).length();
+
+                    remainingX -= entityHit.hitVec.x - posX;
+                    remainingY -= entityHit.hitVec.y - posY;
+                    remainingZ -= entityHit.hitVec.z - posZ;
+
+                    posX = entityHit.hitVec.x;
+                    posY = entityHit.hitVec.y;
+                    posZ = entityHit.hitVec.z;
+
+                    onImpact(entityHit);
+
+                    if ( remainingX > 0 || remainingY > 0 || remainingZ > 0 ) {
+                        ++steps;
+                        continue;
+                    }
+                }
+            }
 
             if ( ray != null && ray.typeOfHit == RayTraceResult.Type.BLOCK ) {
                 IBlockState blockState = world.getBlockState(ray.getBlockPos());

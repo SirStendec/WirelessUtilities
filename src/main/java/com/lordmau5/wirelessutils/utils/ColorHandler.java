@@ -2,14 +2,17 @@ package com.lordmau5.wirelessutils.utils;
 
 import com.lordmau5.wirelessutils.tile.base.ILevellingBlock;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityBaseCondenser;
+import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockRedstoneWire;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.client.renderer.color.IItemColor;
+import net.minecraft.entity.EntityList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.fluids.Fluid;
@@ -141,6 +144,22 @@ public class ColorHandler {
                 return Level.fromAugment(stack).color;
             };
         }
+    }
+
+    public static class VoidPearl {
+        public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
+            if ( tintIndex == 0 )
+                return 0xFFFFFF;
+
+            EntityList.EntityEggInfo info = null;
+            if ( ModItems.itemVoidPearl.containsEntity(stack) )
+                info = EntityList.ENTITY_EGGS.get(new ResourceLocation(stack.getTagCompound().getString("EntityID")));
+
+            if ( info == null )
+                return 0x002f45;
+
+            return info.primaryColor;
+        };
     }
 
     public static class LevelUpgrade {

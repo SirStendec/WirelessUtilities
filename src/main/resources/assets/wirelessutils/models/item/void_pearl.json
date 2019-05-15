@@ -1,0 +1,14 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "wirelessutils:item/void_pearl"
+	},
+	"overrides": [
+		{
+			"predicate": {
+				"filled": 1
+			},
+			"model": "wirelessutils:item/void_pearl_filled"
+		}
+	]
+}

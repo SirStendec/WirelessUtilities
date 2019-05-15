@@ -4,7 +4,6 @@ import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
 import com.lordmau5.wirelessutils.render.RenderPearl;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -13,14 +12,16 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityEndGateway;
+import net.minecraft.tileentity.TileEntityEndPortal;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
@@ -79,21 +80,47 @@ public class EntityStabilizedEnderPearl extends EntityBaseThrowable {
             }
         }
 
-        if ( result.typeOfHit == RayTraceResult.Type.BLOCK ) {
+        if ( !world.isRemote && result.typeOfHit == RayTraceResult.Type.BLOCK && ModConfig.items.voidPearl.enableVoiding ) {
             BlockPos pos = result.getBlockPos();
             TileEntity tile = world.getTileEntity(pos);
-            if ( tile instanceof TileEntityEndGateway ) {
-                TileEntityEndGateway gateway = (TileEntityEndGateway) tile;
-                if ( thrower != null ) {
-                    if ( thrower instanceof EntityPlayerMP )
-                        CriteriaTriggers.ENTER_BLOCK.trigger((EntityPlayerMP) thrower, world.getBlockState(pos));
+            if ( tile instanceof TileEntityEndPortal ) {
+                ItemStack pearl = new ItemStack(ModItems.itemVoidPearl, 1);
+                EntityVoidPearl entity;
+                if ( thrower != null )
+                    entity = new EntityVoidPearl(world, thrower, pearl);
+                else
+                    entity = new EntityVoidPearl(world, pearl);
 
-                    gateway.teleportEntity(thrower);
-                    setDead();
-                    return;
+                entity.setPosition(posX, posY, posZ);
+
+                EnumFacing.Axis axis = result.sideHit.getAxis();
+
+                double newX = motionX * .2D;
+                double newY = motionY * .2D;
+                double newZ = motionZ * .2D;
+
+                if ( axis == EnumFacing.Axis.X )
+                    newX *= -1;
+                else if ( axis == EnumFacing.Axis.Y )
+                    newY *= -1;
+                else
+                    newZ *= -1;
+
+                if ( Math.sqrt(Math.pow(newX, 2) + Math.pow(newY, 2) + Math.pow(newZ, 2)) < .2 ) {
+                    newX = newX > 0 ? .2D : -.2D;
+                    newY = .2D;
+                    newZ = newZ > 0 ? .2D : -.2D;
                 }
 
-                gateway.teleportEntity(this);
+                entity.setVelocity(newX, newY, newZ);
+                world.spawnEntity(entity);
+
+                if ( world instanceof WorldServer ) {
+                    WorldServer ws = (WorldServer) world;
+                    ws.spawnParticle(EnumParticleTypes.PORTAL, false, posX, posY, posZ, 0, 0, 0);
+                }
+
+                setDead();
                 return;
             }
         }

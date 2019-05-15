@@ -1,0 +1,7 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "wirelessutils:item/void_pearl",
+		"layer1": "wirelessutils:item/void_pearl_center"
+	}
+}

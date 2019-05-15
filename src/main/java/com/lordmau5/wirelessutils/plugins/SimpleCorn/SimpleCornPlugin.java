@@ -23,6 +23,8 @@ public class SimpleCornPlugin implements IPlugin {
         if ( blockCorn instanceof BlockCrops ) {
             TallCropBehavior behavior = new TallCropBehavior(blockCorn, blockCornMid, blockCornTop);
             behavior.priority = 1;
+            behavior.minimumBlocks = 3;
+            behavior.reverseHarvestOrder = true;
             BehaviorManager.addBehavior(behavior);
         }
     }

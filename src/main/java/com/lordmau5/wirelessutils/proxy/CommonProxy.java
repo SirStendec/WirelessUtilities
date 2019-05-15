@@ -20,6 +20,7 @@ import com.lordmau5.wirelessutils.entity.pearl.EntityFluxedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityQuenchedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityScorchedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityStabilizedEnderPearl;
+import com.lordmau5.wirelessutils.entity.pearl.EntityVoidPearl;
 import com.lordmau5.wirelessutils.fixers.InventoryWalker;
 import com.lordmau5.wirelessutils.fixers.NullableItemListWalker;
 import com.lordmau5.wirelessutils.item.ItemAbsolutePositionalCard;
@@ -50,6 +51,7 @@ import com.lordmau5.wirelessutils.item.pearl.ItemFluxedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemQuenchedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemScorchedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemStabilizedEnderPearl;
+import com.lordmau5.wirelessutils.item.pearl.ItemVoidPearl;
 import com.lordmau5.wirelessutils.item.upgrade.ItemConversionUpgrade;
 import com.lordmau5.wirelessutils.item.upgrade.ItemLevelUpgrade;
 import com.lordmau5.wirelessutils.packet.PacketParticleLine;
@@ -243,6 +245,13 @@ public class CommonProxy {
                 .name("stabilized_ender_pearl")
                 .tracker(64, 20, true)
                 .build());
+
+        event.getRegistry().register(EntityEntryBuilder.create()
+                .entity(EntityVoidPearl.class)
+                .id(new ResourceLocation(WirelessUtils.MODID, "void_pearl"), id++)
+                .name("void_pearl")
+                .tracker(64, 20, true)
+                .build());
     }
 
     @SuppressWarnings("unused")
@@ -315,6 +324,7 @@ public class CommonProxy {
         registerItem(event, new ItemQuenchedPearl());
         registerItem(event, new ItemScorchedPearl());
         registerItem(event, new ItemStabilizedEnderPearl());
+        registerItem(event, new ItemVoidPearl());
 
         registerItem(event, new ItemAbsolutePositionalCard());
         registerItem(event, new ItemRelativePositionalCard());

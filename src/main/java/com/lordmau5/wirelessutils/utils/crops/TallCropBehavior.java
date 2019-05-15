@@ -16,6 +16,8 @@ public class TallCropBehavior implements IHarvestBehavior {
     public final Set<Block> targets;
     public final boolean silkAll;
 
+    public boolean reverseHarvestOrder = false;
+    public int minimumBlocks = 0;
     public int priority = 0;
 
     public TallCropBehavior(Block... targets) {
@@ -52,7 +54,6 @@ public class TallCropBehavior implements IHarvestBehavior {
         BlockPos workingPos = pos;
         Block workingBlock = block;
         int i = 0;
-
         while ( targets.contains(workingBlock) ) {
             if ( i++ > 255 )
                 break;
@@ -64,6 +65,9 @@ public class TallCropBehavior implements IHarvestBehavior {
             workingState = world.getBlockState(workingPos);
             workingBlock = workingState.getBlock();
         }
+
+        if ( i < minimumBlocks )
+            return false;
 
         return true;
     }
@@ -82,20 +86,28 @@ public class TallCropBehavior implements IHarvestBehavior {
             return false;
 
         boolean harvested = false;
-        if ( i < 255 && (!silkTouch || !ModConfig.augments.crop.useActivation || silkAll) ) {
-            IBlockState above = world.getBlockState(pos.up());
-            if ( targets.contains(above.getBlock()) )
-                harvested = doHarvest(i + 1, above, world, pos.up(), silkTouch, fortune, desublimator);
+        BlockPos posAbove = pos.up();
+        IBlockState above = world.getBlockState(posAbove);
 
-            // If harvesting above causes the state of this block to change, make sure we should still run.
-            IBlockState newState = world.getBlockState(pos);
-            if ( newState.getBlock() != block )
-                return doHarvest(i + 1, newState, world, pos, silkTouch, fortune, desublimator) || harvested;
+        if ( !reverseHarvestOrder && i < 255 && (!silkTouch || !ModConfig.augments.crop.useActivation || silkAll) ) {
+            harvested = doHarvest(i + 1, above, world, posAbove, silkTouch, fortune, desublimator);
+            if ( harvested ) {
+                IBlockState newState = world.getBlockState(pos);
+                if ( newState != state ) {
+                    doHarvest(i + 1, newState, world, pos, silkTouch, fortune, desublimator);
+                    return true;
+                }
+            }
         }
 
         if ( silkTouch && ModConfig.augments.crop.useActivation )
-            return harvestByUsing(state, world, pos, fortune, desublimator) || harvested;
+            harvested = harvestByUsing(state, world, pos, fortune, desublimator) || harvested;
+        else
+            harvested = harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator) || harvested;
 
-        return harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator) || harvested;
+        if ( reverseHarvestOrder && i < 255 && (!silkTouch || !ModConfig.augments.crop.useActivation || silkAll) )
+            harvested = doHarvest(i + 1, above, world, posAbove, silkTouch, fortune, desublimator) || harvested;
+
+        return harvested;
     }
 }

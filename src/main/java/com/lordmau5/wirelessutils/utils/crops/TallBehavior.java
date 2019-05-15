@@ -16,6 +16,8 @@ public class TallBehavior implements IHarvestBehavior {
     public final Set<Block> targets;
     public final boolean harvestBottom;
 
+    public boolean reverseHarvestOrder = false;
+    public int minimumBlocks = 0;
     public int priority = 0;
 
     public TallBehavior() {
@@ -28,8 +30,17 @@ public class TallBehavior implements IHarvestBehavior {
     }
 
     public TallBehavior(Set<Block> targets, boolean harvestBottom) {
+        this(targets, harvestBottom, harvestBottom ? 0 : 2);
+    }
+
+    public TallBehavior(Set<Block> targets, int minimumBlocks) {
+        this(targets, false, minimumBlocks);
+    }
+
+    public TallBehavior(Set<Block> targets, boolean harvestBottom, int minimumBlocks) {
         this.targets = targets;
         this.harvestBottom = harvestBottom;
+        this.minimumBlocks = minimumBlocks;
     }
 
     @Override
@@ -50,7 +61,17 @@ public class TallBehavior implements IHarvestBehavior {
         if ( TileBaseDesublimator.isBlacklisted(state) )
             return false;
 
-        return appliesTo(state) && (harvestBottom || appliesTo(world.getBlockState(pos.up())));
+        if ( !appliesTo(state) )
+            return false;
+
+        int i = 0;
+        while ( appliesTo(state) ) {
+            i++;
+            pos = pos.up();
+            state = world.getBlockState(pos);
+        }
+
+        return i >= minimumBlocks;
     }
 
     @Override
@@ -66,13 +87,16 @@ public class TallBehavior implements IHarvestBehavior {
         IBlockState above = world.getBlockState(pos.up());
         boolean harvested = false;
 
-        if ( i < 255 && appliesTo(above) )
+        if ( !reverseHarvestOrder && i < 255 && appliesTo(above) )
             harvested = doHarvest(i + 1, above, world, pos.up(), silkTouch, fortune, desublimator);
 
         IBlockState below = world.getBlockState(pos.down());
-        if ( !harvestBottom && !appliesTo(below) )
-            return harvested;
+        if ( harvestBottom || appliesTo(below) )
+            harvested = harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator) || harvested;
 
-        return harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator) || harvested;
+        if ( reverseHarvestOrder && i < 255 && appliesTo(above) )
+            harvested = doHarvest(i + 1, above, world, pos.up(), silkTouch, fortune, desublimator) || harvested;
+
+        return harvested;
     }
 }

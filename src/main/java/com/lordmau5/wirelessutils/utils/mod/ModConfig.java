@@ -79,6 +79,13 @@ public class ModConfig {
                 "When fired from a Dispenser rather than thrown by an entity, the pearl will, upon landing, teleport the closest entity to where it struck."
         })
         public final StabilizedEnderPearl stabilizedEnderPearl = new StabilizedEnderPearl();
+
+        @Config.Name("Void Pearl")
+        @Config.Comment({
+                "Void Pearls can be thrown like Ender Pearls.",
+                "Upon hitting a living entity, they trap it inside. They can be thrown to release the entity, or used in special machines."
+        })
+        public final VoidPearl voidPearl = new VoidPearl();
     }
 
     public static class FluxedPearl {
@@ -160,6 +167,16 @@ public class ModConfig {
         @Config.Comment("Search this many blocks in each direction for a living entity to teleport if the pearl wasn't thrown by one.")
         @Config.RangeInt(min = 0, max = 128)
         public int radius = 16;
+    }
+
+    public static class VoidPearl {
+        @Config.Name("Enable Voiding")
+        @Config.Comment("Enable crafting Void Pearls by throwing Stabilized Ender Pearls into an end portal.")
+        public boolean enableVoiding = true;
+
+        @Config.Name("Entity Blacklist")
+        @Config.Comment("A list of entities that cannot be placed within Void Pearls.")
+        public String[] blacklist = {};
     }
 
     public static class Upgrades {

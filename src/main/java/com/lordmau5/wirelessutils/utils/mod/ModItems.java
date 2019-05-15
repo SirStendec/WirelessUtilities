@@ -27,6 +27,7 @@ import com.lordmau5.wirelessutils.item.pearl.ItemFluxedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemQuenchedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemScorchedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemStabilizedEnderPearl;
+import com.lordmau5.wirelessutils.item.pearl.ItemVoidPearl;
 import com.lordmau5.wirelessutils.item.upgrade.ItemConversionUpgrade;
 import com.lordmau5.wirelessutils.item.upgrade.ItemLevelUpgrade;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
@@ -76,6 +77,9 @@ public class ModItems {
 
     @GameRegistry.ObjectHolder("wirelessutils:stabilized_ender_pearl")
     public static ItemStabilizedEnderPearl itemStabilizedEnderPearl;
+
+    @GameRegistry.ObjectHolder("wirelessutils:void_pearl")
+    public static ItemVoidPearl itemVoidPearl;
 
     @GameRegistry.ObjectHolder("wirelessutils:base_augment")
     public static ItemBaseAugment itemBaseAugment;
@@ -222,6 +226,7 @@ public class ModItems {
         itemPlayerPositionalCard.initModel();
         itemSidedTransferAugment.initModel();
         itemDispenserAugment.initModel();
+        itemVoidPearl.initModel();
     }
 
     @SideOnly(Side.CLIENT)
@@ -235,6 +240,7 @@ public class ModItems {
         itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemWorldAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemInvertAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.FluidGen.handleItemColor, itemFluidGenAugment);
+        itemColors.registerItemColorHandler(ColorHandler.VoidPearl.handleItemColor, itemVoidPearl);
 
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockDirectionalCharger));
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockPositionalCharger));

@@ -1,14 +1,19 @@
 package com.lordmau5.wirelessutils.entity;
 
 import com.lordmau5.wirelessutils.item.base.IDamageableItem;
+import com.lordmau5.wirelessutils.item.base.IDimensionallyStableItem;
 import com.lordmau5.wirelessutils.item.base.IGrowableItem;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ITeleporter;
 
 import javax.annotation.Nullable;
 
@@ -57,6 +62,36 @@ public class EntityItemEnhanced extends EntityItem {
         }
 
         return super.attackEntityFrom(source, amount);
+    }
+
+    @Nullable
+    @Override
+    public Entity changeDimension(int dimensionIn, ITeleporter teleporter) {
+        if ( shouldChangeDimension() )
+            return super.changeDimension(dimensionIn, teleporter);
+
+        // We don't want to change dimensions.
+        return null;
+    }
+
+    public boolean shouldChangeDimension() {
+        ItemStack stack = getItem();
+        Item item = stack.getItem();
+
+        return (!(item instanceof IDimensionallyStableItem) || ((IDimensionallyStableItem) item).allowDimensionalTravel());
+    }
+
+    @Override
+    protected void onInsideBlock(IBlockState state) {
+        super.onInsideBlock(state);
+        ItemStack stack = getItem();
+        Item item = stack.getItem();
+
+        if ( item instanceof IDimensionallyStableItem ) {
+            Block block = state.getBlock();
+            if ( block == Blocks.END_GATEWAY || block == Blocks.END_PORTAL )
+                ((IDimensionallyStableItem) item).onPortalImpact(stack, this, state);
+        }
     }
 
     @Override

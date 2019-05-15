@@ -124,6 +124,13 @@ item.wirelessutils.charged_pearl.jei.1=Rumor has it that Charged Pearls were fir
 item.wirelessutils.quenched_pearl.name=Quenched Pearl
 item.wirelessutils.scorched_pearl.name=Scorched Pearl
 
+item.wirelessutils.void_pearl.name=Void Pearl
+item.wirelessutils.void_pearl.contains=Contains:
+item.wirelessutils.void_pearl.empty=Empty
+item.wirelessutils.void_pearl.entry=- %s
+item.wirelessutils.void_pearl.jei.0=Throwing a Stabilized Ender Pearl into an End Portal has filled it with nothingness.
+item.wirelessutils.void_pearl.jei.1=The void seeks to be filled, and to that end, it seems to suck up any creature it comes into contact with.
+
 item.wirelessutils.stabilized_ender_pearl.jei.0=Stabilized Ender Pearls behave similarly to Fluxed Pearls, in that they can be bounced and fired from Dispensers.
 item.wirelessutils.stabilized_ender_pearl.jei.1=If a Stabilized Ender Pearl is shot from a Dispenser rather than thrown, it will teleport a nearby creature to itself when it lands.
 item.wirelessutils.stabilized_ender_pearl.jei.2=The stabilization also seems to have made the process safer.

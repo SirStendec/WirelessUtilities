@@ -128,21 +128,29 @@ public abstract class ItemBasePearl extends ItemBase implements IJEIInformationI
     public abstract @Nonnull
     EntityThrowable getProjectileEntity(@Nonnull World worldIn, @Nullable EntityPlayer playerIn, @Nullable IPosition position, @Nonnull ItemStack stack);
 
+    public boolean shouldStackShrink(@Nonnull ItemStack stack, EntityPlayer player) {
+        return !player.capabilities.isCreativeMode;
+    }
+
     @Override
     @Nonnull
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         ItemStack stack = playerIn.getHeldItem(handIn);
-        if ( !playerIn.capabilities.isCreativeMode )
-            stack.shrink(1);
 
         worldIn.playSound(null, playerIn.posX, playerIn.posY, playerIn.posZ, SoundEvents.ENTITY_ENDERPEARL_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
         playerIn.getCooldownTracker().setCooldown(this, 5);
 
         if ( !worldIn.isRemote ) {
-            EntityThrowable pearl = getProjectileEntity(worldIn, playerIn, null, stack);
-            pearl.shoot(playerIn, playerIn.rotationPitch, playerIn.rotationYaw, 0.0F, getProjectileVelocity(stack), getProjectileInaccuracy(stack));
+            ItemStack thrown = stack.copy();
+            thrown.setCount(1);
+
+            EntityThrowable pearl = getProjectileEntity(worldIn, playerIn, null, thrown);
+            pearl.shoot(playerIn, playerIn.rotationPitch, playerIn.rotationYaw, 0.0F, getProjectileVelocity(thrown), getProjectileInaccuracy(thrown));
             worldIn.spawnEntity(pearl);
         }
+
+        if ( shouldStackShrink(stack, playerIn) )
+            stack.shrink(1);
 
         playerIn.addStat(StatList.getObjectUseStats(this));
         return new ActionResult<>(EnumActionResult.SUCCESS, stack);
