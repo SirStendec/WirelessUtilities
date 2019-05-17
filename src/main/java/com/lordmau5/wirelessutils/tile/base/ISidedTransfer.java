@@ -131,13 +131,17 @@ public interface ISidedTransfer {
             return facing.getOpposite();
 
         else if ( side == TransferSide.TOP ) {
-            if ( facing == EnumFacing.UP || facing == EnumFacing.DOWN )
+            if ( facing == EnumFacing.UP )
+                return getRotationX() ? EnumFacing.WEST : EnumFacing.SOUTH;
+            else if ( facing == EnumFacing.DOWN )
                 return getRotationX() ? EnumFacing.EAST : EnumFacing.NORTH;
 
             return EnumFacing.UP;
 
         } else if ( side == TransferSide.BOTTOM ) {
-            if ( facing == EnumFacing.UP || facing == EnumFacing.DOWN )
+            if ( facing == EnumFacing.UP )
+                return getRotationX() ? EnumFacing.EAST : EnumFacing.NORTH;
+            else if ( facing == EnumFacing.DOWN )
                 return getRotationX() ? EnumFacing.WEST : EnumFacing.SOUTH;
 
             return EnumFacing.DOWN;

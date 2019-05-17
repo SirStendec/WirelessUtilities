@@ -209,6 +209,16 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             for (int i = 0; i < locks.length; i++)
                 System.out.println("  " + i + ": " + locks[i]);
         }
+
+        for (TransferSide side : TransferSide.VALUES) {
+            if ( side != getSideForFacing(getFacingForSide(side)) )
+                System.out.println(" MISMATCH: side: " + side + " -- facing: " + getFacingForSide(side) + " -- reversed: " + getSideForFacing(getFacingForSide(side)));
+        }
+
+        for (EnumFacing facing : EnumFacing.VALUES) {
+            if ( facing != getFacingForSide(getSideForFacing(facing)) )
+                System.out.println(" MISMATCH: facing: " + facing + " -- side: " + getSideForFacing(facing) + " -- reversed: " + getFacingForSide(getSideForFacing(facing)));
+        }
     }
 
     /* Comparator */
@@ -746,7 +756,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     public boolean shouldProcessEntities() {
-        return true;
+        return !shouldProcessBlocks();
     }
 
     public BlockPosDimension getPosition() {
@@ -1600,7 +1610,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( enabled && canRun && augmentDrain > 0 )
             extractEnergy(augmentDrain, false);
 
-        if ( !enabled || !canRun || getEnergyStored() < baseEnergy ) {
+        if ( !enabled || !canRun || getEnergyStored() < baseEnergy || (gatherTick != 0 && shouldProcessBlocks()) ) {
             setActive(false);
             updateTrackers();
             return;
