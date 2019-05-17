@@ -131,34 +131,26 @@ public interface ISidedTransfer {
             return facing.getOpposite();
 
         else if ( side == TransferSide.TOP ) {
-            if ( facing == EnumFacing.UP )
+            if ( facing == EnumFacing.UP || facing == EnumFacing.DOWN )
                 return getRotationX() ? EnumFacing.EAST : EnumFacing.NORTH;
-            else if ( facing == EnumFacing.DOWN )
-                return getRotationX() ? EnumFacing.WEST : EnumFacing.SOUTH;
 
             return EnumFacing.UP;
 
         } else if ( side == TransferSide.BOTTOM ) {
-            if ( facing == EnumFacing.DOWN )
-                return getRotationX() ? EnumFacing.EAST : EnumFacing.NORTH;
-            else if ( facing == EnumFacing.UP )
+            if ( facing == EnumFacing.UP || facing == EnumFacing.DOWN )
                 return getRotationX() ? EnumFacing.WEST : EnumFacing.SOUTH;
 
             return EnumFacing.DOWN;
 
         } else if ( side == TransferSide.LEFT ) {
-            if ( facing == EnumFacing.UP )
-                return getRotationX() ? EnumFacing.NORTH : EnumFacing.WEST;
-            else if ( facing == EnumFacing.DOWN )
+            if ( facing == EnumFacing.UP || facing == EnumFacing.DOWN )
                 return getRotationX() ? EnumFacing.SOUTH : EnumFacing.EAST;
 
             return facing.rotateY();
 
         } else if ( side == TransferSide.RIGHT ) {
-            if ( facing == EnumFacing.UP )
+            if ( facing == EnumFacing.UP || facing == EnumFacing.DOWN )
                 return getRotationX() ? EnumFacing.NORTH : EnumFacing.WEST;
-            else if ( facing == EnumFacing.DOWN )
-                return getRotationX() ? EnumFacing.SOUTH : EnumFacing.EAST;
 
             return facing.rotateYCCW();
 
