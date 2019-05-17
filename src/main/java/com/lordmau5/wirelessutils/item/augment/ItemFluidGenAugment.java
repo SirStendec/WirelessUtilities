@@ -62,6 +62,7 @@ public class ItemFluidGenAugment extends ItemAugment {
 
     @Override
     public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        // We want to show our drain for tooltips, but not for actual machines.
         if ( augmentable == null )
             return getEnergy(stack);
 

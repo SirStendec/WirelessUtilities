@@ -233,7 +233,11 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
             return ItemStack.EMPTY;
 
         entity.setPosition(pos.x, pos.y, pos.z);
-        entity.setVelocity(0, 0, 0);
+
+        entity.motionX = 0;
+        entity.motionY = 0;
+        entity.motionZ = 0;
+
         entity.setUniqueId(UUID.randomUUID());
 
         world.spawnEntity(entity);
