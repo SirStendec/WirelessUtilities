@@ -67,7 +67,6 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
     @SideOnly(Side.CLIENT)
     public void initModel() {
         ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
-        super.initModel();
     }
 
     @Override
