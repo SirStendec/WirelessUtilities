@@ -175,6 +175,9 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard {
             tag.removeTag("Range");
             tag.removeTag("Facing");
 
+            if ( tag.isEmpty() )
+                tag = null;
+
             if ( stack.getCount() == 1 ) {
                 stack.setTagCompound(tag);
             } else {

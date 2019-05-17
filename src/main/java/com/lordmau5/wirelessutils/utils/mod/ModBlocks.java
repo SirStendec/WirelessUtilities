@@ -11,6 +11,7 @@ import com.lordmau5.wirelessutils.block.desublimator.BlockPositionalDesublimator
 import com.lordmau5.wirelessutils.block.redstone.BlockPoweredAir;
 import com.lordmau5.wirelessutils.block.redstone.BlockPoweredRedstoneWire;
 import com.lordmau5.wirelessutils.block.slime.BlockAngledSlime;
+import com.lordmau5.wirelessutils.block.vaporizer.BlockDirectionalVaporizer;
 import com.lordmau5.wirelessutils.utils.ColorHandler;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -40,6 +41,9 @@ public class ModBlocks {
     @GameRegistry.ObjectHolder("wirelessutils:positional_desublimator")
     public static BlockPositionalDesublimator blockPositionalDesublimator;
 
+    @GameRegistry.ObjectHolder("wirelessutils:directional_vaporizer")
+    public static BlockDirectionalVaporizer blockDirectionalVaporizer;
+
     @GameRegistry.ObjectHolder("wirelessutils:powered_air")
     public static BlockPoweredAir blockPoweredAir;
 
@@ -63,6 +67,9 @@ public class ModBlocks {
 
         blockDirectionalDesublimator.initModel();
         blockPositionalDesublimator.initModel();
+
+        //blockDirectionalVaporizer.initModel();
+
         blockAngledSlime.initModel();
     }
 
@@ -77,6 +84,8 @@ public class ModBlocks {
 
         blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockDirectionalDesublimator);
         blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockPositionalDesublimator);
+
+        //blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockDirectionalVaporizer);
 
         blockColors.registerBlockColorHandler(ColorHandler.RedstoneWire.handleBlockColor, blockPoweredRedstoneWire);
     }

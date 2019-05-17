@@ -43,6 +43,12 @@ tile.wirelessutils.positional_desublimator.info.0=The Positional Desublimator tr
 tile.wirelessutils.positional_desublimator.info.1=items to set positions, as specified
 tile.wirelessutils.positional_desublimator.info.2=by Positional Cards.
 
+tile.wirelessutils.directional_vaporizer.name=Directional Vaporizer
+tile.wirelessutils.directional_vaporizer.info.0=The Directional Vaporizer works by
+tile.wirelessutils.directional_vaporizer.info.1=vaporizing entities within its working
+tile.wirelessutils.directional_vaporizer.info.2=area and then processing them with its
+tile.wirelessutils.directional_vaporizer.info.3=installed module.
+
 tile.wirelessutils.infinite_wireless_transmitter.name=Infinite Wireless Transmitter
 
 tile.wirelessutils.directional_rs_network.name=Directional RS Network

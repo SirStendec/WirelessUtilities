@@ -52,7 +52,13 @@ public abstract class ItemBasePearl extends ItemBase implements IJEIInformationI
 
             @Override
             protected IProjectile getProjectileEntity(World worldIn, IPosition position, ItemStack stack) {
-                return ItemBasePearl.this.getProjectileEntity(worldIn, null, position, stack);
+                ItemStack thrown = stack;
+                if ( thrown.getCount() > 1 ) {
+                    thrown = stack.copy();
+                    thrown.setCount(1);
+                }
+
+                return ItemBasePearl.this.getProjectileEntity(worldIn, null, position, thrown);
             }
         });
     }
@@ -141,8 +147,11 @@ public abstract class ItemBasePearl extends ItemBase implements IJEIInformationI
         playerIn.getCooldownTracker().setCooldown(this, 5);
 
         if ( !worldIn.isRemote ) {
-            ItemStack thrown = stack.copy();
-            thrown.setCount(1);
+            ItemStack thrown = stack;
+            if ( thrown.getCount() > 1 ) {
+                thrown = stack.copy();
+                thrown.setCount(1);
+            }
 
             EntityThrowable pearl = getProjectileEntity(worldIn, playerIn, null, thrown);
             pearl.shoot(playerIn, playerIn.rotationPitch, playerIn.rotationYaw, 0.0F, getProjectileVelocity(thrown), getProjectileInaccuracy(thrown));

@@ -267,6 +267,8 @@ public class CommonProxy {
         event.getRegistry().register(new BlockDirectionalDesublimator());
         event.getRegistry().register(new BlockPositionalDesublimator());
 
+        //event.getRegistry().register(new BlockDirectionalVaporizer());
+
         event.getRegistry().register(new BlockPoweredAir());
         event.getRegistry().register(new BlockPoweredRedstoneWire());
         event.getRegistry().register(new BlockDirectionalAir());
@@ -284,6 +286,8 @@ public class CommonProxy {
 
         registerTile(TileDirectionalDesublimator.class);
         registerTile(TilePositionalDesublimator.class);
+
+        //registerTile(TileDirectionalVaporizer.class);
 
         PluginRegistry.registerBlocks(event);
     }
@@ -316,6 +320,8 @@ public class CommonProxy {
 
         registerItem(event, new ItemBlockMachine(ModBlocks.blockDirectionalDesublimator).setRegistryName(ModBlocks.blockDirectionalDesublimator.getRegistryName()));
         registerItem(event, new ItemBlockMachine(ModBlocks.blockPositionalDesublimator).setRegistryName(ModBlocks.blockPositionalDesublimator.getRegistryName()));
+
+        //registerItem(event, new ItemBlockMachine(ModBlocks.blockDirectionalVaporizer).setRegistryName(ModBlocks.blockDirectionalVaporizer.getRegistryName()));
 
         registerItem(event, new ItemBlockExplainable(ModBlocks.blockAngledSlime).setRegistryName(ModBlocks.blockAngledSlime.getRegistryName()));
 

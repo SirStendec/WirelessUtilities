@@ -1,0 +1,81 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "wirelessutils:layered_template",
+		"transform": "forge:default-block",
+		"textures": {
+			"layer0:solid:base": "wirelessutils:block/machine_base",
+			"layer0:solid:side": "wirelessutils:block/machine_side",
+			"layer0:solid:front": "#layer0:solid:base",
+			"layer1:cutout:mark": "wirelessutils:block/vaporizer_mark",
+			"layer2:cutout:level": "wirelessutils:block/overlay",
+			"layer3:cutout:config_bottom": "model_property:machine.config.bottom",
+			"layer3:cutout:config_top": "model_property:machine.config.top",
+			"layer3:cutout:config_front": "model_property:machine.config.front",
+			"layer3:cutout:config_back": "model_property:machine.config.back",
+			"layer3:cutout:config_right": "model_property:machine.config.right",
+			"layer3:cutout:config_left": "model_property:machine.config.left"
+		},
+		"custom": {
+			"template": "wirelessutils:block/directional_machine"
+		},
+		"uvlock": false
+	},
+	"variants": {
+		"inventory": [
+			{
+				"textures": {
+					"layer1:solid:mark": "wirelessutils:block/vaporizer_mark",
+					"layer2:solid:level": "wirelessutils:block/overlay"
+				}
+			}
+		],
+		"level": {
+			"0": {},
+			"1": {},
+			"2": {},
+			"3": {},
+			"4": {},
+			"5": {},
+			"6": {},
+			"7": {},
+			"8": {},
+			"9": {}
+		},
+		"active": {
+			"false": {},
+			"true": {
+				"textures": {
+					"layer1:cutout:mark": "wirelessutils:block/vaporizer_mark_active"
+				}
+			}
+		},
+		"facing": {
+			"north": {
+			},
+			"south": {
+				"y": 180
+			},
+			"east": {
+				"y": 90
+			},
+			"west": {
+				"y": 270
+			},
+			"up_x": {
+				"x": -90,
+				"y": 90
+			},
+			"down_x": {
+				"x": 90,
+				"y": 90
+			},
+			"up_z": {
+				"x": -90
+			},
+			"down_z": {
+				"x": 90
+			}
+		}
+	}
+}

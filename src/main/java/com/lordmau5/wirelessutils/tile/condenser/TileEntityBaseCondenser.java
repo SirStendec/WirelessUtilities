@@ -1230,7 +1230,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     @Override
     public int extractEnergy(int maxExtract, boolean simulate) {
         int extracted = super.extractEnergy(maxExtract, simulate);
-        energyPerTick += extracted;
+        if ( !simulate )
+            energyPerTick += extracted;
         return extracted;
     }
 

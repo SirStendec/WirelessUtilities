@@ -185,6 +185,9 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
 
             BlockPosDimension.removeFromTag(tag);
 
+            if ( tag.isEmpty() )
+                tag = null;
+
             if ( stack.getCount() == 1 ) {
                 stack.setTagCompound(tag);
             } else {

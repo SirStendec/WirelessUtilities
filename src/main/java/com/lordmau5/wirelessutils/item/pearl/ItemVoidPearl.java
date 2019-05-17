@@ -250,6 +250,11 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         if ( tag != null ) {
             tag.removeTag("EntityID");
             tag.removeTag("EntityData");
+
+            // Clear empty tags to allow better stacking.
+            if ( tag.isEmpty() )
+                tag = null;
+
             out.setTagCompound(tag);
         }
 
