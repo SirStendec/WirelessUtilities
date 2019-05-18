@@ -43,6 +43,12 @@ tile.wirelessutils.positional_desublimator.info.0=Позиционный дес�
 tile.wirelessutils.positional_desublimator.info.1=предметы в заданные положения, как
 tile.wirelessutils.positional_desublimator.info.2=указано в позиционных картах.
 
+tile.wirelessutils.directional_vaporizer.name=Направленный испаритель
+tile.wirelessutils.directional_vaporizer.info.0=Направленный испаритель работает путем
+tile.wirelessutils.directional_vaporizer.info.1=испарения объектов в своей рабочей
+tile.wirelessutils.directional_vaporizer.info.2=зоне, а затем обрабатывает их
+tile.wirelessutils.directional_vaporizer.info.3=с установленным модулем.
+
 tile.wirelessutils.infinite_wireless_transmitter.name=Бесконечный беспроводной передатчик
 
 tile.wirelessutils.directional_rs_network.name=Направленная сеть RS
@@ -80,11 +86,12 @@ item.wirelessutils.accurate_pearl.info.1=при выстреле из разда
 
 item.wirelessutils.player_positional_card.name=Позиционная карта игрока
 item.wirelessutils.player_positional_card.info.0=Сидя-Используйте этот предмет, чтобы установить
-item.wirelessutils.player_positional_card.info.1=его для себя и открыть графический интерфейс
-item.wirelessutils.player_positional_card.info.2=для настройки того,
-item.wirelessutils.player_positional_card.info.3=что может быть доступно.
+item.wirelessutils.player_positional_card.info.1=его для себя.
+#item.wirelessutils.player_positional_card.info.1=его для себя и открыть графический интерфейс
+#item.wirelessutils.player_positional_card.info.2=для настройки того,
+#item.wirelessutils.player_positional_card.info.3=что может быть доступно.
 item.wirelessutils.player_positional_card.highlight=%s (%s)
-item.wirelessutils.player_positional_card.player=Игрок: %s
+item.wirelessutils.player_positional_card.player=Player: %s
 item.wirelessutils.player_positional_card.invalid.unset=Цель не была установлена.
 
 item.wirelessutils.positional_card.name=Абсолютная позиционная карта
@@ -123,6 +130,13 @@ item.wirelessutils.charged_pearl.jei.1=Ходят слухи, что заряж�
 item.wirelessutils.quenched_pearl.name=Закаленный жемчуг
 item.wirelessutils.scorched_pearl.name=Выжженный жемчуг
 
+item.wirelessutils.void_pearl.name=Жемчуг пустоты
+item.wirelessutils.void_pearl.contains=Содержит:
+item.wirelessutils.void_pearl.empty=Пусто
+item.wirelessutils.void_pearl.entry=- %s
+item.wirelessutils.void_pearl.jei.0=Бросание стабилизированного жемчуга Края в портал Края заполнит его ничем.
+item.wirelessutils.void_pearl.jei.1=Пустота стремится быть заполненной, и с этой целью она, кажется, поглощает любое существо, с которым соприкасается.
+
 item.wirelessutils.stabilized_ender_pearl.jei.0=Стабилизированный жемчуг Края ведет себя так же, как и флаксовый жемчуг, в том смысле, что он может отскакивать и запускаться из раздатчика.
 item.wirelessutils.stabilized_ender_pearl.jei.1=Если стабилизированный жемчуг Края выстрелил из раздатчика, а не брошен, он телепортирует соседнее существо к себе при приземлении.
 item.wirelessutils.stabilized_ender_pearl.jei.2=Стабилизация также, кажется, сделала процесс более безопасным.
@@ -134,6 +148,13 @@ item.wirelessutils.level_upgrade.name=Комплект обновления
 item.wirelessutils.conversion_upgrade.name=Набор для преобразования
 
 item.wirelessutils.base_augment.name=Базовое дополнение
+
+item.wirelessutils.dispenser_augment.name=Дополнение раздатчика
+item.wirelessutils.dispenser_augment.info.0=Это дополнение позволяет десублиматорам
+item.wirelessutils.dispenser_augment.info.1=отправлять предметы в мир,
+item.wirelessutils.dispenser_augment.info.2=а не просто сбрасывать их.
+item.wirelessutils.dispenser_augment.info.3=Требуется блок воздуха
+item.wirelessutils.dispenser_augment.info.4=в выбранном месте.
 
 item.wirelessutils.world_augment.name=Мировое дополнение
 item.wirelessutils.world_augment.info.0=Это дополнение позволяет определенным машинам
@@ -175,6 +196,10 @@ item.wirelessutils.crop_augment.info.0=Это дополнение позвол�
 item.wirelessutils.crop_augment.info.1=взаимодействовать с культурами, например,
 item.wirelessutils.crop_augment.info.2=собирая урожай или используя на них костную муку.
 
+item.wirelessutils.crop_augment.tree.0=Урожайное дополнение также будут собирать деревья,
+item.wirelessutils.crop_augment.tree.1=если у них есть основание дерева
+item.wirelessutils.crop_augment.tree.2=в пределах их рабочей зоны.
+
 item.wirelessutils.inventory_augment.name=Инвентарное дополнение
 item.wirelessutils.inventory_augment.info.0=Это дополнение позволяет машине
 item.wirelessutils.inventory_augment.info.1=работать на предметах в инвентарных 
@@ -204,6 +229,11 @@ item.wirelessutils.range_augment.lock.1=когда цель требует, чт
 item.wirelessutils.range_augment.lock.2=диапазона было в пределах диапазона.
 
 item.wirelessutils.disabled=Этот предмет отключен в конфигурации.
+
+item.wirelessutils.augment.min_level=Требуемый уровень машины: %s
+item.wirelessutils.augment.energy=Использование энергии:
+item.wirelessutils.augment.energy.entry=- %s
+item.wirelessutils.augment.energy.action=%sx + %s RF/действие
 
 item.wirelessutils.augment_ctrl.inactive=Зажмите §e§oCtrl§r§7 для допустимых машин
 item.wirelessutils.augment_ctrl.active=Допустимые машины:
@@ -314,6 +344,11 @@ info.wirelessutils.round_robin.name=По кругу
 info.wirelessutils.round_robin.per_target=За цель:
 info.wirelessutils.round_robin.maximum=Максимум
 
+info.wirelessutils.world_tick.name=Мировая тиковая скорость
+info.wirelessutils.world_tick.minimum=Минимум
+info.wirelessutils.world_tick.ticks=%s тиков
+info.wirelessutils.world_tick.frequency=Выполнять каждые:
+
 info.wirelessutils.work_info.name=Работа
 info.wirelessutils.work_info.tooltip.rate=Скорость: %s
 info.wirelessutils.work_info.tooltip.targets=Цели: %s из %s
@@ -322,7 +357,9 @@ info.wirelessutils.work_info.maximum=Максимальная скорость:
 info.wirelessutils.work_info.targets.name=Активные цели:
 info.wirelessutils.work_info.targets.info=%s из %s
 
-info.wirelessutils.item_rate=Предметов/тик
+info.wirelessutils.item_rate.second=Предметов/сек.
+info.wirelessutils.item_rate.tick=Предметов/тик
+info.wirelessutils.item_rate.item=Сек./предмет
 info.wirelessutils.buffer=Буфер
 
 jei.wirelessutils.charger=Предметная зарядка
@@ -361,6 +398,8 @@ btn.wirelessutils.range.width=Ширина:
 
 info.wirelessutils.slot_lock=Этот предмет не может быть удален.
 info.wirelessutils.max=Макс.: %s
+info.wirelessutils.min=Мин.: %s
+info.wirelessutils.range=Диапазон: %s to %s
 
 info.wirelessutils.blockpos.full=X: %s Y: %s Z: %s Изм.: %s
 info.wirelessutils.blockpos.basic=X: %s Y: %s Z: %s
@@ -372,7 +411,7 @@ info.wirelessutils.configured=%s (настроено)
 
 info.wirelessutils.tiered.name=%s (%s)
 info.wirelessutils.tiered.tier=уровень %s
-info.wirelessutils.tiered.level.creative=Творческий
+info.wirelessutils.tiered.level.5=Творческий
 
 info.wirelessutils.tiered.upgrade.info.0=Этот предмет модернизирует машины
 info.wirelessutils.tiered.upgrade.info.1=из %s в %s.
