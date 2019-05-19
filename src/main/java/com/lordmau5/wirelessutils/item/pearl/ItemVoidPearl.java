@@ -66,7 +66,7 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
     @Override
     @SideOnly(Side.CLIENT)
     public void initModel() {
-        ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
+        ModelLoader.setCustomMeshDefinition(this, stack -> new ModelResourceLocation(getRegistryName(), "inventory"));
     }
 
     @Override
@@ -261,6 +261,7 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
             out.setTagCompound(tag);
         }
 
+        out.setItemDamage(0);
         return out;
     }
 
@@ -291,8 +292,18 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         NBTTagCompound entityTag = new NBTTagCompound();
         entity.writeToNBT(entityTag);
 
+        entityTag.removeTag("UUIDMost");
+        entityTag.removeTag("UUIDLeast");
+        entityTag.removeTag("Motion");
+        entityTag.removeTag("FallDistance");
+        entityTag.removeTag("OnGround");
+        entityTag.removeTag("Rotation");
+        entityTag.removeTag("Pos");
+
         tag.setString("EntityID", name);
         tag.setTag("EntityData", entityTag);
+
+        out.setItemDamage(EntityList.getID(entity.getClass()));
 
         out.setTagCompound(tag);
         entity.setDead();

@@ -43,12 +43,12 @@ public class ItemInventoryAugment extends ItemAugment {
     }
 
     @Override
-    public boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull Class<? extends IAugmentable> klass) {
+    public boolean canApplyToDelegate(@Nonnull ItemStack stack, @Nonnull Class<? extends IAugmentable> klass) {
         return IInventoryAugmentable.class.isAssignableFrom(klass);
     }
 
     @Override
-    public boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
+    public boolean canApplyToDelegate(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         return augmentable instanceof IInventoryAugmentable;
     }
 }

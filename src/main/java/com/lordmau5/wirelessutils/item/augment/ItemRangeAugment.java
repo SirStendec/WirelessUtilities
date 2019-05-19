@@ -65,7 +65,7 @@ public class ItemRangeAugment extends ItemAugment {
     }
 
     @Override
-    public boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull Class<? extends IAugmentable> klass) {
+    public boolean canApplyToDelegate(@Nonnull ItemStack stack, @Nonnull Class<? extends IAugmentable> klass) {
         if ( IDirectionalMachine.class.isAssignableFrom(klass) ) {
             if ( isInterdimensional(stack) || stack.getMetadata() >= ModConfig.augments.range.maxTierDirectional )
                 return false;
@@ -75,7 +75,7 @@ public class ItemRangeAugment extends ItemAugment {
     }
 
     @Override
-    public boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
+    public boolean canApplyToDelegate(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         if ( (augmentable instanceof IDirectionalMachine) && (isInterdimensional(stack) || stack.getMetadata() >= ModConfig.augments.range.maxTierDirectional) )
             return false;
 

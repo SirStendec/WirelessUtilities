@@ -21,6 +21,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
@@ -28,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -217,9 +219,61 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
 
     public abstract void apply(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable);
 
-    public abstract boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull Class<? extends IAugmentable> klass);
+    public boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull Class<? extends IAugmentable> klass) {
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("AllowedMachines", Constants.NBT.TAG_LIST) ) {
+                Machine machine = klass.getAnnotation(Machine.class);
+                if ( machine == null )
+                    return false;
 
-    public abstract boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable);
+                String name = machine.name();
+                NBTTagList list = tag.getTagList("AllowedMachines", Constants.NBT.TAG_STRING);
+                boolean allowed = false;
+                for (int i = 0; i < list.tagCount(); i++) {
+                    if ( name.equals(list.getStringTagAt(i)) ) {
+                        allowed = true;
+                        break;
+                    }
+                }
+
+                if ( !allowed )
+                    return false;
+            }
+        }
+
+        return canApplyToDelegate(stack, klass);
+    }
+
+    public boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("AllowedMachines", Constants.NBT.TAG_LIST) ) {
+                Machine machine = augmentable.getClass().getAnnotation(Machine.class);
+                if ( machine == null )
+                    return false;
+
+                String name = machine.name();
+                NBTTagList list = tag.getTagList("AllowedMachines", Constants.NBT.TAG_STRING);
+                boolean allowed = false;
+                for (int i = 0; i < list.tagCount(); i++) {
+                    if ( name.equals(list.getStringTagAt(i)) ) {
+                        allowed = true;
+                        break;
+                    }
+                }
+
+                if ( !allowed )
+                    return false;
+            }
+        }
+
+        return canApplyToDelegate(stack, augmentable);
+    }
+
+    public abstract boolean canApplyToDelegate(@Nonnull ItemStack stack, @Nonnull Class<? extends IAugmentable> klass);
+
+    public abstract boolean canApplyToDelegate(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable);
 
     public boolean shouldRequireLowerTier(@Nonnull ItemStack stack) {
         return true;
@@ -255,11 +309,12 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
     }
 
     public void addSlotLockExplanation(@Nonnull List<String> tooltip, @Nonnull TileEntity tile, @Nonnull Slot slot, @Nonnull ItemStack stack) {
-        if ( !ModConfig.augments.requirePreviousTiers || !(tile instanceof TileEntityBaseMachine) )
+        if ( !(tile instanceof TileEntityBaseMachine) )
             return;
 
         TileEntityBaseMachine te = (TileEntityBaseMachine) tile;
-        if ( te.hasHigherTierAugment(stack) )
+
+        if ( ModConfig.augments.requirePreviousTiers && te.hasHigherTierAugment(stack) )
             addLocalizedLines(tooltip, "info." + WirelessUtils.MODID + ".tiered.required.higher", TextHelpers.YELLOW);
     }
 
@@ -267,11 +322,22 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
     @Nonnull
     public String getItemStackDisplayName(@Nonnull ItemStack stack) {
         String name = super.getItemStackDisplayName(stack);
-        if ( getTiers() > 1 )
+        String tier = null;
+
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("TierName", Constants.NBT.TAG_STRING) )
+                tier = tag.getString("TierName");
+        }
+
+        if ( tier == null && getTiers() > 1 )
+            tier = Level.fromAugment(stack).getName();
+
+        if ( tier != null )
             return new TextComponentTranslation(
                     "info." + WirelessUtils.MODID + ".tiered.name",
                     name,
-                    Level.fromAugment(stack).getName()
+                    tier
             ).getUnformattedText();
 
         return name;
