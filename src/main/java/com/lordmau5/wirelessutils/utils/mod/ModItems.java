@@ -22,6 +22,9 @@ import com.lordmau5.wirelessutils.item.augment.ItemSidedTransferAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemSlotAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemTransferAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemWorldAugment;
+import com.lordmau5.wirelessutils.item.module.ItemBaseModule;
+import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
+import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
 import com.lordmau5.wirelessutils.item.pearl.ItemChargedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemFluxedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemQuenchedPearl;
@@ -138,6 +141,15 @@ public class ModItems {
     @GameRegistry.ObjectHolder("wirelessutils:dispenser_augment")
     public static ItemDispenserAugment itemDispenserAugment;
 
+    @GameRegistry.ObjectHolder("wirelessutils:base_module")
+    public static ItemBaseModule itemBaseModule;
+
+    @GameRegistry.ObjectHolder("wirelessutils:slaughter_module")
+    public static ItemSlaughterModule itemSlaughterModule;
+
+    @GameRegistry.ObjectHolder("wirelessutils:teleport_module")
+    public static ItemTeleportModule itemTeleportModule;
+
     public static void initLootTables() {
         LootTableList.register(new ResourceLocation(WirelessUtils.MODID, "charged_pearl_drops"));
     }
@@ -227,6 +239,9 @@ public class ModItems {
         itemSidedTransferAugment.initModel();
         itemDispenserAugment.initModel();
         itemVoidPearl.initModel();
+        itemBaseModule.initModel();
+        itemSlaughterModule.initModel();
+        itemTeleportModule.initModel();
     }
 
     @SideOnly(Side.CLIENT)
@@ -252,6 +267,6 @@ public class ModItems {
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockDirectionalDesublimator));
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockPositionalDesublimator));
 
-        //itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockDirectionalVaporizer));
+        itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockDirectionalVaporizer));
     }
 }

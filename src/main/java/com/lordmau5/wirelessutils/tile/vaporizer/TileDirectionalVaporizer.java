@@ -1,6 +1,8 @@
 package com.lordmau5.wirelessutils.tile.vaporizer;
 
 import cofh.core.network.PacketBase;
+import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiDirectionalVaporizer;
+import com.lordmau5.wirelessutils.gui.container.vaporizer.ContainerDirectionalVaporizer;
 import com.lordmau5.wirelessutils.item.augment.ItemRangeAugment;
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
 import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
@@ -11,15 +13,18 @@ import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 @Machine(name = "directional_vaporizer")
@@ -38,6 +43,7 @@ public class TileDirectionalVaporizer extends TileBaseVaporizer implements IRang
 
     public TileDirectionalVaporizer() {
         super();
+        initializeItemStackHandler(18);
     }
 
     /* Debugging */
@@ -142,6 +148,17 @@ public class TileDirectionalVaporizer extends TileBaseVaporizer implements IRang
         super.setDefaultColor(color);
         if ( validTargets != null )
             calculateTargets();
+    }
+
+    @Override
+    public boolean canGetFullEntities() {
+        return true;
+    }
+
+    @Nullable
+    @Override
+    public AxisAlignedBB getFullEntitiesAABB() {
+        return getTargetBoundingBox(getPosition());
     }
 
     public void calculateTargets() {
@@ -456,5 +473,13 @@ public class TileDirectionalVaporizer extends TileBaseVaporizer implements IRang
 
     /* GUI */
 
+    @Override
+    public Object getGuiClient(InventoryPlayer inventory) {
+        return new GuiDirectionalVaporizer(inventory, this);
+    }
 
+    @Override
+    public Object getGuiServer(InventoryPlayer inventory) {
+        return new ContainerDirectionalVaporizer(inventory, this);
+    }
 }

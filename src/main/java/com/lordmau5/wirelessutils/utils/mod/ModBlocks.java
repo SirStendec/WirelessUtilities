@@ -68,7 +68,7 @@ public class ModBlocks {
         blockDirectionalDesublimator.initModel();
         blockPositionalDesublimator.initModel();
 
-        //blockDirectionalVaporizer.initModel();
+        blockDirectionalVaporizer.initModel();
 
         blockAngledSlime.initModel();
     }
@@ -85,7 +85,7 @@ public class ModBlocks {
         blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockDirectionalDesublimator);
         blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockPositionalDesublimator);
 
-        //blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockDirectionalVaporizer);
+        blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockDirectionalVaporizer);
 
         blockColors.registerBlockColorHandler(ColorHandler.RedstoneWire.handleBlockColor, blockPoweredRedstoneWire);
     }

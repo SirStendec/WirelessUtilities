@@ -25,6 +25,7 @@ import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
+import com.lordmau5.wirelessutils.utils.ItemHandlerProxy;
 import com.lordmau5.wirelessutils.utils.ItemStackHandler;
 import com.lordmau5.wirelessutils.utils.StackHelper;
 import com.lordmau5.wirelessutils.utils.WUFakePlayer;
@@ -107,7 +108,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
-    protected CapabilityHandler capabilityHandler;
+    protected ItemHandlerProxy capabilityHandler;
 
     private ComparableItemStackValidatedNBT[] locks;
     private boolean[] emptySlots;
@@ -154,11 +155,17 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     private boolean sideTransferAugment = false;
     private Mode[] sideTransfer;
+    private boolean[] sideIsCached;
+    private TileEntity[] sideCache;
 
     public TileBaseDesublimator() {
         super();
         sideTransfer = new Mode[6];
+        sideIsCached = new boolean[6];
+        sideCache = new TileEntity[6];
         Arrays.fill(sideTransfer, Mode.PASSIVE);
+        Arrays.fill(sideIsCached, false);
+        Arrays.fill(sideCache, null);
         worker = new Worker<>(this);
 
         updateTextures();
@@ -178,7 +185,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         plantables = 0;
         fertilizers = 0;
 
-        capabilityHandler = new CapabilityHandler(this);
+        capabilityHandler = new ItemHandlerProxy(itemStackHandler, getBufferOffset(), 18, true, true);
     }
 
     /* Debugging */
@@ -735,12 +742,21 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     public abstract int getEnergyCost(double distance, boolean interdimensional);
 
     public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
-        if ( validTargets == null )
+        if ( validTargets == null ) {
+            tickActive();
             calculateTargets();
+        }
 
         validTargetsPerTick = 0;
         maxEnergyPerTick = augmentDrain;
         return validTargets;
+    }
+
+    @Override
+    public void onInactive() {
+        super.onInactive();
+        worker.clearTargetCache();
+        validTargets = null;
     }
 
     public boolean shouldProcessBlocks() {
@@ -1240,7 +1256,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             if ( dispenserMode ) {
                 IBehaviorDispenseItem behavior = BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(move.getItem());
                 if ( behavior != null && behavior != IBehaviorDispenseItem.DEFAULT_BEHAVIOR && world.isAirBlock(target.pos) ) {
-                    world.setBlockState(target.pos, ModBlocks.blockDirectionalAir.getDefaultState().withProperty(BlockDirectionalAir.FACING, target.pos.getFacing()), 16);
+                    world.setBlockState(target.pos, ModBlocks.blockDirectionalAir.getDefaultState().withProperty(BlockDirectionalAir.FACING, target.pos.getFacing().getOpposite()), 16);
                     move = behavior.dispense(new BlockSourceImpl(world, target.pos), move);
                     world.setBlockState(target.pos, Blocks.AIR.getDefaultState(), 16);
                     count = stack.getCount() - move.getCount();
@@ -1402,7 +1418,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         return 0;
     }
 
-    public CapabilityHandler getCapabilityHandler() {
+    public ItemHandlerProxy getCapabilityHandler() {
         return capabilityHandler;
     }
 
@@ -1482,6 +1498,14 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         }
 
         callBlockUpdate();
+        callNeighborStateChange(getFacingForSide(side));
+    }
+
+    @Override
+    public void onNeighborBlockChange() {
+        super.onNeighborBlockChange();
+        Arrays.fill(sideCache, null);
+        Arrays.fill(sideIsCached, false);
     }
 
     @Override
@@ -1490,10 +1514,22 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return;
 
         EnumFacing facing = getFacingForSide(side);
-        BlockPos target = pos.offset(facing);
+        TileEntity tile;
 
-        TileEntity tile = world.getTileEntity(target);
-        if ( tile == null )
+        if ( sideIsCached[side.index] ) {
+            tile = sideCache[side.index];
+            if ( tile != null && tile.isInvalid() ) {
+                tile = world.getTileEntity(pos.offset(facing));
+                sideCache[side.index] = tile;
+            }
+
+        } else {
+            tile = world.getTileEntity(pos.offset(facing));
+            sideCache[side.index] = tile;
+            sideIsCached[side.index] = true;
+        }
+
+        if ( tile == null || tile.isInvalid() )
             return;
 
         EnumFacing opposite = facing.getOpposite();
@@ -1607,15 +1643,21 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( sideTransferAugment && enabled && (inverted ? empty < totalSlots : full < totalSlots) )
             executeSidedTransfer();
 
-        if ( enabled && canRun && augmentDrain > 0 )
-            extractEnergy(augmentDrain, false);
+        if ( enabled && canRun && augmentDrain > 0 ) {
+            if ( augmentDrain > getEnergyStored() )
+                enabled = false;
+            else
+                extractEnergy(augmentDrain, false);
+        }
 
         if ( !enabled || !canRun || getEnergyStored() < baseEnergy || (gatherTick != 0 && shouldProcessBlocks()) ) {
+            tickInactive();
             setActive(false);
             updateTrackers();
             return;
         }
 
+        tickActive();
         setActive(worker.performWork());
         updateTrackers();
     }

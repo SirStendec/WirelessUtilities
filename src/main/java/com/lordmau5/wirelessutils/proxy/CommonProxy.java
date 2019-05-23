@@ -12,6 +12,7 @@ import com.lordmau5.wirelessutils.block.desublimator.BlockPositionalDesublimator
 import com.lordmau5.wirelessutils.block.redstone.BlockPoweredAir;
 import com.lordmau5.wirelessutils.block.redstone.BlockPoweredRedstoneWire;
 import com.lordmau5.wirelessutils.block.slime.BlockAngledSlime;
+import com.lordmau5.wirelessutils.block.vaporizer.BlockDirectionalVaporizer;
 import com.lordmau5.wirelessutils.commands.DebugCommand;
 import com.lordmau5.wirelessutils.commands.FluidGenCommand;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
@@ -46,6 +47,9 @@ import com.lordmau5.wirelessutils.item.augment.ItemSlotAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemTransferAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemWorldAugment;
 import com.lordmau5.wirelessutils.item.base.IEnhancedItem;
+import com.lordmau5.wirelessutils.item.module.ItemBaseModule;
+import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
+import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
 import com.lordmau5.wirelessutils.item.pearl.ItemChargedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemFluxedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemQuenchedPearl;
@@ -65,6 +69,7 @@ import com.lordmau5.wirelessutils.tile.condenser.TileEntityDirectionalCondenser;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityPositionalCondenser;
 import com.lordmau5.wirelessutils.tile.desublimator.TileDirectionalDesublimator;
 import com.lordmau5.wirelessutils.tile.desublimator.TilePositionalDesublimator;
+import com.lordmau5.wirelessutils.tile.vaporizer.TileDirectionalVaporizer;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
 import com.lordmau5.wirelessutils.utils.ChunkManager;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
@@ -267,7 +272,7 @@ public class CommonProxy {
         event.getRegistry().register(new BlockDirectionalDesublimator());
         event.getRegistry().register(new BlockPositionalDesublimator());
 
-        //event.getRegistry().register(new BlockDirectionalVaporizer());
+        event.getRegistry().register(new BlockDirectionalVaporizer());
 
         event.getRegistry().register(new BlockPoweredAir());
         event.getRegistry().register(new BlockPoweredRedstoneWire());
@@ -287,7 +292,7 @@ public class CommonProxy {
         registerTile(TileDirectionalDesublimator.class);
         registerTile(TilePositionalDesublimator.class);
 
-        //registerTile(TileDirectionalVaporizer.class);
+        registerTile(TileDirectionalVaporizer.class);
 
         PluginRegistry.registerBlocks(event);
     }
@@ -321,7 +326,7 @@ public class CommonProxy {
         registerItem(event, new ItemBlockMachine(ModBlocks.blockDirectionalDesublimator).setRegistryName(ModBlocks.blockDirectionalDesublimator.getRegistryName()));
         registerItem(event, new ItemBlockMachine(ModBlocks.blockPositionalDesublimator).setRegistryName(ModBlocks.blockPositionalDesublimator.getRegistryName()));
 
-        //registerItem(event, new ItemBlockMachine(ModBlocks.blockDirectionalVaporizer).setRegistryName(ModBlocks.blockDirectionalVaporizer.getRegistryName()));
+        registerItem(event, new ItemBlockMachine(ModBlocks.blockDirectionalVaporizer).setRegistryName(ModBlocks.blockDirectionalVaporizer.getRegistryName()));
 
         registerItem(event, new ItemBlockExplainable(ModBlocks.blockAngledSlime).setRegistryName(ModBlocks.blockAngledSlime.getRegistryName()));
 
@@ -357,6 +362,10 @@ public class CommonProxy {
         registerItem(event, new ItemFluidGenAugment());
         registerItem(event, new ItemSidedTransferAugment());
         registerItem(event, new ItemDispenserAugment());
+
+        registerItem(event, new ItemBaseModule());
+        registerItem(event, new ItemSlaughterModule());
+        registerItem(event, new ItemTeleportModule());
 
         PluginRegistry.registerItems(event);
     }

@@ -32,21 +32,30 @@ public interface ISidedTransfer {
     }
 
     enum Mode {
-        PASSIVE(0),
-        ACTIVE(1),
-        DISABLED(2);
+        PASSIVE(0, false),
+        ACTIVE(1, true),
+        DISABLED(2, false),
+        INPUT(3, true),
+        OUTPUT(4, true);
 
         public final int index;
-        public static final Mode[] VALUES = new Mode[3];
+        public final boolean active;
+        public static final Mode[] VALUES = new Mode[5];
 
-        Mode(int index) {
+        Mode(int index, boolean active) {
             this.index = index;
+            this.active = active;
         }
 
-        public Mode next() {
+        public Mode next(boolean specific) {
             switch (this) {
                 case PASSIVE:
+                    if ( specific )
+                        return INPUT;
                     return ACTIVE;
+                case INPUT:
+                    return OUTPUT;
+                case OUTPUT:
                 case ACTIVE:
                     return DISABLED;
                 default:
@@ -54,13 +63,18 @@ public interface ISidedTransfer {
             }
         }
 
-        public Mode prev() {
+        public Mode prev(boolean specific) {
             switch (this) {
                 case PASSIVE:
                     return DISABLED;
+                case OUTPUT:
+                    return INPUT;
+                case INPUT:
                 case ACTIVE:
                     return PASSIVE;
                 default:
+                    if ( specific )
+                        return OUTPUT;
                     return ACTIVE;
             }
         }
@@ -162,11 +176,30 @@ public interface ISidedTransfer {
             return facing;
     }
 
-    default String getTextureForMode(Mode mode, boolean input) {
-        if ( mode == Mode.PASSIVE )
-            return null;
+    default boolean isModeSpecific() {
+        return false;
+    }
 
-        return "wirelessutils:block/side_" + (mode == Mode.DISABLED ? "disabled" : input ? "input" : "output");
+    String TEXTURE_PREFIX = "wirelessutils:block/side_";
+
+    default String getTextureForMode(Mode mode) {
+        switch (mode) {
+            case DISABLED:
+                return TEXTURE_PREFIX + "disabled";
+            case INPUT:
+                return TEXTURE_PREFIX + "input";
+            case OUTPUT:
+                return TEXTURE_PREFIX + "output";
+            default:
+                return null;
+        }
+    }
+
+    default String getTextureForMode(Mode mode, boolean input) {
+        if ( mode == Mode.ACTIVE )
+            mode = input ? Mode.INPUT : Mode.OUTPUT;
+
+        return getTextureForMode(mode);
     }
 
     default boolean canSideTransfer(TransferSide side) {
@@ -189,7 +222,7 @@ public interface ISidedTransfer {
 
     default void executeSidedTransfer() {
         for (TransferSide side : TransferSide.VALUES) {
-            if ( getSideTransferMode(side) == Mode.ACTIVE )
+            if ( getSideTransferMode(side).active )
                 transferSide(side);
         }
     }

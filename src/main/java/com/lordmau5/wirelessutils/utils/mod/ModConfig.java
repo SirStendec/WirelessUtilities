@@ -34,6 +34,10 @@ public class ModConfig {
     @Config.Comment("Condensers are machines that transfer fluids into other blocks.")
     public static final Condensers condensers = new Condensers();
 
+    @Config.Name("Vaporizers")
+    @Config.Comment("Vaporizers are machines that do things to living entities.")
+    public static final Vaporizers vaporizers = new Vaporizers();
+
     @Config.Name("Performance")
     @Config.Comment("Various settings for limiting the mod's performance impact.")
     public static final Performance performance = new Performance();
@@ -738,6 +742,23 @@ public class ModConfig {
         @Config.Comment("The cost to power a distant block will never exceed this value.")
         @Config.RangeInt(min = 0)
         public int maximumCost = 1500;
+    }
+
+    public static class Vaporizers {
+        @Config.Name("Use Experience Fluid")
+        @Config.Comment("Whether or not Vaporizers should use some form of fluid experience. Affects xp orb collection.")
+        @Config.RequiresWorldRestart
+        public boolean useFluid = true;
+
+        @Config.Name("Fluid mB per Experience Point")
+        @Config.Comment("Fluid experience should convert to experience points at this ratio.")
+        @Config.RangeInt(min = 1)
+        public int mbPerPoint = 1;
+
+        @Config.Name("Custom Fluid Name")
+        @Config.Comment("If set, this fluid is used rather than an auto-discovered fluid.")
+        @Config.RequiresWorldRestart
+        public String customFluid = "";
     }
 
     public static class Condensers {

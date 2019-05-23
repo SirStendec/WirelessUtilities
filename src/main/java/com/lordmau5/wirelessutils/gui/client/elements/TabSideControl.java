@@ -10,6 +10,7 @@ import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
+import com.lordmau5.wirelessutils.utils.Textures;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -102,19 +103,35 @@ public class TabSideControl extends TabBase implements IContainsButtons {
             ));
 
             btn.setVisible(transfer.canSideTransfer(side));
-            int offset = getOffset(mode);
-            btn.setSheetX(offset);
-            btn.setHoverX(offset);
-            btn.setDisabledX(offset);
+            int offsetY = getYOffset(mode);
+            int offsetX = getXOffset(mode);
+            btn.setSheetX(offsetX);
+            btn.setSheetY(offsetY);
+            btn.setHoverX(offsetX);
+            btn.setHoverY(offsetY);
+            btn.setDisabledX(offsetX);
+            btn.setDisabledY(offsetY);
         }
     }
 
-    public static int getOffset(ISidedTransfer.Mode mode) {
+    public static int getYOffset(ISidedTransfer.Mode mode) {
         switch (mode) {
+            case INPUT:
+            case OUTPUT:
+                return 126;
+            default:
+                return 84;
+        }
+    }
+
+    public static int getXOffset(ISidedTransfer.Mode mode) {
+        switch (mode) {
+            case INPUT:
             case PASSIVE:
                 return 204;
             case ACTIVE:
                 return 190;
+            case OUTPUT:
             case DISABLED:
             default:
                 return 218;
@@ -153,9 +170,9 @@ public class TabSideControl extends TabBase implements IContainsButtons {
 
         ISidedTransfer.Mode mode = transfer.getSideTransferMode(side);
         if ( button == 0 )
-            mode = mode.next();
+            mode = mode.next(transfer.isModeSpecific());
         else
-            mode = mode.prev();
+            mode = mode.prev(transfer.isModeSpecific());
 
         GuiContainerCore.playClickSound(button == 0 ? 1F : 0.7F);
         transfer.setSideTransferMode(side, mode);
@@ -192,11 +209,18 @@ public class TabSideControl extends TabBase implements IContainsButtons {
 
     @Override
     protected void drawForeground() {
-        boolean inverted = false;
-        if ( machine instanceof IInvertAugmentable )
-            inverted = ((IInvertAugmentable) machine).isInverted();
+        if ( !(machine instanceof ISidedTransfer) )
+            return;
 
-        drawTabIcon(inverted ? CoreTextures.ICON_OUTPUT : CoreTextures.ICON_INPUT);
+        ISidedTransfer transfer = (ISidedTransfer) machine;
+
+        if ( transfer.isModeSpecific() )
+            drawTabIcon(Textures.INPUT_OUTPUT);
+        else {
+            boolean inverted = machine instanceof IInvertAugmentable && ((IInvertAugmentable) machine).isInverted();
+            drawTabIcon(inverted ? CoreTextures.ICON_OUTPUT : CoreTextures.ICON_INPUT);
+        }
+
         if ( !isFullyOpened() )
             return;
 
@@ -206,9 +230,14 @@ public class TabSideControl extends TabBase implements IContainsButtons {
 
     @Override
     public void addTooltip(List<String> list) {
+        if ( !(machine instanceof ISidedTransfer) )
+            return;
+
+        ISidedTransfer transfer = (ISidedTransfer) machine;
+
         if ( !isFullyOpened() ) {
             list.add(StringHelper.localize("tab." + WirelessUtils.MODID + ".auto_transfer"));
-            if ( machine instanceof IInvertAugmentable ) {
+            if ( !transfer.isModeSpecific() && machine instanceof IInvertAugmentable ) {
                 boolean inverted = ((IInvertAugmentable) machine).isInverted();
                 list.add(new TextComponentTranslation(
                         "tab." + WirelessUtils.MODID + ".auto_transfer.mode",

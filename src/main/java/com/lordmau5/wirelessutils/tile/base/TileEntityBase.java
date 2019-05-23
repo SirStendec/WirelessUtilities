@@ -8,6 +8,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -15,10 +16,12 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.IWorldNameable;
 import net.minecraft.world.World;
 import net.minecraftforge.common.property.IExtendedBlockState;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nonnull;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +38,32 @@ public abstract class TileEntityBase extends TileRSControl implements EventDispa
     @Override
     protected String getModVersion() {
         return WirelessUtils.VERSION;
+    }
+
+    public void callNeighborStateChange(EnumFacing facing) {
+        if ( world == null || pos == null )
+            return;
+
+        if ( ForgeEventFactory.onNeighborNotify(world, pos, world.getBlockState(pos), EnumSet.of(facing), false).isCanceled() )
+            return;
+
+        world.neighborChanged(pos.offset(facing), getBlockType(), pos);
+    }
+
+    @Override
+    public void callNeighborStateChange() {
+        if ( world == null || pos == null )
+            return;
+
+        super.callNeighborStateChange();
+    }
+
+    @Override
+    public void callNeighborTileChange() {
+        if ( world == null || pos == null )
+            return;
+
+        super.callNeighborTileChange();
     }
 
     /* Life Cycle */

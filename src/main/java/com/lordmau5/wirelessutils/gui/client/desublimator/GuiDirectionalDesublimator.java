@@ -142,6 +142,5 @@ public class GuiDirectionalDesublimator extends BaseGuiContainer {
         super.drawGuiContainerForegroundLayer(mouseX, mouseY);
 
         fontRenderer.drawString(StringHelper.localize("info." + WirelessUtils.MODID + ".buffer"), 8, 80, 0x404040);
-
     }
 }

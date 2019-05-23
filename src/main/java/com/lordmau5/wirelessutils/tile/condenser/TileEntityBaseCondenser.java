@@ -120,12 +120,19 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     private boolean sideTransferAugment = false;
     private Mode[] sideTransfer;
+    private boolean[] sideIsCached;
+    private TileEntity[] sideCache;
 
 
     public TileEntityBaseCondenser() {
         super();
         sideTransfer = new Mode[6];
+        sideIsCached = new boolean[6];
+        sideCache = new TileEntity[6];
         Arrays.fill(sideTransfer, Mode.PASSIVE);
+        Arrays.fill(sideIsCached, false);
+        Arrays.fill(sideCache, null);
+
         worker = new Worker<>(this);
 
         tank = new FluidTank(calculateFluidCapacity());
@@ -684,6 +691,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         sideTransferAugment = augmented;
         updateTextures();
+        callNeighborStateChange();
     }
 
     @Override
@@ -788,8 +796,10 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     public abstract int getEnergyCost(double distance, boolean interdimensional);
 
     public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
-        if ( validTargets == null )
+        if ( validTargets == null ) {
+            tickActive();
             calculateTargets();
+        }
 
         validTargetsPerTick = 0;
         maxEnergyPerTick = augmentDrain;
@@ -797,6 +807,13 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             maxEnergyPerTick = fluidGenCost;
 
         return validTargets;
+    }
+
+    @Override
+    public void onInactive() {
+        super.onInactive();
+        worker.clearTargetCache();
+        validTargets = null;
     }
 
     public boolean shouldProcessBlocks() {
@@ -1280,6 +1297,14 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         }
 
         callBlockUpdate();
+        callNeighborStateChange(getFacingForSide(side));
+    }
+
+    @Override
+    public void onNeighborBlockChange() {
+        super.onNeighborBlockChange();
+        Arrays.fill(sideCache, null);
+        Arrays.fill(sideIsCached, false);
     }
 
     public void transferSide(TransferSide side) {
@@ -1287,10 +1312,22 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             return;
 
         EnumFacing facing = getFacingForSide(side);
-        BlockPos target = pos.offset(facing);
+        TileEntity tile;
 
-        TileEntity tile = world.getTileEntity(target);
-        if ( tile == null )
+        if ( sideIsCached[side.index] ) {
+            tile = sideCache[side.index];
+            if ( tile != null && tile.isInvalid() ) {
+                tile = world.getTileEntity(pos.offset(facing));
+                sideCache[side.index] = tile;
+            }
+
+        } else {
+            tile = world.getTileEntity(pos.offset(facing));
+            sideCache[side.index] = tile;
+            sideIsCached[side.index] = true;
+        }
+
+        if ( tile == null || tile.isInvalid() )
             return;
 
         EnumFacing opposite = facing.getOpposite();
@@ -1387,8 +1424,12 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( sideTransferAugment && enabled )
             executeSidedTransfer();
 
-        if ( enabled && augmentDrain > 0 )
-            extractEnergy(augmentDrain, false);
+        if ( enabled && augmentDrain > 0 ) {
+            if ( augmentDrain > getEnergyStored() )
+                enabled = false;
+            else
+                extractEnergy(augmentDrain, false);
+        }
 
         if ( fluidGen && getEnergyStored() >= fluidGenCost ) {
             int filled = fluidHandler.fill(fluidGenStack, true);
@@ -1397,11 +1438,13 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         }
 
         if ( !enabled || getEnergyStored() < baseEnergy ) {
+            tickInactive();
             setActive(false);
             updateTrackers();
             return;
         }
 
+        tickActive();
         craftingTicks += level.craftingTPT;
 
         int total = inverted ? tank.getCapacity() : tank.getFluidAmount();

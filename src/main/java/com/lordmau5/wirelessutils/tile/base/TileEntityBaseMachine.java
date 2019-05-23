@@ -13,6 +13,7 @@ import com.lordmau5.wirelessutils.utils.ItemStackHandler;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.constants.Properties;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -64,6 +65,8 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     /* Throttling */
     protected final TimeTracker tracker = new TimeTracker();
     private boolean activeCooldown = false;
+    protected byte inactiveTicks = 0;
+
 
     /* Energy */
     protected int baseEnergy = 0;
@@ -583,6 +586,8 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         readAugmentsFromNBT(tag);
         updateAugmentStatus();
 
+        inactiveTicks = tag.getByte("InactiveTicks");
+
         super.readFromNBT(tag);
     }
 
@@ -592,6 +597,9 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         writeLevelToNBT(tag);
         writeOwnerToNBT(tag);
         writeAugmentsToNBT(tag);
+
+        tag.setByte("InactiveTicks", inactiveTicks);
+
         return tag;
     }
 
@@ -611,6 +619,24 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     @Override
     public boolean hasGui() {
         return true;
+    }
+
+    /* Inactivity */
+
+    public void tickInactive() {
+        if ( inactiveTicks < ModConfig.performance.scanRate ) {
+            inactiveTicks++;
+            if ( inactiveTicks >= ModConfig.performance.scanRate )
+                onInactive();
+        }
+    }
+
+    public void tickActive() {
+        inactiveTicks = 0;
+    }
+
+    public void onInactive() {
+        unloadAllChunks();
     }
 
     /* Block State */
@@ -670,6 +696,7 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         System.out.println("Owner: " + owner.getName() + "#" + owner.getId());
         System.out.println("Comparator: " + comparatorState);
         System.out.println("Dismantled: " + wasDismantled);
+        System.out.println("Inactive Ticks: " + inactiveTicks);
 
         ItemStack[] augments = getAugmentSlots();
         System.out.println("Augments: " + (augments == null ? "NULL" : "[" + augments.length + "]"));

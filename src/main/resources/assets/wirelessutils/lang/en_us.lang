@@ -147,6 +147,21 @@ item.wirelessutils.machine_panel.name=Machine Panel
 item.wirelessutils.level_upgrade.name=Upgrade Kit
 item.wirelessutils.conversion_upgrade.name=Conversion Kit
 
+item.wirelessutils.base_module.name=Module Base
+
+item.wirelessutils.slaughter_module.name=Slaughter Module
+item.wirelessutils.slaughter_module.info.0=This module will kill any living
+item.wirelessutils.slaughter_module.info.1=creatures unfortunate enough to
+item.wirelessutils.slaughter_module.info.2=find themselves in the working
+item.wirelessutils.slaughter_module.info.3=area of its Vaporizer.
+
+item.wirelessutils.teleport_module.name=Teleportation Module
+item.wirelessutils.teleport_module.info.0=This module will transport any
+item.wirelessutils.teleport_module.info.1=entities in the working area of
+item.wirelessutils.teleport_module.info.2=its Vaporizer to the location
+item.wirelessutils.teleport_module.info.3=specified within the installed
+item.wirelessutils.teleport_module.info.4=Positional Card.
+
 item.wirelessutils.base_augment.name=Augment Base
 
 item.wirelessutils.dispenser_augment.name=Dispenser Augment
@@ -324,6 +339,8 @@ tab.wirelessutils.auto_transfer.mode.output=Output
 tab.wirelessutils.auto_transfer.mode.PASSIVE=Passive
 tab.wirelessutils.auto_transfer.mode.ACTIVE=Active
 tab.wirelessutils.auto_transfer.mode.DISABLED=Disabled
+tab.wirelessutils.auto_transfer.mode.INPUT=Input
+tab.wirelessutils.auto_transfer.mode.OUTPUT=Output
 tab.wirelessutils.auto_transfer.side=Side: %s
 tab.wirelessutils.auto_transfer.side.TOP=Top
 tab.wirelessutils.auto_transfer.side.LEFT=Left
@@ -361,6 +378,8 @@ info.wirelessutils.item_rate.second=Items/s
 info.wirelessutils.item_rate.tick=Items/t
 info.wirelessutils.item_rate.item=s/Item
 info.wirelessutils.buffer=Buffer
+info.wirelessutils.buffer.input=Input
+info.wirelessutils.buffer.output=Output
 
 jei.wirelessutils.charger=Item Charging
 jei.wirelessutils.condenser=Item Condensing

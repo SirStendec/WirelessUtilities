@@ -19,6 +19,8 @@ public class Textures {
     public static TextureAtlasSprite SIZE;
     public static TextureAtlasSprite OFFSET;
 
+    public static TextureAtlasSprite INPUT_OUTPUT;
+
     public static TextureAtlasSprite ROUND_ROBIN;
     public static TextureAtlasSprite NEAREST_FIRST;
     public static TextureAtlasSprite FURTHEST_FIRST;
@@ -44,6 +46,8 @@ public class Textures {
         NEAREST_FIRST = register("nearest_first");
         FURTHEST_FIRST = register("furthest_first");
         RANDOM = register("random");
+
+        INPUT_OUTPUT = register("input_output");
     }
 
     private static TextureAtlasSprite register(String icon) {

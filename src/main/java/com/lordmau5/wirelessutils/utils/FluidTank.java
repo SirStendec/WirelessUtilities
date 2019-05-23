@@ -39,6 +39,23 @@ public class FluidTank extends FluidTankCore {
             fluid.amount = this.capacity;
     }
 
+    public int fill(int amount, boolean doFill) {
+        if ( infinite )
+            return 0;
+
+        if ( fluid == null )
+            return 0;
+
+        int filled = capacity - fluid.amount;
+        if ( amount < filled ) {
+            fluid.amount += amount;
+            return amount;
+        } else
+            fluid.amount = capacity;
+
+        return filled;
+    }
+
     @Override
     public int fill(FluidStack resource, boolean doFill) {
         if ( infinite ) {

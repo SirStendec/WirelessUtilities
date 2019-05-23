@@ -27,7 +27,6 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -68,13 +67,20 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
     protected boolean sideTransferAugment = false;
     private Mode[] sideTransfer;
+    private boolean[] sideIsCached;
+    private TileEntity[] sideCache;
 
     private boolean processItems = false;
 
     public TileEntityBaseCharger() {
         super();
         sideTransfer = new Mode[6];
+        sideIsCached = new boolean[6];
+        sideCache = new TileEntity[6];
         Arrays.fill(sideTransfer, Mode.PASSIVE);
+        Arrays.fill(sideIsCached, false);
+        Arrays.fill(sideCache, null);
+
         worker = new Worker<>(this);
 
         updateTextures();
@@ -410,11 +416,20 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     }
 
     public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
-        if ( validTargets == null )
+        if ( validTargets == null ) {
+            tickActive();
             calculateTargets();
+        }
 
         validTargetsPerTick = 0;
         return validTargets;
+    }
+
+    @Override
+    public void onInactive() {
+        super.onInactive();
+        worker.clearTargetCache();
+        validTargets = null;
     }
 
     public boolean shouldProcessBlocks() {
@@ -653,6 +668,14 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         }
 
         callBlockUpdate();
+        callNeighborStateChange(getFacingForSide(side));
+    }
+
+    @Override
+    public void onNeighborBlockChange() {
+        super.onNeighborBlockChange();
+        Arrays.fill(sideCache, null);
+        Arrays.fill(sideIsCached, false);
     }
 
     public void transferSide(TransferSide side) {
@@ -660,10 +683,22 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
             return;
 
         EnumFacing facing = getFacingForSide(side);
-        BlockPos target = pos.offset(facing);
+        TileEntity tile;
 
-        TileEntity tile = world.getTileEntity(target);
-        if ( tile == null )
+        if ( sideIsCached[side.index] ) {
+            tile = sideCache[side.index];
+            if ( tile != null && tile.isInvalid() ) {
+                tile = world.getTileEntity(pos.offset(facing));
+                sideCache[side.index] = tile;
+            }
+
+        } else {
+            tile = world.getTileEntity(pos.offset(facing));
+            sideCache[side.index] = tile;
+            sideIsCached[side.index] = true;
+        }
+
+        if ( tile == null || tile.isInvalid() )
             return;
 
         EnumFacing opposite = facing.getOpposite();
@@ -710,13 +745,18 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         if ( sideTransferAugment && enabled )
             executeSidedTransfer();
 
+        long energy = getFullEnergyStored();
+
         if ( !enabled || (inverted ?
-                (getFullEnergyStored() == getFullMaxEnergyStored() || getMaxReceive() == 0) :
-                (getEnergyStored() == 0 || getMaxExtract() == 0)) ) {
+                (energy == getFullMaxEnergyStored() || getMaxReceive() == 0) :
+                (energy == 0 || getMaxExtract() == 0 || energy < augmentDrain)) ) {
+            tickInactive();
             setActive(false);
             updateTrackers();
             return;
         }
+
+        tickActive();
 
         craftingTicks += level.craftingTPT;
         if ( craftingTicks < 0 )
@@ -726,13 +766,13 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
         if ( inverted ) {
             total = getMaxReceive();
-            long remaining = getFullMaxEnergyStored() - getFullEnergyStored();
+            long remaining = getFullMaxEnergyStored() - energy;
             if ( remaining < total )
                 total = remaining;
 
         } else {
             total = getMaxExtract();
-            long stored = getFullEnergyStored();
+            long stored = energy;
             if ( stored < total )
                 total = stored;
         }
@@ -740,10 +780,14 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         remainingPerTick = total;
         activeTargetsPerTick = 0;
 
-        if ( augmentDrain > 0 )
+        if ( !inverted && augmentDrain > 0 )
             remainingPerTick -= extractEnergy(augmentDrain, false);
 
         setActive(worker.performWork());
+
+        if ( inverted && augmentDrain > 0 )
+            extractEnergy(augmentDrain, false);
+
         energyPerTick = total - remainingPerTick;
         updateTrackers();
     }

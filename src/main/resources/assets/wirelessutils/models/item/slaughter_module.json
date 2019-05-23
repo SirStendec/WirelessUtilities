@@ -1,0 +1,7 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "wirelessutils:item/module_base",
+		"layer1": "wirelessutils:item/slaughter_module_mark"
+	}
+}

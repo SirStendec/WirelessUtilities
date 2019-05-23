@@ -23,6 +23,17 @@ public class StackHelper {
         return true;
     }
 
+    public static ItemStack insert(IItemHandler target, ItemStack stack) {
+        int slots = target.getSlots();
+        for (int i = 0; i < slots; i++) {
+            stack = target.insertItem(i, stack, false);
+            if ( stack.isEmpty() )
+                break;
+        }
+
+        return stack;
+    }
+
     public static int insertAll(IItemHandler target, List<ItemStack> items) {
         int slots = target.getSlots();
         int inserted = 0;

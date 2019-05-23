@@ -47,7 +47,7 @@ public class WUFakePlayer extends FakePlayer {
         return player;
     }
 
-    private WUFakePlayer(WorldServer world) {
+    public WUFakePlayer(WorldServer world) {
         super(world, PROFILE);
     }
 
