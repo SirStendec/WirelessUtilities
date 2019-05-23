@@ -378,8 +378,7 @@ info.wirelessutils.item_rate.second=Items/s
 info.wirelessutils.item_rate.tick=Items/t
 info.wirelessutils.item_rate.item=s/Item
 info.wirelessutils.buffer=Buffer
-info.wirelessutils.buffer.input=Input
-info.wirelessutils.buffer.output=Output
+info.wirelessutils.buffer.in_out=Input / Output
 
 jei.wirelessutils.charger=Item Charging
 jei.wirelessutils.condenser=Item Condensing

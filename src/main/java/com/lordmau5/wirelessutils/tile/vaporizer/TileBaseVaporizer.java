@@ -2,6 +2,8 @@ package com.lordmau5.wirelessutils.tile.vaporizer;
 
 import cofh.core.fluid.FluidTankCore;
 import cofh.core.network.PacketBase;
+import cofh.core.util.CoreUtils;
+import cofh.core.util.helpers.InventoryHelper;
 import com.google.common.base.MoreObjects;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.item.module.ItemModule;
@@ -31,7 +33,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.capabilities.Capability;
@@ -89,6 +90,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     private boolean sideTransferAugment = false;
     private ISidedTransfer.Mode[] sideTransfer;
+    private boolean[] sideIsCached;
+    private TileEntity[] sideCache;
 
     private boolean temporarilyAllowInsertion = false;
     private boolean didFullEntities = false;
@@ -96,9 +99,13 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     public TileBaseVaporizer() {
         super();
         sideTransfer = new ISidedTransfer.Mode[6];
-        Arrays.fill(sideTransfer, ISidedTransfer.Mode.PASSIVE);
-        worker = new Worker<>(this);
+        sideIsCached = new boolean[6];
+        sideCache = new TileEntity[6];
+        Arrays.fill(sideTransfer, Mode.PASSIVE);
+        Arrays.fill(sideIsCached, false);
+        Arrays.fill(sideCache, null);
 
+        worker = new Worker<>(this);
         tank = new FluidTank(calculateFluidCapacity());
 
         Fluid fluid = getExperienceFluid();
@@ -172,7 +179,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     }
 
     public boolean wantsFluid() {
-        return behavior != null && behavior.wantsFluid(this);
+        return behavior != null && behavior.wantsFluid();
     }
 
     public boolean hasFluid() {
@@ -245,10 +252,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             return isValidModule(stack);
 
         else if ( slot == getModifierOffset() )
-            return behavior != null && behavior.isValidModifier(stack, this);
+            return behavior != null && behavior.isValidModifier(stack);
 
         else if ( slot >= getInputOffset() && slot < getOutputOffset() )
-            return behavior != null && behavior.isValidInput(stack, this);
+            return behavior != null && behavior.isValidInput(stack);
 
         return temporarilyAllowInsertion;
     }
@@ -266,10 +273,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             return true;
 
         } else if ( slot == getModifierOffset() )
-            return behavior != null && behavior.isModifierUnlocked(this);
+            return behavior != null && behavior.isModifierUnlocked();
 
         else if ( slot >= getInputOffset() && slot < getOutputOffset() )
-            return behavior != null && behavior.isInputUnlocked(slot - getInputOffset(), this);
+            return behavior != null && behavior.isInputUnlocked(slot - getInputOffset());
 
         return true;
     }
@@ -304,8 +311,16 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         behavior = module.getBehavior(stack, this);
     }
 
+    public ItemStack getModule() {
+        return itemStackHandler.getStackInSlot(getModuleOffset());
+    }
+
     public ItemStack getModifier() {
         return itemStackHandler.getStackInSlot(getModifierOffset());
+    }
+
+    public ItemStack getModifierGhost() {
+        return behavior != null ? behavior.getModifierGhost() : ItemStack.EMPTY;
     }
 
     public void updateModifier() {
@@ -313,7 +328,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             return;
 
         ItemStack stack = itemStackHandler.getStackInSlot(getModifierOffset());
-        behavior.updateModifier(behavior.isValidModifier(stack, this) ? stack : ItemStack.EMPTY, this);
+        behavior.updateModifier(behavior.isValidModifier(stack) ? stack : ItemStack.EMPTY);
     }
 
     @Override
@@ -339,7 +354,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     @Override
     public boolean isInverted() {
-        return inverted && (behavior != null && behavior.canInvert(this));
+        return inverted && (behavior != null && behavior.canInvert());
     }
 
     @Override
@@ -519,19 +534,29 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             box = new AxisAlignedBB(target.pos);
 
         List<Entity> entities = world.getEntitiesWithinAABB(behavior.getEntityClass(), box);
+        validTargetsPerTick += entities.size();
 
         boolean worked = false;
+        boolean stop = false;
 
-        for (Entity entity : entities)
-            worked = behavior.process(entity, this) || worked;
+        for (Entity entity : entities) {
+            WorkResult result = behavior.process(entity, target);
+            worked |= result.success;
+            if ( result.success )
+                activeTargetsPerTick++;
 
-        if ( worked )
-            behavior.postProcess(target, box, world, this);
+            if ( !result.keepProcessing ) {
+                stop = true;
+                break;
+            }
+        }
 
-        if ( worked )
-            return didFullEntities ? WorkResult.SUCCESS_STOP : WorkResult.SUCCESS_CONTINUE;
+        if ( worked ) {
+            behavior.postProcess(target, box, world);
+            return (stop || didFullEntities) ? WorkResult.SUCCESS_STOP : WorkResult.SUCCESS_CONTINUE;
+        }
 
-        return didFullEntities ? WorkResult.FAILURE_STOP : WorkResult.FAILURE_CONTINUE;
+        return (stop || didFullEntities) ? WorkResult.FAILURE_STOP : WorkResult.FAILURE_CONTINUE;
     }
 
     @Nonnull
@@ -627,6 +652,14 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         }
 
         callBlockUpdate();
+        callNeighborStateChange(getFacingForSide(side));
+    }
+
+    @Override
+    public void onNeighborBlockChange() {
+        super.onNeighborBlockChange();
+        Arrays.fill(sideCache, null);
+        Arrays.fill(sideIsCached, false);
     }
 
     @Override
@@ -639,9 +672,22 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             return;
 
         EnumFacing facing = getFacingForSide(side);
-        BlockPos target = pos.offset(facing);
-        TileEntity tile = world.getTileEntity(target);
-        if ( tile == null )
+        TileEntity tile;
+
+        if ( sideIsCached[side.index] ) {
+            tile = sideCache[side.index];
+            if ( tile != null && tile.isInvalid() ) {
+                tile = world.getTileEntity(pos.offset(facing));
+                sideCache[side.index] = tile;
+            }
+
+        } else {
+            tile = world.getTileEntity(pos.offset(facing));
+            sideCache[side.index] = tile;
+            sideIsCached[side.index] = true;
+        }
+
+        if ( tile == null || tile.isInvalid() )
             return;
 
         EnumFacing opposite = facing.getOpposite();
@@ -661,18 +707,51 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         }
 
         // Fluid
-        if ( mode == Mode.INPUT && wantsFluid() && hasFluid() ) {
+        if ( hasFluid() ) {
             IFluidHandler handler = tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, opposite);
-            if ( handler != null )
+            if ( mode == Mode.INPUT && wantsFluid() && handler != null )
                 FluidUtil.tryFluidTransfer(fluidHandler, handler, tank.getCapacity(), true);
-
-        } else if ( mode == Mode.OUTPUT && !wantsFluid() && hasFluid() ) {
-            IFluidHandler handler = tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, opposite);
-            if ( handler != null )
+            else if ( mode == Mode.OUTPUT && handler != null )
                 FluidUtil.tryFluidTransfer(handler, fluidHandler, tank.getCapacity(), true);
         }
 
-        // TODO: Inventory?
+        // Items
+        IItemHandler handler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, opposite);
+        if ( handler == null )
+            return;
+
+        // TODO: Tracking if we actually have room to insert or items to extract.
+        if ( mode == Mode.INPUT )
+            transferOne(handler, inputProxy);
+        else if ( mode == Mode.OUTPUT )
+            transferOne(outputProxy, handler);
+    }
+
+    public void transferOne(IItemHandler source, IItemHandler destination) {
+        int slots = source.getSlots();
+        for (int i = 0; i < slots; i++) {
+            ItemStack stack = source.extractItem(i, 64, true);
+            if ( stack.isEmpty() )
+                continue;
+
+            ItemStack remainder = InventoryHelper.insertStackIntoInventory(destination, stack, true);
+            int count = stack.getCount() - remainder.getCount();
+            if ( count == 0 )
+                continue;
+
+            remainder = InventoryHelper.insertStackIntoInventory(
+                    destination,
+                    source.extractItem(i, count, false),
+                    false);
+
+            if ( !remainder.isEmpty() ) {
+                remainder = source.insertItem(i, remainder, false);
+                if ( !remainder.isEmpty() )
+                    CoreUtils.dropItemStackIntoWorldWithVelocity(remainder, world, pos);
+            }
+
+            break;
+        }
     }
 
     /* IConfigurableWorldTickRate */
@@ -736,7 +815,13 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         boolean enabled = behavior != null && redstoneControlOrDisable();
 
-        if ( sideTransferAugment && enabled )
+        if ( gatherTick == 0 ) {
+            activeTargetsPerTick = 0;
+            validTargetsPerTick = 0;
+            energyPerTick = 0;
+        }
+
+        if ( enabled && sideTransferAugment )
             executeSidedTransfer();
 
         if ( enabled && augmentDrain > 0 ) {
@@ -746,7 +831,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
                 extractEnergy(augmentDrain, false);
         }
 
-        if ( !enabled || getEnergyStored() < baseEnergy || gatherTick != 0 ) {
+        boolean canRun = behavior != null && behavior.canRun();
+
+        if ( !enabled || !canRun || getEnergyStored() < baseEnergy || gatherTick != 0 ) {
             tickInactive();
             setActive(false);
             updateTrackers();
@@ -761,6 +848,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     /* Event Handling */
 
     public void onItemDrops(LivingDropsEvent event) {
+        if ( !ModConfig.vaporizers.modules.slaughter.collectDrops )
+            return;
+
         List<EntityItem> drops = event.getDrops();
 
         drops.removeIf(item -> {
@@ -773,6 +863,15 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     }
 
     public void onExperienceDrops(LivingExperienceDropEvent event) {
+        int mode = ModConfig.vaporizers.modules.slaughter.collectExperience;
+        if ( mode == 0 )
+            return;
+
+        else if ( mode == 3 ) {
+            event.setCanceled(true);
+            return;
+        }
+
         if ( !hasFluid() )
             return;
 
@@ -781,7 +880,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         if ( used > 0 )
             markChunkDirty();
 
-        int remaining = Math.floorDiv(amount - used, ModConfig.vaporizers.mbPerPoint);
+        int remaining = mode == 2 ? 0 : Math.floorDiv(amount - used, ModConfig.vaporizers.mbPerPoint);
         if ( remaining == 0 )
             event.setCanceled(true);
         else
@@ -974,27 +1073,33 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     public interface IVaporizerBehavior {
 
-        boolean canInvert(@Nonnull TileBaseVaporizer vaporizer);
+        boolean canInvert();
 
         Class<? extends Entity> getEntityClass();
 
-        boolean isInputUnlocked(int slot, @Nonnull TileBaseVaporizer vaporizer);
+        boolean isInputUnlocked(int slot);
 
-        boolean isValidInput(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer);
+        boolean isValidInput(@Nonnull ItemStack stack);
 
-        boolean isModifierUnlocked(@Nonnull TileBaseVaporizer vaporizer);
+        boolean isModifierUnlocked();
 
-        boolean isValidModifier(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer);
+        boolean isValidModifier(@Nonnull ItemStack stack);
 
-        void updateModifier(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer);
+        void updateModifier(@Nonnull ItemStack stack);
 
-        default boolean wantsFluid(@Nonnull TileBaseVaporizer vaporizer) {
+        @Nonnull
+        ItemStack getModifierGhost();
+
+        default boolean wantsFluid() {
             return false;
         }
 
-        boolean process(@Nonnull Entity entity, @Nonnull TileBaseVaporizer vaporizer);
+        boolean canRun();
 
-        void postProcess(@Nonnull VaporizerTarget target, @Nonnull AxisAlignedBB box, @Nonnull World world, @Nonnull TileBaseVaporizer vaporizer);
+        @Nonnull
+        WorkResult process(@Nonnull Entity entity, @Nonnull VaporizerTarget target);
+
+        void postProcess(@Nonnull VaporizerTarget target, @Nonnull AxisAlignedBB box, @Nonnull World world);
 
     }
 

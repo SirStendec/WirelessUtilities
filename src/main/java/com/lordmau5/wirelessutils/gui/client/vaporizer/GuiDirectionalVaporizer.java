@@ -41,7 +41,8 @@ public class GuiDirectionalVaporizer extends BaseGuiContainer {
         super(new ContainerDirectionalVaporizer(player, vaporizer), vaporizer, TEXTURE);
         this.vaporizer = vaporizer;
 
-        ySize = 222;
+        drawTitle = false;
+        ySize = 242;
         generateInfo("tab." + WirelessUtils.MODID + ".directional_vaporizer");
     }
 
@@ -49,12 +50,12 @@ public class GuiDirectionalVaporizer extends BaseGuiContainer {
     public void initGui() {
         super.initGui();
 
-        addElement(new ElementEnergyStored(this, 10, 20, vaporizer.getEnergyStorage()).setInfinite(vaporizer.isCreative()));
+        addElement(new ElementEnergyStored(this, 10, 46, vaporizer.getEnergyStorage()).setInfinite(vaporizer.isCreative()));
 
         if ( vaporizer.hasFluid() )
-            addElement(new ElementFluidTank(this, 34, 22, vaporizer.getTank()).setAlwaysShow(true).setSmall().drawTank(true));
+            addElement(new ElementFluidTank(this, 34, 52, vaporizer.getTank()).setAlwaysShow(true).setSmall().drawTank(true));
 
-        addElement(new ElementAreaButton(this, vaporizer, 152, 69));
+        addElement(new ElementAreaButton(this, vaporizer, 152, 89));
 
         addTab(new TabEnergy(this, vaporizer, false));
         addTab(new TabWorkInfo(this, vaporizer).setItem(new ItemStack(ModItems.itemVoidPearl)));
@@ -65,13 +66,13 @@ public class GuiDirectionalVaporizer extends BaseGuiContainer {
         addTab(new TabRedstoneControl(this, vaporizer));
         sideControl = (TabSideControl) addTab(new TabSideControl(this, vaporizer));
 
-        btnMode = new ElementDynamicContainedButton(this, "Mode", 134, 69, 16, 16, Textures.SIZE);
+        btnMode = new ElementDynamicContainedButton(this, "Mode", 134, 89, 16, 16, Textures.SIZE);
         addElement(btnMode);
 
-        rangeControls = new ElementRangeControls(this, vaporizer, 138, 18);
+        rangeControls = new ElementRangeControls(this, vaporizer, 138, 38);
         addElement(rangeControls);
 
-        offsetControls = new ElementOffsetControls(this, vaporizer, 138, 18);
+        offsetControls = new ElementOffsetControls(this, vaporizer, 138, 38);
         addElement(offsetControls);
     }
 
@@ -108,10 +109,26 @@ public class GuiDirectionalVaporizer extends BaseGuiContainer {
     protected void drawGuiContainerBackgroundLayer(float partialTick, int x, int y) {
         super.drawGuiContainerBackgroundLayer(partialTick, x, y);
 
-        drawSlotLocks(vaporizer.getInputOffset(), guiLeft + 8, guiTop + 91, 2, 4);
-        drawSlotLocks(vaporizer.getOutputOffset(), guiLeft + 98, guiTop + 91, 2, 4);
+        if ( vaporizer.getModule().isEmpty() )
+            drawGhostItem(new ItemStack(ModItems.itemBaseModule), guiLeft + 8, guiTop + 8, true, true, null);
+
+        if ( vaporizer.getModifier().isEmpty() )
+            drawGhostItem(vaporizer.getModifierGhost(), guiLeft + 26, guiTop + 8, true, true, null);
+
+        drawSlotLocks(vaporizer.getInputOffset(), guiLeft + 8, guiTop + 111, 2, 4);
+        drawSlotLocks(vaporizer.getOutputOffset(), guiLeft + 98, guiTop + 111, 2, 4);
 
         drawSlotLocks(vaporizer.getModuleOffset(), guiLeft + 8, guiTop + 8, 1, 2);
+    }
+
+    @Override
+    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+        super.drawGuiContainerForegroundLayer(mouseX, mouseY);
+
+        String title = StringHelper.localize(name);
+        fontRenderer.drawString(title, getCenteredOffset(title), 28, 0x404040);
+
+        fontRenderer.drawString(StringHelper.localize("info." + WirelessUtils.MODID + ".buffer.in_out"), 8, 100, 0x404040);
     }
 
     protected void drawSlotLocks(int slotIndex, int xPos, int yPos, int rows, int cols) {
@@ -126,13 +143,5 @@ public class GuiDirectionalVaporizer extends BaseGuiContainer {
             }
         }
 
-    }
-
-    @Override
-    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-        super.drawGuiContainerForegroundLayer(mouseX, mouseY);
-
-        fontRenderer.drawString(StringHelper.localize("info." + WirelessUtils.MODID + ".buffer.input"), 8, 80, 0x404040);
-        fontRenderer.drawString(StringHelper.localize("info." + WirelessUtils.MODID + ".buffer.output"), 98, 80, 0x404040);
     }
 }

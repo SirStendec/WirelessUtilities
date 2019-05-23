@@ -759,6 +759,45 @@ public class ModConfig {
         @Config.Comment("If set, this fluid is used rather than an auto-discovered fluid.")
         @Config.RequiresWorldRestart
         public String customFluid = "";
+
+        @Config.Name("Modules")
+        @Config.Comment("Modules give a Vaporizer purpose. Without an installed module, they have no behavior.")
+        public Modules modules = new Modules();
+    }
+
+    public static class Modules {
+        @Config.Name("Slaughter Module")
+        @Config.Comment("Slaughter Modules will kill all living entities within the Vaporizer's working area.")
+        public SlaughterModule slaughter = new SlaughterModule();
+    }
+
+    public static class SlaughterModule {
+        @Config.Name("Attack Bosses")
+        @Config.Comment("When enabled, the Slaughter Module will kill enemies marked as Bosses, such as Withers.")
+        public boolean attackBosses = true;
+
+        @Config.Name("Enable Weapons")
+        @Config.Comment("When enabled, the Slaughter Module will use a weapon placed in the Input slot of the Vaporizer.")
+        @Config.RequiresWorldRestart
+        public boolean enableWeapon = true;
+
+        @Config.Name("Damage Weapons")
+        @Config.Comment("When enabled, the Slaughter Module will apply durability damage to the weapon when using it.")
+        public boolean damageWeapon = true;
+
+        @Config.Name("Maximum Damage")
+        @Config.Comment("Slaughter Modules should do up to this much damage when they attack. 0 for Unlimited.")
+        @Config.RangeDouble(min = 0, max = Float.MAX_VALUE)
+        public double maxDamage = 0D;
+
+        @Config.Name("Collect Drops")
+        @Config.Comment("When enabled, the Vaporizer will attempt to collect all the drops from entities is kills.")
+        public boolean collectDrops = true;
+
+        @Config.Name("Collect Experience")
+        @Config.Comment("0 = Ignore Experience, 1 = Collect Experience till Full, 2 = Collect All Experience, 3 = Void Experience")
+        @Config.RangeInt(min = 0, max = 3)
+        public int collectExperience = 1;
     }
 
     public static class Condensers {

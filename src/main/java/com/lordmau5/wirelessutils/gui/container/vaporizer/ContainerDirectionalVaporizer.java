@@ -25,7 +25,7 @@ public class ContainerDirectionalVaporizer extends BaseContainerTile {
 
     @Override
     protected int getPlayerInventoryVerticalOffset() {
-        return 140;
+        return 160;
     }
 
     public void addModuleSlots() {
@@ -39,7 +39,7 @@ public class ContainerDirectionalVaporizer extends BaseContainerTile {
     }
 
     public void addBufferSlots(int slotIndex, int xPos) {
-        int yPos = 91;
+        int yPos = 111;
         for (int y = 0; y < 2; y++) {
             for (int x = 0; x < 4; x++, slotIndex++)
                 addSlotToContainer(new SlotUnlockableItemHandler(vaporizer, itemHandler, slotIndex, xPos + (x * 18), yPos + (y * 18)));

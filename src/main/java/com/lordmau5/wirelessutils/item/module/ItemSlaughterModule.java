@@ -1,6 +1,8 @@
 package com.lordmau5.wirelessutils.item.module;
 
+import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -64,11 +66,11 @@ public class ItemSlaughterModule extends ItemModule {
             this.vaporizer = vaporizer;
         }
 
-        public void updateModifier(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
+        public void updateModifier(@Nonnull ItemStack stack) {
 
         }
 
-        public boolean canInvert(@Nonnull TileBaseVaporizer vaporizer) {
+        public boolean canInvert() {
             return false;
         }
 
@@ -76,48 +78,64 @@ public class ItemSlaughterModule extends ItemModule {
             return EntityLivingBase.class;
         }
 
-        public boolean isInputUnlocked(int slot, @Nonnull TileBaseVaporizer vaporizer) {
-            return slot == 0;
+        public boolean isInputUnlocked(int slot) {
+            return ModConfig.vaporizers.modules.slaughter.enableWeapon && slot == 0;
         }
 
-        public boolean isModifierUnlocked(@Nonnull TileBaseVaporizer vaporizer) {
+        public boolean isModifierUnlocked() {
             return false;
         }
 
-        public boolean isValidInput(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
+        @Nonnull
+        public ItemStack getModifierGhost() {
+            return ItemStack.EMPTY;
+        }
+
+        public boolean isValidInput(@Nonnull ItemStack stack) {
+            return ModConfig.vaporizers.modules.slaughter.enableWeapon;
+        }
+
+        public boolean isValidModifier(@Nonnull ItemStack stack) {
+            return false;
+        }
+
+        public boolean canRun() {
             return true;
         }
 
-        public boolean isValidModifier(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
-            return false;
-        }
-
-        public boolean process(@Nonnull Entity entity, @Nonnull TileBaseVaporizer vaporizer) {
+        @Nonnull
+        public IWorkProvider.WorkResult process(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget target) {
             if ( !(entity instanceof EntityLivingBase) )
-                return false;
+                return IWorkProvider.WorkResult.FAILURE_REMOVE;
 
             EntityLivingBase living = (EntityLivingBase) entity;
             if ( !living.attackable() || !living.isEntityAlive() )
-                return false;
+                return IWorkProvider.WorkResult.FAILURE_REMOVE;
+
+            if ( !ModConfig.vaporizers.modules.slaughter.attackBosses && !living.isNonBoss() )
+                return IWorkProvider.WorkResult.FAILURE_REMOVE;
 
             TileBaseVaporizer.WUVaporizerPlayer player = vaporizer.getFakePlayer(living.world);
             if ( player == null )
-                return false;
+                return IWorkProvider.WorkResult.FAILURE_STOP;
 
-            // Race condition? It crashed stuff, anyways.
-            ItemStack weapon = vaporizer.getInput().getStackInSlot(0);
+            ItemStack weapon = ModConfig.vaporizers.modules.slaughter.enableWeapon ? vaporizer.getInput().getStackInSlot(0) : ItemStack.EMPTY;
             player.setHeldItem(EnumHand.MAIN_HAND, weapon);
 
-            boolean success = living.attackEntityFrom(new VaporizerDamage(player, vaporizer), living.getHealth());
-            if ( success && !vaporizer.isCreative() ) {
+            float damage = living.getHealth();
+            if ( ModConfig.vaporizers.modules.slaughter.maxDamage != 0 && damage > ModConfig.vaporizers.modules.slaughter.maxDamage )
+                damage = (float) ModConfig.vaporizers.modules.slaughter.maxDamage;
+
+            boolean success = living.attackEntityFrom(new VaporizerDamage(player, vaporizer), damage);
+            if ( success && ModConfig.vaporizers.modules.slaughter.damageWeapon && !vaporizer.isCreative() ) {
                 weapon.damageItem(1, player);
                 vaporizer.markChunkDirty();
             }
 
-            return success;
+            return IWorkProvider.WorkResult.SUCCESS_CONTINUE;
         }
 
-        public void postProcess(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull AxisAlignedBB box, @Nonnull World world, @Nonnull TileBaseVaporizer vaporizer) {
+        public void postProcess(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull AxisAlignedBB box, @Nonnull World world) {
 
         }
     }
