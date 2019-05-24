@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.gui.client.vaporizer;
 import cofh.core.gui.container.IAugmentableContainer;
 import cofh.core.gui.element.ElementEnergyStored;
 import cofh.core.gui.element.ElementFluidTank;
+import cofh.core.gui.element.tab.TabBase;
 import cofh.core.gui.element.tab.TabEnergy;
 import cofh.core.gui.element.tab.TabInfo;
 import cofh.core.gui.element.tab.TabRedstoneControl;
@@ -16,6 +17,7 @@ import com.lordmau5.wirelessutils.gui.client.elements.ElementOffsetControls;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementRangeControls;
 import com.lordmau5.wirelessutils.gui.client.elements.TabAugmentTwoElectricBoogaloo;
 import com.lordmau5.wirelessutils.gui.client.elements.TabSideControl;
+import com.lordmau5.wirelessutils.gui.client.elements.TabSpacer;
 import com.lordmau5.wirelessutils.gui.client.elements.TabWorkInfo;
 import com.lordmau5.wirelessutils.gui.client.elements.TabWorldTickRate;
 import com.lordmau5.wirelessutils.gui.container.vaporizer.ContainerDirectionalVaporizer;
@@ -23,6 +25,7 @@ import com.lordmau5.wirelessutils.tile.vaporizer.TileDirectionalVaporizer;
 import com.lordmau5.wirelessutils.utils.Textures;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
@@ -57,11 +60,13 @@ public class GuiDirectionalVaporizer extends BaseGuiContainer {
 
         addElement(new ElementAreaButton(this, vaporizer, 152, 89));
 
+        addTab(new TabSpacer(this, TabBase.LEFT, 20));
         addTab(new TabEnergy(this, vaporizer, false));
         addTab(new TabWorkInfo(this, vaporizer).setItem(new ItemStack(ModItems.itemVoidPearl)));
         addTab(new TabWorldTickRate(this, vaporizer));
         addTab(new TabInfo(this, myInfo));
 
+        addTab(new TabSpacer(this, TabBase.RIGHT, 20));
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));
         addTab(new TabRedstoneControl(this, vaporizer));
         sideControl = (TabSideControl) addTab(new TabSideControl(this, vaporizer));
@@ -115,10 +120,12 @@ public class GuiDirectionalVaporizer extends BaseGuiContainer {
         if ( vaporizer.getModifier().isEmpty() )
             drawGhostItem(vaporizer.getModifierGhost(), guiLeft + 26, guiTop + 8, true, true, null);
 
-        drawSlotLocks(vaporizer.getInputOffset(), guiLeft + 8, guiTop + 111, 2, 4);
-        drawSlotLocks(vaporizer.getOutputOffset(), guiLeft + 98, guiTop + 111, 2, 4);
+        ContainerDirectionalVaporizer container = (ContainerDirectionalVaporizer) inventorySlots;
 
-        drawSlotLocks(vaporizer.getModuleOffset(), guiLeft + 8, guiTop + 8, 1, 2);
+        drawSlotLocks(vaporizer.getInputOffset(), container.inputOffset, guiLeft + 8, guiTop + 111, 2, 4);
+        drawSlotLocks(vaporizer.getOutputOffset(), container.outputOffset, guiLeft + 98, guiTop + 111, 2, 4);
+
+        drawSlotLocks(vaporizer.getModuleOffset(), container.moduleOffset, guiLeft + 8, guiTop + 8, 1, 2);
     }
 
     @Override
@@ -131,10 +138,13 @@ public class GuiDirectionalVaporizer extends BaseGuiContainer {
         fontRenderer.drawString(StringHelper.localize("info." + WirelessUtils.MODID + ".buffer.in_out"), 8, 100, 0x404040);
     }
 
-    protected void drawSlotLocks(int slotIndex, int xPos, int yPos, int rows, int cols) {
+    protected void drawSlotLocks(int slotIndex, int slotOffset, int xPos, int yPos, int rows, int cols) {
+        ItemStack held = mc.player.inventory.getItemStack();
+
         for (int y = 0; y < rows; y++) {
-            for (int x = 0; x < cols; x++, slotIndex++) {
-                if ( !vaporizer.isSlotUnlocked(slotIndex) ) {
+            for (int x = 0; x < cols; x++, slotIndex++, slotOffset++) {
+                Slot slot = inventorySlots.getSlot(slotOffset);
+                if ( !vaporizer.isSlotUnlocked(slotIndex) || (!held.isEmpty() && !slot.isItemValid(held)) ) {
                     int xp = xPos + (x * 18);
                     int yp = yPos + (y * 18);
 

@@ -5,11 +5,13 @@ import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import com.lordmau5.wirelessutils.utils.TeleportUtils;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -51,6 +53,9 @@ public class ItemTeleportModule extends ItemModule {
         }
 
         public Class<? extends Entity> getEntityClass() {
+            if ( ModConfig.vaporizers.modules.teleport.livingOnly )
+                return EntityLivingBase.class;
+
             return Entity.class;
         }
 
@@ -84,8 +89,13 @@ public class ItemTeleportModule extends ItemModule {
                 ItemBasePositionalCard card = (ItemBasePositionalCard) stack.getItem();
                 target = card.getTarget(stack, vaporizer.getPosition());
 
-            } else
-                target = vaporizer.getPosition().offset(vaporizer.getEnumFacing().getOpposite(), 1);
+            } else {
+                BlockPosDimension pos = vaporizer.getPosition();
+                if ( pos == null )
+                    target = null;
+                else
+                    target = pos.offset(vaporizer.getEnumFacing().getOpposite(), 1);
+            }
         }
 
         public boolean canRun() {
@@ -93,23 +103,26 @@ public class ItemTeleportModule extends ItemModule {
         }
 
         @Nonnull
-        public IWorkProvider.WorkResult process(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget vaporizerTarget) {
+        public IWorkProvider.WorkResult processEntity(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget vaporizerTarget) {
             World world = entity.world;
-            if ( world == null || entity.isDead )
+            if ( world == null || entity.isDead || entity.timeUntilPortal > 0 )
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
 
-            // TODO: Cooldown for teleportation.
+            if ( entity instanceof EntityPlayer && (!ModConfig.vaporizers.modules.teleport.targetPlayers || (entity.isSneaking() && ModConfig.vaporizers.modules.teleport.ignoreSneaking)) )
+                return IWorkProvider.WorkResult.FAILURE_REMOVE;
 
             Entity newEntity = TeleportUtils.teleportEntity(entity, target.getDimension(), target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5);
             if ( newEntity == null )
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
 
+            newEntity.timeUntilPortal = newEntity.getPortalCooldown();
             newEntity.fallDistance = 0;
             return IWorkProvider.WorkResult.SUCCESS_CONTINUE;
         }
 
-        public void postProcess(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull AxisAlignedBB box, @Nonnull World world) {
-
+        @Nonnull
+        public IWorkProvider.WorkResult processBlock(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
+            return IWorkProvider.WorkResult.FAILURE_REMOVE;
         }
     }
 }

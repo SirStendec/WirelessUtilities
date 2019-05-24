@@ -12,14 +12,23 @@ public class ContainerDirectionalVaporizer extends BaseContainerTile {
     private final TileBaseVaporizer vaporizer;
     private final IItemHandler itemHandler;
 
+    public final int moduleOffset;
+    public final int inputOffset;
+    public final int outputOffset;
+
     public ContainerDirectionalVaporizer(InventoryPlayer inventory, TileDirectionalVaporizer vaporizer) {
         super(inventory, vaporizer, true, true);
 
         this.vaporizer = vaporizer;
         itemHandler = vaporizer.getInventory();
 
+        moduleOffset = inventorySlots.size();
         addModuleSlots();
+
+        inputOffset = inventorySlots.size();
         addBufferSlots(vaporizer.getInputOffset(), 8);
+
+        outputOffset = inventorySlots.size();
         addBufferSlots(vaporizer.getOutputOffset(), 98);
     }
 

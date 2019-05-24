@@ -162,6 +162,17 @@ item.wirelessutils.teleport_module.info.2=its Vaporizer to the location
 item.wirelessutils.teleport_module.info.3=specified within the installed
 item.wirelessutils.teleport_module.info.4=Positional Card.
 
+item.wirelessutils.capture_module.name=Capture Module
+item.wirelessutils.capture_module.info.0=This module will capture any living
+item.wirelessutils.capture_module.info.1=creatures within the working area of
+item.wirelessutils.capture_module.info.2=its Vaporizer within Void Pearls
+item.wirelessutils.capture_module.info.3=taken from the Vaporizer's Input.
+
+item.wirelessutils.clone_module.name=Duplication Module
+item.wirelessutils.clone_module.info.0=This module uses experience and other
+item.wirelessutils.clone_module.info.1=captured creatures to create duplicates
+item.wirelessutils.clone_module.info.2=of the provided captured creature.
+
 item.wirelessutils.base_augment.name=Augment Base
 
 item.wirelessutils.dispenser_augment.name=Dispenser Augment

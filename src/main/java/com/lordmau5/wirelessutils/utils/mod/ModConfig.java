@@ -746,14 +746,14 @@ public class ModConfig {
 
     public static class Vaporizers {
         @Config.Name("Use Experience Fluid")
-        @Config.Comment("Whether or not Vaporizers should use some form of fluid experience. Affects xp orb collection.")
+        @Config.Comment("Whether or not Vaporizers should use some form of fluid experience for modules that require fuel.")
         @Config.RequiresWorldRestart
         public boolean useFluid = true;
 
         @Config.Name("Fluid mB per Experience Point")
         @Config.Comment("Fluid experience should convert to experience points at this ratio.")
         @Config.RangeInt(min = 1)
-        public int mbPerPoint = 1;
+        public int mbPerPoint = 20;
 
         @Config.Name("Custom Fluid Name")
         @Config.Comment("If set, this fluid is used rather than an auto-discovered fluid.")
@@ -769,6 +769,24 @@ public class ModConfig {
         @Config.Name("Slaughter Module")
         @Config.Comment("Slaughter Modules will kill all living entities within the Vaporizer's working area.")
         public SlaughterModule slaughter = new SlaughterModule();
+
+        @Config.Name("Teleportation Module")
+        @Config.Comment("Teleportation Modules transport all entities within the Vaporizer's working area to a set location.")
+        public TeleportModule teleport = new TeleportModule();
+    }
+
+    public static class TeleportModule {
+        @Config.Name("Limit to Living Entities")
+        @Config.Comment("When enabled, only living entities will be transported. Otherwise, ALL entities can be targetted.")
+        public boolean livingOnly = false;
+
+        @Config.Name("Target Players")
+        @Config.Comment("When enabled, players can be transported.")
+        public boolean targetPlayers = true;
+
+        @Config.Name("Ignore Sneaking Players")
+        @Config.Comment("When enabled, sneaking players will be ignored.")
+        public boolean ignoreSneaking = true;
     }
 
     public static class SlaughterModule {
@@ -776,28 +794,44 @@ public class ModConfig {
         @Config.Comment("When enabled, the Slaughter Module will kill enemies marked as Bosses, such as Withers.")
         public boolean attackBosses = true;
 
+        @Config.Name("Target Players")
+        @Config.Comment("When enabled, players can be transported.")
+        public boolean targetPlayers = false;
+
+        @Config.Name("Ignore Sneaking Players")
+        @Config.Comment("When enabled, sneaking players will be ignored.")
+        public boolean ignoreSneaking = true;
+
         @Config.Name("Enable Weapons")
         @Config.Comment("When enabled, the Slaughter Module will use a weapon placed in the Input slot of the Vaporizer.")
         @Config.RequiresWorldRestart
         public boolean enableWeapon = true;
 
-        @Config.Name("Damage Weapons")
-        @Config.Comment("When enabled, the Slaughter Module will apply durability damage to the weapon when using it.")
-        public boolean damageWeapon = true;
+        @Config.Name("Weapon Durability Use")
+        @Config.Comment("The amount of durability damage to apply to weapons for each successful use.")
+        @Config.RangeInt(min = 0)
+        public int damageWeapon = 1;
 
         @Config.Name("Maximum Damage")
         @Config.Comment("Slaughter Modules should do up to this much damage when they attack. 0 for Unlimited.")
         @Config.RangeDouble(min = 0, max = Float.MAX_VALUE)
         public double maxDamage = 0D;
 
+        @Config.Name("Damage is Unblockable")
+        @Config.Comment("When enabled, damage cannot be blocked by shields and armor.")
+        public boolean unblockable = true;
+
+        @Config.Name("Damage is Absolute")
+        @Config.Comment("When enabled, damage cannot be mitigated through effects and enchantments.")
+        public boolean absolute = true;
+
         @Config.Name("Collect Drops")
-        @Config.Comment("When enabled, the Vaporizer will attempt to collect all the drops from entities is kills.")
-        public boolean collectDrops = true;
+        @Config.Comment("0 = Ignore Drops, 1 = Collect Drops till Full, 2 = Collect All Drops, 3 = Void Drops")
+        public int collectDrops = 1;
 
         @Config.Name("Collect Experience")
         @Config.Comment("0 = Ignore Experience, 1 = Collect Experience till Full, 2 = Collect All Experience, 3 = Void Experience")
-        @Config.RangeInt(min = 0, max = 3)
-        public int collectExperience = 1;
+        public int collectExperience = 2;
     }
 
     public static class Condensers {
@@ -998,7 +1032,7 @@ public class ModConfig {
 
     public static class Performance {
         @Config.Name("Steps Per Tick")
-        @Config.Comment("Machines should process this many tile entities and/or items per tick, until they run out of energy.")
+        @Config.Comment("Machines should processEntity this many tile entities and/or items per tick, until they run out of energy.")
         @Config.RangeInt(min = 1)
         public int stepsPerTick = 20;
 

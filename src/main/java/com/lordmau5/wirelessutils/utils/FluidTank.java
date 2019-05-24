@@ -39,6 +39,11 @@ public class FluidTank extends FluidTankCore {
             fluid.amount = this.capacity;
     }
 
+    public void setAmount(int amount) {
+        if ( fluid != null )
+            fluid.amount = amount;
+    }
+
     public int fill(int amount, boolean doFill) {
         if ( infinite )
             return 0;

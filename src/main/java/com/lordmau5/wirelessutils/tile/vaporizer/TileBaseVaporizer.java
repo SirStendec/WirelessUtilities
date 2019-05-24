@@ -72,6 +72,15 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     protected IFluidHandler fluidHandler;
     protected FluidTank tank;
 
+    private int excessFuel = 0;
+
+    private boolean[] emptySlots;
+    private boolean[] fullSlots;
+    private int fullInput = 0;
+    private int emptyInput = 0;
+    private int fullOutput = 0;
+    private int emptyOutput = 0;
+
     protected ItemHandlerProxy inputProxy;
     protected ItemHandlerProxy outputProxy;
     protected ItemHandlerProxy passiveProxy;
@@ -238,6 +247,15 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     protected void initializeItemStackHandler(int size) {
         super.initializeItemStackHandler(size);
 
+        emptySlots = new boolean[size];
+        fullSlots = new boolean[size];
+
+        emptyOutput = 8;
+        emptyInput = 8;
+
+        Arrays.fill(emptySlots, true);
+        Arrays.fill(fullSlots, false);
+
         passiveProxy = new ItemHandlerProxy(itemStackHandler, getInputOffset(), 16, true, true);
         inputProxy = new ItemHandlerProxy(itemStackHandler, getInputOffset(), 8, true, true);
         outputProxy = new ItemHandlerProxy(itemStackHandler, getOutputOffset(), 8, true, true);
@@ -258,6 +276,14 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             return behavior != null && behavior.isValidInput(stack);
 
         return temporarilyAllowInsertion;
+    }
+
+    @Override
+    public int getStackLimit(int slot) {
+        if ( slot == getModuleOffset() || slot == getModifierOffset() )
+            return 1;
+
+        return super.getStackLimit(slot);
     }
 
     @Override
@@ -283,6 +309,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     @Override
     public void onContentsChanged(int slot) {
+        updateItemCache(slot);
+
         if ( slot == getModuleOffset() )
             updateModule();
 
@@ -334,8 +362,43 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     @Override
     public void readInventoryFromNBT(NBTTagCompound tag) {
         super.readInventoryFromNBT(tag);
+        int slots = itemStackHandler.getSlots();
+        for (int i = 0; i < slots; i++)
+            updateItemCache(i);
+
         updateModule();
     }
+
+    public void updateItemCache(int slot) {
+        if ( slot < getInputOffset() )
+            return;
+
+        boolean isInput = slot >= getInputOffset() && slot < getOutputOffset();
+        boolean isOutput = !isInput && slot >= getOutputOffset() && slot < getModuleOffset();
+
+        ItemStack stack = itemStackHandler.getStackInSlot(slot);
+        Item item = stack.getItem();
+
+        boolean slotEmpty = stack.isEmpty();
+        boolean slotFull = getStackLimit(slot, stack) == stack.getCount();
+
+        if ( emptySlots[slot] != slotEmpty ) {
+            emptySlots[slot] = slotEmpty;
+            if ( isInput )
+                emptyInput += slotEmpty ? 1 : -1;
+            else if ( isOutput )
+                emptyOutput += slotEmpty ? 1 : -1;
+        }
+
+        if ( fullSlots[slot] != slotFull ) {
+            fullSlots[slot] = slotFull;
+            if ( isInput )
+                fullInput += slotFull ? 1 : -1;
+            else if ( isOutput )
+                fullOutput += slotFull ? 1 : -1;
+        }
+    }
+
 
     public ItemHandlerProxy getInput() {
         return inputProxy;
@@ -343,6 +406,14 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     public ItemHandlerProxy getOutput() {
         return outputProxy;
+    }
+
+    public boolean hasInput() {
+        return emptyInput < 8;
+    }
+
+    public boolean hasEmptyOutput() {
+        return emptyOutput > 0;
     }
 
     /* Augments */
@@ -418,6 +489,56 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     }
 
     /* IWorkProvider */
+
+    public void addFuel(int amount) {
+        // Always dirtying.
+        markChunkDirty();
+
+        // Store as fluid if possible.
+        if ( hasFluid() ) {
+            int room = Math.floorDiv(tank.getCapacity() - tank.getFluidAmount(), ModConfig.vaporizers.mbPerPoint);
+            if ( room > 0 ) {
+                if ( room < amount ) {
+                    tank.fill(room * ModConfig.vaporizers.mbPerPoint, true);
+                    amount -= room;
+
+                } else {
+                    tank.fill(amount * ModConfig.vaporizers.mbPerPoint, true);
+                    return;
+                }
+            }
+        }
+
+        excessFuel += amount;
+    }
+
+    public boolean removeFuel(int amount) {
+        // This is always dirtying.
+        markChunkDirty();
+
+        // Do we have excess fuel?
+        if ( excessFuel > amount ) {
+            excessFuel -= amount;
+            markChunkDirty();
+            return true;
+        } else if ( excessFuel > 0 ) {
+            amount -= excessFuel;
+            excessFuel = 0;
+        }
+
+        // Use fluid before burning items.
+        if ( hasFluid() ) {
+            int points = Math.min(amount, Math.floorDiv(tank.getFluidAmount(), ModConfig.vaporizers.mbPerPoint));
+            if ( points > 0 ) {
+                tank.drain(points * ModConfig.vaporizers.mbPerPoint, true);
+                amount -= points;
+            }
+        }
+
+        // TODO: Burning items.
+
+        return amount <= 0;
+    }
 
     public BlockPosDimension getPosition() {
         if ( pos == null || world == null )
@@ -521,42 +642,49 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     @Nonnull
     public WorkResult performWorkBlock(@Nonnull VaporizerTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile) {
-        if ( didFullEntities )
-            return WorkResult.FAILURE_CONTINUE;
+        WorkResult result = behavior.processBlock(target, world);
+        boolean worked = result.success;
+        boolean stop = !result.keepProcessing;
 
-        AxisAlignedBB box = null;
-        if ( canGetFullEntities() ) {
-            didFullEntities = true;
-            box = getFullEntitiesAABB();
+        if ( !result.remove ) {
+            validTargetsPerTick++;
+            if ( worked )
+                activeTargetsPerTick++;
         }
 
-        if ( box == null )
-            box = new AxisAlignedBB(target.pos);
+        if ( !didFullEntities && !stop ) {
+            Class<? extends Entity> klass = behavior.getEntityClass();
+            if ( !stop && klass != null ) {
+                AxisAlignedBB box = null;
+                if ( canGetFullEntities() ) {
+                    didFullEntities = true;
+                    box = getFullEntitiesAABB();
+                }
 
-        List<Entity> entities = world.getEntitiesWithinAABB(behavior.getEntityClass(), box);
-        validTargetsPerTick += entities.size();
+                if ( box == null )
+                    box = new AxisAlignedBB(target.pos);
 
-        boolean worked = false;
-        boolean stop = false;
+                List<Entity> entities = world.getEntitiesWithinAABB(behavior.getEntityClass(), box);
+                validTargetsPerTick += entities.size();
 
-        for (Entity entity : entities) {
-            WorkResult result = behavior.process(entity, target);
-            worked |= result.success;
-            if ( result.success )
-                activeTargetsPerTick++;
+                for (Entity entity : entities) {
+                    result = behavior.processEntity(entity, target);
+                    worked |= result.success;
+                    if ( result.success )
+                        activeTargetsPerTick++;
 
-            if ( !result.keepProcessing ) {
-                stop = true;
-                break;
+                    if ( !result.keepProcessing ) {
+                        stop = true;
+                        break;
+                    }
+                }
             }
         }
 
-        if ( worked ) {
-            behavior.postProcess(target, box, world);
-            return (stop || didFullEntities) ? WorkResult.SUCCESS_STOP : WorkResult.SUCCESS_CONTINUE;
-        }
+        if ( worked )
+            return stop ? WorkResult.SUCCESS_STOP : WorkResult.SUCCESS_CONTINUE;
 
-        return (stop || didFullEntities) ? WorkResult.FAILURE_STOP : WorkResult.FAILURE_CONTINUE;
+        return stop ? WorkResult.FAILURE_STOP : WorkResult.FAILURE_CONTINUE;
     }
 
     @Nonnull
@@ -721,9 +849,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             return;
 
         // TODO: Tracking if we actually have room to insert or items to extract.
-        if ( mode == Mode.INPUT )
+        if ( mode == Mode.INPUT && fullInput < 8 )
             transferOne(handler, inputProxy);
-        else if ( mode == Mode.OUTPUT )
+        else if ( mode == Mode.OUTPUT && emptyOutput < 8 )
             transferOne(outputProxy, handler);
     }
 
@@ -848,14 +976,19 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     /* Event Handling */
 
     public void onItemDrops(LivingDropsEvent event) {
-        if ( !ModConfig.vaporizers.modules.slaughter.collectDrops )
+        int mode = ModConfig.vaporizers.modules.slaughter.collectDrops;
+        if ( mode == 0 )
             return;
 
         List<EntityItem> drops = event.getDrops();
+        if ( mode == 3 ) {
+            drops.clear();
+            return;
+        }
 
         drops.removeIf(item -> {
             ItemStack stack = insertOutputStack(item.getItem());
-            if ( stack.isEmpty() )
+            if ( mode == 2 || stack.isEmpty() )
                 return true;
             item.setItem(stack);
             return false;
@@ -893,12 +1026,14 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
         gatherTick = tag.getByte("GatherTick");
+        excessFuel = tag.getInteger("ExcessFuel");
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         tag = super.writeToNBT(tag);
         tag.setByte("GatherTick", gatherTick);
+        tag.setInteger("ExcessFuel", excessFuel);
         return tag;
     }
 
@@ -1097,10 +1232,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         boolean canRun();
 
         @Nonnull
-        WorkResult process(@Nonnull Entity entity, @Nonnull VaporizerTarget target);
+        WorkResult processBlock(@Nonnull VaporizerTarget target, @Nonnull World world);
 
-        void postProcess(@Nonnull VaporizerTarget target, @Nonnull AxisAlignedBB box, @Nonnull World world);
-
+        @Nonnull
+        WorkResult processEntity(@Nonnull Entity entity, @Nonnull VaporizerTarget target);
     }
 
     /* Fake Player */

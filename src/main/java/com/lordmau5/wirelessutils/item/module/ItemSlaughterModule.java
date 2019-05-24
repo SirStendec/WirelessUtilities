@@ -9,7 +9,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -50,12 +49,12 @@ public class ItemSlaughterModule extends ItemModule {
 
         @Override
         public boolean isUnblockable() {
-            return true;
+            return ModConfig.vaporizers.modules.slaughter.unblockable;
         }
 
         @Override
         public boolean isDamageAbsolute() {
-            return true;
+            return ModConfig.vaporizers.modules.slaughter.absolute;
         }
     }
 
@@ -104,12 +103,15 @@ public class ItemSlaughterModule extends ItemModule {
         }
 
         @Nonnull
-        public IWorkProvider.WorkResult process(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget target) {
+        public IWorkProvider.WorkResult processEntity(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget target) {
             if ( !(entity instanceof EntityLivingBase) )
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
 
             EntityLivingBase living = (EntityLivingBase) entity;
             if ( !living.attackable() || !living.isEntityAlive() )
+                return IWorkProvider.WorkResult.FAILURE_REMOVE;
+
+            if ( entity instanceof EntityPlayer && (((EntityPlayer) entity).capabilities.isCreativeMode || !ModConfig.vaporizers.modules.slaughter.targetPlayers || (entity.isSneaking() && ModConfig.vaporizers.modules.slaughter.ignoreSneaking)) )
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
 
             if ( !ModConfig.vaporizers.modules.slaughter.attackBosses && !living.isNonBoss() )
@@ -127,16 +129,20 @@ public class ItemSlaughterModule extends ItemModule {
                 damage = (float) ModConfig.vaporizers.modules.slaughter.maxDamage;
 
             boolean success = living.attackEntityFrom(new VaporizerDamage(player, vaporizer), damage);
-            if ( success && ModConfig.vaporizers.modules.slaughter.damageWeapon && !vaporizer.isCreative() ) {
-                weapon.damageItem(1, player);
+            int weaponDamage = ModConfig.vaporizers.modules.slaughter.damageWeapon;
+            if ( success && weaponDamage > 0 && !vaporizer.isCreative() ) {
+                weapon.damageItem(weaponDamage, player);
+                if ( weapon.isEmpty() )
+                    vaporizer.getInput().setStackInSlot(0, weapon);
                 vaporizer.markChunkDirty();
             }
 
             return IWorkProvider.WorkResult.SUCCESS_CONTINUE;
         }
 
-        public void postProcess(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull AxisAlignedBB box, @Nonnull World world) {
-
+        @Nonnull
+        public IWorkProvider.WorkResult processBlock(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
+            return IWorkProvider.WorkResult.FAILURE_REMOVE;
         }
     }
 }

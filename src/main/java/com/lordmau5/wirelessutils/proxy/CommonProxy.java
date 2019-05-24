@@ -48,6 +48,8 @@ import com.lordmau5.wirelessutils.item.augment.ItemTransferAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemWorldAugment;
 import com.lordmau5.wirelessutils.item.base.IEnhancedItem;
 import com.lordmau5.wirelessutils.item.module.ItemBaseModule;
+import com.lordmau5.wirelessutils.item.module.ItemCaptureModule;
+import com.lordmau5.wirelessutils.item.module.ItemCloneModule;
 import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
 import com.lordmau5.wirelessutils.item.pearl.ItemChargedPearl;
@@ -366,6 +368,8 @@ public class CommonProxy {
         registerItem(event, new ItemBaseModule());
         registerItem(event, new ItemSlaughterModule());
         registerItem(event, new ItemTeleportModule());
+        registerItem(event, new ItemCaptureModule());
+        registerItem(event, new ItemCloneModule());
 
         PluginRegistry.registerItems(event);
     }

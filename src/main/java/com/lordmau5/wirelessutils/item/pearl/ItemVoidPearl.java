@@ -7,8 +7,8 @@ import com.lordmau5.wirelessutils.entity.pearl.EntityVoidPearl;
 import com.lordmau5.wirelessutils.item.base.IDimensionallyStableItem;
 import com.lordmau5.wirelessutils.item.base.IJEIInformationItem;
 import com.lordmau5.wirelessutils.item.base.ItemBasePearl;
+import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
-import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import mezz.jei.api.IModRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -95,6 +95,8 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
                     getTranslationKey() + ".entry",
                     getCapturedName(stack)
             ).getFormattedText());
+
+            tooltip.add("Cost: " + getCapturedCost(stack, worldIn));
 
         } else
             tooltip.add(new TextComponentTranslation(
@@ -209,6 +211,23 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
     }
 
     @Nullable
+    public ResourceLocation getCapturedId(@Nonnull ItemStack stack) {
+        if ( !containsEntity(stack) )
+            return null;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        return new ResourceLocation(tag.getString("EntityID"));
+    }
+
+    public int getCapturedCost(@Nonnull ItemStack stack, @Nullable World world) {
+        if ( !containsEntity(stack) )
+            return -1;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        return EntityUtilities.getSpawnCost(new ResourceLocation(tag.getString("EntityID")), world);
+    }
+
+    @Nullable
     public Entity getCapturedEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData) {
         if ( !containsEntity(stack) )
             return null;
@@ -278,7 +297,7 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
             return ItemStack.EMPTY;
 
         String name = key.toString();
-        if ( isBlacklisted(name) )
+        if ( EntityUtilities.isBlacklisted(name) )
             return ItemStack.EMPTY;
 
         ItemStack out = stack.copy();
@@ -289,16 +308,14 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         if ( tag == null )
             tag = new NBTTagCompound();
 
+        int cost = ((EntityLiving) entity).experienceValue;
+        EntityUtilities.saveSpawnCost(key, cost);
+
         NBTTagCompound entityTag = new NBTTagCompound();
         entity.writeToNBT(entityTag);
 
-        entityTag.removeTag("UUIDMost");
-        entityTag.removeTag("UUIDLeast");
-        entityTag.removeTag("Motion");
-        entityTag.removeTag("FallDistance");
-        entityTag.removeTag("OnGround");
-        entityTag.removeTag("Rotation");
-        entityTag.removeTag("Pos");
+        for (String badTag : BAD_TAGS)
+            entityTag.removeTag(badTag);
 
         tag.setString("EntityID", name);
         tag.setTag("EntityData", entityTag);
@@ -311,15 +328,10 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         return out;
     }
 
-    public static boolean isBlacklisted(String key) {
-        if ( key == null )
-            return false;
-
-        key = key.toLowerCase();
-        for (String listed : ModConfig.items.voidPearl.blacklist)
-            if ( listed.equals(key) )
-                return true;
-
-        return false;
-    }
+    public static String[] BAD_TAGS = {
+            "UUIDMost", "UUIDLeast",
+            "Rotation", "Pos", "Motion",
+            "FallDistance", "OnGround", "Air",
+            "Dimension", "PortalCooldown", "Leash", "Leashed"
+    };
 }

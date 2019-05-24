@@ -43,6 +43,13 @@ public class ItemHandlerProxy implements IItemHandler {
         return handler.getStackInSlot(slot + offset);
     }
 
+    public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
+        if ( handler == null || slot < 0 || slot >= slots )
+            throw new RuntimeException("invalid slot");
+
+        handler.setStackInSlot(slot + offset, stack);
+    }
+
     @Nonnull
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
         if ( !allowInsert || handler == null || slot < 0 || slot >= slots )
