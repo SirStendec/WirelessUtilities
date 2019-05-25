@@ -1,5 +1,8 @@
 package com.lordmau5.wirelessutils.item.module;
 
+import com.google.common.base.Predicate;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementModuleBase;
+import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import com.lordmau5.wirelessutils.utils.EntityUtilities;
@@ -26,7 +29,7 @@ public class ItemCloneModule extends ItemModule {
     @Nullable
     @Override
     public TileBaseVaporizer.IVaporizerBehavior getBehavior(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
-        return new CloneBehavior(vaporizer);
+        return new CloneBehavior(vaporizer, stack);
     }
 
     public static class CloneBehavior implements TileBaseVaporizer.IVaporizerBehavior {
@@ -34,9 +37,10 @@ public class ItemCloneModule extends ItemModule {
         public final TileBaseVaporizer vaporizer;
         public final ItemStack ghost;
 
-        public CloneBehavior(TileBaseVaporizer vaporizer) {
+        public CloneBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack module) {
             this.vaporizer = vaporizer;
             ghost = new ItemStack(ModItems.itemVoidPearl);
+            updateModule(module);
         }
 
         public boolean canInvert() {
@@ -44,6 +48,19 @@ public class ItemCloneModule extends ItemModule {
         }
 
         public Class<? extends Entity> getEntityClass() {
+            return null;
+        }
+
+        public Predicate<? super Entity> getEntityFilter() {
+            return null;
+        }
+
+        public void updateModule(@Nonnull ItemStack stack) {
+
+        }
+
+        @Nullable
+        public ElementModuleBase getGUI(@Nonnull GuiBaseVaporizer gui) {
             return null;
         }
 
@@ -67,7 +84,14 @@ public class ItemCloneModule extends ItemModule {
 
         }
 
-        @Override
+        public int getExperienceMode() {
+            return 0;
+        }
+
+        public int getDropMode() {
+            return 0;
+        }
+
         public boolean wantsFluid() {
             return true;
         }

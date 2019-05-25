@@ -1,5 +1,8 @@
 package com.lordmau5.wirelessutils.item.module;
 
+import com.google.common.base.Predicate;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementModuleBase;
+import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
@@ -48,6 +51,29 @@ public class ItemTeleportModule extends ItemModule {
             updateModifier(vaporizer.getModifier());
         }
 
+        public void updateModule(@Nonnull ItemStack stack) {
+
+        }
+
+        public void updateModifier(@Nonnull ItemStack stack) {
+            if ( isValidModifier(stack) ) {
+                ItemBasePositionalCard card = (ItemBasePositionalCard) stack.getItem();
+                target = card.getTarget(stack, vaporizer.getPosition());
+
+            } else {
+                BlockPosDimension pos = vaporizer.getPosition();
+                if ( pos == null )
+                    target = null;
+                else
+                    target = pos.offset(vaporizer.getEnumFacing().getOpposite(), 1);
+            }
+        }
+
+        @Nullable
+        public ElementModuleBase getGUI(@Nonnull GuiBaseVaporizer gui) {
+            return null;
+        }
+
         public boolean canInvert() {
             return false;
         }
@@ -57,6 +83,11 @@ public class ItemTeleportModule extends ItemModule {
                 return EntityLivingBase.class;
 
             return Entity.class;
+        }
+
+        @Nullable
+        public Predicate<? super Entity> getEntityFilter() {
+            return null;
         }
 
         public boolean isInputUnlocked(int slot) {
@@ -84,18 +115,16 @@ public class ItemTeleportModule extends ItemModule {
             return ((ItemBasePositionalCard) item).isCardConfigured(stack);
         }
 
-        public void updateModifier(@Nonnull ItemStack stack) {
-            if ( isValidModifier(stack) ) {
-                ItemBasePositionalCard card = (ItemBasePositionalCard) stack.getItem();
-                target = card.getTarget(stack, vaporizer.getPosition());
+        public boolean wantsFluid() {
+            return false;
+        }
 
-            } else {
-                BlockPosDimension pos = vaporizer.getPosition();
-                if ( pos == null )
-                    target = null;
-                else
-                    target = pos.offset(vaporizer.getEnumFacing().getOpposite(), 1);
-            }
+        public int getExperienceMode() {
+            return 0;
+        }
+
+        public int getDropMode() {
+            return 0;
         }
 
         public boolean canRun() {

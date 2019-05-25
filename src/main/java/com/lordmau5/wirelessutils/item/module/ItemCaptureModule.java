@@ -1,12 +1,14 @@
 package com.lordmau5.wirelessutils.item.module;
 
-import com.lordmau5.wirelessutils.item.pearl.ItemVoidPearl;
+import com.google.common.base.Predicate;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementModuleBase;
+import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
+import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.ItemHandlerProxy;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
@@ -28,42 +30,16 @@ public class ItemCaptureModule extends ItemModule {
     @Nullable
     @Override
     public TileBaseVaporizer.IVaporizerBehavior getBehavior(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
-        return new CaptureBehavior(vaporizer);
-    }
-
-    public static boolean isEntityBall(@Nonnull ItemStack stack) {
-        Item item = stack.getItem();
-        if ( item instanceof ItemVoidPearl )
-            return true;
-
-        return false;
-    }
-
-    public static boolean isFilledEntityBall(@Nonnull ItemStack stack) {
-        Item item = stack.getItem();
-        if ( item instanceof ItemVoidPearl ) {
-            ItemVoidPearl pearl = (ItemVoidPearl) item;
-            return pearl.containsEntity(stack);
-        }
-
-        return false;
-    }
-
-    @Nonnull
-    public static ItemStack captureEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
-        Item item = stack.getItem();
-        if ( item instanceof ItemVoidPearl )
-            return ((ItemVoidPearl) item).captureEntity(stack, entity);
-
-        return ItemStack.EMPTY;
+        return new CaptureBehavior(vaporizer, stack);
     }
 
     public static class CaptureBehavior implements TileBaseVaporizer.IVaporizerBehavior {
 
         public final TileBaseVaporizer vaporizer;
 
-        public CaptureBehavior(TileBaseVaporizer vaporizer) {
+        public CaptureBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack module) {
             this.vaporizer = vaporizer;
+            updateModule(module);
         }
 
         public boolean canInvert() {
@@ -74,12 +50,25 @@ public class ItemCaptureModule extends ItemModule {
             return EntityLiving.class;
         }
 
+        public Predicate<? super Entity> getEntityFilter() {
+            return null;
+        }
+
+        public void updateModule(@Nonnull ItemStack stack) {
+
+        }
+
+        @Nullable
+        public ElementModuleBase getGUI(@Nonnull GuiBaseVaporizer gui) {
+            return null;
+        }
+
         public boolean isInputUnlocked(int slot) {
             return true;
         }
 
         public boolean isValidInput(@Nonnull ItemStack stack) {
-            return isEntityBall(stack) && !isFilledEntityBall(stack);
+            return EntityUtilities.isEntityBall(stack) && !EntityUtilities.isFilledEntityBall(stack);
         }
 
         public boolean isModifierUnlocked() {
@@ -97,6 +86,18 @@ public class ItemCaptureModule extends ItemModule {
         @Nonnull
         public ItemStack getModifierGhost() {
             return ItemStack.EMPTY;
+        }
+
+        public boolean wantsFluid() {
+            return false;
+        }
+
+        public int getExperienceMode() {
+            return 0;
+        }
+
+        public int getDropMode() {
+            return 0;
         }
 
         public boolean canRun() {
@@ -120,7 +121,7 @@ public class ItemCaptureModule extends ItemModule {
                 }
             }
 
-            ItemStack result = captureEntity(stack, entity);
+            ItemStack result = EntityUtilities.captureEntity(stack, entity);
             if ( result.isEmpty() )
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
 

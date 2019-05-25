@@ -155,6 +155,14 @@ item.wirelessutils.slaughter_module.info.1=creatures unfortunate enough to
 item.wirelessutils.slaughter_module.info.2=find themselves in the working
 item.wirelessutils.slaughter_module.info.3=area of its Vaporizer.
 
+item.wirelessutils.slaughter_module.entry=- %s
+item.wirelessutils.slaughter_module.info_list=%s %s Items
+item.wirelessutils.slaughter_module.drops=Drops: %s
+item.wirelessutils.slaughter_module.exp=Experience: %s
+
+item.wirelessutils.slaughter_module.kill=%s was vaporized.
+item.wirelessutils.slaughter_module.kill.item=%s was vaporized with %s.
+
 item.wirelessutils.teleport_module.name=Teleportation Module
 item.wirelessutils.teleport_module.info.0=This module will transport any
 item.wirelessutils.teleport_module.info.1=entities in the working area of
@@ -393,6 +401,23 @@ info.wirelessutils.buffer.in_out=Input / Output
 
 jei.wirelessutils.charger=Item Charging
 jei.wirelessutils.condenser=Item Condensing
+
+btn.wirelessutils.main=Main
+btn.wirelessutils.module=Module
+
+btn.wirelessutils.drop.drops=Drops:
+btn.wirelessutils.drop.exp=Experience:
+
+btn.wirelessutils.blacklist=Blacklist:
+btn.wirelessutils.whitelist=Whitelist:
+
+btn.wirelessutils.child_mode.0=Ignore Age
+btn.wirelessutils.child_mode.1=Adults Only
+
+btn.wirelessutils.drop_mode.0=Ignore
+btn.wirelessutils.drop_mode.1=Collect till Full
+btn.wirelessutils.drop_mode.2=Collect then Void
+btn.wirelessutils.drop_mode.3=Void All
 
 btn.wirelessutils.edit=Edit
 btn.wirelessutils.save=Save

@@ -5,6 +5,9 @@ import cofh.core.network.PacketBase;
 import cofh.core.util.CoreUtils;
 import cofh.core.util.helpers.InventoryHelper;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Predicate;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementModuleBase;
+import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.item.module.ItemModule;
 import com.lordmau5.wirelessutils.tile.base.IConfigurableWorldTickRate;
@@ -104,6 +107,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     private boolean temporarilyAllowInsertion = false;
     private boolean didFullEntities = false;
+
+    private Item previousModule = null;
 
     public TileBaseVaporizer() {
         super();
@@ -328,23 +333,46 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         return item instanceof ItemModule && ((ItemModule) item).canApplyTo(stack, this);
     }
 
+    @Nullable
+    public IVaporizerBehavior getBehavior() {
+        return behavior;
+    }
+
     public void updateModule() {
         ItemStack stack = itemStackHandler.getStackInSlot(getModuleOffset());
         if ( stack.isEmpty() || !isValidModule(stack) ) {
             behavior = null;
+            previousModule = null;
             return;
         }
 
         ItemModule module = (ItemModule) stack.getItem();
+
+        if ( module == previousModule && behavior != null ) {
+            behavior.updateModule(stack);
+            return;
+        }
+
         behavior = module.getBehavior(stack, this);
+        previousModule = module;
     }
 
     public ItemStack getModule() {
         return itemStackHandler.getStackInSlot(getModuleOffset());
     }
 
+    public void setModule(@Nonnull ItemStack stack) {
+        if ( isValidModule(stack) )
+            itemStackHandler.setStackInSlot(getModuleOffset(), stack);
+    }
+
     public ItemStack getModifier() {
         return itemStackHandler.getStackInSlot(getModifierOffset());
+    }
+
+    public void setModifier(@Nonnull ItemStack stack) {
+        if ( behavior != null && behavior.isValidModifier(stack) )
+            itemStackHandler.setStackInSlot(getModifierOffset(), stack);
     }
 
     public ItemStack getModifierGhost() {
@@ -654,7 +682,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         if ( !didFullEntities && !stop ) {
             Class<? extends Entity> klass = behavior.getEntityClass();
-            if ( !stop && klass != null ) {
+            Predicate<? super Entity> filter = behavior.getEntityFilter();
+
+            if ( klass != null ) {
                 AxisAlignedBB box = null;
                 if ( canGetFullEntities() ) {
                     didFullEntities = true;
@@ -664,7 +694,12 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
                 if ( box == null )
                     box = new AxisAlignedBB(target.pos);
 
-                List<Entity> entities = world.getEntitiesWithinAABB(behavior.getEntityClass(), box);
+                List<Entity> entities;
+                if ( filter == null )
+                    entities = world.getEntitiesWithinAABB(klass, box);
+                else
+                    entities = world.getEntitiesWithinAABB(klass, box, filter);
+
                 validTargetsPerTick += entities.size();
 
                 for (Entity entity : entities) {
@@ -976,7 +1011,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     /* Event Handling */
 
     public void onItemDrops(LivingDropsEvent event) {
-        int mode = ModConfig.vaporizers.modules.slaughter.collectDrops;
+        int mode = behavior == null ? 0 : behavior.getDropMode();
         if ( mode == 0 )
             return;
 
@@ -996,7 +1031,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     }
 
     public void onExperienceDrops(LivingExperienceDropEvent event) {
-        int mode = ModConfig.vaporizers.modules.slaughter.collectExperience;
+        int mode = behavior == null ? 0 : behavior.getExperienceMode();
         if ( mode == 0 )
             return;
 
@@ -1113,6 +1148,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         for (int i = 0; i < sideTransfer.length; i++)
             payload.addByte(sideTransfer[i].index);
 
+        if ( behavior != null )
+            behavior.updateModePacket(payload);
+
         return payload;
     }
 
@@ -1125,6 +1163,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         for (int i = 0; i < sideTransfer.length; i++)
             setSideTransferMode(i, Mode.byIndex(payload.getByte()));
+
+        if ( behavior != null )
+            behavior.handleModePacket(payload);
     }
 
     @Override
@@ -1208,28 +1249,46 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     public interface IVaporizerBehavior {
 
-        boolean canInvert();
-
-        Class<? extends Entity> getEntityClass();
-
-        boolean isInputUnlocked(int slot);
-
-        boolean isValidInput(@Nonnull ItemStack stack);
+        void updateModule(@Nonnull ItemStack stack);
 
         boolean isModifierUnlocked();
 
         boolean isValidModifier(@Nonnull ItemStack stack);
 
-        void updateModifier(@Nonnull ItemStack stack);
-
         @Nonnull
         ItemStack getModifierGhost();
 
-        default boolean wantsFluid() {
-            return false;
+        void updateModifier(@Nonnull ItemStack stack);
+
+        boolean isInputUnlocked(int slot);
+
+        boolean isValidInput(@Nonnull ItemStack stack);
+
+        ElementModuleBase getGUI(@Nonnull GuiBaseVaporizer gui);
+
+        default void updateModePacket(@Nonnull PacketBase packet) {
+
         }
 
+        default void handleModePacket(@Nonnull PacketBase packet) {
+
+        }
+
+        boolean wantsFluid();
+
         boolean canRun();
+
+        boolean canInvert();
+
+        int getExperienceMode();
+
+        int getDropMode();
+
+        @Nullable
+        Class<? extends Entity> getEntityClass();
+
+        @Nullable
+        Predicate<? super Entity> getEntityFilter();
 
         @Nonnull
         WorkResult processBlock(@Nonnull VaporizerTarget target, @Nonnull World world);

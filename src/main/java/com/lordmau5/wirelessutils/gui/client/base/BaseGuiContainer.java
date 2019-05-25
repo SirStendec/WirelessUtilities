@@ -71,6 +71,16 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements ICont
     }
 
     @Override
+    public int getCenteredOffset(String string) {
+        return super.getCenteredOffset(string);
+    }
+
+    @Override
+    public int getCenteredOffset(String string, int xPos) {
+        return super.getCenteredOffset(string, xPos);
+    }
+
+    @Override
     protected ElementBase getElementAtPosition(int mX, int mY) {
         for (ElementBase element : elements) {
             if ( element.isVisible() && element.intersectsWith(mX, mY) )

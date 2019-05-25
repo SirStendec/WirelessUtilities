@@ -7,10 +7,8 @@ import cofh.core.gui.element.tab.TabBase;
 import cofh.core.gui.element.tab.TabEnergy;
 import cofh.core.gui.element.tab.TabInfo;
 import cofh.core.gui.element.tab.TabRedstoneControl;
-import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.SharedState;
-import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementAreaButton;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementDynamicContainedButton;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementOffsetControls;
@@ -25,13 +23,9 @@ import com.lordmau5.wirelessutils.tile.vaporizer.TileDirectionalVaporizer;
 import com.lordmau5.wirelessutils.utils.Textures;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 
-public class GuiDirectionalVaporizer extends BaseGuiContainer {
-
-    public static final ResourceLocation TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/directional_vaporizer.png");
+public class GuiDirectionalVaporizer extends GuiBaseVaporizer {
 
     private final TileDirectionalVaporizer vaporizer;
 
@@ -41,11 +35,9 @@ public class GuiDirectionalVaporizer extends BaseGuiContainer {
     private TabSideControl sideControl;
 
     public GuiDirectionalVaporizer(InventoryPlayer player, TileDirectionalVaporizer vaporizer) {
-        super(new ContainerDirectionalVaporizer(player, vaporizer), vaporizer, TEXTURE);
+        super(new ContainerDirectionalVaporizer(player, vaporizer), vaporizer);
         this.vaporizer = vaporizer;
 
-        drawTitle = false;
-        ySize = 242;
         generateInfo("tab." + WirelessUtils.MODID + ".directional_vaporizer");
     }
 
@@ -108,50 +100,5 @@ public class GuiDirectionalVaporizer extends BaseGuiContainer {
 
         rangeControls.setVisible(!offsetMode);
         offsetControls.setVisible(offsetMode);
-    }
-
-    @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTick, int x, int y) {
-        super.drawGuiContainerBackgroundLayer(partialTick, x, y);
-
-        if ( vaporizer.getModule().isEmpty() )
-            drawGhostItem(new ItemStack(ModItems.itemBaseModule), guiLeft + 8, guiTop + 8, true, true, null);
-
-        if ( vaporizer.getModifier().isEmpty() )
-            drawGhostItem(vaporizer.getModifierGhost(), guiLeft + 26, guiTop + 8, true, true, null);
-
-        ContainerDirectionalVaporizer container = (ContainerDirectionalVaporizer) inventorySlots;
-
-        drawSlotLocks(vaporizer.getInputOffset(), container.inputOffset, guiLeft + 8, guiTop + 111, 2, 4);
-        drawSlotLocks(vaporizer.getOutputOffset(), container.outputOffset, guiLeft + 98, guiTop + 111, 2, 4);
-
-        drawSlotLocks(vaporizer.getModuleOffset(), container.moduleOffset, guiLeft + 8, guiTop + 8, 1, 2);
-    }
-
-    @Override
-    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
-        super.drawGuiContainerForegroundLayer(mouseX, mouseY);
-
-        String title = StringHelper.localize(name);
-        fontRenderer.drawString(title, getCenteredOffset(title), 28, 0x404040);
-
-        fontRenderer.drawString(StringHelper.localize("info." + WirelessUtils.MODID + ".buffer.in_out"), 8, 100, 0x404040);
-    }
-
-    protected void drawSlotLocks(int slotIndex, int slotOffset, int xPos, int yPos, int rows, int cols) {
-        ItemStack held = mc.player.inventory.getItemStack();
-
-        for (int y = 0; y < rows; y++) {
-            for (int x = 0; x < cols; x++, slotIndex++, slotOffset++) {
-                Slot slot = inventorySlots.getSlot(slotOffset);
-                if ( !vaporizer.isSlotUnlocked(slotIndex) || (!held.isEmpty() && !slot.isItemValid(held)) ) {
-                    int xp = xPos + (x * 18);
-                    int yp = yPos + (y * 18);
-
-                    drawRect(xp, yp, xp + 16, yp + 16, 0x99444444);
-                }
-            }
-        }
-
     }
 }

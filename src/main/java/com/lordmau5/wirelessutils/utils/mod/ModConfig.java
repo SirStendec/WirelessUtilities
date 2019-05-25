@@ -795,7 +795,7 @@ public class ModConfig {
         public boolean attackBosses = true;
 
         @Config.Name("Target Players")
-        @Config.Comment("When enabled, players can be transported.")
+        @Config.Comment("When enabled, players can be attacked.")
         public boolean targetPlayers = false;
 
         @Config.Name("Ignore Sneaking Players")
@@ -825,13 +825,21 @@ public class ModConfig {
         @Config.Comment("When enabled, damage cannot be mitigated through effects and enchantments.")
         public boolean absolute = true;
 
-        @Config.Name("Collect Drops")
+        @Config.Name("Collect Drops - Default")
         @Config.Comment("0 = Ignore Drops, 1 = Collect Drops till Full, 2 = Collect All Drops, 3 = Void Drops")
         public int collectDrops = 1;
 
-        @Config.Name("Collect Experience")
+        @Config.Name("Collect Drops - Minimum")
+        @Config.Comment("0 = Ignore Drops, 1 = Collect Drops till Full, 2 = Collect All Drops, 3 = Void Drops")
+        public int collectDropsMinimum = 0;
+
+        @Config.Name("Collect Experience - Default")
         @Config.Comment("0 = Ignore Experience, 1 = Collect Experience till Full, 2 = Collect All Experience, 3 = Void Experience")
         public int collectExperience = 2;
+
+        @Config.Name("Collect Experience - Minimum")
+        @Config.Comment("0 = Ignore Experience, 1 = Collect Experience till Full, 2 = Collect All Experience, 3 = Void Experience")
+        public int collectExperienceMinimum = 0;
     }
 
     public static class Condensers {
