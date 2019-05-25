@@ -63,20 +63,22 @@ public class EntityUtilities {
         if ( key == null )
             return false;
 
-        key = key.toLowerCase();
-        for (String listed : ModConfig.items.voidPearl.blacklist) {
-            if ( listed.equals(key) )
-                return true;
-        }
-
-        return false;
+        return isBlacklisted(new ResourceLocation(key));
     }
 
     public static boolean isBlacklisted(@Nullable ResourceLocation name) {
         if ( name == null )
             return false;
 
-        return isBlacklisted(name.toString());
+        String key = name.toString();
+        String ns = name.getNamespace() + ":*";
+
+        for (String listed : ModConfig.items.voidPearl.blacklist) {
+            if ( listed.equals(key) || listed.equals(ns) )
+                return true;
+        }
+
+        return false;
     }
 
     public static boolean isBlacklisted(@Nonnull ItemStack stack) {

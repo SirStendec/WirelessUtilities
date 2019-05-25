@@ -78,6 +78,7 @@ public class GuiBaseVaporizer extends BaseGuiContainer {
             return;
 
         moduleTab = enabled;
+        BaseGuiContainer.playClickSound(1F);
         container.setSlotsVisible(!moduleTab);
     }
 

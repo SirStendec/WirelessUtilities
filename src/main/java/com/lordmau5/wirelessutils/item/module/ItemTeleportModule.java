@@ -1,7 +1,7 @@
 package com.lordmau5.wirelessutils.item.module;
 
-import com.google.common.base.Predicate;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementModuleBase;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementTeleportModule;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
@@ -12,7 +12,6 @@ import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -20,7 +19,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ItemTeleportModule extends ItemModule {
+public class ItemTeleportModule extends ItemFilteringModule {
 
     public ItemTeleportModule() {
         super();
@@ -35,24 +34,25 @@ public class ItemTeleportModule extends ItemModule {
     @Nullable
     @Override
     public TileBaseVaporizer.IVaporizerBehavior getBehavior(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
-        return new TeleportBehavior(vaporizer);
+        return new TeleportBehavior(vaporizer, stack);
     }
 
-    public static class TeleportBehavior implements TileBaseVaporizer.IVaporizerBehavior {
+    public static class TeleportBehavior extends FilteredBehavior {
 
-        public final TileBaseVaporizer vaporizer;
         public final ItemStack GHOST;
         public BlockPosDimension target;
 
-        public TeleportBehavior(@Nonnull TileBaseVaporizer vaporizer) {
+        public TeleportBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack stack) {
+            super(vaporizer);
             GHOST = new ItemStack(ModItems.itemAbsolutePositionalCard);
 
-            this.vaporizer = vaporizer;
+            allowPlayers = true;
+            allowCreative = true;
+
+            requireAttackable = false;
+
+            updateModule(stack);
             updateModifier(vaporizer.getModifier());
-        }
-
-        public void updateModule(@Nonnull ItemStack stack) {
-
         }
 
         public void updateModifier(@Nonnull ItemStack stack) {
@@ -71,23 +71,19 @@ public class ItemTeleportModule extends ItemModule {
 
         @Nullable
         public ElementModuleBase getGUI(@Nonnull GuiBaseVaporizer gui) {
-            return null;
+            return new ElementTeleportModule(gui, this);
         }
 
         public boolean canInvert() {
             return false;
         }
 
+        @Override
         public Class<? extends Entity> getEntityClass() {
             if ( ModConfig.vaporizers.modules.teleport.livingOnly )
                 return EntityLivingBase.class;
 
             return Entity.class;
-        }
-
-        @Nullable
-        public Predicate<? super Entity> getEntityFilter() {
-            return null;
         }
 
         public boolean isInputUnlocked(int slot) {
@@ -128,16 +124,20 @@ public class ItemTeleportModule extends ItemModule {
         }
 
         public boolean canRun() {
+            // This should only happen when the machine is loading.
+            if ( target == null ) {
+                updateModifier(vaporizer.getModifier());
+                if ( target == null )
+                    return false;
+            }
+
             return true;
         }
 
         @Nonnull
         public IWorkProvider.WorkResult processEntity(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget vaporizerTarget) {
             World world = entity.world;
-            if ( world == null || entity.isDead || entity.timeUntilPortal > 0 )
-                return IWorkProvider.WorkResult.FAILURE_REMOVE;
-
-            if ( entity instanceof EntityPlayer && (!ModConfig.vaporizers.modules.teleport.targetPlayers || (entity.isSneaking() && ModConfig.vaporizers.modules.teleport.ignoreSneaking)) )
+            if ( world == null || entity.timeUntilPortal > 0 || target == null )
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
 
             Entity newEntity = TeleportUtils.teleportEntity(entity, target.getDimension(), target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5);

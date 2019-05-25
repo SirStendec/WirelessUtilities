@@ -155,10 +155,14 @@ item.wirelessutils.slaughter_module.info.1=creatures unfortunate enough to
 item.wirelessutils.slaughter_module.info.2=find themselves in the working
 item.wirelessutils.slaughter_module.info.3=area of its Vaporizer.
 
-item.wirelessutils.slaughter_module.entry=- %s
-item.wirelessutils.slaughter_module.info_list=%s %s Items
 item.wirelessutils.slaughter_module.drops=Drops: %s
 item.wirelessutils.slaughter_module.exp=Experience: %s
+
+item.wirelessutils.filtered_module.entry=- %s
+item.wirelessutils.filtered_module.info_list=%s %s Items
+item.wirelessutils.filtered_module.age=Age: %s
+item.wirelessutils.filtered_module.named=Named: %s
+item.wirelessutils.filtered_module.sneak=Sneaking: %s
 
 item.wirelessutils.slaughter_module.kill=%s was vaporized.
 item.wirelessutils.slaughter_module.kill.item=%s was vaporized with %s.
@@ -411,8 +415,17 @@ btn.wirelessutils.drop.exp=Experience:
 btn.wirelessutils.blacklist=Blacklist:
 btn.wirelessutils.whitelist=Whitelist:
 
+btn.wirelessutils.sneak_mode.0=Ignore
+btn.wirelessutils.sneak_mode.1=Sneaking
+btn.wirelessutils.sneak_mode.2=Standing
+
+btn.wirelessutils.named_mode.0=Ignore Name
+btn.wirelessutils.named_mode.1=Unnamed Only
+btn.wirelessutils.named_mode.2=Named Only
+
 btn.wirelessutils.child_mode.0=Ignore Age
-btn.wirelessutils.child_mode.1=Adults Only
+btn.wirelessutils.child_mode.1=Children Only
+btn.wirelessutils.child_mode.2=Adults Only
 
 btn.wirelessutils.drop_mode.0=Ignore
 btn.wirelessutils.drop_mode.1=Collect till Full

@@ -1,6 +1,6 @@
 package com.lordmau5.wirelessutils.item.module;
 
-import com.google.common.base.Predicate;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementCaptureModule;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementModuleBase;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ItemCaptureModule extends ItemModule {
+public class ItemCaptureModule extends ItemFilteringModule {
 
     public ItemCaptureModule() {
         super();
@@ -33,12 +33,17 @@ public class ItemCaptureModule extends ItemModule {
         return new CaptureBehavior(vaporizer, stack);
     }
 
-    public static class CaptureBehavior implements TileBaseVaporizer.IVaporizerBehavior {
-
-        public final TileBaseVaporizer vaporizer;
+    public static class CaptureBehavior extends FilteredBehavior {
 
         public CaptureBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack module) {
-            this.vaporizer = vaporizer;
+            super(vaporizer);
+
+            allowPlayers = false;
+            allowCreative = false;
+
+            requireAttackable = true;
+            requireAlive = true;
+
             updateModule(module);
         }
 
@@ -46,21 +51,14 @@ public class ItemCaptureModule extends ItemModule {
             return false;
         }
 
+        @Override
         public Class<? extends Entity> getEntityClass() {
             return EntityLiving.class;
         }
 
-        public Predicate<? super Entity> getEntityFilter() {
-            return null;
-        }
-
-        public void updateModule(@Nonnull ItemStack stack) {
-
-        }
-
         @Nullable
         public ElementModuleBase getGUI(@Nonnull GuiBaseVaporizer gui) {
-            return null;
+            return new ElementCaptureModule(gui, this);
         }
 
         public boolean isInputUnlocked(int slot) {

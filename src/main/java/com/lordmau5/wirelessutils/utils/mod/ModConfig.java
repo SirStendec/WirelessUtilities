@@ -778,29 +778,25 @@ public class ModConfig {
     public static class TeleportModule {
         @Config.Name("Limit to Living Entities")
         @Config.Comment("When enabled, only living entities will be transported. Otherwise, ALL entities can be targetted.")
+        @Config.RequiresWorldRestart
         public boolean livingOnly = false;
 
         @Config.Name("Target Players")
         @Config.Comment("When enabled, players can be transported.")
+        @Config.RequiresWorldRestart
         public boolean targetPlayers = true;
-
-        @Config.Name("Ignore Sneaking Players")
-        @Config.Comment("When enabled, sneaking players will be ignored.")
-        public boolean ignoreSneaking = true;
     }
 
     public static class SlaughterModule {
         @Config.Name("Attack Bosses")
         @Config.Comment("When enabled, the Slaughter Module will kill enemies marked as Bosses, such as Withers.")
+        @Config.RequiresWorldRestart
         public boolean attackBosses = true;
 
         @Config.Name("Target Players")
         @Config.Comment("When enabled, players can be attacked.")
+        @Config.RequiresWorldRestart
         public boolean targetPlayers = false;
-
-        @Config.Name("Ignore Sneaking Players")
-        @Config.Comment("When enabled, sneaking players will be ignored.")
-        public boolean ignoreSneaking = true;
 
         @Config.Name("Enable Weapons")
         @Config.Comment("When enabled, the Slaughter Module will use a weapon placed in the Input slot of the Vaporizer.")
