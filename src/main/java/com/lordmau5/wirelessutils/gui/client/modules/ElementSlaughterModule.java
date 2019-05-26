@@ -1,8 +1,10 @@
-package com.lordmau5.wirelessutils.gui.client.elements;
+package com.lordmau5.wirelessutils.gui.client.modules;
 
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementDynamicContainedButton;
+import com.lordmau5.wirelessutils.gui.client.modules.base.ElementFilterableModule;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
@@ -30,7 +32,7 @@ public class ElementSlaughterModule extends ElementFilterableModule {
         addElement(btnExp);
     }
 
-    int getContentHeight() {
+    public int getContentHeight() {
         return 50;
     }
 

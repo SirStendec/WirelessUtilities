@@ -1,6 +1,8 @@
 package com.lordmau5.wirelessutils.item.base;
 
+import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
+import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import com.lordmau5.wirelessutils.utils.crafting.INBTPreservingIngredient;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import net.minecraft.inventory.InventoryCrafting;
@@ -73,44 +75,77 @@ public abstract class ItemBasePositionalCard extends ItemBase implements ISlotCo
 
     @Override
     public void addTooltipContext(@Nonnull List<String> tooltip, @Nonnull TileEntity tile, @Nonnull Slot slot, @Nonnull ItemStack stack) {
-        if ( tile instanceof IPositionalMachine && tile.hasWorld() ) {
-            IPositionalMachine machine = (IPositionalMachine) tile;
-            BlockPosDimension target = getTarget(stack, machine.getPosition());
-            if ( target == null ) {
-                tooltip.add(1,
-                        new TextComponentTranslation(getTranslationKey() + ".invalid.unset")
-                                .setStyle(GRAY)
-                                .getFormattedText());
+        BlockPosDimension target;
+        int distance = 0;
+        boolean interdimensional = false;
+        boolean inRange = false;
+
+        if ( tile instanceof TileBaseVaporizer && tile.hasWorld() ) {
+            TileBaseVaporizer vaporizer = (TileBaseVaporizer) tile;
+            if ( vaporizer.getBehavior() instanceof ItemTeleportModule.TeleportBehavior ) {
+                ItemTeleportModule.TeleportBehavior behavior = (ItemTeleportModule.TeleportBehavior) vaporizer.getBehavior();
+                target = getTarget(stack, vaporizer.getPosition());
+
+                World world = vaporizer.getWorld();
+                if ( world != null ) {
+                    int dimension = world.provider.getDimension();
+
+                    if ( dimension != target.getDimension() )
+                        interdimensional = true;
+                    else {
+                        BlockPos pos = vaporizer.getPos();
+                        distance = (int) Math.floor(target.getDistance(pos.getX(), pos.getY(), pos.getZ()));
+                    }
+
+                    inRange = behavior.isTargetInRange(stack);
+                }
+            } else
                 return;
-            }
+
+        } else if ( tile instanceof IPositionalMachine && tile.hasWorld() ) {
+            IPositionalMachine machine = (IPositionalMachine) tile;
+            target = getTarget(stack, machine.getPosition());
 
             World world = tile.getWorld();
             if ( world != null ) {
-                ITextComponent distance;
                 int dimension = world.provider.getDimension();
 
-                if ( dimension != target.getDimension() ) {
-                    distance = new TextComponentString("999").setStyle(
-                            getStyle(TextFormatting.WHITE, true)
-                    );
-
-                } else {
+                if ( dimension != target.getDimension() )
+                    interdimensional = true;
+                else {
                     BlockPos pos = tile.getPos();
-                    int blockDistance = (int) Math.floor(target.getDistance(pos.getX(), pos.getY(), pos.getZ()));
-                    distance = getComponent(blockDistance);
+                    distance = (int) Math.floor(target.getDistance(pos.getX(), pos.getY(), pos.getZ()));
                 }
 
-                tooltip.add(1, new TextComponentTranslation(
-                        getTranslationKey() + ".distance",
-                        distance
-                ).setStyle(GRAY).getFormattedText());
-
-                if ( !machine.isTargetInRange(target) )
-                    tooltip.add(1, new TextComponentTranslation(
-                            getTranslationKey() + ".invalid.range")
-                            .setStyle(RED)
-                            .getFormattedText());
+                inRange = !shouldIgnoreDistance(stack) && machine.isTargetInRange(target);
             }
+
+        } else
+            return;
+
+        if ( target == null ) {
+            tooltip.add(1,
+                    new TextComponentTranslation(getTranslationKey() + ".invalid.unset")
+                            .setStyle(GRAY)
+                            .getFormattedText());
+            return;
         }
+
+        ITextComponent dist;
+        if ( interdimensional )
+            dist = new TextComponentString("999").setStyle(getStyle(TextFormatting.WHITE, true));
+        else
+            dist = getComponent(distance);
+
+        tooltip.add(1, new TextComponentTranslation(
+                getTranslationKey() + ".distance",
+                distance
+        ).setStyle(GRAY).getFormattedText());
+
+        if ( !inRange )
+            tooltip.add(1, new TextComponentTranslation(
+                    getTranslationKey() + ".invalid.range")
+                    .setStyle(RED)
+                    .getFormattedText());
     }
 }

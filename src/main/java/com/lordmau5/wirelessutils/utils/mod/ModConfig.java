@@ -760,12 +760,24 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public String customFluid = "";
 
+        @Config.Name("Maximum Entities Per Tick")
+        @Config.Comment("The maximum number of entities to handle in a work tick.")
+        public int entitiesPerTick = 100;
+
         @Config.Name("Modules")
         @Config.Comment("Modules give a Vaporizer purpose. Without an installed module, they have no behavior.")
         public Modules modules = new Modules();
     }
 
     public static class Modules {
+        @Config.Name("Capture Module")
+        @Config.Comment("Capture Modules will capture entities within the Vaporizer's working area within Void Pearls.")
+        public CaptureModule capture = new CaptureModule();
+
+        @Config.Name("Duplication Module")
+        @Config.Comment("Duplication Modules will create duplicates of a captured entity within the Vaporizer's working area.")
+        public CloneModule clone = new CloneModule();
+
         @Config.Name("Slaughter Module")
         @Config.Comment("Slaughter Modules will kill all living entities within the Vaporizer's working area.")
         public SlaughterModule slaughter = new SlaughterModule();
@@ -775,7 +787,101 @@ public class ModConfig {
         public TeleportModule teleport = new TeleportModule();
     }
 
+    public static class CaptureModule {
+        @Config.Name("Required Level")
+        @Config.Comment("Vaporizers must be at least this level in order to use this module.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for vaporizers using this module.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This module will drain this amount of RF/t from non-disabled vaporizers using them.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
+    }
+
+    public static class CloneModule {
+        @Config.Name("Required Level")
+        @Config.Comment("Vaporizers must be at least this level in order to use this module.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for vaporizers using this module.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This module will drain this amount of RF/t from non-disabled vaporizers using them.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
+
+        @Config.Name("Exact Copy Factor")
+        @Config.Comment({
+                "When greater than zero, exact copies of mobs can be spawned for an increased cost.",
+                "The formula will be Cost = Ceiling(Exact Copy Factor * (Base Experience * Experience Factor + Max Health * Health Factor))"
+        })
+        @Config.RangeDouble(min = 0)
+        public double exactFactor = 2;
+
+        @Config.Name("Animal Base Experience")
+        @Config.Comment("Animal entities do not expose experience in a standard way. Because of that, each one will be worth this number of experience points to spawn.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresMcRestart
+        public int animalBaseExp = 3;
+
+        @Config.Name("Experience Factor")
+        @Config.Comment("The cost to spawn an entity is calculated as Cost = Ceiling(Base Experience * Experience Factor + Max Health * Health Factor)")
+        @Config.RangeDouble(min = 0)
+        public double expFactor = 1.2;
+
+        @Config.Name("Health Factor")
+        @Config.Comment("The cost to spawn an entity is calculated as Cost = Ceiling(Base Experience * Experience Factor + Max Health * Health Factor)")
+        @Config.RangeDouble(min = 0)
+        public double healthFactor = 1.2;
+    }
+
     public static class TeleportModule {
+        @Config.Name("Required Level")
+        @Config.Comment("Vaporizers must be at least this level in order to use this module.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for vaporizers using this module.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This module will drain this amount of RF/t from non-disabled vaporizers using them.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
+
         @Config.Name("Limit to Living Entities")
         @Config.Comment("When enabled, only living entities will be transported. Otherwise, ALL entities can be targetted.")
         @Config.RequiresWorldRestart
@@ -785,9 +891,46 @@ public class ModConfig {
         @Config.Comment("When enabled, players can be transported.")
         @Config.RequiresWorldRestart
         public boolean targetPlayers = true;
+
+        @Config.Name("Cost per Block")
+        @Config.Comment("The cost to teleport entities to a distant block goes up by this amount per block, linearly with distance.")
+        @Config.RangeInt(min = 0)
+        public int costPerBlock = 0;
+
+        @Config.Name("Cost per Block Squared")
+        @Config.Comment("The cost to teleport entities to a distant block goes up by this amount per block as a square with distance.")
+        @Config.RangeInt(min = 0)
+        public int costPerBlockSquared = 0;
+
+        @Config.Name("Maximum / Interdimensional Cost")
+        @Config.Comment("The maximum cost to teleport entities to a distant block will never exceed this value. Also the cost for interdimensional teleportation.")
+        @Config.RangeInt(min = 0)
+        public int costInterdimensional = 1000;
     }
 
     public static class SlaughterModule {
+        @Config.Name("Required Level")
+        @Config.Comment("Vaporizers must be at least this level in order to use this module.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for vaporizers using this module.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This module will drain this amount of RF/t from non-disabled vaporizers using them.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
+
         @Config.Name("Attack Bosses")
         @Config.Comment("When enabled, the Slaughter Module will kill enemies marked as Bosses, such as Withers.")
         @Config.RequiresWorldRestart
@@ -808,9 +951,14 @@ public class ModConfig {
         @Config.RangeInt(min = 0)
         public int damageWeapon = 1;
 
+        @Config.Name("Damage Mode")
+        @Config.Comment("0=Entity's Health + Absorption, 1=Entity's Max Health + Absorption, 2=Maximum Damage")
+        @Config.RangeInt(min = 0, max = 2)
+        public int damageMode = 1;
+
         @Config.Name("Maximum Damage")
-        @Config.Comment("Slaughter Modules should do up to this much damage when they attack. 0 for Unlimited.")
-        @Config.RangeDouble(min = 0, max = Float.MAX_VALUE)
+        @Config.Comment("Slaughter Modules should do up to this much damage when they attack. 0 for Maximum.")
+        @Config.RangeDouble(min = 0, max = 1000000000)
         public double maxDamage = 0D;
 
         @Config.Name("Damage is Unblockable")

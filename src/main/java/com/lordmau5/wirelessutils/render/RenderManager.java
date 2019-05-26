@@ -28,6 +28,7 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -168,6 +169,14 @@ public class RenderManager {
         dimensionAreas.remove(area);
         if ( dimensionAreas.isEmpty() )
             areas.remove(area.dimension);
+    }
+
+    @Nullable
+    public BlockArea getArea(int id) {
+        if ( !enabled )
+            return null;
+
+        return areaIDs.get(id);
     }
 
     @SuppressWarnings("unused")

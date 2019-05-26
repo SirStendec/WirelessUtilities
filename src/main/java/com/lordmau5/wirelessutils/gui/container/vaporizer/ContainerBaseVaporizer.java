@@ -1,7 +1,9 @@
 package com.lordmau5.wirelessutils.gui.container.vaporizer;
 
 import com.lordmau5.wirelessutils.gui.container.BaseContainerTile;
+import com.lordmau5.wirelessutils.gui.slot.IVisibleSlot;
 import com.lordmau5.wirelessutils.gui.slot.SlotUnlockableItemHandler;
+import com.lordmau5.wirelessutils.gui.slot.SlotVisible;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Slot;
@@ -18,7 +20,7 @@ public class ContainerBaseVaporizer extends BaseContainerTile {
     public final int inputOffset;
     public final int outputOffset;
 
-    protected ArrayList<SlotUnlockableItemHandler> slots = new ArrayList<>();
+    protected ArrayList<IVisibleSlot> slots;
 
     public ContainerBaseVaporizer(InventoryPlayer inventory, TileBaseVaporizer vaporizer) {
         super(inventory, vaporizer, true, true);
@@ -38,15 +40,21 @@ public class ContainerBaseVaporizer extends BaseContainerTile {
 
     @Override
     protected Slot addSlotToContainer(Slot slotIn) {
-        if ( slotIn instanceof SlotUnlockableItemHandler )
-            slots.add((SlotUnlockableItemHandler) slotIn);
+        if ( slotIn instanceof IVisibleSlot ) {
+            // We have to create the array here, otherwise it's not accessible
+            // when this overridden method is called by super constructors.
+            if ( slots == null )
+                slots = new ArrayList<>();
+            slots.add((IVisibleSlot) slotIn);
+        }
 
         return super.addSlotToContainer(slotIn);
     }
 
     public void setSlotsVisible(boolean visible) {
-        for (SlotUnlockableItemHandler slot : slots)
-            slot.setVisible(visible);
+        if ( slots != null )
+            for (IVisibleSlot slot : slots)
+                slot.setVisible(visible);
     }
 
     @Override
@@ -70,5 +78,20 @@ public class ContainerBaseVaporizer extends BaseContainerTile {
             for (int x = 0; x < 4; x++, slotIndex++)
                 addSlotToContainer(new SlotUnlockableItemHandler(vaporizer, itemHandler, slotIndex, xPos + (x * 18), yPos + (y * 18)));
         }
+    }
+
+    @Override
+    protected void bindPlayerInventory(InventoryPlayer inventoryPlayer) {
+        int xOffset = getPlayerInventoryHorizontalOffset();
+        int yOffset = getPlayerInventoryVerticalOffset();
+
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 9; x++) {
+                addSlotToContainer(new SlotVisible(inventoryPlayer, x + y * 9 + 9, xOffset + x * 18, yOffset + y * 18));
+            }
+        }
+
+        for (int x = 0; x < 9; x++)
+            addSlotToContainer(new SlotVisible(inventoryPlayer, x, xOffset + x * 18, yOffset + 58));
     }
 }

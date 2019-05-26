@@ -176,6 +176,22 @@ public class LevelWrapper implements ILevelWrapper {
         return level.gatherTicks;
     }
 
+    public void setMaxVaporizerEntities(int entities) {
+        level.maxVaporizerEntities = entities;
+    }
+
+    public int getMaxVaporizerEntities() {
+        return level.maxVaporizerEntities;
+    }
+
+    public void setMaxVaporizerFluid(int fluid) {
+        level.maxVaporizerFluid = fluid;
+    }
+
+    public int getMaxVaporizerFluid() {
+        return level.maxVaporizerFluid;
+    }
+
     public int getIndex() {
         return level.toInt();
     }

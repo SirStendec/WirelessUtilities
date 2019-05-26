@@ -5,6 +5,7 @@ import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -17,44 +18,85 @@ import java.util.Map;
 
 public class EntityUtilities {
 
-    private static Map<String, Integer> spawnCosts = new HashMap<>();
+    private static Map<String, Integer> baseExperience = new HashMap<>();
 
-    public static void setSpawnCost(@Nonnull ResourceLocation name, int cost) {
+    public static void setBaseExperience(@Nonnull ResourceLocation name, int cost) {
         String key = name.toString();
-        spawnCosts.put(key, cost);
+        baseExperience.put(key, cost);
     }
 
-    public static void saveSpawnCost(@Nonnull ResourceLocation name, int cost) {
+    public static void saveBaseExperience(@Nonnull ResourceLocation name, int cost) {
         String key = name.toString();
-        if ( !spawnCosts.containsKey(key) )
-            spawnCosts.put(key, cost);
+        if ( !baseExperience.containsKey(key) )
+            baseExperience.put(key, cost);
     }
 
-    public static int getSpawnCost(@Nonnull ResourceLocation name, @Nullable World world) {
+    public static int saveBaseExperience(@Nonnull ResourceLocation name, @Nullable Entity entity) {
         String key = name.toString();
+        if ( baseExperience.containsKey(key) )
+            return baseExperience.get(key);
 
-        if ( spawnCosts.containsKey(key) )
-            return spawnCosts.get(key);
+        int cost = getBaseFromEntity(entity);
+        baseExperience.put(key, cost);
+        return cost;
+    }
 
+    public static int getBaseFromEntity(@Nullable Entity entity) {
         int cost = -1;
-        if ( world != null && EntityList.isRegistered(name) ) {
-            Entity entity = EntityList.createEntityByIDFromName(name, world);
-            if ( entity instanceof EntityLiving ) {
-                cost = ((EntityLiving) entity).experienceValue;
-                spawnCosts.put(key, cost);
-            }
+        if ( entity instanceof EntityAnimal )
+            cost = ModConfig.vaporizers.modules.clone.animalBaseExp;
+
+        if ( entity instanceof EntityLiving ) {
+            int value = ((EntityLiving) entity).experienceValue;
+            if ( value > 0 )
+                cost = value;
         }
+
+        if ( cost == -1 )
+            cost = 0;
 
         return cost;
     }
 
-    public static int getSpawnCost(@Nonnull ItemStack stack, @Nullable World world) {
+    public static int getBaseExperience(@Nonnull Entity entity) {
+        ResourceLocation name = EntityList.getKey(entity);
+        if ( name == null )
+            return 0;
+
+        return getBaseExperience(name, entity);
+    }
+
+    public static int getBaseExperience(@Nonnull ResourceLocation name, @Nullable Entity entity) {
+        String key = name.toString();
+
+        if ( baseExperience.containsKey(key) )
+            return baseExperience.get(key);
+
+        if ( entity != null )
+            return saveBaseExperience(name, entity);
+
+        return 0;
+    }
+
+    public static int getBaseExperience(@Nonnull ResourceLocation name, @Nullable World world) {
+        String key = name.toString();
+
+        if ( baseExperience.containsKey(key) )
+            return baseExperience.get(key);
+
+        if ( world != null && EntityList.isRegistered(name) )
+            return saveBaseExperience(name, EntityList.createEntityByIDFromName(name, world));
+
+        return 0;
+    }
+
+    public static int getBaseExperience(@Nonnull ItemStack stack, @Nullable World world) {
         if ( !isFilledEntityBall(stack) )
             return -1;
 
         Item item = stack.getItem();
         if ( item instanceof ItemVoidPearl )
-            return getSpawnCost(((ItemVoidPearl) item).getCapturedId(stack), world);
+            return getBaseExperience(((ItemVoidPearl) item).getCapturedId(stack), world);
 
         return -1;
     }

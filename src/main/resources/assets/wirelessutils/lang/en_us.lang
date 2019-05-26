@@ -49,6 +49,12 @@ tile.wirelessutils.directional_vaporizer.info.1=vaporizing entities within its w
 tile.wirelessutils.directional_vaporizer.info.2=area and then processing them with its
 tile.wirelessutils.directional_vaporizer.info.3=installed module.
 
+tile.wirelessutils.positional_vaporizer.name=Positional Vaporizer
+tile.wirelessutils.positional_vaporizer.info.0=The Positional Vaporizer works by
+tile.wirelessutils.positional_vaporizer.info.1=vaporizing entities at set positions
+tile.wirelessutils.positional_vaporizer.info.2=and then processing them with its
+tile.wirelessutils.positional_vaporizer.info.3=installed module.
+
 tile.wirelessutils.infinite_wireless_transmitter.name=Infinite Wireless Transmitter
 
 tile.wirelessutils.directional_rs_network.name=Directional RS Network
@@ -161,8 +167,28 @@ item.wirelessutils.slaughter_module.exp=Experience: %s
 item.wirelessutils.filtered_module.entry=- %s
 item.wirelessutils.filtered_module.info_list=%s %s Items
 item.wirelessutils.filtered_module.age=Age: %s
-item.wirelessutils.filtered_module.named=Named: %s
-item.wirelessutils.filtered_module.sneak=Sneaking: %s
+item.wirelessutils.filtered_module.age_info.0=Filter living creatures based
+item.wirelessutils.filtered_module.age_info.1=upon their adulthood.
+item.wirelessutils.filtered_module.named=Name: %s
+item.wirelessutils.filtered_module.named_info.0=Filter entities based upon
+item.wirelessutils.filtered_module.named_info.1=whether or not they've been
+item.wirelessutils.filtered_module.named_info.2=given a name.
+item.wirelessutils.filtered_module.sneak=Sneak: %s
+item.wirelessutils.filtered_module.sneak_info.0=Filter living creatures based
+item.wirelessutils.filtered_module.sneak_info.1=upon whether they are sneaking
+item.wirelessutils.filtered_module.sneak_info.2=or standing.
+item.wirelessutils.filtered_module.player=Player: %s
+item.wirelessutils.filtered_module.player_info.0=Filter living creatures based
+item.wirelessutils.filtered_module.player_info.1=upon whether they are a player
+item.wirelessutils.filtered_module.player_info.2=or not.
+item.wirelessutils.filtered_module.list_info.0=The following list can behave as
+item.wirelessutils.filtered_module.list_info.1=either a whitelist or a blacklist.
+item.wirelessutils.filtered_module.list_info.2=
+item.wirelessutils.filtered_module.list_info.3=Entries can be added by using
+item.wirelessutils.filtered_module.list_info.4=the module on entities in the
+item.wirelessutils.filtered_module.list_info.5=world. Wildcards can be used to
+item.wirelessutils.filtered_module.list_info.6=filter by entire mods, for
+item.wirelessutils.filtered_module.list_info.7=example: "minecraft:*"
 
 item.wirelessutils.slaughter_module.kill=%s was vaporized.
 item.wirelessutils.slaughter_module.kill.item=%s was vaporized with %s.
@@ -184,6 +210,11 @@ item.wirelessutils.clone_module.name=Duplication Module
 item.wirelessutils.clone_module.info.0=This module uses experience and other
 item.wirelessutils.clone_module.info.1=captured creatures to create duplicates
 item.wirelessutils.clone_module.info.2=of the provided captured creature.
+item.wirelessutils.clone_module.exact=Spawn Exact Copies
+item.wirelessutils.clone_module.exact.info.0=Spawning exact copies does exactly
+item.wirelessutils.clone_module.exact.info.1=what it sounds like, at the cost
+item.wirelessutils.clone_module.exact.info.2=of using considerably more fuel.
+item.wirelessutils.clone_module.exact.off=Do Not Spawn Exact Copies
 
 item.wirelessutils.base_augment.name=Augment Base
 
@@ -415,17 +446,13 @@ btn.wirelessutils.drop.exp=Experience:
 btn.wirelessutils.blacklist=Blacklist:
 btn.wirelessutils.whitelist=Whitelist:
 
-btn.wirelessutils.sneak_mode.0=Ignore
-btn.wirelessutils.sneak_mode.1=Sneaking
-btn.wirelessutils.sneak_mode.2=Standing
+btn.wirelessutils.mode.0=---
+btn.wirelessutils.mode.1=No
+btn.wirelessutils.mode.2=Yes
 
-btn.wirelessutils.named_mode.0=Ignore Name
-btn.wirelessutils.named_mode.1=Unnamed Only
-btn.wirelessutils.named_mode.2=Named Only
-
-btn.wirelessutils.child_mode.0=Ignore Age
-btn.wirelessutils.child_mode.1=Children Only
-btn.wirelessutils.child_mode.2=Adults Only
+btn.wirelessutils.age_mode.0=---
+btn.wirelessutils.age_mode.1=Children
+btn.wirelessutils.age_mode.2=Adults
 
 btn.wirelessutils.drop_mode.0=Ignore
 btn.wirelessutils.drop_mode.1=Collect till Full

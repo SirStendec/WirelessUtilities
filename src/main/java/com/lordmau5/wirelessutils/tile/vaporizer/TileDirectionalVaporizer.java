@@ -343,6 +343,7 @@ public class TileDirectionalVaporizer extends TileBaseVaporizer implements IRang
         return range;
     }
 
+    @Override
     public void setRange(ItemStack augment) {
         this.range = ModItems.itemRangeAugment.getDirectionalRange(augment);
         setRanges(rangeHeight, rangeLength, rangeWidth);

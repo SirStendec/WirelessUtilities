@@ -10,6 +10,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -27,26 +28,13 @@ import java.util.List;
 
 public abstract class ItemFilteringModule extends ItemModule {
 
+    @Override
     public boolean isConfigured(@Nonnull ItemStack stack) {
         NBTTagCompound tag = stack.getTagCompound();
         if ( tag == null )
-            return false;
+            return super.isConfigured(stack);
 
-        return tag.hasKey("Whitelist") || tag.hasKey("Blacklist") || tag.hasKey("ChildMode") || tag.hasKey("NameMode") || tag.hasKey("SneakMode");
-    }
-
-    @Nonnull
-    @Override
-    public String getItemStackDisplayName(ItemStack stack) {
-        String name = super.getItemStackDisplayName(stack);
-
-        if ( isConfigured(stack) )
-            name = new TextComponentTranslation(
-                    "info." + WirelessUtils.MODID + ".configured",
-                    name
-            ).getFormattedText();
-
-        return name;
+        return tag.hasKey("Whitelist") || tag.hasKey("Blacklist") || tag.hasKey("ChildMode") || tag.hasKey("NameMode") || tag.hasKey("SneakMode") || super.isConfigured(stack);
     }
 
     @Override
@@ -66,14 +54,21 @@ public abstract class ItemFilteringModule extends ItemModule {
         if ( mode != 0 )
             tooltip.add(new TextComponentTranslation(
                     name + ".named",
-                    StringHelper.localize("btn." + WirelessUtils.MODID + ".named_mode." + mode)
+                    StringHelper.localize("btn." + WirelessUtils.MODID + ".mode." + mode)
             ).getFormattedText());
 
-        mode = getSneakingMode(stack);
+        mode = getPlayerMode(stack);
+        if ( mode != 0 )
+            tooltip.add(new TextComponentTranslation(
+                    name + ".player",
+                    StringHelper.localize("btn." + WirelessUtils.MODID + ".mode." + mode)
+            ).getFormattedText());
+
+        mode = getSneakMode(stack);
         if ( mode != 0 )
             tooltip.add(new TextComponentTranslation(
                     name + ".sneak",
-                    StringHelper.localize("btn." + WirelessUtils.MODID + ".sneak_mode." + mode)
+                    StringHelper.localize("btn." + WirelessUtils.MODID + ".mode." + mode)
             ).getFormattedText());
 
         String[] blacklist = getBlacklist(stack);
@@ -195,7 +190,46 @@ public abstract class ItemFilteringModule extends ItemModule {
         return true;
     }
 
-    public int getSneakingMode(@Nullable ItemStack stack) {
+    public int getPlayerMode(@Nonnull ItemStack stack) {
+        if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("PlayerMode") )
+                return tag.getByte("PlayerMode");
+        }
+
+        return 1;
+    }
+
+    @Nonnull
+    public ItemStack setPlayerMode(@Nonnull ItemStack stack, int mode) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return ItemStack.EMPTY;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        if ( tag == null )
+            tag = new NBTTagCompound();
+        else if ( tag.getBoolean("Locked") )
+            return ItemStack.EMPTY;
+
+        if ( mode < 0 )
+            mode = 2;
+        else if ( mode > 2 )
+            mode = 0;
+
+        if ( mode == 1 )
+            tag.removeTag("PlayerMode");
+        else
+            tag.setByte("PlayerMode", (byte) mode);
+
+        if ( tag.isEmpty() )
+            tag = null;
+
+        stack.setTagCompound(tag);
+        return stack;
+    }
+
+
+    public int getSneakMode(@Nonnull ItemStack stack) {
         if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
             NBTTagCompound tag = stack.getTagCompound();
             if ( tag != null )
@@ -206,7 +240,7 @@ public abstract class ItemFilteringModule extends ItemModule {
     }
 
     @Nonnull
-    public ItemStack setSneakingMode(@Nonnull ItemStack stack, int mode) {
+    public ItemStack setSneakMode(@Nonnull ItemStack stack, int mode) {
         if ( stack.isEmpty() || stack.getItem() != this )
             return ItemStack.EMPTY;
 
@@ -233,7 +267,7 @@ public abstract class ItemFilteringModule extends ItemModule {
         return stack;
     }
 
-    public boolean isWhitelist(@Nullable ItemStack stack) {
+    public boolean isWhitelist(@Nonnull ItemStack stack) {
         if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
             NBTTagCompound tag = stack.getTagCompound();
             return tag != null && tag.getBoolean("Whitelist");
@@ -412,10 +446,15 @@ public abstract class ItemFilteringModule extends ItemModule {
         protected boolean allowCreative = false;
 
         // Living Modes
+        protected boolean allowBosses = false;
         protected boolean requireAttackable = true;
         protected boolean requireAlive = true;
 
+        // Items
+        protected boolean obeyItemTags = false;
+
         // Configurable Modes
+        private int playerMode = 0;
         private int childMode = 0;
         private int namedMode = 0;
         private int sneakMode = 0;
@@ -427,6 +466,14 @@ public abstract class ItemFilteringModule extends ItemModule {
 
         public FilteredBehavior(@Nonnull TileBaseVaporizer vaporizer) {
             this.vaporizer = vaporizer;
+        }
+
+        public boolean allowPlayers() {
+            return allowPlayers;
+        }
+
+        public int getPlayerMode() {
+            return playerMode;
         }
 
         public int getChildMode() {
@@ -453,9 +500,10 @@ public abstract class ItemFilteringModule extends ItemModule {
         public void updateModule(@Nonnull ItemStack stack) {
             ItemFilteringModule item = (ItemFilteringModule) stack.getItem();
 
+            playerMode = item.getPlayerMode(stack);
             childMode = item.getChildMode(stack);
             namedMode = item.getNamedMode(stack);
-            sneakMode = item.getSneakingMode(stack);
+            sneakMode = item.getSneakMode(stack);
 
             blacklist = item.getBlacklist(stack);
             whitelist = item.isWhitelist(stack);
@@ -473,7 +521,7 @@ public abstract class ItemFilteringModule extends ItemModule {
 
                 // We *sometimes* want players.
                 if ( entity instanceof EntityPlayer ) {
-                    if ( !allowPlayers )
+                    if ( !allowPlayers || playerMode == 1 )
                         return false;
 
                     EntityPlayer player = (EntityPlayer) entity;
@@ -482,7 +530,9 @@ public abstract class ItemFilteringModule extends ItemModule {
 
                     if ( !allowCreative && player.capabilities.isCreativeMode )
                         return false;
-                }
+
+                } else if ( playerMode == 2 )
+                    return false;
 
                 if ( entity instanceof EntityLivingBase ) {
                     EntityLivingBase living = (EntityLivingBase) entity;
@@ -493,10 +543,18 @@ public abstract class ItemFilteringModule extends ItemModule {
                     if ( requireAlive && !living.isEntityAlive() )
                         return false;
 
-                    if ( sneakMode != 0 && living.isSneaking() != (sneakMode == 1) )
+                    if ( !allowBosses && !living.isNonBoss() )
+                        return false;
+
+                    if ( sneakMode != 0 && living.isSneaking() == (sneakMode == 1) )
                         return false;
 
                     if ( childMode != 0 && living.isChild() != (childMode == 1) )
+                        return false;
+
+                } else if ( obeyItemTags && entity instanceof EntityItem ) {
+                    NBTTagCompound tag = entity.getEntityData();
+                    if ( tag != null && tag.getBoolean("PreventRemoteMovement") && !tag.getBoolean("AllowMachineRemoteMovement") )
                         return false;
                 }
 
@@ -515,7 +573,9 @@ public abstract class ItemFilteringModule extends ItemModule {
                                 else
                                     return false;
                             }
-                    }
+                    } else if ( whitelist )
+                        return false;
+
                 } else if ( whitelist )
                     return false;
 
@@ -524,6 +584,7 @@ public abstract class ItemFilteringModule extends ItemModule {
         }
 
         public void updateModePacket(@Nonnull PacketBase packet) {
+            packet.addByte(playerMode);
             packet.addByte(childMode);
             packet.addByte(namedMode);
             packet.addByte(sneakMode);
@@ -542,9 +603,10 @@ public abstract class ItemFilteringModule extends ItemModule {
             ItemStack stack = vaporizer.getModule();
             ItemFilteringModule item = (ItemFilteringModule) stack.getItem();
 
+            item.setPlayerMode(stack, packet.getByte());
             item.setChildMode(stack, packet.getByte());
             item.setNamedMode(stack, packet.getByte());
-            item.setSneakingMode(stack, packet.getByte());
+            item.setSneakMode(stack, packet.getByte());
             item.setWhitelist(stack, packet.getBool());
 
             int count = packet.getInt();

@@ -6,7 +6,7 @@ import cofh.core.util.CoreUtils;
 import cofh.core.util.helpers.InventoryHelper;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
-import com.lordmau5.wirelessutils.gui.client.elements.ElementModuleBase;
+import com.lordmau5.wirelessutils.gui.client.modules.base.ElementModuleBase;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.item.module.ItemModule;
@@ -36,6 +36,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.capabilities.Capability;
@@ -60,6 +61,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -76,6 +78,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     protected FluidTank tank;
 
     private int excessFuel = 0;
+
+    protected double moduleMultiplier = 1;
+    protected int moduleEnergy = 0;
+    protected int moduleDrain = 0;
 
     private boolean[] emptySlots;
     private boolean[] fullSlots;
@@ -99,6 +105,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     private int activeTargetsPerTick;
     private int validTargetsPerTick;
     private int maxEnergyPerTick;
+
+    private int remainingPerTick;
 
     private boolean sideTransferAugment = false;
     private ISidedTransfer.Mode[] sideTransfer;
@@ -176,10 +184,14 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         System.out.println("   Side Transfer: " + Arrays.toString(sideTransfer));
         System.out.println("   Valid Targets: " + validTargetsPerTick);
         System.out.println("  Active Targets: " + activeTargetsPerTick);
+        System.out.println(" World Tick Rate: " + gatherTickRate);
 
         System.out.println("   Tank Contents: " + debugPrintStack(tank.getFluid()));
+        System.out.println("   Overflow Fuel: " + excessFuel);
 
-        System.out.println(" World Tick Rate: " + gatherTickRate);
+        System.out.println("        Behavior: " + behavior);
+        if ( behavior != null )
+            behavior.debugPrint();
     }
 
     /* Fluid Stuff */
@@ -219,7 +231,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     }
 
     public int calculateFluidCapacity() {
-        return level.maxCondenserCapacity;
+        return level.maxVaporizerFluid;
     }
 
     /* Inventory */
@@ -288,6 +300,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         if ( slot == getModuleOffset() || slot == getModifierOffset() )
             return 1;
 
+        if ( behavior != null && slot >= getInputOffset() && slot < getOutputOffset() )
+            return behavior.getInputLimit(slot - getInputOffset());
+
         return super.getStackLimit(slot);
     }
 
@@ -322,6 +337,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         if ( slot == getModifierOffset() )
             updateModifier();
 
+        if ( behavior != null && slot >= getInputOffset() && slot < getOutputOffset() )
+            behavior.updateInput(slot - getInputOffset());
+
         super.onContentsChanged(slot);
     }
 
@@ -338,6 +356,17 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         return behavior;
     }
 
+    @Override
+    public boolean updateBaseEnergy() {
+        int newEnergy = (int) (level.baseEnergyPerOperation * augmentMultiplier * moduleMultiplier) + augmentEnergy + moduleEnergy;
+        if ( newEnergy == baseEnergy )
+            return false;
+
+        baseEnergy = newEnergy;
+        energyChanged();
+        return true;
+    }
+
     public void updateModule() {
         ItemStack stack = itemStackHandler.getStackInSlot(getModuleOffset());
         if ( stack.isEmpty() || !isValidModule(stack) ) {
@@ -350,11 +379,17 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         if ( module == previousModule && behavior != null ) {
             behavior.updateModule(stack);
-            return;
+        } else
+            behavior = module.getBehavior(stack, this);
+
+        if ( behavior != null ) {
+            moduleEnergy = behavior.getEnergyAddition();
+            moduleMultiplier = behavior.getEnergyMultiplier();
+            moduleDrain = behavior.getEnergyDrain();
         }
 
-        behavior = module.getBehavior(stack, this);
         previousModule = module;
+        updateBaseEnergy();
     }
 
     public ItemStack getModule() {
@@ -405,7 +440,6 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         boolean isOutput = !isInput && slot >= getOutputOffset() && slot < getModuleOffset();
 
         ItemStack stack = itemStackHandler.getStackInSlot(slot);
-        Item item = stack.getItem();
 
         boolean slotEmpty = stack.isEmpty();
         boolean slotFull = getStackLimit(slot, stack) == stack.getCount();
@@ -449,6 +483,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     @Override
     public void updateLevel() {
         super.updateLevel();
+        tank.setCapacity(calculateFluidCapacity());
+        tank.setInfinite(isCreative());
     }
 
     @Override
@@ -540,17 +576,21 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         excessFuel += amount;
     }
 
-    public boolean removeFuel(int amount) {
+    public int removeFuel(int amount) {
         // This is always dirtying.
         markChunkDirty();
+
+        int used = 0;
 
         // Do we have excess fuel?
         if ( excessFuel > amount ) {
             excessFuel -= amount;
             markChunkDirty();
-            return true;
+            return amount;
+
         } else if ( excessFuel > 0 ) {
             amount -= excessFuel;
+            used = excessFuel;
             excessFuel = 0;
         }
 
@@ -559,13 +599,14 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             int points = Math.min(amount, Math.floorDiv(tank.getFluidAmount(), ModConfig.vaporizers.mbPerPoint));
             if ( points > 0 ) {
                 tank.drain(points * ModConfig.vaporizers.mbPerPoint, true);
+                used += points;
                 amount -= points;
             }
         }
 
         // TODO: Burning items.
 
-        return amount <= 0;
+        return used;
     }
 
     public BlockPosDimension getPosition() {
@@ -623,7 +664,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             calculateTargets();
 
         validTargetsPerTick = 0;
-        maxEnergyPerTick = augmentDrain;
+        maxEnergyPerTick = moduleDrain + augmentDrain;
         return validTargets;
     }
 
@@ -670,9 +711,18 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     @Nonnull
     public WorkResult performWorkBlock(@Nonnull VaporizerTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile) {
+        int fullCost = target.cost + baseEnergy + behavior.getEnergyCost(target, world);
+        int stored = getEnergyStored();
+        if ( stored < fullCost ) {
+            if ( stored < baseEnergy )
+                return WorkResult.FAILURE_STOP;
+            return WorkResult.FAILURE_CONTINUE;
+        }
+
         WorkResult result = behavior.processBlock(target, world);
         boolean worked = result.success;
         boolean stop = !result.keepProcessing;
+        boolean noAdvance = result.noAdvance;
 
         if ( !result.remove ) {
             validTargetsPerTick++;
@@ -686,8 +736,14 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
             if ( klass != null ) {
                 AxisAlignedBB box = null;
+                HashSet<BlockPos> visitedTargets = null;
+
                 if ( canGetFullEntities() ) {
                     didFullEntities = true;
+                    visitedTargets = new HashSet<>();
+                    if ( worked )
+                        visitedTargets.add(target.pos);
+
                     box = getFullEntitiesAABB();
                 }
 
@@ -703,21 +759,53 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
                 validTargetsPerTick += entities.size();
 
                 for (Entity entity : entities) {
+                    if ( visitedTargets != null ) {
+                        BlockPos pos = entity.getPosition();
+                        if ( !visitedTargets.contains(pos) ) {
+                            int cost = fullCost + getEnergyCost(pos.getDistance(pos.getX(), pos.getY(), pos.getZ()), false);
+                            if ( cost > stored )
+                                continue;
+
+                            fullCost = cost;
+                            visitedTargets.add(pos);
+                        }
+                    }
+
                     result = behavior.processEntity(entity, target);
                     worked |= result.success;
                     if ( result.success )
                         activeTargetsPerTick++;
 
-                    if ( !result.keepProcessing ) {
+                    remainingPerTick--;
+                    if ( remainingPerTick <= 0 ) {
+                        noAdvance = true;
                         stop = true;
                         break;
+                    } else {
+                        noAdvance = result.noAdvance;
+
+                        if ( !result.keepProcessing ) {
+                            stop = true;
+                            break;
+                        }
                     }
                 }
             }
         }
 
-        if ( worked )
+        if ( worked ) {
+            extractEnergy(fullCost, false);
+            if ( getEnergyStored() < baseEnergy )
+                stop = true;
+
+            if ( noAdvance && stop )
+                return WorkResult.SUCCESS_STOP_IN_PLACE;
+
             return stop ? WorkResult.SUCCESS_STOP : WorkResult.SUCCESS_CONTINUE;
+        }
+
+        if ( noAdvance && stop )
+            return WorkResult.FAILURE_STOP_IN_PLACE;
 
         return stop ? WorkResult.FAILURE_STOP : WorkResult.FAILURE_CONTINUE;
     }
@@ -987,11 +1075,12 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         if ( enabled && sideTransferAugment )
             executeSidedTransfer();
 
-        if ( enabled && augmentDrain > 0 ) {
-            if ( augmentDrain > getEnergyStored() )
+        int drain = moduleDrain + augmentDrain;
+        if ( enabled && drain > 0 ) {
+            if ( drain > getEnergyStored() )
                 enabled = false;
             else
-                extractEnergy(augmentDrain, false);
+                extractEnergy(drain, false);
         }
 
         boolean canRun = behavior != null && behavior.canRun();
@@ -1002,6 +1091,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             updateTrackers();
             return;
         }
+
+        remainingPerTick = level.maxVaporizerEntities;
 
         tickActive();
         setActive(worker.performWork());
@@ -1249,6 +1340,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     public interface IVaporizerBehavior {
 
+        default void debugPrint() {
+
+        }
+
         void updateModule(@Nonnull ItemStack stack);
 
         boolean isModifierUnlocked();
@@ -1263,6 +1358,19 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         boolean isInputUnlocked(int slot);
 
         boolean isValidInput(@Nonnull ItemStack stack);
+
+        default int getInputLimit(int slot) {
+            return 64;
+        }
+
+        @Nonnull
+        default ItemStack getInputGhost(int slot) {
+            return ItemStack.EMPTY;
+        }
+
+        default void updateInput(int slot) {
+
+        }
 
         ElementModuleBase getGUI(@Nonnull GuiBaseVaporizer gui);
 
@@ -1289,6 +1397,20 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         @Nullable
         Predicate<? super Entity> getEntityFilter();
+
+        int getEnergyCost(@Nonnull VaporizerTarget target, @Nonnull World world);
+
+        default double getEnergyMultiplier() {
+            return 1;
+        }
+
+        default int getEnergyAddition() {
+            return 0;
+        }
+
+        default int getEnergyDrain() {
+            return 0;
+        }
 
         @Nonnull
         WorkResult processBlock(@Nonnull VaporizerTarget target, @Nonnull World world);

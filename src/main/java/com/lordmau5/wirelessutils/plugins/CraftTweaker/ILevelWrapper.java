@@ -112,6 +112,18 @@ public interface ILevelWrapper {
     @ZenGetter("worldTickRate")
     int getWorldTickRate();
 
+    @ZenSetter("maxVaporizerEntities")
+    void setMaxVaporizerEntities(int entities);
+
+    @ZenGetter("maxVaporizerEntities")
+    int getMaxVaporizerEntities();
+
+    @ZenSetter("maxVaporizerFluid")
+    void setMaxVaporizerFluid(int fluid);
+
+    @ZenGetter("maxVaporizerFluid")
+    int getMaxVaporizerFluid();
+
     @ZenGetter("index")
     int getIndex();
 }

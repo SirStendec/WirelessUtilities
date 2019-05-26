@@ -96,8 +96,6 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
                     getCapturedName(stack)
             ).getFormattedText());
 
-            tooltip.add("Cost: " + getCapturedCost(stack, worldIn));
-
         } else
             tooltip.add(new TextComponentTranslation(
                     getTranslationKey() + ".empty"
@@ -219,12 +217,23 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         return new ResourceLocation(tag.getString("EntityID"));
     }
 
-    public int getCapturedCost(@Nonnull ItemStack stack, @Nullable World world) {
+    public float getCapturedMaxHP(@Nonnull ItemStack stack, @Nonnull World world, boolean withData) {
+        if ( !containsEntity(stack) )
+            return 0;
+
+        Entity entity = getCapturedEntity(stack, world, withData);
+        if ( entity instanceof EntityLivingBase )
+            return ((EntityLivingBase) entity).getMaxHealth();
+
+        return 0;
+    }
+
+    public int getCapturedBaseExperience(@Nonnull ItemStack stack, @Nullable World world) {
         if ( !containsEntity(stack) )
             return -1;
 
         NBTTagCompound tag = stack.getTagCompound();
-        return EntityUtilities.getSpawnCost(new ResourceLocation(tag.getString("EntityID")), world);
+        return EntityUtilities.getBaseExperience(new ResourceLocation(tag.getString("EntityID")), world);
     }
 
     @Nullable
@@ -308,8 +317,7 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         if ( tag == null )
             tag = new NBTTagCompound();
 
-        int cost = ((EntityLiving) entity).experienceValue;
-        EntityUtilities.saveSpawnCost(key, cost);
+        EntityUtilities.saveBaseExperience(key, entity);
 
         NBTTagCompound entityTag = new NBTTagCompound();
         entity.writeToNBT(entityTag);

@@ -13,6 +13,7 @@ import com.lordmau5.wirelessutils.block.redstone.BlockPoweredAir;
 import com.lordmau5.wirelessutils.block.redstone.BlockPoweredRedstoneWire;
 import com.lordmau5.wirelessutils.block.slime.BlockAngledSlime;
 import com.lordmau5.wirelessutils.block.vaporizer.BlockDirectionalVaporizer;
+import com.lordmau5.wirelessutils.block.vaporizer.BlockPositionalVaporizer;
 import com.lordmau5.wirelessutils.commands.DebugCommand;
 import com.lordmau5.wirelessutils.commands.FluidGenCommand;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
@@ -72,6 +73,7 @@ import com.lordmau5.wirelessutils.tile.condenser.TileEntityPositionalCondenser;
 import com.lordmau5.wirelessutils.tile.desublimator.TileDirectionalDesublimator;
 import com.lordmau5.wirelessutils.tile.desublimator.TilePositionalDesublimator;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileDirectionalVaporizer;
+import com.lordmau5.wirelessutils.tile.vaporizer.TilePositionalVaporizer;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
 import com.lordmau5.wirelessutils.utils.ChunkManager;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
@@ -275,6 +277,7 @@ public class CommonProxy {
         event.getRegistry().register(new BlockPositionalDesublimator());
 
         event.getRegistry().register(new BlockDirectionalVaporizer());
+        event.getRegistry().register(new BlockPositionalVaporizer());
 
         event.getRegistry().register(new BlockPoweredAir());
         event.getRegistry().register(new BlockPoweredRedstoneWire());
@@ -295,6 +298,7 @@ public class CommonProxy {
         registerTile(TilePositionalDesublimator.class);
 
         registerTile(TileDirectionalVaporizer.class);
+        registerTile(TilePositionalVaporizer.class);
 
         PluginRegistry.registerBlocks(event);
     }
@@ -329,6 +333,7 @@ public class CommonProxy {
         registerItem(event, new ItemBlockMachine(ModBlocks.blockPositionalDesublimator).setRegistryName(ModBlocks.blockPositionalDesublimator.getRegistryName()));
 
         registerItem(event, new ItemBlockMachine(ModBlocks.blockDirectionalVaporizer).setRegistryName(ModBlocks.blockDirectionalVaporizer.getRegistryName()));
+        registerItem(event, new ItemBlockMachine(ModBlocks.blockPositionalVaporizer).setRegistryName(ModBlocks.blockPositionalVaporizer.getRegistryName()));
 
         registerItem(event, new ItemBlockExplainable(ModBlocks.blockAngledSlime).setRegistryName(ModBlocks.blockAngledSlime.getRegistryName()));
 

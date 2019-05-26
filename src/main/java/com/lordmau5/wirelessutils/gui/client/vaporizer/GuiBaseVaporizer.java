@@ -1,10 +1,20 @@
 package com.lordmau5.wirelessutils.gui.client.vaporizer;
 
+import cofh.core.gui.container.IAugmentableContainer;
 import cofh.core.gui.element.ElementBase;
+import cofh.core.gui.element.tab.TabBase;
+import cofh.core.gui.element.tab.TabEnergy;
+import cofh.core.gui.element.tab.TabInfo;
+import cofh.core.gui.element.tab.TabRedstoneControl;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
-import com.lordmau5.wirelessutils.gui.client.elements.ElementModuleBase;
+import com.lordmau5.wirelessutils.gui.client.elements.TabAugmentTwoElectricBoogaloo;
+import com.lordmau5.wirelessutils.gui.client.elements.TabSideControl;
+import com.lordmau5.wirelessutils.gui.client.elements.TabSpacer;
+import com.lordmau5.wirelessutils.gui.client.elements.TabWorkInfo;
+import com.lordmau5.wirelessutils.gui.client.elements.TabWorldTickRate;
+import com.lordmau5.wirelessutils.gui.client.modules.base.ElementModuleBase;
 import com.lordmau5.wirelessutils.gui.container.vaporizer.ContainerBaseVaporizer;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
@@ -23,6 +33,8 @@ public class GuiBaseVaporizer extends BaseGuiContainer {
     protected final TileBaseVaporizer vaporizer;
     protected final ContainerBaseVaporizer container;
 
+    protected TabSideControl sideControl;
+
     private TileBaseVaporizer.IVaporizerBehavior behavior = null;
     protected ElementModuleBase module = null;
     protected boolean moduleTab = false;
@@ -36,6 +48,22 @@ public class GuiBaseVaporizer extends BaseGuiContainer {
 
         drawTitle = false;
         ySize = 242;
+    }
+
+    @Override
+    public void initGui() {
+        super.initGui();
+
+        addTab(new TabSpacer(this, TabBase.LEFT, 20));
+        addTab(new TabEnergy(this, vaporizer, false));
+        addTab(new TabWorkInfo(this, vaporizer).setItem(new ItemStack(ModItems.itemVoidPearl)));
+        addTab(new TabWorldTickRate(this, vaporizer));
+        addTab(new TabInfo(this, myInfo));
+
+        addTab(new TabSpacer(this, TabBase.RIGHT, 20));
+        addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));
+        addTab(new TabRedstoneControl(this, vaporizer));
+        sideControl = (TabSideControl) addTab(new TabSideControl(this, vaporizer));
     }
 
     public TileBaseVaporizer getVaporizer() {
@@ -56,6 +84,8 @@ public class GuiBaseVaporizer extends BaseGuiContainer {
     @Override
     protected void updateElementInformation() {
         super.updateElementInformation();
+
+        sideControl.setVisible(vaporizer.isSidedTransferAugmented());
 
         TileBaseVaporizer.IVaporizerBehavior behavior = vaporizer.getBehavior();
         if ( this.behavior != behavior ) {
@@ -78,6 +108,7 @@ public class GuiBaseVaporizer extends BaseGuiContainer {
             return;
 
         moduleTab = enabled;
+        drawInventory = !moduleTab;
         BaseGuiContainer.playClickSound(1F);
         container.setSlotsVisible(!moduleTab);
     }
@@ -204,9 +235,9 @@ public class GuiBaseVaporizer extends BaseGuiContainer {
 
             ContainerBaseVaporizer container = (ContainerBaseVaporizer) inventorySlots;
 
-            drawSlotLocks(vaporizer.getInputOffset(), container.inputOffset, guiLeft + 8, guiTop + 111, 2, 4);
-            drawSlotLocks(vaporizer.getOutputOffset(), container.outputOffset, guiLeft + 98, guiTop + 111, 2, 4);
-            drawSlotLocks(vaporizer.getModuleOffset(), container.moduleOffset, guiLeft + 10, guiTop + 8, 1, 2);
+            drawSlotLocks(vaporizer.getInputOffset(), container.inputOffset, guiLeft + 8, guiTop + 111, 2, 4, true);
+            drawSlotLocks(vaporizer.getOutputOffset(), container.outputOffset, guiLeft + 98, guiTop + 111, 2, 4, false);
+            drawSlotLocks(vaporizer.getModuleOffset(), container.moduleOffset, guiLeft + 10, guiTop + 8, 1, 2, false);
 
         } else {
             drawTopTab(2, false);
@@ -233,17 +264,21 @@ public class GuiBaseVaporizer extends BaseGuiContainer {
         drawSizedTexturedModalRect(guiLeft + 97, guiTop + 110, 176, 43, 72, 36, 256, 256);
     }
 
-    protected void drawSlotLocks(int slotIndex, int slotOffset, int xPos, int yPos, int rows, int cols) {
+    protected void drawSlotLocks(int slotIndex, int slotOffset, int xPos, int yPos, int rows, int cols, boolean inputGhosts) {
         ItemStack held = mc.player.inventory.getItemStack();
+        int idx = 0;
 
         for (int y = 0; y < rows; y++) {
-            for (int x = 0; x < cols; x++, slotIndex++, slotOffset++) {
+            for (int x = 0; x < cols; x++, slotIndex++, slotOffset++, idx++) {
+                int xp = xPos + (x * 18);
+                int yp = yPos + (y * 18);
                 Slot slot = inventorySlots.getSlot(slotOffset);
-                if ( !vaporizer.isSlotUnlocked(slotIndex) || (!held.isEmpty() && !slot.isItemValid(held)) ) {
-                    int xp = xPos + (x * 18);
-                    int yp = yPos + (y * 18);
-
+                if ( !vaporizer.isSlotUnlocked(slotIndex) || (!held.isEmpty() && !slot.isItemValid(held)) )
                     drawRect(xp, yp, xp + 16, yp + 16, 0x99444444);
+                else if ( inputGhosts && !slot.getHasStack() ) {
+                    ItemStack ghost = behavior.getInputGhost(idx);
+                    if ( !ghost.isEmpty() )
+                        drawGhostItem(ghost, xp, yp, true, true, null);
                 }
             }
         }

@@ -1,12 +1,15 @@
 package com.lordmau5.wirelessutils.item.module;
 
-import com.lordmau5.wirelessutils.gui.client.elements.ElementCaptureModule;
-import com.lordmau5.wirelessutils.gui.client.elements.ElementModuleBase;
+import com.lordmau5.wirelessutils.gui.client.modules.ElementCaptureModule;
+import com.lordmau5.wirelessutils.gui.client.modules.base.ElementModuleBase;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.ItemHandlerProxy;
+import com.lordmau5.wirelessutils.utils.Level;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
+import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.item.ItemStack;
@@ -29,14 +32,39 @@ public class ItemCaptureModule extends ItemFilteringModule {
 
     @Nullable
     @Override
+    public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {
+        return Level.fromInt(ModConfig.vaporizers.modules.capture.requiredLevel);
+    }
+
+    @Override
+    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable TileBaseVaporizer vaporizer) {
+        return ModConfig.vaporizers.modules.capture.energyMultiplier;
+    }
+
+    @Override
+    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable TileBaseVaporizer vaporizer) {
+        return ModConfig.vaporizers.modules.capture.energyAddition;
+    }
+
+    @Override
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable TileBaseVaporizer vaporizer) {
+        return ModConfig.vaporizers.modules.capture.energyDrain;
+    }
+
+    @Nullable
+    @Override
     public TileBaseVaporizer.IVaporizerBehavior getBehavior(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
         return new CaptureBehavior(vaporizer, stack);
     }
 
     public static class CaptureBehavior extends FilteredBehavior {
 
+        private ItemStack ghost;
+
         public CaptureBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack module) {
             super(vaporizer);
+
+            ghost = new ItemStack(ModItems.itemVoidPearl);
 
             allowPlayers = false;
             allowCreative = false;
@@ -45,6 +73,33 @@ public class ItemCaptureModule extends ItemFilteringModule {
             requireAlive = true;
 
             updateModule(module);
+        }
+
+        public double getEnergyMultiplier() {
+            ItemStack stack = vaporizer.getModule();
+            if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )
+                return 1;
+
+            ItemModule item = (ItemModule) stack.getItem();
+            return item.getEnergyMultiplier(stack, vaporizer);
+        }
+
+        public int getEnergyAddition() {
+            ItemStack stack = vaporizer.getModule();
+            if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )
+                return 0;
+
+            ItemModule item = (ItemModule) stack.getItem();
+            return item.getEnergyAddition(stack, vaporizer);
+        }
+
+        public int getEnergyDrain() {
+            ItemStack stack = vaporizer.getModule();
+            if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )
+                return 0;
+
+            ItemModule item = (ItemModule) stack.getItem();
+            return item.getEneryDrain(stack, vaporizer);
         }
 
         public boolean canInvert() {
@@ -67,6 +122,12 @@ public class ItemCaptureModule extends ItemFilteringModule {
 
         public boolean isValidInput(@Nonnull ItemStack stack) {
             return EntityUtilities.isEntityBall(stack) && !EntityUtilities.isFilledEntityBall(stack);
+        }
+
+        @Nonnull
+        @Override
+        public ItemStack getInputGhost(int slot) {
+            return ghost;
         }
 
         public boolean isModifierUnlocked() {
@@ -100,6 +161,10 @@ public class ItemCaptureModule extends ItemFilteringModule {
 
         public boolean canRun() {
             return vaporizer.hasInput() && vaporizer.hasEmptyOutput();
+        }
+
+        public int getEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
+            return 0;
         }
 
         @Nonnull

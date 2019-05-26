@@ -12,6 +12,7 @@ public class ElementDynamicContainedButton extends ElementDynamicButton {
 
     private String tooltip;
     private boolean tooltipLocalized = false;
+    private boolean tooltipLines = false;
 
     public ElementDynamicContainedButton(IContainsButtons container, int posX, int posY, int sizeX, int sizeY, String label) {
         super(container.getGui(), posX, posY, sizeX, sizeY, label);
@@ -63,6 +64,17 @@ public class ElementDynamicContainedButton extends ElementDynamicButton {
         return this;
     }
 
+    public ElementDynamicContainedButton setToolTipLines(String tooltip) {
+        this.tooltip = tooltip;
+        tooltipLines = true;
+        return this;
+    }
+
+    public ElementDynamicContainedButton setToolTipLines(boolean lines) {
+        tooltipLines = lines;
+        return this;
+    }
+
     public ElementDynamicContainedButton setActive() {
         setEnabled(true);
         return this;
@@ -76,9 +88,29 @@ public class ElementDynamicContainedButton extends ElementDynamicButton {
     @Override
     public void addTooltip(List<String> list) {
         if ( tooltip != null ) {
-            if ( tooltipLocalized )
+            if ( tooltipLines ) {
+                int i = 0;
+                int blank = 0;
+                String path = tooltip + "." + i;
+                while ( StringHelper.canLocalize(path) ) {
+                    String tip = StringHelper.localize(path);
+                    if ( tip.isEmpty() )
+                        blank++;
+                    else {
+                        while ( blank > 0 ) {
+                            list.add("");
+                            blank--;
+                        }
+
+                        list.add(tip);
+                    }
+
+                    i++;
+                    path = tooltip + "." + i;
+                }
+            } else if ( tooltipLocalized ) {
                 list.add(tooltip);
-            else
+            } else
                 list.add(StringHelper.localize(tooltip));
         }
     }

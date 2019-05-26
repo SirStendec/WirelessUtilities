@@ -1,6 +1,5 @@
 package com.lordmau5.wirelessutils.item.module;
 
-import cofh.api.core.IAugmentable;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.base.ItemBaseUpgrade;
@@ -31,6 +30,24 @@ public abstract class ItemModule extends ItemBaseUpgrade {
         setMaxDamage(0);
     }
 
+    public boolean isConfigured(@Nonnull ItemStack stack) {
+        return false;
+    }
+
+    @Nonnull
+    @Override
+    public String getItemStackDisplayName(ItemStack stack) {
+        String name = super.getItemStackDisplayName(stack);
+
+        if ( isConfigured(stack) )
+            name = new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".configured",
+                    name
+            ).getFormattedText();
+
+        return name;
+    }
+
     @Override
     public void initModel() {
         ModelLoader.setCustomMeshDefinition(this, stack -> new ModelResourceLocation(stack.getItem().getRegistryName(), "inventory"));
@@ -59,7 +76,7 @@ public abstract class ItemModule extends ItemBaseUpgrade {
         return null;
     }
 
-    public double getEnergyMultiplier(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+    public double getEnergyMultiplier(@Nonnull ItemStack stack, @Nullable TileBaseVaporizer vaporizer) {
         if ( stack.isEmpty() || stack.getItem() != this )
             return 1;
 
@@ -69,14 +86,14 @@ public abstract class ItemModule extends ItemBaseUpgrade {
                 return itemTag.getDouble("EnergyMult");
         }
 
-        return getEnergyMultiplierDelegate(stack, augmentable);
+        return getEnergyMultiplierDelegate(stack, vaporizer);
     }
 
-    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable TileBaseVaporizer vaporizer) {
         return 1;
     }
 
-    public int getEnergyAddition(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+    public int getEnergyAddition(@Nonnull ItemStack stack, @Nullable TileBaseVaporizer vaporizer) {
         if ( stack.isEmpty() || stack.getItem() != this )
             return 0;
 
@@ -86,14 +103,14 @@ public abstract class ItemModule extends ItemBaseUpgrade {
                 return itemTag.getInteger("EnergyAdd");
         }
 
-        return getEnergyAdditionDelegate(stack, augmentable);
+        return getEnergyAdditionDelegate(stack, vaporizer);
     }
 
-    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable TileBaseVaporizer vaporizer) {
         return 0;
     }
 
-    public int getEneryDrain(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+    public int getEneryDrain(@Nonnull ItemStack stack, @Nullable TileBaseVaporizer vaporizer) {
         if ( stack.isEmpty() || stack.getItem() != this )
             return 0;
 
@@ -103,10 +120,10 @@ public abstract class ItemModule extends ItemBaseUpgrade {
                 return itemTag.getInteger("EnergyDrain");
         }
 
-        return getEnergyDrainDelegate(stack, augmentable);
+        return getEnergyDrainDelegate(stack, vaporizer);
     }
 
-    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable TileBaseVaporizer vaporizer) {
         return 0;
     }
 

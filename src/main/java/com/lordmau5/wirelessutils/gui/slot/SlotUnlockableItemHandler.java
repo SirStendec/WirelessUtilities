@@ -9,7 +9,7 @@ import net.minecraftforge.items.SlotItemHandler;
 
 import javax.annotation.Nonnull;
 
-public class SlotUnlockableItemHandler extends SlotItemHandler {
+public class SlotUnlockableItemHandler extends SlotItemHandler implements IVisibleSlot {
 
     private final IUnlockableSlots tile;
     private boolean visible = true;
@@ -17,6 +17,10 @@ public class SlotUnlockableItemHandler extends SlotItemHandler {
     public SlotUnlockableItemHandler(IUnlockableSlots tile, IItemHandler handler, int slotIndex, int x, int y) {
         super(handler, slotIndex, x, y);
         this.tile = tile;
+    }
+
+    public boolean isVisible() {
+        return visible;
     }
 
     public void setVisible(boolean visible) {

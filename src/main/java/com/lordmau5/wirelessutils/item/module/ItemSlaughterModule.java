@@ -3,17 +3,19 @@ package com.lordmau5.wirelessutils.item.module;
 import cofh.core.network.PacketBase;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.gui.client.elements.ElementModuleBase;
-import com.lordmau5.wirelessutils.gui.client.elements.ElementSlaughterModule;
+import com.lordmau5.wirelessutils.gui.client.modules.ElementSlaughterModule;
+import com.lordmau5.wirelessutils.gui.client.modules.base.ElementModuleBase;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
+import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EntityDamageSource;
@@ -35,6 +37,27 @@ public class ItemSlaughterModule extends ItemFilteringModule {
 
     public boolean canApplyToDelegate(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
         return true;
+    }
+
+    @Nullable
+    @Override
+    public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {
+        return Level.fromInt(ModConfig.vaporizers.modules.slaughter.requiredLevel);
+    }
+
+    @Override
+    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable TileBaseVaporizer vaporizer) {
+        return ModConfig.vaporizers.modules.slaughter.energyMultiplier;
+    }
+
+    @Override
+    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable TileBaseVaporizer vaporizer) {
+        return ModConfig.vaporizers.modules.slaughter.energyAddition;
+    }
+
+    @Override
+    public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable TileBaseVaporizer vaporizer) {
+        return ModConfig.vaporizers.modules.slaughter.energyDrain;
     }
 
     @Override
@@ -117,16 +140,47 @@ public class ItemSlaughterModule extends ItemFilteringModule {
         private int dropMode = 0;
         private int experienceMode = 0;
 
+        private ItemStack ghost = new ItemStack(Items.DIAMOND_SWORD);
+
         public SlaughterBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack module) {
             super(vaporizer);
 
             allowPlayers = ModConfig.vaporizers.modules.slaughter.targetPlayers;
             allowCreative = false;
 
+            allowBosses = ModConfig.vaporizers.modules.slaughter.attackBosses;
+
             requireAttackable = true;
             requireAlive = true;
 
             updateModule(module);
+        }
+
+        public double getEnergyMultiplier() {
+            ItemStack stack = vaporizer.getModule();
+            if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )
+                return 1;
+
+            ItemModule item = (ItemModule) stack.getItem();
+            return item.getEnergyMultiplier(stack, vaporizer);
+        }
+
+        public int getEnergyAddition() {
+            ItemStack stack = vaporizer.getModule();
+            if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )
+                return 0;
+
+            ItemModule item = (ItemModule) stack.getItem();
+            return item.getEnergyAddition(stack, vaporizer);
+        }
+
+        public int getEnergyDrain() {
+            ItemStack stack = vaporizer.getModule();
+            if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )
+                return 0;
+
+            ItemModule item = (ItemModule) stack.getItem();
+            return item.getEneryDrain(stack, vaporizer);
         }
 
         @Override
@@ -181,6 +235,18 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             return ModConfig.vaporizers.modules.slaughter.enableWeapon && slot == 0;
         }
 
+        public boolean isValidInput(@Nonnull ItemStack stack) {
+            return ModConfig.vaporizers.modules.slaughter.enableWeapon;
+        }
+
+        @Nonnull
+        @Override
+        public ItemStack getInputGhost(int slot) {
+            if ( slot == 0 )
+                return ghost;
+            return ItemStack.EMPTY;
+        }
+
         public boolean isModifierUnlocked() {
             return false;
         }
@@ -190,16 +256,16 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             return ItemStack.EMPTY;
         }
 
-        public boolean isValidInput(@Nonnull ItemStack stack) {
-            return ModConfig.vaporizers.modules.slaughter.enableWeapon;
-        }
-
         public boolean isValidModifier(@Nonnull ItemStack stack) {
             return false;
         }
 
         public boolean canRun() {
             return true;
+        }
+
+        public int getEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
+            return 0;
         }
 
         @Nonnull
@@ -213,11 +279,32 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             ItemStack weapon = ModConfig.vaporizers.modules.slaughter.enableWeapon ? vaporizer.getInput().getStackInSlot(0) : ItemStack.EMPTY;
             player.setHeldItem(EnumHand.MAIN_HAND, weapon);
 
-            float damage = living.getHealth();
-            if ( ModConfig.vaporizers.modules.slaughter.maxDamage != 0 && damage > ModConfig.vaporizers.modules.slaughter.maxDamage )
-                damage = (float) ModConfig.vaporizers.modules.slaughter.maxDamage;
+            float damage = living.getAbsorptionAmount();
+            float max = (float) ModConfig.vaporizers.modules.slaughter.maxDamage;
+            int mode = ModConfig.vaporizers.modules.slaughter.damageMode;
+            if ( mode == 0 )
+                damage += living.getHealth();
+            else if ( mode == 1 )
+                damage += living.getMaxHealth();
+            else if ( max == 0 )
+                damage = 1000000000;
+            else
+                damage = max;
+
+            if ( max != 0 && damage > max )
+                damage = max;
 
             boolean success = living.attackEntityFrom(new VaporizerDamage(player, vaporizer), damage);
+
+            // Make sure we didn't murder things too hard. This is
+            // legitimately a thing that can leave you with entities
+            // wandering around, unable to die.
+            if ( Float.isNaN(living.getAbsorptionAmount()) )
+                living.setAbsorptionAmount(0);
+
+            if ( Float.isNaN(living.getHealth()) )
+                living.setHealth(1);
+
             int weaponDamage = ModConfig.vaporizers.modules.slaughter.damageWeapon;
             if ( success && weaponDamage > 0 && !vaporizer.isCreative() ) {
                 weapon.damageItem(weaponDamage, player);
