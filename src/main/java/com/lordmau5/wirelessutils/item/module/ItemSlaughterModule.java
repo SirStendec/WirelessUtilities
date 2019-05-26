@@ -14,6 +14,8 @@ import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -23,6 +25,8 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -84,6 +88,103 @@ public class ItemSlaughterModule extends ItemFilteringModule {
                 name + ".exp",
                 StringHelper.localize("btn." + WirelessUtils.MODID + ".drop_mode." + getExperienceMode(stack))
         ).getFormattedText());
+
+        if ( ModConfig.vaporizers.modules.slaughter.enableUseWeapon && getUseWeapon(stack) )
+            tooltip.add(StringHelper.localize(name + ".using_weapon"));
+    }
+
+    public boolean getUseWeapon(@Nonnull ItemStack stack) {
+        if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            return tag != null && tag.getBoolean("UseWeapon");
+        }
+
+        return false;
+    }
+
+    @Nonnull
+    public ItemStack setUseWeapon(@Nonnull ItemStack stack, boolean enabled) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return ItemStack.EMPTY;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        if ( tag == null )
+            tag = new NBTTagCompound();
+        else if ( tag.getBoolean("Locked") )
+            return ItemStack.EMPTY;
+
+        if ( enabled )
+            tag.setBoolean("UseWeapon", true);
+        else
+            tag.removeTag("UseWeapon");
+
+        if ( tag.isEmpty() )
+            tag = null;
+
+        stack.setTagCompound(tag);
+        return stack;
+    }
+
+    public int getDropMode(@Nonnull ItemStack stack) {
+        if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("CollectDrops", Constants.NBT.TAG_BYTE) )
+                return tag.getByte("CollectDrops");
+        }
+
+        return ModConfig.vaporizers.modules.slaughter.collectDrops;
+    }
+
+    @Nonnull
+    public ItemStack setDropMode(@Nonnull ItemStack stack, int mode) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return ItemStack.EMPTY;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        if ( tag == null )
+            tag = new NBTTagCompound();
+        else if ( tag.getBoolean("Locked") )
+            return ItemStack.EMPTY;
+
+        if ( mode < ModConfig.vaporizers.modules.slaughter.collectDropsMinimum )
+            mode = 3;
+        else if ( mode > 3 )
+            mode = ModConfig.vaporizers.modules.slaughter.collectDropsMinimum;
+
+        tag.setByte("CollectDrops", (byte) mode);
+        stack.setTagCompound(tag);
+        return stack;
+    }
+
+    public int getExperienceMode(@Nonnull ItemStack stack) {
+        if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("CollectExp", Constants.NBT.TAG_BYTE) )
+                return tag.getByte("CollectExp");
+        }
+
+        return ModConfig.vaporizers.modules.slaughter.collectExperience;
+    }
+
+    @Nonnull
+    public ItemStack setExperienceMode(@Nonnull ItemStack stack, int mode) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return ItemStack.EMPTY;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        if ( tag == null )
+            tag = new NBTTagCompound();
+        else if ( tag.getBoolean("Locked") )
+            return ItemStack.EMPTY;
+
+        if ( mode < ModConfig.vaporizers.modules.slaughter.collectExperienceMinimum )
+            mode = 3;
+        else if ( mode > 3 )
+            mode = ModConfig.vaporizers.modules.slaughter.collectExperienceMinimum;
+
+        tag.setByte("CollectExp", (byte) mode);
+        stack.setTagCompound(tag);
+        return stack;
     }
 
     @Nullable
@@ -139,6 +240,7 @@ public class ItemSlaughterModule extends ItemFilteringModule {
 
         private int dropMode = 0;
         private int experienceMode = 0;
+        private boolean useWeapon = true;
 
         private ItemStack ghost = new ItemStack(Items.DIAMOND_SWORD);
 
@@ -189,6 +291,7 @@ public class ItemSlaughterModule extends ItemFilteringModule {
 
             dropMode = ModItems.itemSlaughterModule.getDropMode(stack);
             experienceMode = ModItems.itemSlaughterModule.getExperienceMode(stack);
+            useWeapon = ModConfig.vaporizers.modules.slaughter.enableWeapon && ModConfig.vaporizers.modules.slaughter.enableUseWeapon && ModItems.itemSlaughterModule.getUseWeapon(stack);
         }
 
         public void updateModifier(@Nonnull ItemStack stack) {
@@ -212,6 +315,7 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             super.updateModePacket(packet);
             packet.addByte(dropMode);
             packet.addByte(experienceMode);
+            packet.addBool(useWeapon);
         }
 
         @Nonnull
@@ -219,7 +323,12 @@ public class ItemSlaughterModule extends ItemFilteringModule {
         public ItemStack handleModeDelegate(@Nonnull ItemStack stack, @Nonnull PacketBase packet) {
             ModItems.itemSlaughterModule.setDropMode(stack, packet.getByte());
             ModItems.itemSlaughterModule.setExperienceMode(stack, packet.getByte());
+            ModItems.itemSlaughterModule.setUseWeapon(stack, packet.getBool());
             return stack;
+        }
+
+        public boolean useWeapon() {
+            return useWeapon;
         }
 
         public int getExperienceMode() {
@@ -277,7 +386,13 @@ public class ItemSlaughterModule extends ItemFilteringModule {
                 return IWorkProvider.WorkResult.FAILURE_STOP;
 
             ItemStack weapon = ModConfig.vaporizers.modules.slaughter.enableWeapon ? vaporizer.getInput().getStackInSlot(0) : ItemStack.EMPTY;
+
+            // Set up the player to actually do stuff.
+            player.capabilities.isCreativeMode = vaporizer.isCreative();
+            player.inventory.clear();
             player.setHeldItem(EnumHand.MAIN_HAND, weapon);
+            player.updateAttributes(true);
+            player.updateCooldown();
 
             float damage = living.getAbsorptionAmount();
             float max = (float) ModConfig.vaporizers.modules.slaughter.maxDamage;
@@ -294,6 +409,25 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             if ( max != 0 && damage > max )
                 damage = max;
 
+            if ( useWeapon ) {
+                // To give this the best chance of working set the base attack damage
+                // of the fake player to the damage value calculated for the big hit.
+                // This won't ignore resistances, but it'll still hurt. A lot.
+                IAttributeInstance attribute = player.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
+                double old = attribute.getBaseValue();
+                attribute.setBaseValue(damage);
+
+                // Pretend like we're a real player and whack it.
+                boolean success = ForgeHooks.onPlayerAttackTarget(player, living);
+
+                attribute.setBaseValue(old);
+
+                // If that worked, just stop now. Otherwise, we murder the old fashioned way.
+                if ( !success )
+                    return IWorkProvider.WorkResult.SUCCESS_CONTINUE;
+            }
+
+            // Just use a big raw damage event to get our slaughter on.
             boolean success = living.attackEntityFrom(new VaporizerDamage(player, vaporizer), damage);
 
             // Make sure we didn't murder things too hard. This is

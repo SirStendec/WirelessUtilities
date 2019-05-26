@@ -8,6 +8,7 @@ import com.lordmau5.wirelessutils.gui.client.modules.base.ElementFilterableModul
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
@@ -16,6 +17,7 @@ public class ElementSlaughterModule extends ElementFilterableModule {
 
     public final ElementDynamicContainedButton btnDrops;
     public final ElementDynamicContainedButton btnExp;
+    public final ElementDynamicContainedButton btnWeapon;
 
     public final ItemSlaughterModule.SlaughterBehavior behavior;
 
@@ -25,15 +27,20 @@ public class ElementSlaughterModule extends ElementFilterableModule {
 
         btnDrops = new ElementDynamicContainedButton(this, "Drops", 74, 8, 95, 16, "");
         btnExp = new ElementDynamicContainedButton(this, "Exp", 74, 29, 95, 16, "");
+        btnWeapon = new ElementDynamicContainedButton(this, "Weapon", 74, 50, 95, 16, "");
 
+        btnWeapon.setVisible(ModConfig.vaporizers.modules.slaughter.enableWeapon && ModConfig.vaporizers.modules.slaughter.enableUseWeapon);
         btnExp.setVisible(behavior.vaporizer.hasFluid());
+
+        btnWeapon.setToolTipLines("btn." + WirelessUtils.MODID + ".use_weapon.info");
 
         addElement(btnDrops);
         addElement(btnExp);
+        addElement(btnWeapon);
     }
 
     public int getContentHeight() {
-        return 50;
+        return 71;
     }
 
     @Override
@@ -46,6 +53,8 @@ public class ElementSlaughterModule extends ElementFilterableModule {
         gui.drawRightAlignedText(StringHelper.localize("btn." + WirelessUtils.MODID + ".drop.drops"), 70, 12, 0x404040);
         if ( behavior.vaporizer.hasFluid() )
             gui.drawRightAlignedText(StringHelper.localize("btn." + WirelessUtils.MODID + ".drop.exp"), 70, 33, 0x404040);
+        if ( btnWeapon.isVisible() )
+            gui.drawRightAlignedText(StringHelper.localize("btn." + WirelessUtils.MODID + ".use_weapon"), 70, 54, 0x404040);
 
         GlStateManager.popMatrix();
     }
@@ -54,6 +63,7 @@ public class ElementSlaughterModule extends ElementFilterableModule {
     public void updateElementInformation() {
         super.updateElementInformation();
 
+        btnWeapon.setText(StringHelper.localize("btn." + WirelessUtils.MODID + ".mode." + (behavior.useWeapon() ? 2 : 1)));
         btnDrops.setText(getModeLabel(behavior.getDropMode()));
         btnExp.setText(getModeLabel(behavior.getExperienceMode()));
     }
@@ -76,6 +86,12 @@ public class ElementSlaughterModule extends ElementFilterableModule {
             case "Drops":
                 mode = ModItems.itemSlaughterModule.getDropMode(stack) + amount;
                 if ( ModItems.itemSlaughterModule.setDropMode(stack, mode).isEmpty() )
+                    return;
+
+                break;
+
+            case "Weapon":
+                if ( ModItems.itemSlaughterModule.setUseWeapon(stack, !behavior.useWeapon()).isEmpty() )
                     return;
 
                 break;

@@ -305,8 +305,7 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         if ( key == null )
             return ItemStack.EMPTY;
 
-        String name = key.toString();
-        if ( EntityUtilities.isBlacklisted(name) )
+        if ( EntityUtilities.isBlacklisted(key) )
             return ItemStack.EMPTY;
 
         ItemStack out = stack.copy();
@@ -322,10 +321,10 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         NBTTagCompound entityTag = new NBTTagCompound();
         entity.writeToNBT(entityTag);
 
-        for (String badTag : BAD_TAGS)
+        for (String badTag : EntityUtilities.BAD_TAGS)
             entityTag.removeTag(badTag);
 
-        tag.setString("EntityID", name);
+        tag.setString("EntityID", key.toString());
         tag.setTag("EntityData", entityTag);
 
         out.setItemDamage(EntityList.getID(entity.getClass()));
@@ -335,11 +334,4 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
 
         return out;
     }
-
-    public static String[] BAD_TAGS = {
-            "UUIDMost", "UUIDLeast",
-            "Rotation", "Pos", "Motion",
-            "FallDistance", "OnGround", "Air",
-            "Dimension", "PortalCooldown", "Leash", "Leashed"
-    };
 }

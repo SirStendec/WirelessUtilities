@@ -121,11 +121,6 @@ public class ItemTeleportModule extends ItemFilteringModule {
 
         public void updateRange() {
             ItemStack stack = vaporizer.getInput().getStackInSlot(0);
-            if ( stack.isEmpty() || stack.getItem() != ModItems.itemRangeAugment ) {
-                range = 0;
-                isInterdimensional = false;
-                return;
-            }
 
             isInterdimensional = ModItems.itemRangeAugment.isInterdimensional(stack);
             range = ModItems.itemRangeAugment.getPositionalRange(stack);

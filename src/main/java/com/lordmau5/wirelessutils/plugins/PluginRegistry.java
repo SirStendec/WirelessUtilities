@@ -2,10 +2,12 @@ package com.lordmau5.wirelessutils.plugins;
 
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics2Plugin;
 import com.lordmau5.wirelessutils.plugins.CraftTweaker.CraftTweakerPlugin;
+import com.lordmau5.wirelessutils.plugins.IndustrialForegoing.IFPlugin;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.RefinedStoragePlugin;
 import com.lordmau5.wirelessutils.plugins.SimpleCorn.SimpleCornPlugin;
 import com.lordmau5.wirelessutils.plugins.TConstruct.TConstructPlugin;
 import com.lordmau5.wirelessutils.plugins.TheOneProbe.TOPPlugin;
+import com.lordmau5.wirelessutils.plugins.ThermalExpansion.TEPlugin;
 import com.lordmau5.wirelessutils.plugins.Waila.WailaPlugin;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.color.BlockColors;
@@ -57,6 +59,12 @@ public class PluginRegistry {
 
         if ( Loader.isModLoaded("simplecorn") )
             addPlugin("simplecorn", new SimpleCornPlugin());
+
+        if ( Loader.isModLoaded("industrialforegoing") )
+            addPlugin("industrialforegoing", new IFPlugin());
+
+        if ( Loader.isModLoaded("thermalexpansion") )
+            addPlugin("thermalexpansion", new TEPlugin());
     }
 
     public static void preInit(FMLPreInitializationEvent event) {

@@ -2,6 +2,7 @@ package com.lordmau5.wirelessutils.utils;
 
 import com.lordmau5.wirelessutils.item.pearl.ItemVoidPearl;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class EntityUtilities {
 
     private static Map<String, Integer> baseExperience = new HashMap<>();
+    private static Map<Item, IEntityBall> entityBallMap = new Object2ObjectOpenHashMap<>();
 
     public static void setBaseExperience(@Nonnull ResourceLocation name, int cost) {
         String key = name.toString();
@@ -140,6 +142,10 @@ public class EntityUtilities {
         if ( item instanceof ItemVoidPearl )
             return true;
 
+        IEntityBall handler = entityBallMap.get(item);
+        if ( handler != null )
+            return handler.isValidItem(stack);
+
         return false;
     }
 
@@ -150,6 +156,10 @@ public class EntityUtilities {
             return pearl.containsEntity(stack);
         }
 
+        IEntityBall handler = entityBallMap.get(item);
+        if ( handler != null )
+            return handler.isFilledItem(stack);
+
         return false;
     }
 
@@ -158,6 +168,10 @@ public class EntityUtilities {
         Item item = stack.getItem();
         if ( item instanceof ItemVoidPearl )
             return ((ItemVoidPearl) item).captureEntity(stack, entity);
+
+        IEntityBall handler = entityBallMap.get(item);
+        if ( handler != null )
+            return handler.captureEntity(stack, entity);
 
         return ItemStack.EMPTY;
     }
@@ -168,7 +182,38 @@ public class EntityUtilities {
         if ( item instanceof ItemVoidPearl )
             return ((ItemVoidPearl) item).getCapturedEntity(stack, world, withData);
 
+        IEntityBall handler = entityBallMap.get(item);
+        if ( handler != null )
+            return handler.getEntity(stack, world, withData);
+
         return null;
     }
+
+    public static void registerHandler(@Nonnull Item item, @Nonnull IEntityBall handler) {
+        entityBallMap.put(item, handler);
+    }
+
+    public IEntityBall getHandler(@Nonnull Item item) {
+        return entityBallMap.get(item);
+    }
+
+    public interface IEntityBall {
+        @Nullable
+        Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData);
+
+        @Nonnull
+        ItemStack captureEntity(@Nonnull ItemStack stack, @Nonnull Entity entity);
+
+        boolean isValidItem(@Nonnull ItemStack stack);
+
+        boolean isFilledItem(@Nonnull ItemStack stack);
+    }
+
+    public static String[] BAD_TAGS = {
+            "UUIDMost", "UUIDLeast",
+            "Rotation", "Pos", "Motion",
+            "FallDistance", "OnGround", "Air",
+            "Dimension", "PortalCooldown", "Leash", "Leashed"
+    };
 
 }

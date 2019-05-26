@@ -5,7 +5,6 @@ import cofh.core.util.helpers.StringHelper;
 import com.google.common.base.Predicate;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
-import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -371,68 +370,6 @@ public abstract class ItemFilteringModule extends ItemModule {
         if ( tag.isEmpty() )
             tag = null;
 
-        stack.setTagCompound(tag);
-        return stack;
-    }
-
-    public int getDropMode(@Nonnull ItemStack stack) {
-        if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
-            NBTTagCompound tag = stack.getTagCompound();
-            if ( tag != null && tag.hasKey("CollectDrops", Constants.NBT.TAG_BYTE) )
-                return tag.getByte("CollectDrops");
-        }
-
-        return ModConfig.vaporizers.modules.slaughter.collectDrops;
-    }
-
-    @Nonnull
-    public ItemStack setDropMode(@Nonnull ItemStack stack, int mode) {
-        if ( stack.isEmpty() || stack.getItem() != this )
-            return ItemStack.EMPTY;
-
-        NBTTagCompound tag = stack.getTagCompound();
-        if ( tag == null )
-            tag = new NBTTagCompound();
-        else if ( tag.getBoolean("Locked") )
-            return ItemStack.EMPTY;
-
-        if ( mode < ModConfig.vaporizers.modules.slaughter.collectDropsMinimum )
-            mode = 3;
-        else if ( mode > 3 )
-            mode = ModConfig.vaporizers.modules.slaughter.collectDropsMinimum;
-
-        tag.setByte("CollectDrops", (byte) mode);
-        stack.setTagCompound(tag);
-        return stack;
-    }
-
-    public int getExperienceMode(@Nonnull ItemStack stack) {
-        if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
-            NBTTagCompound tag = stack.getTagCompound();
-            if ( tag != null && tag.hasKey("CollectExp", Constants.NBT.TAG_BYTE) )
-                return tag.getByte("CollectExp");
-        }
-
-        return ModConfig.vaporizers.modules.slaughter.collectExperience;
-    }
-
-    @Nonnull
-    public ItemStack setExperienceMode(@Nonnull ItemStack stack, int mode) {
-        if ( stack.isEmpty() || stack.getItem() != this )
-            return ItemStack.EMPTY;
-
-        NBTTagCompound tag = stack.getTagCompound();
-        if ( tag == null )
-            tag = new NBTTagCompound();
-        else if ( tag.getBoolean("Locked") )
-            return ItemStack.EMPTY;
-
-        if ( mode < ModConfig.vaporizers.modules.slaughter.collectExperienceMinimum )
-            mode = 3;
-        else if ( mode > 3 )
-            mode = ModConfig.vaporizers.modules.slaughter.collectExperienceMinimum;
-
-        tag.setByte("CollectExp", (byte) mode);
         stack.setTagCompound(tag);
         return stack;
     }

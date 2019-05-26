@@ -764,9 +764,25 @@ public class ModConfig {
         @Config.Comment("The maximum number of entities to handle in a work tick.")
         public int entitiesPerTick = 100;
 
+        @Config.Name("Compatibility")
+        @Config.Comment("Compatibility with other mods!")
+        public VaporizerCompatibility compatibility = new VaporizerCompatibility();
+
         @Config.Name("Modules")
         @Config.Comment("Modules give a Vaporizer purpose. Without an installed module, they have no behavior.")
         public Modules modules = new Modules();
+    }
+
+    public static class VaporizerCompatibility {
+        @Config.Name("Use Morbs")
+        @Config.Comment("Allow the use of Morbs from Thermal Expansion in Vaporizers.")
+        @Config.RequiresMcRestart
+        public boolean useMorbs = true;
+
+        @Config.Name("Use Mob Imprisonment Tools")
+        @Config.Comment("Allow the use of Mob Imprisonment Tools from Industrial Foregoing in Vaporizers.")
+        @Config.RequiresMcRestart
+        public boolean useMITs = true;
     }
 
     public static class Modules {
@@ -851,12 +867,12 @@ public class ModConfig {
         @Config.Name("Experience Factor")
         @Config.Comment("The cost to spawn an entity is calculated as Cost = Ceiling(Base Experience * Experience Factor + Max Health * Health Factor)")
         @Config.RangeDouble(min = 0)
-        public double expFactor = 1.2;
+        public double expFactor = 2;
 
         @Config.Name("Health Factor")
         @Config.Comment("The cost to spawn an entity is calculated as Cost = Ceiling(Base Experience * Experience Factor + Max Health * Health Factor)")
         @Config.RangeDouble(min = 0)
-        public double healthFactor = 1.2;
+        public double healthFactor = 0;
     }
 
     public static class TeleportModule {
@@ -945,6 +961,11 @@ public class ModConfig {
         @Config.Comment("When enabled, the Slaughter Module will use a weapon placed in the Input slot of the Vaporizer.")
         @Config.RequiresWorldRestart
         public boolean enableWeapon = true;
+
+        @Config.Name("Enable Use Weapon Mode")
+        @Config.Comment("In Use Weapon Mode, the Slaughter Module will use its weapon in the same way a player does, allowing normal weapon things to happen, such as Tinker Tools gaining experience.")
+        @Config.RequiresWorldRestart
+        public boolean enableUseWeapon = true;
 
         @Config.Name("Weapon Durability Use")
         @Config.Comment("The amount of durability damage to apply to weapons for each successful use.")

@@ -31,7 +31,7 @@ public class ElementTeleportModule extends ElementFilterableModule {
         if ( behavior.isInterdimensional() )
             range = TextFormatting.OBFUSCATED + "999";
 
-        gui.drawRightAlignedText(StringHelper.localize("btn." + WirelessUtils.MODID + ".range"), 90, posY + 8, 0x404040);
-        fontRenderer.drawString(range, 94, posY + 8, 0);
+        gui.drawRightAlignedText(StringHelper.localize("btn." + WirelessUtils.MODID + ".range"), 90, posY + 9, 0x404040);
+        fontRenderer.drawString(range, 94, posY + 9, 0);
     }
 }

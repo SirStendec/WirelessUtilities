@@ -1,15 +1,20 @@
 package com.lordmau5.wirelessutils.utils;
 
+import cofh.core.entity.NetServerHandlerFake;
 import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 
@@ -19,6 +24,8 @@ public class WUFakePlayer extends FakePlayer {
 
     private static final UUID uuid = UUID.fromString("1a82a7dc-9467-40e8-b806-b5ebf0a39a73");
     private static final GameProfile PROFILE = new GameProfile(uuid, "[WU]");
+
+    private final ItemStack[] cachedEquipment = new ItemStack[6];
 
     public static void removeFakePlayer(@Nonnull World world) {
         int dimension = world.provider.getDimension();
@@ -49,6 +56,13 @@ public class WUFakePlayer extends FakePlayer {
 
     public WUFakePlayer(WorldServer world) {
         super(world, PROFILE);
+        connection = new NetServerHandlerFake(FMLCommonHandler.instance().getMinecraftServerInstance(), this);
+        addedToChunk = false;
+
+        capabilities.disableDamage = true;
+        setSize(0, 0);
+
+        Arrays.fill(cachedEquipment, ItemStack.EMPTY);
     }
 
     @Override
@@ -64,5 +78,33 @@ public class WUFakePlayer extends FakePlayer {
     @Override
     public void openEditSign(TileEntitySign signTile) {
         // Intentionally Left Blank
+    }
+
+    public void updateCooldown() {
+        this.ticksSinceLastSwing = 10000;
+    }
+
+    public void updateAttributes() {
+        updateAttributes(false);
+    }
+
+    public void updateAttributes(boolean handOnly) {
+        for (EntityEquipmentSlot slot : EntityEquipmentSlot.values()) {
+            if ( handOnly && slot.getSlotType() != EntityEquipmentSlot.Type.HAND )
+                continue;
+
+            int index = slot.getSlotIndex();
+            ItemStack cached = cachedEquipment[index].copy();
+            ItemStack stack = getItemStackFromSlot(slot);
+
+            if ( !ItemStack.areItemsEqual(stack, cached) ) {
+                if ( !cached.isEmpty() )
+                    getAttributeMap().removeAttributeModifiers(cached.getAttributeModifiers(slot));
+                if ( !stack.isEmpty() )
+                    getAttributeMap().applyAttributeModifiers(stack.getAttributeModifiers(slot));
+
+                cachedEquipment[index] = stack;
+            }
+        }
     }
 }

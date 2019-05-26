@@ -132,6 +132,14 @@ public class ItemCloneModule extends ItemModule {
             updateModifier(vaporizer.getModifier());
         }
 
+        public boolean hasEntity() {
+            return entityLoaded;
+        }
+
+        public int getCost() {
+            return finalCost;
+        }
+
         public double getEnergyMultiplier() {
             ItemStack stack = vaporizer.getModule();
             if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )

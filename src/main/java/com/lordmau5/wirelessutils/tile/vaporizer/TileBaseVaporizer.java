@@ -522,12 +522,12 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     @Override
     public double getWorkMaxRate() {
-        return 0;
+        return level.maxVaporizerEntities;
     }
 
     @Override
     public double getWorkLastTick() {
-        return 0;
+        return remainingPerTick;
     }
 
     @Override
@@ -1070,6 +1070,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             activeTargetsPerTick = 0;
             validTargetsPerTick = 0;
             energyPerTick = 0;
+            remainingPerTick = 0;
         }
 
         if ( enabled && sideTransferAugment )
@@ -1092,11 +1093,13 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             return;
         }
 
-        remainingPerTick = level.maxVaporizerEntities;
-
+        int total = level.maxVaporizerEntities;
+        remainingPerTick = total;
         tickActive();
         setActive(worker.performWork());
         updateTrackers();
+
+        remainingPerTick = total - remainingPerTick;
     }
 
     /* Event Handling */
@@ -1211,6 +1214,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         payload.addShort(activeTargetsPerTick);
         payload.addInt(maxEnergyPerTick);
         payload.addInt(gatherTickRate);
+        payload.addInt(remainingPerTick);
 
         return payload;
     }
@@ -1227,6 +1231,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         activeTargetsPerTick = payload.getShort();
         maxEnergyPerTick = payload.getInt();
         setWorldTickRate(payload.getInt());
+        remainingPerTick = payload.getInt();
     }
 
     @Override
