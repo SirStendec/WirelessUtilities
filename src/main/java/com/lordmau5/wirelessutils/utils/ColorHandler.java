@@ -12,7 +12,6 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.fluids.Fluid;
@@ -152,8 +151,8 @@ public class ColorHandler {
                 return 0xFFFFFF;
 
             EntityList.EntityEggInfo info = null;
-            if ( ModItems.itemVoidPearl.containsEntity(stack) )
-                info = EntityList.ENTITY_EGGS.get(new ResourceLocation(stack.getTagCompound().getString("EntityID")));
+            if ( ModItems.itemVoidPearl.isFilledBall(stack) )
+                info = EntityList.ENTITY_EGGS.get(ModItems.itemVoidPearl.getEntityId(stack));
 
             if ( info == null )
                 return 0x002f45;

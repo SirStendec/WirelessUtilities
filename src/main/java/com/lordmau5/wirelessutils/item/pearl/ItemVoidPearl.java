@@ -37,6 +37,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -45,7 +46,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStableItem {
+public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStableItem, EntityUtilities.IEntityBall {
 
     public ItemVoidPearl() {
         super();
@@ -57,10 +58,12 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
                 (stack, worldIn, entityIn) -> {
                     Item item = stack.getItem();
                     if ( item instanceof ItemVoidPearl )
-                        return ((ItemVoidPearl) item).containsEntity(stack) ? 1F : 0F;
+                        return ((ItemVoidPearl) item).isFilledBall(stack) ? 1F : 0F;
 
                     return 0F;
                 });
+
+        EntityUtilities.registerHandler(this, this);
     }
 
     @Override
@@ -89,11 +92,15 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
 
     @Override
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
-        if ( containsEntity(stack) ) {
-            tooltip.add(StringHelper.localize(getTranslationKey() + ".contains"));
+        if ( isFilledBall(stack) ) {
             tooltip.add(new TextComponentTranslation(
-                    getTranslationKey() + ".entry",
+                    getTranslationKey() + ".contains",
                     getCapturedName(stack)
+            ).getFormattedText());
+
+            tooltip.add(new TextComponentTranslation(
+                    getTranslationKey() + ".health",
+                    getCapturedHealth(stack)
             ).getFormattedText());
 
         } else
@@ -110,7 +117,7 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
     public String getHighlightTip(@Nonnull ItemStack stack, @Nonnull String displayName) {
         displayName = super.getHighlightTip(stack, displayName);
 
-        if ( containsEntity(stack) ) {
+        if ( isFilledBall(stack) ) {
             displayName = new TextComponentTranslation(
                     "info." + WirelessUtils.MODID + ".tiered.name",
                     displayName,
@@ -123,13 +130,15 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
 
     @Override
     public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer player, EntityLivingBase entity, EnumHand hand) {
-        if ( entity.world.isRemote || containsEntity(stack) )
+        if ( entity.world.isRemote || isFilledBall(stack) )
             return false;
 
-        ItemStack out = captureEntity(stack, entity);
+        ItemStack out = saveEntity(stack, entity);
         if ( out.isEmpty() )
             return false;
 
+        entity.setDead();
+        player.swingArm(hand);
         player.getCooldownTracker().setCooldown(this, 5);
 
         if ( stack.getCount() == 1 )
@@ -155,7 +164,7 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
 
     @Override
     public boolean onEntityItemUpdate(EntityItem entity) {
-        if ( entity.world != null && entity.world.isRemote && containsEntity(entity.getItem()) ) {
+        if ( entity.world != null && entity.world.isRemote && isFilledBall(entity.getItem()) ) {
             if ( entity.world.rand.nextFloat() > 0.92 ) {
                 float offsetX = entity.world.rand.nextFloat() * 0.4F - 0.2F;
                 float offsetY = entity.world.rand.nextFloat() * 0.4F + 0.4F;
@@ -180,17 +189,24 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         return new EntityVoidPearl(worldIn, stack);
     }
 
+    /* Entity Stuff */
 
-    public boolean containsEntity(@Nonnull ItemStack stack) {
-        if ( stack.isEmpty() || stack.getItem() != this || !stack.hasTagCompound() )
-            return false;
+    public float getCapturedHealth(@Nonnull ItemStack stack) {
+        if ( !isFilledBall(stack) )
+            return 0;
 
         NBTTagCompound tag = stack.getTagCompound();
-        return tag != null && tag.hasKey("EntityID");
+        if ( tag != null ) {
+            NBTTagCompound entity = tag.getCompoundTag("EntityData");
+            if ( entity != null )
+                return entity.getFloat("Health");
+        }
+
+        return 0;
     }
 
     public ITextComponent getCapturedName(@Nonnull ItemStack stack) {
-        if ( !containsEntity(stack) )
+        if ( !isFilledBall(stack) )
             return null;
 
         NBTTagCompound tag = stack.getTagCompound();
@@ -198,65 +214,38 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         if ( name == null )
             return null;
 
+        ITextComponent out = null;
+
         String key = "entity." + name + ".name";
         if ( StringHelper.canLocalize(key) )
-            return new TextComponentTranslation(key);
+            out = new TextComponentTranslation(key);
 
         else if ( StringHelper.canLocalize(name) )
-            return new TextComponentTranslation(name);
+            out = new TextComponentTranslation(name);
 
-        return new TextComponentString(name);
-    }
+        else
+            out = new TextComponentString(name);
 
-    @Nullable
-    public ResourceLocation getCapturedId(@Nonnull ItemStack stack) {
-        if ( !containsEntity(stack) )
-            return null;
+        NBTTagCompound entity = tag.getCompoundTag("EntityData");
+        if ( entity != null ) {
+            if ( entity.getBoolean("IsBaby") || entity.getInteger("Age") < 0 )
+                out = new TextComponentTranslation(
+                        getTranslationKey() + ".baby",
+                        out
+                );
+        }
 
-        NBTTagCompound tag = stack.getTagCompound();
-        return new ResourceLocation(tag.getString("EntityID"));
-    }
-
-    public float getCapturedMaxHP(@Nonnull ItemStack stack, @Nonnull World world, boolean withData) {
-        if ( !containsEntity(stack) )
-            return 0;
-
-        Entity entity = getCapturedEntity(stack, world, withData);
-        if ( entity instanceof EntityLivingBase )
-            return ((EntityLivingBase) entity).getMaxHealth();
-
-        return 0;
-    }
-
-    public int getCapturedBaseExperience(@Nonnull ItemStack stack, @Nullable World world) {
-        if ( !containsEntity(stack) )
-            return -1;
-
-        NBTTagCompound tag = stack.getTagCompound();
-        return EntityUtilities.getBaseExperience(new ResourceLocation(tag.getString("EntityID")), world);
-    }
-
-    @Nullable
-    public Entity getCapturedEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData) {
-        if ( !containsEntity(stack) )
-            return null;
-
-        NBTTagCompound tag = stack.getTagCompound();
-        Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(tag.getString("EntityID")), world);
-        if ( entity != null && withData )
-            entity.readFromNBT(tag.getCompoundTag("EntityData"));
-
-        return entity;
+        return out;
     }
 
     @Override
     public boolean shouldStackShrink(@Nonnull ItemStack stack, EntityPlayer player) {
-        return containsEntity(stack) || super.shouldStackShrink(stack, player);
+        return isFilledBall(stack) || super.shouldStackShrink(stack, player);
     }
 
     @Nonnull
-    public ItemStack releaseEntity(@Nonnull ItemStack stack, @Nonnull World world, Vec3d pos) {
-        Entity entity = getCapturedEntity(stack, world, true);
+    public ItemStack releaseEntity(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull Vec3d pos) {
+        Entity entity = getEntity(stack, world, true);
         if ( entity == null )
             return ItemStack.EMPTY;
 
@@ -267,45 +256,69 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         entity.motionZ = 0;
 
         entity.setUniqueId(UUID.randomUUID());
-
         world.spawnEntity(entity);
 
         if ( entity instanceof EntityLiving )
             ((EntityLiving) entity).playLivingSound();
 
-        ItemStack out = stack.copy();
-        if ( out.getCount() > 1 )
-            out.setCount(1);
+        return removeEntity(stack);
+    }
 
-        NBTTagCompound tag = out.getTagCompound();
-        if ( tag != null ) {
-            tag.removeTag("EntityID");
-            tag.removeTag("EntityData");
+    /* IEntityBall */
 
-            // Clear empty tags to allow better stacking.
-            if ( tag.isEmpty() )
-                tag = null;
+    public boolean isValidBall(@Nonnull ItemStack stack) {
+        return !stack.isEmpty() && stack.getItem() == this;
+    }
 
-            out.setTagCompound(tag);
-        }
+    public boolean isFilledBall(@Nonnull ItemStack stack) {
+        if ( stack.isEmpty() || stack.getItem() != this || !stack.hasTagCompound() )
+            return false;
 
-        out.setItemDamage(0);
-        return out;
+        NBTTagCompound tag = stack.getTagCompound();
+        return tag != null && tag.hasKey("EntityID", Constants.NBT.TAG_STRING);
+    }
+
+    @Nullable
+    public Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData) {
+        if ( !isFilledBall(stack) )
+            return null;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(tag.getString("EntityID")), world);
+        if ( entity != null && withData && tag.hasKey("EntityData", Constants.NBT.TAG_COMPOUND) )
+            entity.readFromNBT(tag.getCompoundTag("EntityData"));
+
+        return entity;
+    }
+
+    @Nullable
+    public Class<? extends Entity> getEntityClass(@Nonnull ItemStack stack) {
+        if ( !isFilledBall(stack) )
+            return null;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        return EntityList.getClass(new ResourceLocation(tag.getString("EntityID")));
+    }
+
+    @Nullable
+    public ResourceLocation getEntityId(@Nonnull ItemStack stack) {
+        if ( !isFilledBall(stack) )
+            return null;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        return new ResourceLocation(tag.getString("EntityID"));
     }
 
     @Nonnull
-    public ItemStack captureEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
-        if ( stack.isEmpty() || stack.getItem() != this || containsEntity(stack) )
+    public ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
+        if ( !isValidBall(stack) || isFilledBall(stack) )
             return ItemStack.EMPTY;
 
         if ( !(entity instanceof EntityLiving) || !entity.isEntityAlive() || !entity.isNonBoss() )
             return ItemStack.EMPTY;
 
         ResourceLocation key = EntityList.getKey(entity);
-        if ( key == null )
-            return ItemStack.EMPTY;
-
-        if ( EntityUtilities.isBlacklisted(key) )
+        if ( key == null || EntityUtilities.isBlacklisted(key) )
             return ItemStack.EMPTY;
 
         ItemStack out = stack.copy();
@@ -315,8 +328,6 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         NBTTagCompound tag = out.getTagCompound();
         if ( tag == null )
             tag = new NBTTagCompound();
-
-        EntityUtilities.saveBaseExperience(key, entity);
 
         NBTTagCompound entityTag = new NBTTagCompound();
         entity.writeToNBT(entityTag);
@@ -328,10 +339,31 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         tag.setTag("EntityData", entityTag);
 
         out.setItemDamage(EntityList.getID(entity.getClass()));
+        out.setTagCompound(tag);
+
+        return out;
+    }
+
+    @Nonnull
+    public ItemStack removeEntity(@Nonnull ItemStack stack) {
+        if ( !isValidBall(stack) )
+            return ItemStack.EMPTY;
+
+        ItemStack out = stack.copy();
+        if ( out.getCount() > 1 )
+            out.setCount(1);
+
+        NBTTagCompound tag = out.getTagCompound();
+        if ( tag != null ) {
+            tag.removeTag("EntityID");
+            tag.removeTag("EntityData");
+
+            if ( tag.isEmpty() )
+                tag = null;
+        }
 
         out.setTagCompound(tag);
-        entity.setDead();
-
+        out.setItemDamage(0);
         return out;
     }
 }

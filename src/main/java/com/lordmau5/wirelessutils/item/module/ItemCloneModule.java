@@ -18,6 +18,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
@@ -305,13 +306,28 @@ public class ItemCloneModule extends ItemModule {
                 return IWorkProvider.WorkResult.FAILURE_STOP;
             }
 
+            // Check for too many entities.
+            Class<? extends Entity> klass = EntityUtilities.getEntityClass(modifier);
+            if ( klass == null ) {
+                vaporizer.addFuel(removed);
+                return IWorkProvider.WorkResult.FAILURE_STOP;
+            }
+
+            List<Entity> existing = world.getEntitiesWithinAABB(klass, new AxisAlignedBB(target.pos).grow(ModConfig.vaporizers.modules.clone.maxRange));
+            if ( existing.size() > ModConfig.vaporizers.modules.clone.maxCount ) {
+                vaporizer.addFuel(removed);
+                return IWorkProvider.WorkResult.FAILURE_STOP;
+            }
+
+            // Now get the entity...
             Entity entity = EntityUtilities.getEntity(modifier, world, exactCopies);
             if ( entity == null ) {
                 vaporizer.addFuel(removed);
                 return IWorkProvider.WorkResult.FAILURE_STOP;
             }
 
-            entity.setPosition(target.pos.getX() + 0.5, target.pos.getY() + 0.5, target.pos.getZ() + 0.5);
+            // ... and spawn it!
+            entity.setPosition(target.pos.getX() + world.rand.nextFloat(), target.pos.getY() + world.rand.nextFloat(), target.pos.getZ() + world.rand.nextFloat());
             world.spawnEntity(entity);
 
             return IWorkProvider.WorkResult.SUCCESS_CONTINUE;

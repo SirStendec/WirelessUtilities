@@ -137,9 +137,10 @@ item.wirelessutils.quenched_pearl.name=Quenched Pearl
 item.wirelessutils.scorched_pearl.name=Scorched Pearl
 
 item.wirelessutils.void_pearl.name=Void Pearl
-item.wirelessutils.void_pearl.contains=Contains:
+item.wirelessutils.void_pearl.contains=Contains: %s
+item.wirelessutils.void_pearl.baby=Baby %s
+item.wirelessutils.void_pearl.health=Health: %s
 item.wirelessutils.void_pearl.empty=Empty
-item.wirelessutils.void_pearl.entry=- %s
 item.wirelessutils.void_pearl.jei.0=Throwing a Stabilized Ender Pearl into an End Portal has filled it with nothingness.
 item.wirelessutils.void_pearl.jei.1=The void seeks to be filled, and to that end, it seems to suck up any creature it comes into contact with.
 

@@ -873,6 +873,16 @@ public class ModConfig {
         @Config.Comment("The cost to spawn an entity is calculated as Cost = Ceiling(Base Experience * Experience Factor + Max Health * Health Factor)")
         @Config.RangeDouble(min = 0)
         public double healthFactor = 0;
+
+        @Config.Name("Maximum Entity - Count")
+        @Config.Comment("No more than this number of the target entity should exist in the immediate area. If they do, temporarily stop spawning.")
+        @Config.RangeInt(min = 1)
+        public int maxCount = 20;
+
+        @Config.Name("Maximum Entity - Range")
+        @Config.Comment("Check within this many blocks of the target spawn location.")
+        @Config.RangeInt(min = 0)
+        public int maxRange = 10;
     }
 
     public static class TeleportModule {

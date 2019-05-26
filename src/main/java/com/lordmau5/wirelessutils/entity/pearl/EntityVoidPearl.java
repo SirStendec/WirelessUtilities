@@ -86,7 +86,7 @@ public class EntityVoidPearl extends EntityBaseThrowable {
             return;
 
         ItemStack stack = getStack();
-        if ( ModItems.itemVoidPearl.containsEntity(stack) ) {
+        if ( ModItems.itemVoidPearl.isFilledBall(stack) ) {
             ItemStack released = ModItems.itemVoidPearl.releaseEntity(stack, world, result.hitVec);
             if ( !released.isEmpty() ) {
                 stack.shrink(1);
@@ -94,8 +94,9 @@ public class EntityVoidPearl extends EntityBaseThrowable {
             }
 
         } else if ( result.entityHit != null ) {
-            ItemStack captured = ModItems.itemVoidPearl.captureEntity(stack, result.entityHit);
+            ItemStack captured = ModItems.itemVoidPearl.saveEntity(stack, result.entityHit);
             if ( !captured.isEmpty() ) {
+                result.entityHit.setDead();
                 stack.shrink(1);
                 setStack(captured);
             }

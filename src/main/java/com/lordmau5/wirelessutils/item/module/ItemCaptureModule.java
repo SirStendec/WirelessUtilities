@@ -184,10 +184,11 @@ public class ItemCaptureModule extends ItemFilteringModule {
                 }
             }
 
-            ItemStack result = EntityUtilities.captureEntity(stack, entity);
+            ItemStack result = EntityUtilities.saveEntity(stack, entity);
             if ( result.isEmpty() )
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
 
+            entity.setDead();
             input.extractItem(slot, 1, false);
             vaporizer.insertOutputStack(result);
 

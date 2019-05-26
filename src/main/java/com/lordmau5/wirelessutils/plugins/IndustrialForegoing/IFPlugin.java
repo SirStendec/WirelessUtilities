@@ -28,7 +28,7 @@ public class IFPlugin implements IPlugin {
             EntityUtilities.registerHandler(itemMobImprisonmentTool, new EntityUtilities.IEntityBall() {
                 @Nullable
                 public Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData) {
-                    if ( !isFilledItem(stack) )
+                    if ( !isFilledBall(stack) )
                         return null;
 
                     NBTTagCompound tag = stack.getTagCompound();
@@ -39,9 +39,40 @@ public class IFPlugin implements IPlugin {
                     return entity;
                 }
 
+                @Nullable
+                public Class<? extends Entity> getEntityClass(@Nonnull ItemStack stack) {
+                    if ( !isFilledBall(stack) )
+                        return null;
+
+                    NBTTagCompound tag = stack.getTagCompound();
+                    return EntityList.getClass(new ResourceLocation(tag.getString("entity")));
+                }
+
+                @Nullable
+                public ResourceLocation getEntityId(@Nonnull ItemStack stack) {
+                    if ( !isFilledBall(stack) )
+                        return null;
+
+                    NBTTagCompound tag = stack.getTagCompound();
+                    return new ResourceLocation(tag.getString("entity"));
+                }
+
                 @Nonnull
-                public ItemStack captureEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
-                    if ( stack.isEmpty() || stack.getItem() != itemMobImprisonmentTool || isFilledItem(stack) )
+                public ItemStack removeEntity(@Nonnull ItemStack stack) {
+                    if ( !isValidBall(stack) )
+                        return ItemStack.EMPTY;
+
+                    ItemStack out = stack.copy();
+                    if ( out.getCount() > 1 )
+                        out.setCount(1);
+
+                    out.setTagCompound(null);
+                    return out;
+                }
+
+                @Nonnull
+                public ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
+                    if ( stack.isEmpty() || stack.getItem() != itemMobImprisonmentTool || isFilledBall(stack) )
                         return ItemStack.EMPTY;
 
                     if ( !(entity instanceof EntityLiving) || !entity.isEntityAlive() || !entity.isNonBoss() )
@@ -58,7 +89,6 @@ public class IFPlugin implements IPlugin {
                     if ( out.getCount() > 1 )
                         out.setCount(1);
 
-                    EntityUtilities.saveBaseExperience(key, entity);
                     NBTTagCompound tag = new NBTTagCompound();
 
                     // This is hot garbage, just saying.
@@ -66,16 +96,15 @@ public class IFPlugin implements IPlugin {
                     tag.setString("entity", key.toString());
 
                     out.setTagCompound(tag);
-                    entity.setDead();
                     return out;
                 }
 
-                public boolean isValidItem(@Nonnull ItemStack stack) {
+                public boolean isValidBall(@Nonnull ItemStack stack) {
                     return stack.getItem() == itemMobImprisonmentTool;
                 }
 
-                public boolean isFilledItem(@Nonnull ItemStack stack) {
-                    if ( !isValidItem(stack) )
+                public boolean isFilledBall(@Nonnull ItemStack stack) {
+                    if ( !isValidBall(stack) )
                         return false;
 
                     NBTTagCompound tag = stack.getTagCompound();
