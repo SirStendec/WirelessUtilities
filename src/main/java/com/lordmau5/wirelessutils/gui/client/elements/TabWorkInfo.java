@@ -6,6 +6,7 @@ import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.tile.base.IWorkInfoProvider;
+import com.lordmau5.wirelessutils.utils.Textures;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -65,6 +66,13 @@ public class TabWorkInfo extends TabBase {
     @Override
     public void addTooltip(List<String> list) {
         if ( !isFullyOpened() ) {
+            if ( !provider.getWorkConfigured() ) {
+                list.add(new TextComponentTranslation(
+                        INTL_KEY + ".unconfigured.tooltip"
+                ).getFormattedText());
+                return;
+            }
+
             list.add(new TextComponentTranslation(
                     INTL_KEY + ".tooltip.rate",
                     TextHelpers.getComponent(provider.formatWorkUnit(provider.getWorkLastTick())).setStyle(TextHelpers.YELLOW)
@@ -91,9 +99,11 @@ public class TabWorkInfo extends TabBase {
 
     @Override
     protected void drawForeground() {
-        if ( icon != null )
+        if ( !provider.getWorkConfigured() )
+            drawTabIcon(Textures.ERROR);
+        else if ( icon != null )
             drawTabIcon(icon);
-        if ( item != null ) {
+        else if ( item != null ) {
             RenderHelper.enableGUIStandardItemLighting();
             gui.getItemRenderer().renderItemAndEffectIntoGUI(item, sideOffset(), 3);
             GlStateManager.disableLighting();
@@ -102,6 +112,32 @@ public class TabWorkInfo extends TabBase {
             return;
 
         FontRenderer fontRenderer = getFontRenderer();
+
+        if ( !provider.getWorkConfigured() ) {
+            fontRenderer.drawStringWithShadow(StringHelper.localize(INTL_KEY + ".unconfigured.title"), sideOffset() + 20, 8, headerColor);
+            String explanation = provider.getWorkUnconfiguredExplanation();
+            if ( explanation == null ) {
+                String[] lines = TextHelpers.getLocalizedLines(INTL_KEY + ".unconfigured.explanation");
+                if ( lines != null )
+                    explanation = String.join("\n\n", lines);
+            } else if ( StringHelper.canLocalize(explanation + ".0") ) {
+                String[] lines = TextHelpers.getLocalizedLines(explanation);
+                if ( lines != null )
+                    explanation = String.join("\n\n", lines);
+            } else if ( StringHelper.canLocalize(explanation) )
+                explanation = StringHelper.localize(explanation);
+
+            if ( explanation != null ) {
+                List<String> lines = fontRenderer.listFormattedStringToWidth(explanation, maxWidth - 16);
+                int length = lines.size();
+                for (int i = 0; i < length; i++) {
+                    fontRenderer.drawString(lines.get(i), sideOffset() + 2, 22 + (12 * i), textColor);
+                }
+            }
+
+            return;
+        }
+
         fontRenderer.drawStringWithShadow(StringHelper.localize(INTL_KEY + ".name"), sideOffset() + 20, 8, headerColor);
 
         fontRenderer.drawStringWithShadow(StringHelper.localize(INTL_KEY + ".current"), sideOffset() + 6, 22, subheaderColor);

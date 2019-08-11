@@ -4,6 +4,8 @@ import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import net.minecraft.client.gui.GuiScreen;
 
+import javax.annotation.Nullable;
+
 public interface IWorkInfoProvider {
 
     String getWorkUnit();
@@ -23,5 +25,14 @@ public interface IWorkInfoProvider {
     int getValidTargetCount();
 
     int getActiveTargetCount();
+
+    default boolean getWorkConfigured() {
+        return true;
+    }
+
+    @Nullable
+    default String getWorkUnconfiguredExplanation() {
+        return null;
+    }
 
 }
