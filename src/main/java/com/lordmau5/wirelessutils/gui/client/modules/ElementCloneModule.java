@@ -8,7 +8,6 @@ import com.lordmau5.wirelessutils.gui.client.modules.base.ElementModuleBase;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.item.module.ItemCloneModule;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
-import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.item.ItemStack;
@@ -46,7 +45,7 @@ public class ElementCloneModule extends ElementModuleBase {
             sCost = new TextComponentTranslation(
                     "btn." + WirelessUtils.MODID + ".cost_fluid",
                     sCost,
-                    StringHelper.formatNumber(cost * ModConfig.vaporizers.mbPerPoint)
+                    StringHelper.formatNumber(cost * gui.getVaporizer().getFluidRate())
             ).getFormattedText();
 
         gui.drawRightAlignedText(sCost, sizeX - 7, posY + 9, 0);

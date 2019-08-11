@@ -6,6 +6,9 @@ import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public class TextHelpers {
     public static final Style GRAY = new Style().setColor(TextFormatting.GRAY);
     public static final Style WHITE = new Style().setColor(TextFormatting.WHITE);
@@ -52,6 +55,27 @@ public class TextHelpers {
         int exp = (int) (Math.log(number) / Math.log(unit));
         String post = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
         return String.format("%.1f %s%s", number / Math.pow(unit, exp), post, postfix);
+    }
+
+    @Nullable
+    public static String[] getLocalizedLines(@Nonnull String base) {
+        int i = 0;
+        String key = base + "." + i;
+
+        while ( StringHelper.canLocalize(key) ) {
+            i++;
+            key = base + "." + i;
+        }
+
+        if ( i == 0 )
+            return null;
+
+        String[] out = new String[i];
+        for (int j = 0; j < i; j++) {
+            out[j] = StringHelper.localize(base + "." + j);
+        }
+
+        return out;
     }
 
 }

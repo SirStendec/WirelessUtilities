@@ -4,11 +4,14 @@ import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -64,5 +67,18 @@ public class ServerProxy extends CommonProxy {
         EntityPlayer player = event.getAttackingPlayer();
         if ( player instanceof TileBaseVaporizer.WUVaporizerPlayer )
             ((TileBaseVaporizer.WUVaporizerPlayer) player).getVaporizer().onExperienceDrops(event);
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onLivingFall(LivingFallEvent event) {
+        EntityLivingBase living = event.getEntityLiving();
+        if ( living != null ) {
+            NBTTagCompound data = living.getEntityData();
+            if ( data != null && data.getBoolean("WUFallProtect") ) {
+                data.removeTag("WUFallProtect");
+                event.setDistance(0);
+                event.setDamageMultiplier(0);
+            }
+        }
     }
 }

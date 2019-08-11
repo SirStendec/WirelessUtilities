@@ -182,6 +182,7 @@ public class ItemSlaughterModule extends ItemFilteringModule {
         else if ( mode > 3 )
             mode = ModConfig.vaporizers.modules.slaughter.collectExperienceMinimum;
 
+
         tag.setByte("CollectExp", (byte) mode);
         stack.setTagCompound(tag);
         return stack;
@@ -369,12 +370,22 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             return false;
         }
 
-        public boolean canRun() {
-            return true;
+        public int getBlockEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
+            return 0;
         }
 
-        public int getEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
-            return 0;
+        public int getEntityEnergyCost(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget target) {
+            if ( useWeapon )
+                return ModConfig.vaporizers.modules.slaughter.entityWeaponEnergy;
+
+            return ModConfig.vaporizers.modules.slaughter.entityEnergy;
+        }
+
+        public int getActionCost() {
+            if ( useWeapon )
+                return ModConfig.vaporizers.modules.slaughter.budgetWeapon;
+
+            return ModConfig.vaporizers.modules.slaughter.budget;
         }
 
         @Nonnull

@@ -159,12 +159,24 @@ public class ItemCaptureModule extends ItemFilteringModule {
             return 0;
         }
 
-        public boolean canRun() {
-            return vaporizer.hasInput() && vaporizer.hasEmptyOutput();
+        @Override
+        public boolean canRun(boolean ignorePower) {
+            if ( !super.canRun(ignorePower) )
+                return false;
+
+            return ignorePower || (vaporizer.hasInput() && vaporizer.hasEmptyOutput());
         }
 
-        public int getEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
+        public int getBlockEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
             return 0;
+        }
+
+        public int getEntityEnergyCost(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget target) {
+            return ModConfig.vaporizers.modules.capture.entityEnergy;
+        }
+
+        public int getActionCost() {
+            return ModConfig.vaporizers.modules.capture.budget;
         }
 
         @Nonnull
@@ -188,9 +200,11 @@ public class ItemCaptureModule extends ItemFilteringModule {
             if ( result.isEmpty() )
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
 
+            if ( !vaporizer.insertOutputStack(result).isEmpty() )
+                return IWorkProvider.WorkResult.FAILURE_REMOVE;
+
             entity.setDead();
             input.extractItem(slot, 1, false);
-            vaporizer.insertOutputStack(result);
 
             return IWorkProvider.WorkResult.SUCCESS_CONTINUE;
         }

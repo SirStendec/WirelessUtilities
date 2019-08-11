@@ -1,11 +1,11 @@
 package com.lordmau5.wirelessutils.gui.client.vaporizer;
 
 import cofh.core.gui.element.ElementEnergyStored;
-import cofh.core.gui.element.ElementFluidTank;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.SharedState;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementAreaButton;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementDynamicContainedButton;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementFluidTankVaporizer;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementOffsetControls;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementRangeControls;
 import com.lordmau5.wirelessutils.gui.container.vaporizer.ContainerDirectionalVaporizer;
@@ -35,7 +35,7 @@ public class GuiDirectionalVaporizer extends GuiBaseVaporizer {
         addElement(new ElementEnergyStored(this, 10, 46, vaporizer.getEnergyStorage()).setInfinite(vaporizer.isCreative()));
 
         if ( vaporizer.hasFluid() )
-            addElement(new ElementFluidTank(this, 34, 52, vaporizer.getTank()).setAlwaysShow(true).setSmall().drawTank(true));
+            addElement(new ElementFluidTankVaporizer(this, 34, 52, vaporizer).setAlwaysShow(true).setSmall().drawTank(true));
 
         addElement(new ElementAreaButton(this, vaporizer, 152, 89));
 

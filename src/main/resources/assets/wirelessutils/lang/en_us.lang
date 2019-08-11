@@ -140,6 +140,7 @@ item.wirelessutils.void_pearl.name=Void Pearl
 item.wirelessutils.void_pearl.contains=Contains: %s
 item.wirelessutils.void_pearl.baby=Baby %s
 item.wirelessutils.void_pearl.health=Health: %s
+item.wirelessutils.void_pearl.value=Value: %s
 item.wirelessutils.void_pearl.empty=Empty
 item.wirelessutils.void_pearl.jei.0=Throwing a Stabilized Ender Pearl into an End Portal has filled it with nothingness.
 item.wirelessutils.void_pearl.jei.1=The void seeks to be filled, and to that end, it seems to suck up any creature it comes into contact with.
@@ -217,6 +218,11 @@ item.wirelessutils.clone_module.exact.info.0=Spawning exact copies does exactly
 item.wirelessutils.clone_module.exact.info.1=what it sounds like, at the cost
 item.wirelessutils.clone_module.exact.info.2=of using considerably more fuel.
 item.wirelessutils.clone_module.exact.off=Do Not Spawn Exact Copies
+
+item.wirelessutils.launch_module.name=Launch Module
+item.wirelessutils.launch_module.info.0=This module vaporizes and reassembles
+item.wirelessutils.launch_module.info.1=things in place, but when it puts them
+item.wirelessutils.launch_module.info.2=back together, it adds extra velocity.
 
 item.wirelessutils.base_augment.name=Augment Base
 
@@ -410,6 +416,10 @@ btn.wirelessutils.dec_area.all=Decrease all by %s
 btn.wirelessutils.inc_area.one=Increase by %s
 btn.wirelessutils.inc_area.all=Increase all by %s
 
+info.wirelessutils.x=X:
+info.wirelessutils.y=Y:
+info.wirelessutils.z=Z:
+
 info.wirelessutils.owner=Owner: %s
 info.wirelessutils.no_owner=(Not Set)
 
@@ -429,6 +439,16 @@ info.wirelessutils.work_info.current=Current Rate:
 info.wirelessutils.work_info.maximum=Maximum Rate:
 info.wirelessutils.work_info.targets.name=Active Targets:
 info.wirelessutils.work_info.targets.info=%s of %s
+
+info.wirelessutils.work_info.unconfigured.title=Unable to Run
+info.wirelessutils.work_info.unconfigured.tooltip=Machine Cannot Run
+info.wirelessutils.work_info.unconfigured.explanation.0=This machine cannot currently run.
+
+info.wirelessutils.vaporizer.unit=Entities/t
+info.wirelessutils.vaporizer.missing_module.0=Please install a valid module.
+info.wirelessutils.vaporizer.missing_modifier.0=Please install a valid modifier.
+info.wirelessutils.vaporizer.bad_config.0=Please configure the module.
+info.wirelessutils.vaporizer.empty_whitelist.0=The target whitelist is empty.
 
 info.wirelessutils.item_rate.second=Items/s
 info.wirelessutils.item_rate.tick=Items/t

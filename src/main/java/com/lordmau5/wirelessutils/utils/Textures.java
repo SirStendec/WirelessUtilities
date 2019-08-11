@@ -16,6 +16,8 @@ public class Textures {
     public static TextureAtlasSprite LOCK;
     public static TextureAtlasSprite UNLOCK;
 
+    public static TextureAtlasSprite ERROR;
+
     public static TextureAtlasSprite SIZE;
     public static TextureAtlasSprite OFFSET;
 
@@ -38,6 +40,8 @@ public class Textures {
 
         LOCK = register("lock");
         UNLOCK = register("unlock");
+
+        ERROR = register("error");
 
         SIZE = register("size");
         OFFSET = register("offset");

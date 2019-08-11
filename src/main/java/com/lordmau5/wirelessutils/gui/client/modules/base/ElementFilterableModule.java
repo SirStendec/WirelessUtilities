@@ -46,7 +46,7 @@ public abstract class ElementFilterableModule extends ElementModuleBase {
         btnListMode = new ElementDynamicContainedButton(this, "ListMode", 8, 92, 78, 16, "");
         btnListMode.setToolTipLines(name + ".list_info");
 
-        txtList = new ElementTextField(gui, 9, 114, 158, 51) {
+        txtList = new ElementTextField(gui, 9, 114, 158, 51, Short.MAX_VALUE) {
             @Override
             public ElementTextField setFocused(boolean focused) {
                 if ( isFocused() && !focused ) {

@@ -6,8 +6,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
@@ -26,10 +29,13 @@ public class EntityUtilities {
         baseExperience.put(key, cost);
     }
 
-    public static void saveBaseExperience(@Nonnull ResourceLocation name, int cost) {
+    public static int saveBaseExperience(@Nonnull ResourceLocation name, int cost) {
         String key = name.toString();
-        if ( !baseExperience.containsKey(key) )
-            baseExperience.put(key, cost);
+        if ( baseExperience.containsKey(key) )
+            return baseExperience.get(key);
+
+        baseExperience.put(key, cost);
+        return cost;
     }
 
     public static int saveBaseExperience(@Nonnull ResourceLocation name, @Nullable Entity entity) {
@@ -73,6 +79,13 @@ public class EntityUtilities {
         if ( baseExperience.containsKey(key) )
             return baseExperience.get(key);
 
+        if ( EntityList.isRegistered(name) ) {
+            Class<? extends Entity> klass = EntityList.getClass(name);
+            if ( klass != null && EntityAnimal.class.isAssignableFrom(klass) ) {
+                return saveBaseExperience(name, ModConfig.vaporizers.modules.clone.animalBaseExp);
+            }
+        }
+
         if ( entity != null )
             return saveBaseExperience(name, entity);
 
@@ -84,6 +97,13 @@ public class EntityUtilities {
 
         if ( baseExperience.containsKey(key) )
             return baseExperience.get(key);
+
+        if ( EntityList.isRegistered(name) ) {
+            Class<? extends Entity> klass = EntityList.getClass(name);
+            if ( klass != null && EntityAnimal.class.isAssignableFrom(klass) ) {
+                return saveBaseExperience(name, ModConfig.vaporizers.modules.clone.animalBaseExp);
+            }
+        }
 
         if ( world != null && EntityList.isRegistered(name) )
             return saveBaseExperience(name, EntityList.createEntityByIDFromName(name, world));
@@ -159,6 +179,15 @@ public class EntityUtilities {
         return ItemStack.EMPTY;
     }
 
+    @Nonnull
+    public static ItemStack removeEntity(@Nonnull ItemStack stack) {
+        IEntityBall handler = entityBallMap.get(stack.getItem());
+        if ( handler != null )
+            return handler.removeEntity(stack);
+
+        return ItemStack.EMPTY;
+    }
+
     @Nullable
     public static Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData) {
         IEntityBall handler = entityBallMap.get(stack.getItem());
@@ -190,8 +219,72 @@ public class EntityUtilities {
         entityBallMap.put(item, handler);
     }
 
-    public IEntityBall getHandler(@Nonnull Item item) {
+    public static IEntityBall getHandler(@Nonnull Item item) {
         return entityBallMap.get(item);
+    }
+
+    public static void registerSpawnEggs() {
+        registerHandler(Items.SPAWN_EGG, new IEntityBall() {
+            @Nullable
+            public Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData) {
+                ResourceLocation name = getEntityId(stack);
+                if ( name == null )
+                    return null;
+
+                Entity entity = EntityList.createEntityByIDFromName(name, world);
+                if ( entity != null && withData )
+                    ItemMonsterPlacer.applyItemEntityDataToEntity(world, null, stack, entity);
+
+                return entity;
+            }
+
+            @Nullable
+            public Class<? extends Entity> getEntityClass(@Nonnull ItemStack stack) {
+                ResourceLocation name = getEntityId(stack);
+                if ( name == null )
+                    return null;
+
+                return EntityList.getClass(name);
+            }
+
+            @Nullable
+            public ResourceLocation getEntityId(@Nonnull ItemStack stack) {
+                if ( !isFilledBall(stack) )
+                    return null;
+
+                return ItemMonsterPlacer.getNamedIdFrom(stack);
+            }
+
+            @Nonnull
+            @Override
+            public ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
+                return ItemStack.EMPTY;
+            }
+
+            @Nonnull
+            @Override
+            public ItemStack removeEntity(@Nonnull ItemStack stack) {
+                return ItemStack.EMPTY;
+            }
+
+            @Override
+            public boolean isValidBall(@Nonnull ItemStack stack) {
+                return !stack.isEmpty() && stack.getItem() instanceof ItemMonsterPlacer;
+            }
+
+            @Override
+            public boolean isFilledBall(@Nonnull ItemStack stack) {
+                if ( !isValidBall(stack) )
+                    return false;
+
+                NBTTagCompound tag = stack.getTagCompound();
+                if ( tag == null )
+                    return false;
+
+                NBTTagCompound entity = tag.getCompoundTag("EntityTag");
+                return entity != null && entity.hasKey("id");
+            }
+        });
     }
 
     public interface IEntityBall {

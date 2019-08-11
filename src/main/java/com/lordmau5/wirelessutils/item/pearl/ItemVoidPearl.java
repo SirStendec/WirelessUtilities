@@ -103,6 +103,13 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
                     getCapturedHealth(stack)
             ).getFormattedText());
 
+            int exp = getBaseExperience(stack);
+            if ( exp != 0 )
+                tooltip.add(new TextComponentTranslation(
+                        getTranslationKey() + ".value",
+                        StringHelper.formatNumber(exp)
+                ).getFormattedText());
+
         } else
             tooltip.add(new TextComponentTranslation(
                     getTranslationKey() + ".empty"
@@ -261,8 +268,22 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         if ( entity instanceof EntityLiving )
             ((EntityLiving) entity).playLivingSound();
 
+        if ( stack.getCount() > 1 ) {
+            stack = stack.copy();
+            stack.setCount(1);
+        }
+
         return removeEntity(stack);
     }
+
+    public int getBaseExperience(@Nonnull ItemStack stack) {
+        ResourceLocation name = getEntityId(stack);
+        if ( name == null )
+            return 0;
+
+        return EntityUtilities.getBaseExperience(name, (World) null);
+    }
+
 
     /* IEntityBall */
 
@@ -350,9 +371,6 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
             return ItemStack.EMPTY;
 
         ItemStack out = stack.copy();
-        if ( out.getCount() > 1 )
-            out.setCount(1);
-
         NBTTagCompound tag = out.getTagCompound();
         if ( tag != null ) {
             tag.removeTag("EntityID");

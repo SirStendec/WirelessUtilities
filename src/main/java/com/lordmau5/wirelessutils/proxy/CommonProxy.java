@@ -51,6 +51,7 @@ import com.lordmau5.wirelessutils.item.base.IEnhancedItem;
 import com.lordmau5.wirelessutils.item.module.ItemBaseModule;
 import com.lordmau5.wirelessutils.item.module.ItemCaptureModule;
 import com.lordmau5.wirelessutils.item.module.ItemCloneModule;
+import com.lordmau5.wirelessutils.item.module.ItemLaunchModule;
 import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
 import com.lordmau5.wirelessutils.item.pearl.ItemChargedPearl;
@@ -77,10 +78,12 @@ import com.lordmau5.wirelessutils.tile.vaporizer.TilePositionalVaporizer;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
 import com.lordmau5.wirelessutils.utils.ChunkManager;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
+import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
 import com.lordmau5.wirelessutils.utils.WUFakePlayer;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -142,6 +145,9 @@ public class CommonProxy {
         PluginRegistry.init(e);
 
         initFixers();
+
+        if ( ModConfig.vaporizers.compatibility.useSpawnEggs )
+            EntityUtilities.registerSpawnEggs();
     }
 
     public void postInit(FMLPostInitializationEvent e) {
@@ -219,6 +225,14 @@ public class CommonProxy {
     @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityEntry> event) {
         int id = 0;
+
+        event.getRegistry().register(EntityEntryBuilder.create()
+                .entity(EntityItemEnhanced.class)
+                .id(new ResourceLocation(WirelessUtils.MODID, "item"), id++)
+                .name("item")
+                .tracker(64, 20, true)
+                .build()
+        );
 
         event.getRegistry().register(EntityEntryBuilder.create()
                 .entity(EntityChargedPearl.class)
@@ -375,6 +389,7 @@ public class CommonProxy {
         registerItem(event, new ItemTeleportModule());
         registerItem(event, new ItemCaptureModule());
         registerItem(event, new ItemCloneModule());
+        registerItem(event, new ItemLaunchModule());
 
         PluginRegistry.registerItems(event);
     }

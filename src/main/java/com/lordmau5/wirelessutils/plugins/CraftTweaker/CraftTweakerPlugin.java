@@ -278,7 +278,8 @@ public class CraftTweakerPlugin implements IPlugin {
                                         @Optional int baseEnergyPerOperation, @Optional long maxEnergyCapacity,
                                         @Optional int maxCondenserTransfer, @Optional int maxCondenserCapacity,
                                         @Optional int maxItemsPerTick, @Optional int gatherTicks,
-                                        @Optional int maxVaporizerEntities, @Optional int maxVaporizerFluid) {
+                                        @Optional int maxVaporizerEntities, @Optional int maxVaporizerFluid,
+                                        @Optional int vaporizerBudgetPerTick, @Optional int vaporizerMaxBudget) {
             augmentSlots = Math.min(9, Math.max(0, augmentSlots));
             rarity = Math.min(EnumRarity.values().length, Math.max(0, rarity));
 
@@ -293,7 +294,13 @@ public class CraftTweakerPlugin implements IPlugin {
             if ( maxVaporizerFluid == 0 )
                 maxVaporizerFluid = maxVaporizerEntities * 1000;
 
-            Level level = new Level(name, augmentSlots, EnumRarity.values()[rarity], color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, (byte) gatherTicks, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, maxItemsPerTick, maxItemsPerTick, 1, maxVaporizerEntities, maxVaporizerFluid);
+            if ( vaporizerBudgetPerTick == 0 )
+                vaporizerBudgetPerTick = 1;
+
+            if ( vaporizerMaxBudget == 0 )
+                vaporizerMaxBudget = 40 * vaporizerBudgetPerTick;
+
+            Level level = new Level(name, augmentSlots, EnumRarity.values()[rarity], color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, (byte) gatherTicks, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, maxItemsPerTick, maxItemsPerTick, 1, maxVaporizerEntities, maxVaporizerFluid, vaporizerBudgetPerTick, vaporizerMaxBudget);
             Level.addLevel(level);
             return new LevelWrapper(level);
         }
@@ -306,7 +313,8 @@ public class CraftTweakerPlugin implements IPlugin {
                                         @Optional int baseEnergyPerOperation, @Optional long maxEnergyCapacity,
                                         @Optional int maxCondenserTransfer, @Optional int maxCondenserCapacity,
                                         @Optional int budgetPerTick, @Optional int maxBudget, @Optional int costPerItem, @Optional int gatherTicks,
-                                        @Optional int maxVaporizerEntities, @Optional int maxVaporizerFluid) {
+                                        @Optional int maxVaporizerEntities, @Optional int maxVaporizerFluid,
+                                        @Optional int vaporizerBudgetPerTick, @Optional int vaporizerMaxBudget) {
             augmentSlots = Math.min(9, Math.max(0, augmentSlots));
             rarity = Math.min(EnumRarity.values().length, Math.max(0, rarity));
 
@@ -327,7 +335,13 @@ public class CraftTweakerPlugin implements IPlugin {
             if ( maxVaporizerFluid == 0 )
                 maxVaporizerFluid = maxVaporizerEntities * 1000;
 
-            Level level = new Level(name, augmentSlots, EnumRarity.values()[rarity], color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, (byte) gatherTicks, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, budgetPerTick, maxBudget, costPerItem, maxVaporizerEntities, maxVaporizerFluid);
+            if ( vaporizerBudgetPerTick == 0 )
+                vaporizerBudgetPerTick = 1;
+
+            if ( vaporizerMaxBudget == 0 )
+                vaporizerMaxBudget = 40 * vaporizerBudgetPerTick;
+
+            Level level = new Level(name, augmentSlots, EnumRarity.values()[rarity], color, maxChargerTransfer, maxChargerCapacity, craftingTPT, baseEnergyPerOperation, (byte) gatherTicks, maxEnergyCapacity, maxCondenserTransfer, maxCondenserCapacity, budgetPerTick, maxBudget, costPerItem, maxVaporizerEntities, maxVaporizerFluid, vaporizerBudgetPerTick, vaporizerMaxBudget);
             Level.addLevel(level);
             return new LevelWrapper(level);
         }

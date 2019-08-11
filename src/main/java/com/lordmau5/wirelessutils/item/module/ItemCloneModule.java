@@ -126,6 +126,8 @@ public class ItemCloneModule extends ItemModule {
         private int entityCost = 0;
         private int finalCost = 0;
 
+        private int entities = 0;
+
         public CloneBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack module) {
             this.vaporizer = vaporizer;
             ghost = new ItemStack(ModItems.itemVoidPearl);
@@ -277,16 +279,56 @@ public class ItemCloneModule extends ItemModule {
             return ghost;
         }
 
-        public boolean canRun() {
+        public boolean canRun(boolean ignorePower) {
+            this.entities = 0;
             if ( !entityLoaded && !entityBall.isEmpty() )
                 updateModifier(entityBall);
 
-            return finalCost > 0;
+            if ( finalCost == 0 )
+                return false;
+
+            // If we operate on entities in a single continuous
+            // block, then do our entity check here.
+            if ( !ignorePower && vaporizer.hasWorld() && vaporizer.canGetFullEntities() ) {
+                Class<? extends Entity> klass = EntityUtilities.getEntityClass(vaporizer.getModifier());
+                if ( klass == null )
+                    klass = EntityLivingBase.class;
+
+                List<Entity> entities = vaporizer.getWorld().getEntitiesWithinAABB(klass, vaporizer.getFullEntitiesAABB().grow(ModConfig.vaporizers.modules.clone.maxRange));
+                this.entities = entities.size();
+
+                if ( this.entities >= ModConfig.vaporizers.modules.clone.maxCount )
+                    return false;
+            }
+
+            return true;
         }
 
-        public int getEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
-            // TODO: Energy cost to clone mobs.
+        @Nullable
+        @Override
+        public String getUnconfiguredExplanation() {
+            if ( entityBall.isEmpty() )
+                return "info." + WirelessUtils.MODID + ".vaporizer.missing_modifier";
+
+            return null;
+        }
+
+        public int getBlockEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
+            if ( exactCopies )
+                return ModConfig.vaporizers.modules.clone.entityExactEnergy;
+
+            return ModConfig.vaporizers.modules.clone.entityEnergy;
+        }
+
+        public int getEntityEnergyCost(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget target) {
             return 0;
+        }
+
+        public int getActionCost() {
+            if ( exactCopies )
+                return ModConfig.vaporizers.modules.clone.budgetExact;
+
+            return ModConfig.vaporizers.modules.clone.budget;
         }
 
         @Nonnull
@@ -302,21 +344,24 @@ public class ItemCloneModule extends ItemModule {
 
             int removed = vaporizer.removeFuel(finalCost);
             if ( removed < finalCost ) {
-                vaporizer.addFuel(removed);
+                if ( removed > 0 )
+                    vaporizer.addFuel(removed);
                 return IWorkProvider.WorkResult.FAILURE_STOP;
             }
 
             // Check for too many entities.
-            Class<? extends Entity> klass = EntityUtilities.getEntityClass(modifier);
-            if ( klass == null ) {
-                vaporizer.addFuel(removed);
-                return IWorkProvider.WorkResult.FAILURE_STOP;
-            }
+            if ( !vaporizer.canGetFullEntities() ) {
+                Class<? extends Entity> klass = EntityUtilities.getEntityClass(modifier);
+                if ( klass == null ) {
+                    vaporizer.addFuel(removed);
+                    return IWorkProvider.WorkResult.FAILURE_STOP;
+                }
 
-            List<Entity> existing = world.getEntitiesWithinAABB(klass, new AxisAlignedBB(target.pos).grow(ModConfig.vaporizers.modules.clone.maxRange));
-            if ( existing.size() > ModConfig.vaporizers.modules.clone.maxCount ) {
-                vaporizer.addFuel(removed);
-                return IWorkProvider.WorkResult.FAILURE_STOP;
+                List<Entity> existing = world.getEntitiesWithinAABB(klass, new AxisAlignedBB(target.pos).grow(ModConfig.vaporizers.modules.clone.maxRange));
+                if ( existing.size() > ModConfig.vaporizers.modules.clone.maxCount ) {
+                    vaporizer.addFuel(removed);
+                    return IWorkProvider.WorkResult.FAILURE_STOP;
+                }
             }
 
             // Now get the entity...
@@ -327,8 +372,34 @@ public class ItemCloneModule extends ItemModule {
             }
 
             // ... and spawn it!
-            entity.setPosition(target.pos.getX() + world.rand.nextFloat(), target.pos.getY() + world.rand.nextFloat(), target.pos.getZ() + world.rand.nextFloat());
+            double offsetX = 0.5D;
+            double offsetY = 0.5D;
+            double offsetZ = 0.5D;
+
+            if ( ModConfig.vaporizers.modules.clone.randomSpawn ) {
+                offsetX = world.rand.nextDouble();
+                offsetY = world.rand.nextDouble();
+                offsetZ = world.rand.nextDouble();
+            }
+
+            entity.setPositionAndRotation(
+                    target.pos.getX() + offsetX,
+                    target.pos.getY() + offsetY,
+                    target.pos.getZ() + offsetZ,
+                    360.0F * world.rand.nextFloat(),
+                    entity.rotationPitch
+            );
+
             world.spawnEntity(entity);
+
+            if ( removed > finalCost )
+                vaporizer.addFuel(removed - finalCost);
+
+            if ( vaporizer.canGetFullEntities() ) {
+                entities++;
+                if ( entities >= ModConfig.vaporizers.modules.clone.maxCount )
+                    return IWorkProvider.WorkResult.SUCCESS_STOP;
+            }
 
             return IWorkProvider.WorkResult.SUCCESS_CONTINUE;
         }

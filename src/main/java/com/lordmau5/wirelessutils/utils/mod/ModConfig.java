@@ -750,15 +750,23 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public boolean useFluid = true;
 
+        @Config.Name("Allow Inserting Fluid")
+        @Config.Comment("Whether or not Vaporizers should accept input fluids. When disabled, Vaporizers can still produce fluid but not accept it.")
+        public boolean acceptFluid = true;
+
+        @Config.Name("Valid Fluids")
+        @Config.Comment("These fluids can be used in Vaporizers. They convert into experience points and back at the rates below.")
+        @Config.RequiresWorldRestart
+        public String[] fluids = {
+                "experience",
+                "essence",
+                "xpjuice"
+        };
+
         @Config.Name("Fluid mB per Experience Point")
         @Config.Comment("Fluid experience should convert to experience points at this ratio.")
         @Config.RangeInt(min = 1)
-        public int mbPerPoint = 20;
-
-        @Config.Name("Custom Fluid Name")
-        @Config.Comment("If set, this fluid is used rather than an auto-discovered fluid.")
-        @Config.RequiresWorldRestart
-        public String customFluid = "";
+        public int[] mbPerPoint = {20, 20, 20};
 
         @Config.Name("Maximum Entities Per Tick")
         @Config.Comment("The maximum number of entities to handle in a work tick.")
@@ -774,6 +782,11 @@ public class ModConfig {
     }
 
     public static class VaporizerCompatibility {
+        @Config.Name("Allow Vanilla Spawn Eggs")
+        @Config.Comment("Allow Vanilla Spawn Eggs to be used in Vaporizers for Duplication.")
+        @Config.RequiresMcRestart
+        public boolean useSpawnEggs = true;
+
         @Config.Name("Use Morbs")
         @Config.Comment("Allow the use of Morbs from Thermal Expansion in Vaporizers.")
         @Config.RequiresMcRestart
@@ -810,6 +823,16 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public int requiredLevel = 0;
 
+        @Config.Name("Budget per Capture")
+        @Config.Comment("Use this much action budget to capture a single entity.")
+        @Config.RangeInt(min = 0)
+        public int budget = 20;
+
+        @Config.Name("Energy per Capture")
+        @Config.Comment("Use this much energy to capture a single entity.")
+        @Config.RangeInt(min = 0)
+        public int entityEnergy = 100;
+
         @Config.Name("Energy Multiplier")
         @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
         @Config.RangeDouble(min = 0)
@@ -834,6 +857,26 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public int requiredLevel = 0;
 
+        @Config.Name("Budget per Clone")
+        @Config.Comment("Use this much action budget to clone an entity.")
+        @Config.RangeInt(min = 0)
+        public int budget = 20;
+
+        @Config.Name("Budget per Exact Copy")
+        @Config.Comment("Use this much action budget to clone an entity in Exact Copy mode.")
+        @Config.RangeInt(min = 0)
+        public int budgetExact = 60;
+
+        @Config.Name("Energy per Entity")
+        @Config.Comment("Consume this amount of base energy per entity spawned.")
+        @Config.RangeInt(min = 0)
+        public int entityEnergy = 1000;
+
+        @Config.Name("Energy per Exact Copy")
+        @Config.Comment("Config this amount of base energy per exact copy spawned.")
+        @Config.RangeInt(min = 0)
+        public int entityExactEnergy = 2000;
+
         @Config.Name("Energy Multiplier")
         @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
         @Config.RangeDouble(min = 0)
@@ -857,6 +900,19 @@ public class ModConfig {
         })
         @Config.RangeDouble(min = 0)
         public double exactFactor = 2;
+
+        @Config.Name("Exact Copy - Energy Addition")
+        @Config.RequiresWorldRestart
+        public int exactEnergyAddition = 0;
+
+        @Config.Name("Exact Copy - Energy Drain per Tick")
+        @Config.RequiresWorldRestart
+        public int exactEnergyDrain = 0;
+
+        @Config.Name("Exact Copy - Energy Multiplier")
+        @Config.RequiresWorldRestart
+        @Config.RangeDouble(min = 0)
+        public double exactEnergyMultiplier = 1;
 
         @Config.Name("Animal Base Experience")
         @Config.Comment("Animal entities do not expose experience in a standard way. Because of that, each one will be worth this number of experience points to spawn.")
@@ -883,6 +939,10 @@ public class ModConfig {
         @Config.Comment("Check within this many blocks of the target spawn location.")
         @Config.RangeInt(min = 0)
         public int maxRange = 10;
+
+        @Config.Name("Randomize Spawn Position")
+        @Config.Comment("When enabled, entities will be spawned at a random position within the target block.")
+        public boolean randomSpawn = true;
     }
 
     public static class TeleportModule {
@@ -940,6 +1000,26 @@ public class ModConfig {
         @Config.RangeInt(min = 0)
         @Config.RequiresWorldRestart
         public int requiredLevel = 0;
+
+        @Config.Name("Budget per Entity")
+        @Config.Comment("Use this much action budget for each entity attacked.")
+        @Config.RangeInt(min = 0)
+        public int budget = 10;
+
+        @Config.Name("Budget per Entity - Use Weapon")
+        @Config.Comment("Use this much action budget for each entity attacked with a weapon.")
+        @Config.RangeInt(min = 0)
+        public int budgetWeapon = 15;
+
+        @Config.Name("Energy per Entity")
+        @Config.Comment("Use this much base energy for each entity attacked.")
+        @Config.RangeInt(min = 0)
+        public int entityEnergy = 1000;
+
+        @Config.Name("Energy per Entity - Use Weapon")
+        @Config.Comment("Use this much base energy for each entity attacked with a weapon.")
+        @Config.RangeInt(min = 0)
+        public int entityWeaponEnergy = 1000;
 
         @Config.Name("Energy Multiplier")
         @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")

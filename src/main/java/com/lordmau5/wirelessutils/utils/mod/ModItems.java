@@ -25,6 +25,7 @@ import com.lordmau5.wirelessutils.item.augment.ItemWorldAugment;
 import com.lordmau5.wirelessutils.item.module.ItemBaseModule;
 import com.lordmau5.wirelessutils.item.module.ItemCaptureModule;
 import com.lordmau5.wirelessutils.item.module.ItemCloneModule;
+import com.lordmau5.wirelessutils.item.module.ItemLaunchModule;
 import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
 import com.lordmau5.wirelessutils.item.pearl.ItemChargedPearl;
@@ -158,6 +159,9 @@ public class ModItems {
     @GameRegistry.ObjectHolder("wirelessutils:clone_module")
     public static ItemCloneModule itemCloneModule;
 
+    @GameRegistry.ObjectHolder("wirelessutils:launch_module")
+    public static ItemLaunchModule itemLaunchModule;
+
     public static void initLootTables() {
         LootTableList.register(new ResourceLocation(WirelessUtils.MODID, "charged_pearl_drops"));
     }
@@ -252,6 +256,7 @@ public class ModItems {
         itemTeleportModule.initModel();
         itemCaptureModule.initModel();
         itemCloneModule.initModel();
+        itemLaunchModule.initModel();
     }
 
     @SideOnly(Side.CLIENT)

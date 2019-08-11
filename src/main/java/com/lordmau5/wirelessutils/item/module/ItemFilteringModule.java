@@ -36,6 +36,10 @@ public abstract class ItemFilteringModule extends ItemModule {
         return tag.hasKey("Whitelist") || tag.hasKey("Blacklist") || tag.hasKey("ChildMode") || tag.hasKey("NameMode") || tag.hasKey("SneakMode") || super.isConfigured(stack);
     }
 
+    protected int getDefaultPlayerMode() {
+        return 1;
+    }
+
     @Override
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
@@ -196,7 +200,7 @@ public abstract class ItemFilteringModule extends ItemModule {
                 return tag.getByte("PlayerMode");
         }
 
-        return 1;
+        return getDefaultPlayerMode();
     }
 
     @Nonnull
@@ -215,7 +219,7 @@ public abstract class ItemFilteringModule extends ItemModule {
         else if ( mode > 2 )
             mode = 0;
 
-        if ( mode == 1 )
+        if ( mode == getDefaultPlayerMode() )
             tag.removeTag("PlayerMode");
         else
             tag.setByte("PlayerMode", (byte) mode);
@@ -574,6 +578,23 @@ public abstract class ItemFilteringModule extends ItemModule {
         @Nullable
         public Predicate<? super Entity> getEntityFilter() {
             return predicate;
+        }
+
+        @Override
+        public boolean canRun(boolean ignorePower) {
+            if ( whitelist && (blacklist == null || blacklist.length == 0) )
+                return false;
+
+            return true;
+        }
+
+        @Nullable
+        @Override
+        public String getUnconfiguredExplanation() {
+            if ( whitelist && (blacklist == null || blacklist.length == 0) )
+                return "info." + WirelessUtils.MODID + ".vaporizer.empty_whitelist";
+
+            return null;
         }
     }
 

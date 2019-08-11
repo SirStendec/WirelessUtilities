@@ -192,6 +192,22 @@ public class LevelWrapper implements ILevelWrapper {
         return level.maxVaporizerFluid;
     }
 
+    public int getVaporizerBudgetPerTick() {
+        return level.vaporizerBudgetPerTick;
+    }
+
+    public void setVaporizerBudgetPerTick(int budget) {
+        level.vaporizerBudgetPerTick = budget;
+    }
+
+    public int getVaporizerMaxBudget() {
+        return level.vaporizerMaxBudget;
+    }
+
+    public void setVaporizerMaxBudget(int budget) {
+        level.vaporizerMaxBudget = budget;
+    }
+
     public int getIndex() {
         return level.toInt();
     }

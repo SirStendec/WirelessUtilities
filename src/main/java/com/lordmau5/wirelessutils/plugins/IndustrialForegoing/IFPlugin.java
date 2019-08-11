@@ -63,9 +63,6 @@ public class IFPlugin implements IPlugin {
                         return ItemStack.EMPTY;
 
                     ItemStack out = stack.copy();
-                    if ( out.getCount() > 1 )
-                        out.setCount(1);
-
                     out.setTagCompound(null);
                     return out;
                 }

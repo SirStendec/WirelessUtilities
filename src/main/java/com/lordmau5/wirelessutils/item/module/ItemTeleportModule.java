@@ -276,7 +276,11 @@ public class ItemTeleportModule extends ItemFilteringModule {
             return 0;
         }
 
-        public boolean canRun() {
+        @Override
+        public boolean canRun(boolean ignorePower) {
+            if ( !super.canRun(ignorePower) )
+                return false;
+
             // This should only happen when the machine is loading.
             if ( target == null ) {
                 updateModifier(vaporizer.getModifier());
@@ -284,12 +288,20 @@ public class ItemTeleportModule extends ItemFilteringModule {
                     return false;
             }
 
-            return vaporizer.getEnergyStored() >= cost;
+            return ignorePower || vaporizer.getEnergyStored() >= cost;
         }
 
         @Override
-        public int getEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
+        public int getBlockEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
             return cost;
+        }
+
+        public int getEntityEnergyCost(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget target) {
+            return 0;
+        }
+
+        public int getActionCost() {
+            return 0;
         }
 
         @Nonnull

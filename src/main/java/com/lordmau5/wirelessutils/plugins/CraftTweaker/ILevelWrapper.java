@@ -124,6 +124,18 @@ public interface ILevelWrapper {
     @ZenGetter("maxVaporizerFluid")
     int getMaxVaporizerFluid();
 
+    @ZenGetter("vaporizerBudgetPerTick")
+    int getVaporizerBudgetPerTick();
+
+    @ZenSetter("vaporizerBudgetPerTick")
+    void setVaporizerBudgetPerTick(int budget);
+
+    @ZenGetter("vaporizerMaxBudget")
+    int getVaporizerMaxBudget();
+
+    @ZenSetter("vaporizerMaxBudget")
+    void setVaporizerMaxBudget(int budget);
+
     @ZenGetter("index")
     int getIndex();
 }
