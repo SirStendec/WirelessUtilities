@@ -101,18 +101,24 @@ public class TEPlugin implements IPlugin {
                     return out;
                 }
 
-                @Override
                 public boolean isValidBall(@Nonnull ItemStack stack) {
                     return stack.getItem() == itemMorb;
                 }
 
-                @Override
                 public boolean isFilledBall(@Nonnull ItemStack stack) {
                     if ( !isValidBall(stack) )
                         return false;
 
                     NBTTagCompound tag = stack.getTagCompound();
                     return tag != null && tag.hasKey("id");
+                }
+
+                public boolean isBabyEntity(@Nonnull ItemStack stack) {
+                    if ( !isFilledBall(stack) )
+                        return false;
+
+                    NBTTagCompound tag = stack.getTagCompound();
+                    return tag != null && (tag.getBoolean("IsBaby") || tag.getInteger("Age") < 0);
                 }
             });
         }

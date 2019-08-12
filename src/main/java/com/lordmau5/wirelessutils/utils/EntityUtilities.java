@@ -166,6 +166,14 @@ public class EntityUtilities {
         return false;
     }
 
+    public static boolean containsBabyEntity(@Nonnull ItemStack stack) {
+        IEntityBall handler = entityBallMap.get(stack.getItem());
+        if ( handler != null )
+            return handler.isBabyEntity(stack);
+
+        return false;
+    }
+
     @Nonnull
     public static ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
         ResourceLocation name = EntityList.getKey(entity);
@@ -284,6 +292,11 @@ public class EntityUtilities {
                 NBTTagCompound entity = tag.getCompoundTag("EntityTag");
                 return entity != null && entity.hasKey("id");
             }
+
+            @Override
+            public boolean isBabyEntity(@Nonnull ItemStack stack) {
+                return false;
+            }
         });
     }
 
@@ -353,6 +366,14 @@ public class EntityUtilities {
          * @return True if the entity ball contains an entity.
          */
         boolean isFilledBall(@Nonnull ItemStack stack);
+
+        /**
+         * Check if the provided entity ball item stack contains a baby entity.
+         *
+         * @param stack The ItemStack to check.
+         * @return True if the entity ball contains a baby entity.
+         */
+        boolean isBabyEntity(@Nonnull ItemStack stack);
     }
 
     public static String[] BAD_TAGS = {

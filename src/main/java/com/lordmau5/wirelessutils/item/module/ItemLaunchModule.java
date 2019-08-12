@@ -187,7 +187,7 @@ public class ItemLaunchModule extends ItemFilteringModule {
             return false;
         }
 
-        public boolean isValidInput(@Nonnull ItemStack stack) {
+        public boolean isValidInput(@Nonnull ItemStack stack, int slot) {
             return false;
         }
 

@@ -446,6 +446,8 @@ info.wirelessutils.work_info.unconfigured.explanation.0=This machine cannot curr
 
 info.wirelessutils.vaporizer.unit=Entities/t
 info.wirelessutils.vaporizer.missing_module.0=Please install a valid module.
+info.wirelessutils.vaporizer.cannot_spawn.0=This entity cannot be spawned.
+info.wirelessutils.vaporizer.missing_entity.0=Please insert a captured entity.
 info.wirelessutils.vaporizer.missing_modifier.0=Please install a valid modifier.
 info.wirelessutils.vaporizer.bad_config.0=Please configure the module.
 info.wirelessutils.vaporizer.empty_whitelist.0=The target whitelist is empty.

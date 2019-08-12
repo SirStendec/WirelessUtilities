@@ -763,14 +763,25 @@ public class ModConfig {
                 "xpjuice"
         };
 
+        @Config.Name("Use Captured Entities as Fuel")
+        @Config.Comment("When enabled, captured entities can be used as fuel for Vaporizer modules that require fuel.")
+        public boolean useEntitiesFuel = true;
+
+        @Config.Name("Captured Entity Fuel Addition")
+        @Config.Comment("When burning a captured entity for fuel, this value will be added to their value to make up for the loss of drops.")
+        @Config.RangeInt(min = 0)
+        public int entityAddition = 1;
+
+        @Config.Name("Baby Experience Multiplier")
+        @Config.Comment("The base experience of baby entities is multiplied by this value when calculating the value of a captured mob. Set to zero to disable using baby entities as fuel.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double babyMultiplier = 0.5D;
+
         @Config.Name("Fluid mB per Experience Point")
         @Config.Comment("Fluid experience should convert to experience points at this ratio.")
         @Config.RangeInt(min = 1)
         public int[] mbPerPoint = {20, 20, 20};
-
-        @Config.Name("Maximum Entities Per Tick")
-        @Config.Comment("The maximum number of entities to handle in a work tick.")
-        public int entitiesPerTick = 100;
 
         @Config.Name("Compatibility")
         @Config.Comment("Compatibility with other mods!")
@@ -920,6 +931,11 @@ public class ModConfig {
         @Config.RequiresMcRestart
         public int animalBaseExp = 3;
 
+        @Config.Name("Exact Copy - Use Baby Multiplier")
+        @Config.Comment("When enabled, the baby experience multiplier is applied when spawning exact copies of baby entities.")
+        @Config.RequiresWorldRestart
+        public boolean exactBaby = false;
+
         @Config.Name("Experience Factor")
         @Config.Comment("The cost to spawn an entity is calculated as Cost = Ceiling(Base Experience * Experience Factor + Max Health * Health Factor)")
         @Config.RangeDouble(min = 0)
@@ -952,6 +968,11 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public int requiredLevel = 0;
 
+        @Config.Name("Budget per Entity")
+        @Config.Comment("Use this much action budget for each entity teleported.")
+        @Config.RangeInt(min = 0)
+        public int budget = 10;
+
         @Config.Name("Energy Multiplier")
         @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
         @Config.RangeDouble(min = 0)
@@ -978,18 +999,38 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public boolean targetPlayers = true;
 
+        @Config.Name("Base Fuel")
+        @Config.Comment("Teleporting an entity will use this much fuel, in addition to energy. The fuel value will be rounded up to the nearest integer.")
+        @Config.RangeDouble(min = 0)
+        public double baseFuel = 0;
+
+        @Config.Name("Fuel per Block")
+        @Config.Comment("The fuel cost to teleport entities to a distant block goes up by this amount per block, linearly with distance.")
+        @Config.RangeDouble(min = 0)
+        public double fuelPerBlock = 0;
+
+        @Config.Name("Fuel per Block Squared")
+        @Config.Comment("The fuel cost to teleport entities to a distant block goes up by this amount per block as a square with distance.")
+        @Config.RangeDouble(min = 0)
+        public double fuelPerBlockSquared = 0;
+
+        @Config.Name("Maximum / Interdimensional Fuel")
+        @Config.Comment("The maximum fuel cost to teleport entities to a distant block will never exceed this value. Also the cost for interdimensional teleportation.")
+        @Config.RangeDouble(min = 0)
+        public double fuelInterdimensional = 0;
+
         @Config.Name("Cost per Block")
-        @Config.Comment("The cost to teleport entities to a distant block goes up by this amount per block, linearly with distance.")
+        @Config.Comment("The energy cost to teleport entities to a distant block goes up by this amount per block, linearly with distance.")
         @Config.RangeInt(min = 0)
         public int costPerBlock = 0;
 
         @Config.Name("Cost per Block Squared")
-        @Config.Comment("The cost to teleport entities to a distant block goes up by this amount per block as a square with distance.")
+        @Config.Comment("The energy cost to teleport entities to a distant block goes up by this amount per block as a square with distance.")
         @Config.RangeInt(min = 0)
         public int costPerBlockSquared = 0;
 
         @Config.Name("Maximum / Interdimensional Cost")
-        @Config.Comment("The maximum cost to teleport entities to a distant block will never exceed this value. Also the cost for interdimensional teleportation.")
+        @Config.Comment("The maximum energy cost to teleport entities to a distant block will never exceed this value. Also the cost for interdimensional teleportation.")
         @Config.RangeInt(min = 0)
         public int costInterdimensional = 1000;
     }

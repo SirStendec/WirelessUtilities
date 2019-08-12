@@ -6,6 +6,7 @@ import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
+import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.TeleportUtils;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
@@ -67,6 +68,7 @@ public class ItemTeleportModule extends ItemFilteringModule {
         private boolean isInterdimensional = false;
         private int range = 0;
         private int cost = 0;
+        private int fuel = 0;
 
         public TeleportBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack stack) {
             super(vaporizer);
@@ -90,6 +92,10 @@ public class ItemTeleportModule extends ItemFilteringModule {
 
         public int getRange() {
             return range;
+        }
+
+        public int getFuel() {
+            return fuel;
         }
 
         public double getEnergyMultiplier() {
@@ -139,19 +145,30 @@ public class ItemTeleportModule extends ItemFilteringModule {
                     target = pos.offset(vaporizer.getEnumFacing().getOpposite(), 1);
             }
 
+            double fuel = ModConfig.vaporizers.modules.teleport.fuelInterdimensional;
             cost = ModConfig.vaporizers.modules.teleport.costInterdimensional;
             if ( target != null && target.getDimension() == pos.getDimension() ) {
                 int dimCost = 0;
+                double fuelCost = 0;
                 double distance = pos.distanceSq(target);
-                if ( distance > 0 )
+                if ( distance > 0 ) {
                     dimCost = (int) Math.floor(
                             (ModConfig.vaporizers.modules.teleport.costPerBlock * Math.sqrt(distance)) +
                                     (ModConfig.vaporizers.modules.teleport.costPerBlockSquared * distance)
                     );
 
+                    fuelCost = (ModConfig.vaporizers.modules.teleport.fuelPerBlock * Math.sqrt(distance)) +
+                            (ModConfig.vaporizers.modules.teleport.fuelPerBlockSquared * distance);
+                }
+
                 if ( dimCost < cost )
                     cost = dimCost;
+
+                if ( fuelCost < fuel || fuel == 0 )
+                    fuel = fuelCost;
             }
+
+            this.fuel = (int) Math.ceil(fuel + ModConfig.vaporizers.modules.teleport.baseFuel);
         }
 
         @Nullable
@@ -212,28 +229,43 @@ public class ItemTeleportModule extends ItemFilteringModule {
         }
 
         public boolean isInputUnlocked(int slot) {
-            if ( slot != 0 )
-                return false;
-
-            ItemStack modifier = vaporizer.getModifier();
-            if ( isPositionalCardValid(modifier) ) {
-                return isTargetInRange(modifier, ModItems.itemRangeAugment.getPositionalRange(ItemStack.EMPTY), false);
+            if ( slot == 0 ) {
+                ItemStack modifier = vaporizer.getModifier();
+                if ( isPositionalCardValid(modifier) )
+                    return isTargetInRange(modifier, ModItems.itemRangeAugment.getPositionalRange(ItemStack.EMPTY), false);
             }
 
-            return true;
+            return usesFuel();
         }
 
         @Override
         public int getInputLimit(int slot) {
-            return 1;
+            if ( slot == 0 )
+                return 1;
+
+            return 64;
         }
 
-        public boolean isValidInput(@Nonnull ItemStack stack) {
-            if ( stack.getItem() != ModItems.itemRangeAugment )
+        public boolean isValidInput(@Nonnull ItemStack stack, int slot) {
+            if ( slot == 0 ) {
+                if ( stack.getItem() != ModItems.itemRangeAugment )
+                    return false;
+
+                return vaporizer.getLevel().toInt() >=
+                        ModItems.itemRangeAugment.getRequiredLevel(stack).toInt();
+            }
+
+            if ( !usesFuel() )
                 return false;
 
-            return vaporizer.getLevel().toInt() >=
-                    ModItems.itemRangeAugment.getRequiredLevel(stack).toInt();
+            if ( !EntityUtilities.isFilledEntityBall(stack) )
+                return false;
+
+            int value = EntityUtilities.getBaseExperience(stack, vaporizer.getWorld());
+            if ( EntityUtilities.containsBabyEntity(stack) )
+                value = (int) Math.floor(value * ModConfig.vaporizers.babyMultiplier);
+
+            return value > 0;
         }
 
         @Override
@@ -265,7 +297,14 @@ public class ItemTeleportModule extends ItemFilteringModule {
         }
 
         public boolean wantsFluid() {
-            return false;
+            return usesFuel();
+        }
+
+        public static boolean usesFuel() {
+            return ModConfig.vaporizers.modules.teleport.baseFuel > 0 ||
+                    ModConfig.vaporizers.modules.teleport.fuelPerBlockSquared > 0 ||
+                    ModConfig.vaporizers.modules.teleport.fuelPerBlock > 0 ||
+                    ModConfig.vaporizers.modules.teleport.fuelInterdimensional > 0;
         }
 
         public int getExperienceMode() {
@@ -301,7 +340,7 @@ public class ItemTeleportModule extends ItemFilteringModule {
         }
 
         public int getActionCost() {
-            return 0;
+            return ModConfig.vaporizers.modules.teleport.budget;
         }
 
         @Nonnull
@@ -310,9 +349,22 @@ public class ItemTeleportModule extends ItemFilteringModule {
             if ( world == null || entity.timeUntilPortal > 0 || target == null )
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
 
+            int removed = fuel == 0 ? 0 : vaporizer.removeFuel(fuel);
+            if ( removed < fuel ) {
+                if ( removed > 0 )
+                    vaporizer.addFuel(fuel);
+                return IWorkProvider.WorkResult.FAILURE_STOP;
+            }
+
             Entity newEntity = TeleportUtils.teleportEntity(entity, target.getDimension(), target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5);
-            if ( newEntity == null )
+            if ( newEntity == null ) {
+                if ( removed > 0 )
+                    vaporizer.addFuel(removed);
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
+            }
+
+            if ( removed > fuel )
+                vaporizer.addFuel(removed - fuel);
 
             newEntity.timeUntilPortal = newEntity.getPortalCooldown();
             newEntity.fallDistance = 0;

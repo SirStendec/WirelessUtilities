@@ -120,7 +120,7 @@ public class ItemCaptureModule extends ItemFilteringModule {
             return true;
         }
 
-        public boolean isValidInput(@Nonnull ItemStack stack) {
+        public boolean isValidInput(@Nonnull ItemStack stack, int slot) {
             return EntityUtilities.isEntityBall(stack) && !EntityUtilities.isFilledEntityBall(stack);
         }
 
@@ -189,7 +189,7 @@ public class ItemCaptureModule extends ItemFilteringModule {
             int slot = 0;
             for (int i = 0; i < input.getSlots(); i++) {
                 ItemStack slotted = input.extractItem(i, 1, true);
-                if ( isValidInput(slotted) ) {
+                if ( isValidInput(slotted, i) ) {
                     stack = slotted;
                     slot = i;
                     break;

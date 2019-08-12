@@ -9,6 +9,7 @@ import com.lordmau5.wirelessutils.item.base.IJEIInformationItem;
 import com.lordmau5.wirelessutils.item.base.ItemBasePearl;
 import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import mezz.jei.api.IModRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -104,6 +105,9 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
             ).getFormattedText());
 
             int exp = getBaseExperience(stack);
+            if ( isBabyEntity(stack) )
+                exp = (int) Math.floor(exp * ModConfig.vaporizers.babyMultiplier);
+
             if ( exp != 0 )
                 tooltip.add(new TextComponentTranslation(
                         getTranslationKey() + ".value",
@@ -221,7 +225,7 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         if ( name == null )
             return null;
 
-        ITextComponent out = null;
+        ITextComponent out;
 
         String key = "entity." + name + ".name";
         if ( StringHelper.canLocalize(key) )
@@ -233,14 +237,11 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         else
             out = new TextComponentString(name);
 
-        NBTTagCompound entity = tag.getCompoundTag("EntityData");
-        if ( entity != null ) {
-            if ( entity.getBoolean("IsBaby") || entity.getInteger("Age") < 0 )
-                out = new TextComponentTranslation(
-                        getTranslationKey() + ".baby",
-                        out
-                );
-        }
+        if ( isBabyEntity(stack) )
+            out = new TextComponentTranslation(
+                    getTranslationKey() + ".baby",
+                    out
+            );
 
         return out;
     }
@@ -297,6 +298,15 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
 
         NBTTagCompound tag = stack.getTagCompound();
         return tag != null && tag.hasKey("EntityID", Constants.NBT.TAG_STRING);
+    }
+
+    public boolean isBabyEntity(@Nonnull ItemStack stack) {
+        if ( !isFilledBall(stack) )
+            return false;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        NBTTagCompound entity = tag.getCompoundTag("EntityData");
+        return entity != null && (entity.getBoolean("IsBaby") || entity.getInteger("Age") < 0);
     }
 
     @Nullable

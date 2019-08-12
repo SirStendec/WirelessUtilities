@@ -122,6 +122,7 @@ public class ItemCloneModule extends ItemModule {
 
         private ItemStack entityBall = ItemStack.EMPTY;
         private boolean entityLoaded = false;
+        private boolean entityBaby = false;
         private float entityHealth = 0;
         private int entityCost = 0;
         private int finalCost = 0;
@@ -144,30 +145,36 @@ public class ItemCloneModule extends ItemModule {
         }
 
         public double getEnergyMultiplier() {
+            double exactMultiplier = exactCopies ? ModConfig.vaporizers.modules.clone.exactEnergyMultiplier : 1D;
+
             ItemStack stack = vaporizer.getModule();
             if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )
-                return 1;
+                return exactMultiplier;
 
             ItemModule item = (ItemModule) stack.getItem();
-            return item.getEnergyMultiplier(stack, vaporizer);
+            return item.getEnergyMultiplier(stack, vaporizer) * exactMultiplier;
         }
 
         public int getEnergyAddition() {
+            int energyAddition = exactCopies ? ModConfig.vaporizers.modules.clone.exactEnergyAddition : 0;
+
             ItemStack stack = vaporizer.getModule();
             if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )
-                return 0;
+                return energyAddition;
 
             ItemModule item = (ItemModule) stack.getItem();
-            return item.getEnergyAddition(stack, vaporizer);
+            return item.getEnergyAddition(stack, vaporizer) + energyAddition;
         }
 
         public int getEnergyDrain() {
+            int exactDrain = exactCopies ? ModConfig.vaporizers.modules.clone.exactEnergyDrain : 0;
+
             ItemStack stack = vaporizer.getModule();
             if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )
-                return 0;
+                return exactDrain;
 
             ItemModule item = (ItemModule) stack.getItem();
-            return item.getEneryDrain(stack, vaporizer);
+            return item.getEneryDrain(stack, vaporizer) + exactDrain;
         }
 
         public boolean canInvert() {
@@ -213,11 +220,18 @@ public class ItemCloneModule extends ItemModule {
         }
 
         public boolean isInputUnlocked(int slot) {
-            return true;
+            return ModConfig.vaporizers.useEntitiesFuel;
         }
 
-        public boolean isValidInput(@Nonnull ItemStack stack) {
-            return EntityUtilities.isFilledEntityBall(stack);
+        public boolean isValidInput(@Nonnull ItemStack stack, int slot) {
+            if ( !EntityUtilities.isFilledEntityBall(stack) )
+                return false;
+
+            int value = EntityUtilities.getBaseExperience(stack, vaporizer.getWorld());
+            if ( EntityUtilities.containsBabyEntity(stack) )
+                value = (int) Math.floor(value * ModConfig.vaporizers.babyMultiplier);
+
+            return value > 0;
         }
 
         public boolean isModifierUnlocked() {
@@ -225,7 +239,7 @@ public class ItemCloneModule extends ItemModule {
         }
 
         public boolean isValidModifier(@Nonnull ItemStack stack) {
-            return EntityUtilities.isFilledEntityBall(stack);
+            return isValidInput(stack, 0);
         }
 
         public void updateModifier(@Nonnull ItemStack stack) {
@@ -239,6 +253,8 @@ public class ItemCloneModule extends ItemModule {
                 if ( entity != null ) {
                     entityLoaded = true;
                     entityCost = EntityUtilities.getBaseExperience(entity);
+                    entityBaby = EntityUtilities.containsBabyEntity(stack);
+
                     if ( entity instanceof EntityLivingBase )
                         entityHealth = ((EntityLivingBase) entity).getMaxHealth();
                     else
@@ -256,8 +272,11 @@ public class ItemCloneModule extends ItemModule {
             }
 
             double rawCost = (ModConfig.vaporizers.modules.clone.expFactor * entityCost) + (ModConfig.vaporizers.modules.clone.healthFactor * entityHealth);
-            if ( exactCopies )
+            if ( exactCopies ) {
                 rawCost *= ModConfig.vaporizers.modules.clone.exactFactor;
+                if ( entityBaby && ModConfig.vaporizers.modules.clone.exactBaby )
+                    rawCost *= ModConfig.vaporizers.babyMultiplier;
+            }
 
             finalCost = (int) Math.ceil(rawCost);
         }
@@ -308,7 +327,10 @@ public class ItemCloneModule extends ItemModule {
         @Override
         public String getUnconfiguredExplanation() {
             if ( entityBall.isEmpty() )
-                return "info." + WirelessUtils.MODID + ".vaporizer.missing_modifier";
+                return "info." + WirelessUtils.MODID + ".vaporizer.missing_entity";
+
+            if ( finalCost == 0 )
+                return "info." + WirelessUtils.MODID + ".vaporizer.cannot_spawn";
 
             return null;
         }

@@ -360,7 +360,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             return behavior != null && behavior.isValidModifier(stack);
 
         else if ( slot >= getInputOffset() && slot < getOutputOffset() )
-            return behavior != null && behavior.isValidInput(stack);
+            return behavior != null && behavior.isValidInput(stack, slot - getInputOffset());
 
         return temporarilyAllowInsertion;
     }
@@ -699,15 +699,22 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         }
 
         // Burn items for fluid.
-        if ( amount > 0 && hasInput() && hasEmptyOutput() ) {
+        if ( ModConfig.vaporizers.useEntitiesFuel && amount > 0 && hasInput() && hasEmptyOutput() ) {
             for (int i = 0; i < inputProxy.getSlots(); i++) {
                 ItemStack slotted = inputProxy.extractItem(i, 64, true);
                 if ( !EntityUtilities.isFilledEntityBall(slotted) )
                     continue;
 
                 int value = EntityUtilities.getBaseExperience(slotted, world);
+                if ( EntityUtilities.containsBabyEntity(slotted) )
+                    value = (int) Math.floor(value * ModConfig.vaporizers.babyMultiplier);
+
                 if ( value == 0 )
                     continue;
+
+                // We do this after checking if the value is zero as a zero value is how we disallow
+                // certain mobs from being used.
+                value += ModConfig.vaporizers.entityAddition;
 
                 int number = Math.min(slotted.getCount(), (int) Math.ceil((double) amount / value));
                 if ( number == 0 )
@@ -1548,7 +1555,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         boolean isInputUnlocked(int slot);
 
-        boolean isValidInput(@Nonnull ItemStack stack);
+        boolean isValidInput(@Nonnull ItemStack stack, int slot);
 
         default int getInputLimit(int slot) {
             return 64;

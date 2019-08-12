@@ -107,6 +107,14 @@ public class IFPlugin implements IPlugin {
                     NBTTagCompound tag = stack.getTagCompound();
                     return tag != null && tag.hasKey("entity");
                 }
+
+                public boolean isBabyEntity(@Nonnull ItemStack stack) {
+                    if ( !isFilledBall(stack) )
+                        return false;
+
+                    NBTTagCompound tag = stack.getTagCompound();
+                    return tag != null && (tag.getBoolean("IsBaby") || tag.getInteger("Age") < 0);
+                }
             });
         }
     }

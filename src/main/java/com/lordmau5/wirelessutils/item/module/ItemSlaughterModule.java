@@ -345,8 +345,8 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             return ModConfig.vaporizers.modules.slaughter.enableWeapon && slot == 0;
         }
 
-        public boolean isValidInput(@Nonnull ItemStack stack) {
-            return ModConfig.vaporizers.modules.slaughter.enableWeapon;
+        public boolean isValidInput(@Nonnull ItemStack stack, int slot) {
+            return ModConfig.vaporizers.modules.slaughter.enableWeapon && slot == 0;
         }
 
         @Nonnull
@@ -419,6 +419,7 @@ public class ItemSlaughterModule extends ItemFilteringModule {
 
             if ( max != 0 && damage > max )
                 damage = max;
+
 
             if ( useWeapon ) {
                 // To give this the best chance of working set the base attack damage
