@@ -1093,8 +1093,8 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public boolean enableWeapon = true;
 
-        @Config.Name("Enable Use Weapon Mode")
-        @Config.Comment("In Use Weapon Mode, the Slaughter Module will use its weapon in the same way a player does, allowing normal weapon things to happen, such as Tinker Tools gaining experience.")
+        @Config.Name("Enable Simulate Player Mode")
+        @Config.Comment("In Simulate Player Mode, the Slaughter Module will use its weapon in the same way a player does, allowing normal weapon things to happen, such as Tinker Tools gaining experience.")
         @Config.RequiresWorldRestart
         public boolean enableUseWeapon = true;
 
