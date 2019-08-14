@@ -1,0 +1,29 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"PEP",
+		"PCP",
+		"EBE"
+	],
+	"key": {
+		"P": {
+			"item": "#VOID_PEARL"
+		},
+		"C": {
+			"item": "wirelessutils:positional_vaporizer",
+			"data": 2
+		},
+		"E": {
+			"item": "#EMERALD"
+		},
+		"B": {
+			"item": "#DIAMOND_BLOCK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:positional_vaporizer",
+		"count": 1,
+		"data": 3
+	}
+}
