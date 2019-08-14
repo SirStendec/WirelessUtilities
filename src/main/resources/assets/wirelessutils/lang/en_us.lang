@@ -468,7 +468,7 @@ jei.wirelessutils.condenser=Item Condensing
 btn.wirelessutils.main=Main
 btn.wirelessutils.module=Module
 
-btn.wirelessutils.use_weapon=Simulate Player:
+btn.wirelessutils.use_weapon=Use Weapon:
 btn.wirelessutils.use_weapon.info.0=When enabled, the Vaporizer will
 btn.wirelessutils.use_weapon.info.1=fully simulate a player using its
 btn.wirelessutils.use_weapon.info.2=weapon, increasing support for
