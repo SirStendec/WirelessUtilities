@@ -1,0 +1,29 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"DMD",
+		"PCP",
+		"DMD"
+	],
+	"key": {
+		"P": {
+			"item": "#VOID_PEARL"
+		},
+		"C": {
+			"item": "wirelessutils:directional_vaporizer",
+			"data": 1
+		},
+		"M": {
+			"item": "#PRISMARINE"
+		},
+		"D": {
+			"item": "#DIAMOND"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:directional_vaporizer",
+		"count": 1,
+		"data": 2
+	}
+}

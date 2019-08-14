@@ -1,0 +1,23 @@
+{
+	"type": "wirelessutils:copy_nbt_shapeless",
+	"conditions": [
+		{
+			"type": "wirelessutils:upgrade_allowed"
+		}
+	],
+	"ingredients": [
+		{
+			"item": "wirelessutils:directional_vaporizer",
+			"data": 4
+		},
+		{
+			"item": "wirelessutils:level_upgrade",
+			"data": 5
+		}
+	],
+	"result": {
+		"item": "wirelessutils:directional_vaporizer",
+		"data": 5,
+		"count": 1
+	}
+}

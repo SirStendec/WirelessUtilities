@@ -1,0 +1,29 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"NBN",
+		"PCP",
+		"NBN"
+	],
+	"key": {
+		"P": {
+			"item": "#VOID_PEARL"
+		},
+		"C": {
+			"item": "wirelessutils:positional_vaporizer",
+			"data": 0
+		},
+		"B": {
+			"item": "#BLAZE_ROD"
+		},
+		"N": {
+			"item": "#NETHER_BRICK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:positional_vaporizer",
+		"count": 1,
+		"data": 1
+	}
+}
