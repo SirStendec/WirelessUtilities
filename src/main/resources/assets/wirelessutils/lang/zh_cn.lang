@@ -45,9 +45,15 @@ tile.wirelessutils.positional_desublimator.info.2=
 
 tile.wirelessutils.directional_vaporizer.name=定向蒸馏器
 tile.wirelessutils.directional_vaporizer.info.0=能将工作区域内的实体
-tile.wirelessutils.directional_vaporizer.info.1=蒸馏，然后用安装的模
-tile.wirelessutils.directional_vaporizer.info.2=块对其进行处理。
+tile.wirelessutils.directional_vaporizer.info.1=蒸馏，然后用机器安装
+tile.wirelessutils.directional_vaporizer.info.2=的模块对其进行处理。
 tile.wirelessutils.directional_vaporizer.info.3=
+
+tile.wirelessutils.positional_vaporizer.name=定位蒸馏器
+tile.wirelessutils.positional_vaporizer.info.0=能将指定位置内的实体
+tile.wirelessutils.positional_vaporizer.info.1=蒸馏，然后用机器安装
+tile.wirelessutils.positional_vaporizer.info.2=的模块对其进行处理。
+tile.wirelessutils.positional_vaporizer.info.3=
 
 tile.wirelessutils.infinite_wireless_transmitter.name=无限无线传输器
 
@@ -132,8 +138,9 @@ item.wirelessutils.scorched_pearl.name=焦黑珍珠
 
 item.wirelessutils.void_pearl.name=虚空珍珠
 item.wirelessutils.void_pearl.contains=含有：
+item.wirelessutils.void_pearl.baby=Baby %s
+item.wirelessutils.void_pearl.health=Health: %s
 item.wirelessutils.void_pearl.empty=无
-item.wirelessutils.void_pearl.entry=- %s
 item.wirelessutils.void_pearl.jei.0=将稳定末影珍珠扔进末地传送门使其充满了虚空。
 item.wirelessutils.void_pearl.jei.1=虚空渴望被填充，因此虚空珍珠会吸收触碰到的任何生物。
 
@@ -146,6 +153,70 @@ item.wirelessutils.machine_panel.name=机器面板
 
 item.wirelessutils.level_upgrade.name=升级套件
 item.wirelessutils.conversion_upgrade.name=转换套件
+
+item.wirelessutils.base_module.name=模块基座
+
+item.wirelessutils.slaughter_module.name=屠宰模块
+item.wirelessutils.slaughter_module.info.0=该模块会杀掉任何发现
+item.wirelessutils.slaughter_module.info.1=自己不幸正位于蒸馏器
+item.wirelessutils.slaughter_module.info.2=工作区域内的生物。
+item.wirelessutils.slaughter_module.info.3=
+
+item.wirelessutils.slaughter_module.using_weapon=使用武器
+item.wirelessutils.slaughter_module.drops=掉落：%s
+item.wirelessutils.slaughter_module.exp=经验：%s
+
+item.wirelessutils.filtered_module.entry=- %s
+item.wirelessutils.filtered_module.info_list=%s %s 物品
+item.wirelessutils.filtered_module.age=年龄：%s
+item.wirelessutils.filtered_module.age_info.0=基于是否成年来过滤
+item.wirelessutils.filtered_module.age_info.1=生物。
+item.wirelessutils.filtered_module.named=名字：%s
+item.wirelessutils.filtered_module.named_info.0=基于生物是否被起名
+item.wirelessutils.filtered_module.named_info.1=来对其进行过滤。
+item.wirelessutils.filtered_module.named_info.2=
+item.wirelessutils.filtered_module.sneak=潜行：%s
+item.wirelessutils.filtered_module.sneak_info.0=基于生物是在潜行还
+item.wirelessutils.filtered_module.sneak_info.1=是在站立对其进行过
+item.wirelessutils.filtered_module.sneak_info.2=滤。
+item.wirelessutils.filtered_module.player=玩家：%s
+item.wirelessutils.filtered_module.player_info.0=基于生物是否是玩家
+item.wirelessutils.filtered_module.player_info.1=对其进行过滤。
+item.wirelessutils.filtered_module.player_info.2=
+item.wirelessutils.filtered_module.list_info.0=下方的列表能作为黑名
+item.wirelessutils.filtered_module.list_info.1=单或白名单使用。
+item.wirelessutils.filtered_module.list_info.2=
+item.wirelessutils.filtered_module.list_info.3=表中条目能通过手持模
+item.wirelessutils.filtered_module.list_info.4=块对实体右键来增加。
+item.wirelessutils.filtered_module.list_info.5=通配符能用于按实体所
+item.wirelessutils.filtered_module.list_info.6=属模组进行过滤，比如
+item.wirelessutils.filtered_module.list_info.7=“minecraft:*”
+
+item.wirelessutils.slaughter_module.kill=%s被蒸馏了。
+item.wirelessutils.slaughter_module.kill.item=%s被%s蒸馏了。
+
+item.wirelessutils.teleport_module.name=传送模块
+item.wirelessutils.teleport_module.info.0=该模块会将蒸馏器工作
+item.wirelessutils.teleport_module.info.1=区域内的任意实体传输
+item.wirelessutils.teleport_module.info.2=到内部已安装位置卡指
+item.wirelessutils.teleport_module.info.3=定的地点。
+item.wirelessutils.teleport_module.info.4=
+
+item.wirelessutils.capture_module.name=捕获模块
+item.wirelessutils.capture_module.info.0=该模块会将蒸馏器工作
+item.wirelessutils.capture_module.info.1=区域内的任意生物捕获
+item.wirelessutils.capture_module.info.2=到从蒸馏器输入得到的
+item.wirelessutils.capture_module.info.3=虚空珍珠中。
+
+item.wirelessutils.clone_module.name=复制模块
+item.wirelessutils.clone_module.info.0=该模块使用经验和已
+item.wirelessutils.clone_module.info.1=捕获生物来创造该生
+item.wirelessutils.clone_module.info.2=物的复制品。
+item.wirelessutils.clone_module.exact=生成精确复制
+item.wirelessutils.clone_module.exact.info.0=该模块能生成生物的精
+item.wirelessutils.clone_module.exact.info.1=确复制，但会额外消耗
+item.wirelessutils.clone_module.exact.info.2=相当多的经验。
+item.wirelessutils.clone_module.exact.off=不生成精确复制
 
 item.wirelessutils.base_augment.name=升级基座
 
@@ -324,6 +395,8 @@ tab.wirelessutils.auto_transfer.mode.output=输出
 tab.wirelessutils.auto_transfer.mode.PASSIVE=被动
 tab.wirelessutils.auto_transfer.mode.ACTIVE=主动
 tab.wirelessutils.auto_transfer.mode.DISABLED=禁用
+tab.wirelessutils.auto_transfer.mode.INPUT=输入
+tab.wirelessutils.auto_transfer.mode.OUTPUT=输出
 tab.wirelessutils.auto_transfer.side=面：%s
 tab.wirelessutils.auto_transfer.side.TOP=顶面
 tab.wirelessutils.auto_transfer.side.LEFT=左面
@@ -361,9 +434,39 @@ info.wirelessutils.item_rate.second=个物品/s
 info.wirelessutils.item_rate.tick=个物品/t
 info.wirelessutils.item_rate.item=s/一个物品
 info.wirelessutils.buffer=缓冲
+info.wirelessutils.buffer.in_out=Input / Output
 
 jei.wirelessutils.charger=物品能量灌注
 jei.wirelessutils.condenser=物品流体灌注
+
+btn.wirelessutils.main=主界面
+btn.wirelessutils.module=模块
+
+btn.wirelessutils.use_weapon=使用武器：
+btn.wirelessutils.use_weapon.info.0=启用时蒸馏器会完整
+btn.wirelessutils.use_weapon.info.1=模拟玩家正在使用其
+btn.wirelessutils.use_weapon.info.2=武器，但增加对一些
+btn.wirelessutils.use_weapon.info.3=武器的支持会导致损
+btn.wirelessutils.use_weapon.info.4=失质量和性能。
+
+btn.wirelessutils.drop.drops=掉落：
+btn.wirelessutils.drop.exp=经验：
+
+btn.wirelessutils.blacklist=黑名单：
+btn.wirelessutils.whitelist=白名单：
+
+btn.wirelessutils.mode.0=---
+btn.wirelessutils.mode.1=否
+btn.wirelessutils.mode.2=是
+
+btn.wirelessutils.age_mode.0=---
+btn.wirelessutils.age_mode.1=幼年
+btn.wirelessutils.age_mode.2=成年
+
+btn.wirelessutils.drop_mode.0=忽略
+btn.wirelessutils.drop_mode.1=收集到满
+btn.wirelessutils.drop_mode.2=先收集再销毁
+btn.wirelessutils.drop_mode.3=全部销毁
 
 btn.wirelessutils.edit=编辑
 btn.wirelessutils.save=保存
@@ -388,6 +491,9 @@ btn.wirelessutils.show_area=显示工作范围
 btn.wirelessutils.hide_area=隐藏工作范围
 btn.wirelessutils.area_scroll=滚动以改变颜色
 btn.wirelessutils.range=距离：
+
+btn.wirelessutils.cost=Cost:
+btn.wirelessutils.cost_fluid=%s (%s mB)
 
 btn.wirelessutils.offset.vertical=垂直：
 btn.wirelessutils.offset.horizontal=水平：
