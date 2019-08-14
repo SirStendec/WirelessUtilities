@@ -397,13 +397,14 @@ public class ItemSlaughterModule extends ItemFilteringModule {
                 return IWorkProvider.WorkResult.FAILURE_STOP;
 
             ItemStack weapon = ModConfig.vaporizers.modules.slaughter.enableWeapon ? vaporizer.getInput().getStackInSlot(0) : ItemStack.EMPTY;
-
             // Set up the player to actually do stuff.
             player.capabilities.isCreativeMode = vaporizer.isCreative();
             player.inventory.clear();
             player.setHeldItem(EnumHand.MAIN_HAND, weapon);
             player.updateAttributes(true);
             player.updateCooldown();
+
+            IAttributeInstance attribute = player.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
 
             float damage = living.getAbsorptionAmount();
             float max = (float) ModConfig.vaporizers.modules.slaughter.maxDamage;
@@ -420,23 +421,31 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             if ( max != 0 && damage > max )
                 damage = max;
 
+            // We want to make sure we don't do *less* damage than we should.
+            if ( !weapon.isEmpty() ) {
+                double real = attribute.getAttributeValue();
+                if ( real > damage && real < Float.MAX_VALUE )
+                    damage = (float) real;
+            }
 
             if ( useWeapon ) {
                 // To give this the best chance of working set the base attack damage
                 // of the fake player to the damage value calculated for the big hit.
                 // This won't ignore resistances, but it'll still hurt. A lot.
-                IAttributeInstance attribute = player.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE);
                 double old = attribute.getBaseValue();
-                attribute.setBaseValue(damage);
+                if ( damage > old )
+                    attribute.setBaseValue(damage);
 
                 // Pretend like we're a real player and whack it.
                 boolean success = ForgeHooks.onPlayerAttackTarget(player, living);
 
-                attribute.setBaseValue(old);
+                if ( damage > old )
+                    attribute.setBaseValue(old);
 
                 // If that worked, just stop now. Otherwise, we murder the old fashioned way.
                 if ( !success )
                     return IWorkProvider.WorkResult.SUCCESS_CONTINUE;
+
             }
 
             // Just use a big raw damage event to get our slaughter on.

@@ -24,6 +24,7 @@ import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.FluidTank;
 import com.lordmau5.wirelessutils.utils.ItemHandlerProxy;
 import com.lordmau5.wirelessutils.utils.WUFakePlayer;
+import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.location.TargetInfo;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
@@ -31,6 +32,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -589,13 +591,53 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         return behavior.getUnconfiguredExplanation();
     }
 
+    @Override
+    public String formatWorkUnit(double value) {
+        String unit;
+        if ( value != 0 && value < 1 ) {
+            value *= 20;
+            if ( value < 1 ) {
+                value = 1 / value;
+                unit = StringHelper.localize("info." + WirelessUtils.MODID + ".vaporizer_unit.item");
+            } else
+                unit = StringHelper.localize("info." + WirelessUtils.MODID + ".vaporizer_unit.second");
+
+        } else
+            unit = StringHelper.localize("info." + WirelessUtils.MODID + ".vaporizer_unit.tick");
+
+        if ( value == Math.floor(value) )
+            return StringHelper.isShiftKeyDown() || value < 1000 ?
+                    StringHelper.formatNumber((long) value) + " " + unit :
+                    TextHelpers.getScaledNumber((long) value, unit, true);
+
+        return String.format("%.2f %s", value, unit);
+    }
+
     public String getWorkUnit() {
-        return StringHelper.localize("info." + WirelessUtils.MODID + ".vaporizer.unit");
+        return StringHelper.localize("info." + WirelessUtils.MODID + ".vaporizer_unit.tick");
     }
 
     @Override
     public double getWorkMaxRate() {
-        return level.maxVaporizerEntities;
+        int budget = 0;
+        if ( behavior != null )
+            budget = behavior.getActionCost();
+
+        if ( budget == 0 )
+            return 0;
+
+        double count;
+        if ( budget == 1 )
+            count = budgetPerTick;
+        else {
+            long budgetPerSecond = budgetPerTick * 20L;
+            count = (budgetPerSecond / (double) budget) / 20;
+        }
+
+        if ( count > level.maxVaporizerEntities )
+            return level.maxVaporizerEntities;
+
+        return count;
     }
 
     @Override
@@ -1271,15 +1313,19 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         if ( mode == 0 )
             return;
 
+        Entity entity = event.getEntity();
+        boolean player = ModConfig.vaporizers.modules.slaughter.neverVoidPlayers && entity instanceof EntityPlayer;
+
         List<EntityItem> drops = event.getDrops();
         if ( mode == 3 ) {
-            drops.clear();
+            if ( !player )
+                drops.clear();
             return;
         }
 
         drops.removeIf(item -> {
             ItemStack stack = insertOutputStack(item.getItem());
-            if ( mode == 2 || stack.isEmpty() )
+            if ( (mode == 2 && !player) || stack.isEmpty() )
                 return true;
             item.setItem(stack);
             return false;

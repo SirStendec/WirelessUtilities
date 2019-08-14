@@ -444,7 +444,11 @@ info.wirelessutils.work_info.unconfigured.title=Unable to Run
 info.wirelessutils.work_info.unconfigured.tooltip=Machine Cannot Run
 info.wirelessutils.work_info.unconfigured.explanation.0=This machine cannot currently run.
 
-info.wirelessutils.vaporizer.unit=Entities/t
+info.wirelessutils.vaporizer_unit=Entities/t
+info.wirelessutils.vaporizer_unit.second=Entities/s
+info.wirelessutils.vaporizer_unit.tick=Entities/t
+info.wirelessutils.vaporizer_unit.item=s/Entity
+
 info.wirelessutils.vaporizer.missing_module.0=Please install a valid module.
 info.wirelessutils.vaporizer.cannot_spawn.0=This entity cannot be spawned.
 info.wirelessutils.vaporizer.missing_entity.0=Please insert a captured entity.

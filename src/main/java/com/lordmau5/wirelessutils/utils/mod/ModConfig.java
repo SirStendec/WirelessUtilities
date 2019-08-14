@@ -1136,6 +1136,10 @@ public class ModConfig {
         @Config.Name("Collect Experience - Minimum")
         @Config.Comment("0 = Ignore Experience, 1 = Collect Experience till Full, 2 = Collect All Experience, 3 = Void Experience")
         public int collectExperienceMinimum = 0;
+
+        @Config.Name("Never Void Player Drops")
+        @Config.Comment("When enabled, items dropped by killed players will never be voided by a Vaporizer.")
+        public boolean neverVoidPlayers = true;
     }
 
     public static class Condensers {
