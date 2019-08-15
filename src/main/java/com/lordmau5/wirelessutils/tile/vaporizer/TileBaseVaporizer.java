@@ -1678,7 +1678,6 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         wantTargets = true;
 
         payload.addFluidStack(tank.getFluid());
-        payload.addString(lastFluid == null ? null : lastFluid.getName());
         payload.addInt(fluidRate);
 
         payload.addByte(iterationMode.ordinal());
@@ -1699,8 +1698,6 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         super.handleGuiPacket(payload);
 
         tank.setFluid(payload.getFluidStack());
-        String name = payload.getString();
-        lastFluid = name == null ? null : FluidRegistry.getFluid(name);
         fluidRate = payload.getInt();
 
         setIterationMode(IterationMode.fromInt(payload.getByte()));
