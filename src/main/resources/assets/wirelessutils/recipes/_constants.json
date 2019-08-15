@@ -128,10 +128,10 @@
 		}
 	},
 	{
-		"name": "VOID_PEARL",
+		"name": "EMPTY_VOID_PEARL",
 		"ingredient": {
 			"item": "wirelessutils:void_pearl",
-			"data": 32767
+			"data": 0
 		}
 	},
 	{
