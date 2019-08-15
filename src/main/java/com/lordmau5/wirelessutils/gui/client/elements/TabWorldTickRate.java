@@ -249,9 +249,9 @@ public class TabWorldTickRate extends TabBase implements IContainsButtons {
 
             int value = machine.getWorldTickRate();
             if ( value == -1 )
-                list.add(new TextComponentTranslation(INTL_KEY + ".minimum").setStyle(TextHelpers.YELLOW).getFormattedText());
-            else
-                list.add(new TextComponentTranslation(INTL_KEY + ".ticks", value).setStyle(TextHelpers.YELLOW).getFormattedText());
+                value = machine.getMinWorldTickRate();
+
+            list.add(new TextComponentTranslation(INTL_KEY + ".ticks", value).setStyle(TextHelpers.YELLOW).getFormattedText());
 
             return;
         }
@@ -311,8 +311,6 @@ public class TabWorldTickRate extends TabBase implements IContainsButtons {
             return;
 
         IConfigurableWorldTickRate machine = (IConfigurableWorldTickRate) this.machine;
-        int value = machine.getWorldTickRate();
-
         FontRenderer fontRenderer = getFontRenderer();
 
         fontRenderer.drawStringWithShadow(StringHelper.localize(INTL_KEY + ".name"), sideOffset() + 17, 8, headerColor);
@@ -326,10 +324,11 @@ public class TabWorldTickRate extends TabBase implements IContainsButtons {
             ).getUnformattedText(), sideOffset() + 6, 56, textColor);
 
         } else {
+            int value = machine.getWorldTickRate();
             if ( value == -1 )
-                fontRenderer.drawString(StringHelper.localize(INTL_KEY + ".minimum"), sideOffset() + 14, 34, textColor);
-            else
-                fontRenderer.drawString(new TextComponentTranslation(INTL_KEY + ".ticks", value).getUnformattedText(), sideOffset() + 14, 34, textColor);
+                value = machine.getMinWorldTickRate();
+
+            fontRenderer.drawString(new TextComponentTranslation(INTL_KEY + ".ticks", value).getUnformattedText(), sideOffset() + 14, 34, textColor);
         }
     }
 

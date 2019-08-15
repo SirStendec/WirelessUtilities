@@ -912,6 +912,15 @@ public class ModConfig {
                 "xpjuice"
         };
 
+        @Config.Name("Fluid mB per Experience Point")
+        @Config.Comment("Fluid experience should convert to experience points at this ratio.")
+        @Config.RangeInt(min = 1)
+        public int[] mbPerPoint = {20, 20, 20};
+
+        @Config.Name("Allow Fluid Conversion")
+        @Config.Comment("When enabled, clicking the fluid tank in Vaporizer will cycle between all the valid fluids as long as the converted fluid can be contained within the tank.")
+        public boolean allowConversion = true;
+
         @Config.Name("Use Captured Entities as Fuel")
         @Config.Comment("When enabled, captured entities can be used as fuel for Vaporizer modules that require fuel.")
         public boolean useEntitiesFuel = true;
@@ -926,11 +935,6 @@ public class ModConfig {
         @Config.RangeDouble(min = 0)
         @Config.RequiresWorldRestart
         public double babyMultiplier = 0.5D;
-
-        @Config.Name("Fluid mB per Experience Point")
-        @Config.Comment("Fluid experience should convert to experience points at this ratio.")
-        @Config.RangeInt(min = 1)
-        public int[] mbPerPoint = {20, 20, 20};
 
         @Config.Name("Compatibility")
         @Config.Comment("Compatibility with other mods!")

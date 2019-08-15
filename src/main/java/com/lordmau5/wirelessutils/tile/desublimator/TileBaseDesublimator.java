@@ -1721,9 +1721,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             remainingBudget += budgetPerTick;
         }
 
-        gatherTick--;
-        if ( gatherTick < 0 )
-            gatherTick = (byte) getActualWorldTickRate();
+        if ( gatherTick > 0 )
+            gatherTick--;
 
         itemsPerTick = 0;
         energyPerTick = 0;
@@ -1755,6 +1754,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             updateTrackers();
             return;
         }
+
+        if ( gatherTick == 0 )
+            gatherTick = (byte) getActualWorldTickRate();
 
         tickActive();
         setActive(worker.performWork());

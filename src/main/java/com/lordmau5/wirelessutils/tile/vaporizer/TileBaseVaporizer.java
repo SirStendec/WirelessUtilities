@@ -82,6 +82,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     protected IFluidHandler fluidHandler;
     protected FluidTank tank;
+    protected Fluid lastFluid;
     private final boolean hasFluid;
 
     private int fluidRate = 0;
@@ -121,6 +122,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     private int maxEnergyPerBlock;
 
     private int remainingPerTick;
+    private byte fluidSwap = 0;
 
     private boolean sideTransferAugment = false;
     private ISidedTransfer.Mode[] sideTransfer;
@@ -175,8 +177,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
                 }
 
                 int out = tank.fill(resource, doFill);
-                if ( doFill && existing == null && tank.getFluid() != null )
+                if ( doFill && existing == null && tank.getFluid() != null ) {
+                    lastFluid = resource.getFluid();
                     fluidRate = rate;
+                }
 
                 return out;
             }
@@ -221,6 +225,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         System.out.println("        Budget/t: " + budgetPerTick);
 
         System.out.println("       Has Fluid: " + hasFluid);
+        System.out.println("      Last Fluid: " + lastFluid);
         System.out.println("   Tank Contents: " + debugPrintStack(tank.getFluid()));
         System.out.println("      Fluid Rate: " + fluidRate);
         System.out.println("   Overflow Fuel: " + excessFuel);
@@ -240,6 +245,66 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     }
 
     /* Fluid Stuff */
+
+    public void setFluidSwap(byte direction) {
+        fluidSwap = direction;
+    }
+
+    public void performFluidSwap(byte direction) {
+        if ( !hasFluid() || tank == null || world == null || world.isRemote || !ModConfig.vaporizers.allowConversion )
+            return;
+
+        FluidStack stack = tank.getFluid();
+        if ( stack == null || stack.amount == 0 )
+            return;
+
+        Fluid fluid = stack.getFluid();
+        String name = fluid == null ? null : fluid.getName();
+        if ( name == null )
+            return;
+
+        int idx = -1;
+        int l = Math.min(ModConfig.vaporizers.fluids.length, ModConfig.vaporizers.mbPerPoint.length);
+        for (int i = 0; i < l; i++) {
+            if ( ModConfig.vaporizers.fluids[i].equalsIgnoreCase(name) ) {
+                idx = i;
+                break;
+            }
+        }
+
+        if ( idx == -1 )
+            return;
+
+        double amount = stack.amount / (double) fluidRate;
+
+        int i = idx + direction;
+        if ( i < 0 )
+            i = l - 1;
+        else if ( i >= l )
+            i = 0;
+
+        while ( i != idx ) {
+            Fluid newFluid = FluidRegistry.getFluid(ModConfig.vaporizers.fluids[i]);
+            if ( newFluid != null ) {
+                int newRate = ModConfig.vaporizers.mbPerPoint[i];
+                int newAmount = (int) Math.floor(amount * newRate);
+
+                if ( newAmount <= tank.getCapacity() ) {
+                    tank.setFluid(new FluidStack(newFluid, newAmount));
+                    fluidRate = newRate;
+                    lastFluid = newFluid;
+                    markChunkDirty();
+                    return;
+                }
+            }
+
+            i += direction;
+            if ( i < 0 )
+                i = l - 1;
+            else if ( i >= l )
+                i = 0;
+        }
+    }
 
     public FluidTankCore getTank() {
         return tank;
@@ -793,7 +858,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             int rate;
 
             if ( existing == null || existing.amount == 0 ) {
-                fillFluid = getExperienceFluid();
+                fillFluid = lastFluid;
+                if ( fillFluid == null )
+                    fillFluid = getExperienceFluid();
+
                 rate = getFluidRate(fillFluid);
             } else {
                 fillFluid = existing.getFluid();
@@ -803,16 +871,16 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             if ( fillFluid != null && rate != 0 ) {
                 int room = Math.floorDiv(tank.getCapacity() - tank.getFluidAmount(), rate);
                 if ( room > 0 ) {
+                    lastFluid = fillFluid;
+                    if ( fluidRate == 0 )
+                        fluidRate = rate;
+
                     if ( room < amount ) {
                         tank.fill(new FluidStack(fillFluid, room * rate), true);
-                        if ( fluidRate == 0 )
-                            fluidRate = rate;
                         amount -= room;
 
                     } else {
                         tank.fill(new FluidStack(fillFluid, amount * rate), true);
-                        if ( fluidRate == 0 )
-                            fluidRate = rate;
                         return;
                     }
                 }
@@ -1508,7 +1576,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         int rate;
 
         if ( existing == null || existing.amount == 0 ) {
-            fillFluid = getExperienceFluid();
+            fillFluid = lastFluid;
+            if ( fillFluid == null )
+                fillFluid = getExperienceFluid();
+
             rate = getFluidRate(fillFluid);
         } else {
             fillFluid = existing.getFluid();
@@ -1522,6 +1593,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             int used = tank.fill(new FluidStack(fillFluid, amount), true);
             if ( used > 0 ) {
                 markChunkDirty();
+                lastFluid = fillFluid;
                 if ( fluidRate == 0 )
                     fluidRate = rate;
             }
@@ -1562,7 +1634,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             tag.setInteger("WorldTickRate", gatherTickRate);
 
         tank.writeToNBT(tag);
-
+        if ( lastFluid != null )
+            tag.setString("LastFluid", lastFluid.getName());
 
         tag.setByte("IterationMode", (byte) iterationMode.ordinal());
 
@@ -1582,8 +1655,13 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         fluidRate = 0;
         FluidStack fluid = tank.getFluid();
-        if ( fluid != null && fluid.amount > 0 )
-            fluidRate = getFluidRate(fluid.getFluid());
+        if ( fluid != null && fluid.amount > 0 ) {
+            lastFluid = fluid.getFluid();
+            fluidRate = getFluidRate(lastFluid);
+        } else if ( tag.hasKey("LastFluid") ) {
+            lastFluid = FluidRegistry.getFluid(tag.getString("LastFluid"));
+        } else
+            lastFluid = null;
 
         for (int i = 0; i < sideTransfer.length; i++)
             sideTransfer[i] = Mode.byIndex(tag.getByte("TransferSide" + i));
@@ -1600,6 +1678,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         wantTargets = true;
 
         payload.addFluidStack(tank.getFluid());
+        payload.addString(lastFluid == null ? null : lastFluid.getName());
         payload.addInt(fluidRate);
 
         payload.addByte(iterationMode.ordinal());
@@ -1620,6 +1699,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         super.handleGuiPacket(payload);
 
         tank.setFluid(payload.getFluidStack());
+        String name = payload.getString();
+        lastFluid = name == null ? null : FluidRegistry.getFluid(name);
         fluidRate = payload.getInt();
 
         setIterationMode(IterationMode.fromInt(payload.getByte()));
@@ -1636,6 +1717,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     public PacketBase getModePacket() {
         PacketBase payload = super.getModePacket();
 
+        payload.addByte(fluidSwap);
         payload.addByte(iterationMode.ordinal());
         payload.addInt(gatherTickRate);
 
@@ -1645,12 +1727,18 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         if ( behavior != null )
             behavior.updateModePacket(payload);
 
+        fluidSwap = 0;
+
         return payload;
     }
 
     @Override
     protected void handleModePacket(PacketBase payload) {
         super.handleModePacket(payload);
+
+        byte fluidSwap = payload.getByte();
+        if ( fluidSwap != 0 )
+            performFluidSwap(fluidSwap);
 
         setIterationMode(IterationMode.fromInt(payload.getByte()));
         setWorldTickRate(payload.getInt());
