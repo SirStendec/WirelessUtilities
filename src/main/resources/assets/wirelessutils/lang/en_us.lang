@@ -142,7 +142,7 @@ item.wirelessutils.void_pearl.baby=Baby %s
 item.wirelessutils.void_pearl.health=Health: %s
 item.wirelessutils.void_pearl.value=Value: %s
 item.wirelessutils.void_pearl.empty=Empty
-item.wirelessutils.void_pearl.jei.0=Throwing a Stabilized Ender Pearl into an End Portal has filled it with nothingness.
+item.wirelessutils.void_pearl.jei.0=Throwing a Scorched Pearl into an End Portal has filled it with nothingness.
 item.wirelessutils.void_pearl.jei.1=The void seeks to be filled, and to that end, it seems to suck up any creature it comes into contact with.
 
 item.wirelessutils.stabilized_ender_pearl.jei.0=Stabilized Ender Pearls behave similarly to Fluxed Pearls, in that they can be bounced and fired from Dispensers.
@@ -223,6 +223,9 @@ item.wirelessutils.launch_module.name=Launch Module
 item.wirelessutils.launch_module.info.0=This module vaporizes and reassembles
 item.wirelessutils.launch_module.info.1=things in place, but when it puts them
 item.wirelessutils.launch_module.info.2=back together, it adds extra velocity.
+
+item.wirelessutils.launch_module.speed=Speed: %s
+item.wirelessutils.launch_module.fall_protect=Negating damage from falling.
 
 item.wirelessutils.base_augment.name=Augment Base
 
@@ -312,6 +315,10 @@ item.wirelessutils.augment.energy=Energy Usage:
 item.wirelessutils.augment.energy.entry=- %s
 item.wirelessutils.augment.energy.action=%sx + %s RF/action
 
+item.wirelessutils.augment.budget=Work Buffer Usage:
+item.wirelessutils.augment.budget.entry=- %s
+item.wirelessutils.augment.budget.action=%sx + %s per action
+
 item.wirelessutils.augment_ctrl.inactive=Hold §e§oCtrl§r§7 for Valid Machines
 item.wirelessutils.augment_ctrl.active=Valid Machines:
 item.wirelessutils.augment_ctrl.entry=- %s
@@ -394,6 +401,16 @@ tab.wirelessutils.positional_ae_network.1=Place a Positional Card in one of the 
 tab.wirelessutils.positional_ae_network.2=Using augments, it's possible to add more than one Positional Card.
 tab.wirelessutils.positional_ae_network.3=Augments can also help you connect blocks farther away from the Positional AE Network. Eventually, even across dimensions!
 
+tab.wirelessutils.directional_vaporizer.0=The Directional Vaporizer vaporizes entities in a direction.
+tab.wirelessutils.directional_vaporizer.1=The behavior of a Vaporizer depends entirely on its installed Module. Without a Module, it won't run.
+tab.wirelessutils.directional_vaporizer.2=Modules allow a Vaporizer to teleport entities, kill them, spawn copies, or to push them around.
+tab.wirelessutils.directional_vaporizer.3=Using augments, it's possible to increase a Vaporizer's range and further customize its capabilities.
+
+tab.wirelessutils.positional_vaporizer.0=The Positional Vaporizer vaporizes entities at specific positions.
+tab.wirelessutils.positional_vaporizer.1=The behavior of a Vaporizer depends entirely on its installed Module. Without a Module, it won't run.
+tab.wirelessutils.positional_vaporizer.2=Modules allow a Vaporizer to teleport entities, kill them, spawn copies, or to push them around.
+tab.wirelessutils.positional_vaporizer.3=Using augments, it's possible to increase a Vaporizer's range and further customize its capabilities.
+
 tab.wirelessutils.auto_transfer=I/O Control
 tab.wirelessutils.auto_transfer.mode=Mode: %s
 tab.wirelessutils.auto_transfer.mode.input=Input
@@ -437,6 +454,7 @@ info.wirelessutils.work_info.tooltip.rate=Rate: %s
 info.wirelessutils.work_info.tooltip.targets=Targets: %s of %s
 info.wirelessutils.work_info.current=Current Rate:
 info.wirelessutils.work_info.maximum=Maximum Rate:
+info.wirelessutils.work_info.sustained=Sustained Rate:
 info.wirelessutils.work_info.targets.name=Active Targets:
 info.wirelessutils.work_info.targets.info=%s of %s
 
@@ -455,6 +473,7 @@ info.wirelessutils.vaporizer.missing_entity.0=Please insert a captured entity.
 info.wirelessutils.vaporizer.missing_modifier.0=Please install a valid modifier.
 info.wirelessutils.vaporizer.bad_config.0=Please configure the module.
 info.wirelessutils.vaporizer.empty_whitelist.0=The target whitelist is empty.
+info.wirelessutils.vaporizer.insufficient_budget.0=The configured module cannot run in this machine.
 
 info.wirelessutils.item_rate.second=Items/s
 info.wirelessutils.item_rate.tick=Items/t
@@ -468,7 +487,7 @@ jei.wirelessutils.condenser=Item Condensing
 btn.wirelessutils.main=Main
 btn.wirelessutils.module=Module
 
-btn.wirelessutils.use_weapon=Simulate Player:
+btn.wirelessutils.use_weapon=As Player:
 btn.wirelessutils.use_weapon.info.0=When enabled, the Vaporizer will
 btn.wirelessutils.use_weapon.info.1=fully simulate a player using its
 btn.wirelessutils.use_weapon.info.2=weapon, increasing support for
@@ -480,6 +499,14 @@ btn.wirelessutils.drop.exp=Experience:
 
 btn.wirelessutils.blacklist=Blacklist:
 btn.wirelessutils.whitelist=Whitelist:
+
+btn.wirelessutils.fall_protect=Fall Protection:
+btn.wirelessutils.fall_protect.0=Disabled
+btn.wirelessutils.fall_protect.1=Enabled
+btn.wirelessutils.fall_protect.info.0=When enabled, the Vaporizer will
+btn.wirelessutils.fall_protect.info.1=use a bit more energy to ensure
+btn.wirelessutils.fall_protect.info.2=that whatever it launches won't
+btn.wirelessutils.fall_protect.info.3=take any damage when it lands.
 
 btn.wirelessutils.mode.0=---
 btn.wirelessutils.mode.1=No
@@ -528,6 +555,10 @@ btn.wirelessutils.range.height=Height:
 btn.wirelessutils.range.length=Length:
 btn.wirelessutils.range.width=Width:
 
+info.wirelessutils.work_budget=Work Buffer
+info.wirelessutils.work_budget.per_tick=+%s/tick
+info.wirelessutils.work_budget.per_op=-%s/action
+
 info.wirelessutils.slot_lock=This item cannot be removed.
 info.wirelessutils.max=Max: %s
 info.wirelessutils.min=Min: %s
@@ -574,6 +605,8 @@ commands.wirelessutils.fluidgen.success=Created Augment: %s
 
 commands.wirelessutils.debug.success=Created Item: %s
 
+stat.wirelessutils.captured_mobs=Void Pearl Captures
+
 advancements.wirelessutils.root.title=Wireless Utilities
 advancements.wirelessutils.root.description=Because wires just get in the way.
 
@@ -618,3 +651,9 @@ advancements.wirelessutils.roundabout.description=Throw a pearl that travels at 
 
 advancements.wirelessutils.enlightened.title=Enlightened
 advancements.wirelessutils.enlightened.description=Toss a Fluxed Pearl against a Redstone Lamp.
+
+advancements.wirelessutils.the_void_tolls.title=For Whom The Void Tolls
+advancements.wirelessutils.the_void_tolls.description=Scorch a Pearl, and then toss it into the portal to the End.
+
+advancements.wirelessutils.void_tolls_for_thee.title=It Tolls for Thee
+advancements.wirelessutils.void_tolls_for_thee.description=Capture something in a Void Pearl.

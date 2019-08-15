@@ -50,7 +50,7 @@ public abstract class ItemFilteringModule extends ItemModule {
         if ( mode != 0 )
             tooltip.add(new TextComponentTranslation(
                     name + ".age",
-                    StringHelper.localize("btn." + WirelessUtils.MODID + ".child_mode." + mode)
+                    StringHelper.localize("btn." + WirelessUtils.MODID + ".age_mode." + mode)
             ).getFormattedText());
 
         mode = getNamedMode(stack);

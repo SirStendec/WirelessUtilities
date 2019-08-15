@@ -9,7 +9,9 @@ import com.lordmau5.wirelessutils.item.base.IJEIInformationItem;
 import com.lordmau5.wirelessutils.item.base.ItemBasePearl;
 import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
+import com.lordmau5.wirelessutils.utils.mod.ModStatistics;
 import mezz.jei.api.IModRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -23,8 +25,10 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -32,11 +36,13 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
@@ -152,6 +158,15 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         player.swingArm(hand);
         player.getCooldownTracker().setCooldown(this, 5);
 
+        if ( player instanceof EntityPlayerMP ) {
+            EntityPlayerMP playerMP = (EntityPlayerMP) player;
+            ModAdvancements.FOR_THEE.trigger(playerMP);
+            playerMP.addStat(ModStatistics.CAPTURED_MOBS);
+        }
+
+        if ( entity.world instanceof WorldServer )
+            entity.world.playSound(null, entity.getPosition(), SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.NEUTRAL, .2F, .2F);
+
         if ( stack.getCount() == 1 )
             player.setHeldItem(hand, out);
         else {
@@ -167,10 +182,20 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
     @Override
     public void onPortalImpact(@Nonnull ItemStack stack, @Nonnull EntityItem entity, @Nonnull IBlockState state) {
         Block block = state.getBlock();
-        if ( block == Blocks.END_PORTAL )
+        if ( block == Blocks.END_PORTAL ) {
+            entity.setPosition(entity.posX, Math.ceil(entity.posY), entity.posZ);
             entity.setVelocity(entity.motionX, .2, entity.motionZ);
-        else if ( block == Blocks.END_GATEWAY )
+        } else if ( block == Blocks.END_GATEWAY )
             entity.setVelocity(-entity.motionX, -entity.motionY, -entity.motionZ);
+
+        if ( entity.world != null && !entity.world.isRemote ) {
+            NBTTagCompound data = entity.getEntityData();
+            int ticks = data.getInteger("WUSoundTicks");
+            if ( ticks == 0 || Math.abs(ticks - entity.ticksExisted) > 1 ) {
+                entity.world.playSound(null, entity.getPosition(), SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.NEUTRAL, 0.5F, 0.2F);
+                data.setInteger("WUSoundTicks", entity.ticksExisted);
+            }
+        }
     }
 
     @Override

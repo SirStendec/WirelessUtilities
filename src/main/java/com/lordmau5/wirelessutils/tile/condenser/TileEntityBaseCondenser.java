@@ -85,6 +85,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     protected final IFluidHandler fluidHandler;
     protected final IFluidHandler internalHandler;
 
+    private boolean wantsTargets = false;
+
     protected boolean locked;
     protected FluidStack lockStack;
 
@@ -404,6 +406,15 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         tank.setCapacity(calculateFluidCapacity());
         fluidMaxRate = calculateMaxFluidRate();
         fluidRate = calculateFluidRate();
+
+        updateTargetEnergy();
+    }
+
+    @Override
+    public void updateAugmentStatus() {
+        super.updateAugmentStatus();
+
+        updateTargetEnergy();
     }
 
     @Override
@@ -507,6 +518,10 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     public double getWorkLastTick() {
         return fluidPerTick;
+    }
+
+    public boolean hasSustainedRate() {
+        return false;
     }
 
     public double getWorkMaxRate() {
@@ -629,13 +644,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             fluidGenCost = energy;
         }
 
-        if ( fluidGen )
-            maxEnergyPerTick -= oldCost;
-
         updateFluidGen();
-
-        if ( fluidGen )
-            maxEnergyPerTick += fluidGenCost;
     }
 
     public void updateFluidGen() {
@@ -801,12 +810,33 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             calculateTargets();
         }
 
-        validTargetsPerTick = 0;
-        maxEnergyPerTick = augmentDrain;
-        if ( fluidGen )
-            maxEnergyPerTick = fluidGenCost;
+        if ( world == null || !world.isRemote ) {
+            validTargetsPerTick = 0;
+            maxEnergyPerTick = 0;
+        }
 
         return validTargets;
+    }
+
+    public void updateTargetEnergy() {
+        if ( world == null || world.isRemote )
+            return;
+
+        maxEnergyPerTick = 0;
+
+        List<CondenserTarget> targets = worker.getTargetCache();
+        if ( targets == null )
+            return;
+
+        for (CondenserTarget target : targets) {
+            int cost = target.cost + baseEnergy;
+            if ( cost > maxEnergyPerTick )
+                maxEnergyPerTick = cost;
+
+            // This won't accurately reflect the maximum energy when crafting
+            // is involved. Just... ignore that. The GUI will update in a second
+            // to be correct.
+        }
     }
 
     @Override
@@ -875,7 +905,10 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         }
 
         validTargetsPerTick++;
-        maxEnergyPerTick += baseEnergy + getEnergyCost(target, source);
+        int cost = baseEnergy + getEnergyCost(target, source);
+        if ( cost > maxEnergyPerTick )
+            maxEnergyPerTick = cost;
+
         return true;
     }
 
@@ -884,7 +917,10 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             return false;
 
         validTargetsPerTick++;
-        maxEnergyPerTick += baseEnergy + getEnergyCost(target, source);
+        int cost = baseEnergy + getEnergyCost(target, source);
+        if ( cost > maxEnergyPerTick )
+            maxEnergyPerTick = cost;
+
         return true;
     }
 
@@ -912,7 +948,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
                         if ( canUse ) {
                             validTargetsPerTick++;
-                            maxEnergyPerTick += baseEnergy + cost;
+                            int tCost = baseEnergy + cost;
+                            if ( tCost > maxEnergyPerTick )
+                                maxEnergyPerTick = tCost;
                             return true;
                         }
                     }
@@ -921,7 +959,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         if ( !inverted && FluidHelper.isFillableEmptyContainer(stack) ) {
             validTargetsPerTick++;
-            maxEnergyPerTick += baseEnergy + cost;
+            int tCost = baseEnergy + cost;
+            if ( tCost > maxEnergyPerTick )
+                maxEnergyPerTick = tCost;
             return true;
         }
 
@@ -931,7 +971,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         CondenserRecipeManager.CondenserRecipe recipe = CondenserRecipeManager.getRecipe(getTankFluid(), stack);
         if ( recipe != null ) {
             validTargetsPerTick++;
-            maxEnergyPerTick += baseEnergy + cost + recipe.cost;
+            int tCost = baseEnergy + cost + recipe.cost;
+            if ( tCost > maxEnergyPerTick )
+                maxEnergyPerTick = tCost;
             return true;
         }
 
@@ -943,7 +985,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( entity.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null) ) {
             validTargetsPerTick++;
             // TODO: Entity energy calculations
-            maxEnergyPerTick += baseEnergy;
+            if ( baseEnergy > maxEnergyPerTick )
+                maxEnergyPerTick = baseEnergy;
             return true;
         }
 
@@ -1254,7 +1297,14 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     @Override
     public int getInfoMaxEnergyPerTick() {
-        return maxEnergyPerTick;
+        int rate = validTargetsPerTick;
+        if ( rate > ModConfig.performance.stepsPerTick )
+            rate = ModConfig.performance.stepsPerTick;
+
+        if ( rate < 1 )
+            return 0;
+
+        return augmentDrain + fluidGenCost + (rate * maxEnergyPerTick);
     }
 
     @Override
@@ -1438,6 +1488,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         }
 
         if ( !enabled || getEnergyStored() < baseEnergy ) {
+            if ( wantsTargets ) {
+                wantsTargets = false;
+                worker.updateTargetCache();
+            }
+
             tickInactive();
             setActive(false);
             updateTrackers();
@@ -1566,6 +1621,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     @Override
     public PacketBase getGuiPacket() {
         PacketBase payload = super.getGuiPacket();
+
+        wantsTargets = true;
+
         payload.addFluidStack(tank.getFluid());
         payload.addInt(maxEnergyPerTick);
         payload.addInt(validTargetsPerTick);

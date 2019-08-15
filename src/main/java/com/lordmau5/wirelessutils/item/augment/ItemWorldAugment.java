@@ -42,6 +42,16 @@ public class ItemWorldAugment extends ItemAugment {
     }
 
     @Override
+    public int getBudgetAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.world.budgetAddition;
+    }
+
+    @Override
+    public double getBudgetMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.world.budgetMultiplier;
+    }
+
+    @Override
     public void apply(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         if ( augmentable instanceof IWorldAugmentable )
             ((IWorldAugmentable) augmentable).setWorldAugmented(!stack.isEmpty());

@@ -214,6 +214,10 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         return energyPerTick;
     }
 
+    public boolean hasSustainedRate() {
+        return false;
+    }
+
     public double getWorkMaxRate() {
         return calculateEnergyMaxTransfer();
     }

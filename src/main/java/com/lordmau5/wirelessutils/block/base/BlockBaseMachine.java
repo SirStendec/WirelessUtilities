@@ -178,6 +178,11 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
         return this.getDefaultState().withProperty(Properties.LEVEL, meta);
     }
 
+    @Override
+    public boolean isOpaqueCube(IBlockState state) {
+        return true;
+    }
+
     /* Block <-> Item Conversion */
 
     @Override

@@ -32,6 +32,8 @@ public class TabWorkInfo extends TabBase {
     private final BaseGuiContainer gui;
     private final IWorkInfoProvider provider;
 
+    private final boolean hasSustained;
+
     private TextureAtlasSprite icon;
     private ItemStack item;
 
@@ -49,7 +51,9 @@ public class TabWorkInfo extends TabBase {
         textColor = defaultTextColor;
         backgroundColor = defaultBackgroundColor;
 
-        maxHeight = 96;
+        hasSustained = provider.hasSustainedRate();
+
+        maxHeight = 96 + (hasSustained ? 24 : 0);
         maxWidth = 100;
     }
 
@@ -146,11 +150,16 @@ public class TabWorkInfo extends TabBase {
         fontRenderer.drawStringWithShadow(StringHelper.localize(INTL_KEY + ".maximum"), sideOffset() + 6, 46, subheaderColor);
         fontRenderer.drawString(provider.formatWorkUnit(provider.getWorkMaxRate()), sideOffset() + 14, 58, textColor);
 
-        fontRenderer.drawStringWithShadow(StringHelper.localize(INTL_KEY + ".targets.name"), sideOffset() + 6, 70, subheaderColor);
+        if ( hasSustained ) {
+            fontRenderer.drawStringWithShadow(StringHelper.localize(INTL_KEY + ".sustained"), sideOffset() + 6, 70, subheaderColor);
+            fontRenderer.drawString(provider.formatWorkUnit(provider.getWorkSustainedRate()), sideOffset() + 14, 82, textColor);
+        }
+
+        fontRenderer.drawStringWithShadow(StringHelper.localize(INTL_KEY + ".targets.name"), sideOffset() + 6, 70 + (hasSustained ? 24 : 0), subheaderColor);
         fontRenderer.drawString(StringHelper.localizeFormat(
                 INTL_KEY + ".targets.info",
                 StringHelper.formatNumber(provider.getActiveTargetCount()),
                 StringHelper.formatNumber(provider.getValidTargetCount())
-        ), sideOffset() + 14, 82, textColor);
+        ), sideOffset() + 14, 82 + (hasSustained ? 24 : 0), textColor);
     }
 }

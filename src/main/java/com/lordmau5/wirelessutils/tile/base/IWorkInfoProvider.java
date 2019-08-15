@@ -18,6 +18,12 @@ public interface IWorkInfoProvider {
         return TextHelpers.getScaledNumber(val, getWorkUnit(), true);
     }
 
+    default double getWorkSustainedRate() {
+        return getWorkMaxRate();
+    }
+
+    boolean hasSustainedRate();
+
     double getWorkMaxRate();
 
     double getWorkLastTick();

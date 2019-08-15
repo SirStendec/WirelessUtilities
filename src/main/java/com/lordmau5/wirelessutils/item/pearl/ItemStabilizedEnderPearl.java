@@ -2,27 +2,20 @@ package com.lordmau5.wirelessutils.item.pearl;
 
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.entity.pearl.EntityStabilizedEnderPearl;
-import com.lordmau5.wirelessutils.item.base.IDimensionallyStableItem;
 import com.lordmau5.wirelessutils.item.base.IJEIInformationItem;
 import com.lordmau5.wirelessutils.item.base.ItemBasePearl;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
-import com.lordmau5.wirelessutils.utils.mod.ModConfig;
-import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import mezz.jei.api.IModRegistry;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.dispenser.IPosition;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -31,7 +24,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemStabilizedEnderPearl extends ItemBasePearl implements IDimensionallyStableItem {
+public class ItemStabilizedEnderPearl extends ItemBasePearl {
 
     public ItemStabilizedEnderPearl() {
         super();
@@ -75,7 +68,7 @@ public class ItemStabilizedEnderPearl extends ItemBasePearl implements IDimensio
         addLocalizedLines(tooltip, "item." + WirelessUtils.MODID + ".accurate_pearl.info", TextHelpers.GREEN);
     }
 
-    @Override
+    /*@Override
     public boolean allowDimensionalTravel() {
         return !ModConfig.items.voidPearl.enableVoiding;
     }
@@ -89,11 +82,12 @@ public class ItemStabilizedEnderPearl extends ItemBasePearl implements IDimensio
             if ( entity.world instanceof WorldServer ) {
                 WorldServer ws = (WorldServer) entity.world;
                 ws.spawnParticle(EnumParticleTypes.PORTAL, false, entity.posX, entity.posY, entity.posZ, 0, 0, 0);
+                entity.world.playSound(null, entity.getPosition(), SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.NEUTRAL, 1F, 0.2F);
             }
         }
 
         ModItems.itemVoidPearl.onPortalImpact(stack, entity, state);
-    }
+    }*/
 
     @Override
     public float getProjectileInaccuracy(@Nonnull ItemStack stack) {

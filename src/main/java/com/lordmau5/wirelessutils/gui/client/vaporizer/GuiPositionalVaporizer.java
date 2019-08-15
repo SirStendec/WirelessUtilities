@@ -1,9 +1,11 @@
 package com.lordmau5.wirelessutils.gui.client.vaporizer;
 
 import cofh.core.gui.element.ElementEnergyStored;
+import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementAreaButton;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementFluidTankVaporizer;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementWorkBudget;
 import com.lordmau5.wirelessutils.gui.container.vaporizer.ContainerPositionalVaporizer;
 import com.lordmau5.wirelessutils.item.base.ItemBaseEntityPositionalCard;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
@@ -13,6 +15,7 @@ import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.TextFormatting;
 
 public class GuiPositionalVaporizer extends GuiBaseVaporizer {
 
@@ -33,8 +36,11 @@ public class GuiPositionalVaporizer extends GuiBaseVaporizer {
 
         addElement(new ElementEnergyStored(this, 10, 46, vaporizer.getEnergyStorage()).setInfinite(vaporizer.isCreative()));
 
+        if ( vaporizer.hasSustainedRate() )
+            addElement(new ElementWorkBudget(this, 26, 46, vaporizer));
+
         if ( vaporizer.hasFluid() )
-            addElement(new ElementFluidTankVaporizer(this, 34, 52, vaporizer).setAlwaysShow(true).setSmall().drawTank(true));
+            addElement(new ElementFluidTankVaporizer(this, 36, 52, vaporizer).setAlwaysShow(true).setSmall().drawTank(true));
 
         addElement(new ElementAreaButton(this, vaporizer, 152, 92));
     }
@@ -80,5 +86,17 @@ public class GuiPositionalVaporizer extends GuiBaseVaporizer {
                 drawRect(xPos + (x * 18), yPos + (y * 18), xPos + 16 + (x * 18), yPos + 16 + (y * 18), color);
             }
         }
+    }
+
+    @Override
+    protected void drawGuiContainerForegroundLayer(int x, int y) {
+        super.drawGuiContainerForegroundLayer(x, y);
+
+        String range = StringHelper.formatNumber(vaporizer.getRange());
+        if ( vaporizer.isInterdimensional() )
+            range = TextFormatting.OBFUSCATED + "999";
+
+        drawRightAlignedText(StringHelper.localize("btn." + WirelessUtils.MODID + ".range"), 90, 63, 0x404040);
+        fontRenderer.drawString(range, 94, 63, 0);
     }
 }

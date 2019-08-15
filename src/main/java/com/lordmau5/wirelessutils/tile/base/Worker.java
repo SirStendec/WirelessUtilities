@@ -16,6 +16,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.VanillaDoubleChestItemHandler;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -61,7 +62,15 @@ public class Worker<T extends TargetInfo> {
         cacheInvPosition = -1;
     }
 
-    private void updateTargetCache() {
+    @Nullable
+    public List<T> getTargetCache() {
+        if ( cacheList == null )
+            return null;
+
+        return Collections.unmodifiableList(cacheList);
+    }
+
+    public void updateTargetCache() {
         if ( cacheList != null && cacheTTL > 0 )
             return;
 

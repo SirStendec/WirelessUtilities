@@ -134,6 +134,40 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
         return 0;
     }
 
+    public int getBudgetAddition(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return 0;
+
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("BudgetAdd") )
+                return tag.getInteger("BudgetAdd");
+        }
+
+        return getBudgetAdditionDelegate(stack, augmentable);
+    }
+
+    public int getBudgetAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return 0;
+    }
+
+    public double getBudgetMultiplier(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return 1D;
+
+        if ( stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("BudgetMult") )
+                return tag.getDouble("BudgetMult");
+        }
+
+        return getBudgetMultiplierDelegate(stack, augmentable);
+    }
+
+    public double getBudgetMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return 1D;
+    }
+
     @Override
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
@@ -200,6 +234,23 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
                 ).getFormattedText());
             }
         }
+
+        multiplier = getBudgetMultiplier(stack, null);
+        addition = getBudgetAddition(stack, null);
+
+        if ( multiplier != 1 || addition != 0 ) {
+            tooltip.add(StringHelper.localize("item." + WirelessUtils.MODID + ".augment.budget"));
+
+            tooltip.add(new TextComponentTranslation(
+                    "item." + WirelessUtils.MODID + ".augment.budget.entry",
+                    new TextComponentTranslation(
+                            "item." + WirelessUtils.MODID + ".augment.budget.action",
+                            String.format("%.2f", multiplier),
+                            StringHelper.formatNumber(addition)
+                    )
+            ).getFormattedText());
+        }
+
     }
 
     @Nonnull

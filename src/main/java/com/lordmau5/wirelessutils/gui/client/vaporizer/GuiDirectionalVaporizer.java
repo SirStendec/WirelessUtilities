@@ -8,6 +8,7 @@ import com.lordmau5.wirelessutils.gui.client.elements.ElementDynamicContainedBut
 import com.lordmau5.wirelessutils.gui.client.elements.ElementFluidTankVaporizer;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementOffsetControls;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementRangeControls;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementWorkBudget;
 import com.lordmau5.wirelessutils.gui.container.vaporizer.ContainerDirectionalVaporizer;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileDirectionalVaporizer;
 import com.lordmau5.wirelessutils.utils.Textures;
@@ -34,8 +35,11 @@ public class GuiDirectionalVaporizer extends GuiBaseVaporizer {
 
         addElement(new ElementEnergyStored(this, 10, 46, vaporizer.getEnergyStorage()).setInfinite(vaporizer.isCreative()));
 
+        if ( vaporizer.hasSustainedRate() )
+            addElement(new ElementWorkBudget(this, 26, 46, vaporizer));
+
         if ( vaporizer.hasFluid() )
-            addElement(new ElementFluidTankVaporizer(this, 34, 52, vaporizer).setAlwaysShow(true).setSmall().drawTank(true));
+            addElement(new ElementFluidTankVaporizer(this, 36, 52, vaporizer).setAlwaysShow(true).setSmall().drawTank(true));
 
         addElement(new ElementAreaButton(this, vaporizer, 152, 89));
 

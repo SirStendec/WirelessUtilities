@@ -119,14 +119,13 @@ public class TileDirectionalVaporizer extends TileBaseVaporizer implements IRang
     /* Energy */
 
     public int getEnergyCost(double distance, boolean interdimensional) {
-        // TODO: Add Vaporizor config rather than using desublimator.
-        int cost = ModConfig.desublimators.directionalDesublimator.maximumCost;
+        int cost = ModConfig.vaporizers.directional.maximumCost;
         if ( !interdimensional ) {
             int dimCost = 0;
             if ( distance > 0 )
                 dimCost = (int) Math.floor(
-                        (ModConfig.desublimators.directionalDesublimator.costPerBlock * distance) +
-                                (ModConfig.desublimators.directionalDesublimator.costPerBlockSquared * (distance * distance))
+                        (ModConfig.vaporizers.directional.costPerBlock * distance) +
+                                (ModConfig.vaporizers.directional.costPerBlockSquared * (distance * distance))
                 );
 
             if ( dimCost < cost )

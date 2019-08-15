@@ -279,6 +279,17 @@ public class ModConfig {
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
         @Config.RequiresWorldRestart
         public int energyDrain = 0;
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double budgetMultiplier = 1;
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int budgetAddition = 0;
     }
 
     public static class ChunkLoadAugments {
@@ -303,6 +314,17 @@ public class ModConfig {
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
         @Config.RequiresWorldRestart
         public int energyDrain = 0;
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double budgetMultiplier = 1;
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int budgetAddition = 0;
     }
 
     public static class InvertAugments {
@@ -327,6 +349,17 @@ public class ModConfig {
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
         @Config.RequiresWorldRestart
         public int energyDrain = 0;
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double budgetMultiplier = 1;
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int budgetAddition = 0;
     }
 
     public static class SidedTransferAugments {
@@ -356,6 +389,17 @@ public class ModConfig {
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
         @Config.RequiresWorldRestart
         public int energyDrain = 0;
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double budgetMultiplier = 1;
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int budgetAddition = 0;
     }
 
     public static class FluidGenAugments {
@@ -424,6 +468,17 @@ public class ModConfig {
         @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
         @Config.RequiresWorldRestart
         public int energyAddition = 0;
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double budgetMultiplier = 1;
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int budgetAddition = 0;
     }
 
     public static class CropAugments {
@@ -485,6 +540,17 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public int energyDrain = 0;
 
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double budgetMultiplier = 1;
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int budgetAddition = 0;
+
         @Config.Name("Automatically Till Ground")
         @Config.Comment("Whether or not Crop Augments should automatically till dirt and grass.")
         public boolean automaticallyTill = false;
@@ -532,6 +598,17 @@ public class ModConfig {
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
         @Config.RequiresWorldRestart
         public int energyDrain = 0;
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double budgetMultiplier = 1;
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int budgetAddition = 0;
     }
 
     public static class CapacityAugments {
@@ -556,6 +633,17 @@ public class ModConfig {
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
         @Config.RequiresWorldRestart
         public int[] energyDrain = {0, 0, 0, 0, 0};
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] budgetMultiplier = {1, 1, 1, 1, 1};
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] budgetAddition = {0, 0, 0, 0, 0};
     }
 
     public static class TransferAugments {
@@ -580,6 +668,17 @@ public class ModConfig {
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
         @Config.RequiresWorldRestart
         public int[] energyDrain = {0, 0, 0, 0, 0};
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] budgetMultiplier = {1, 1, 1, 1, 1};
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] budgetAddition = {0, 0, 0, 0, 0};
     }
 
     public static class SlotAugments {
@@ -609,6 +708,17 @@ public class ModConfig {
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
         @Config.RequiresWorldRestart
         public int[] energyDrain = {0, 0, 0};
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] budgetMultiplier = {1, 1, 1};
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] budgetAddition = {0, 0, 0};
     }
 
     public static class RangeAugments {
@@ -643,6 +753,17 @@ public class ModConfig {
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
         @Config.RequiresWorldRestart
         public int[] energyDrain = {0, 0, 0, 0, 0};
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] budgetMultiplier = {1, 1, 1, 1, 1};
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] budgetAddition = {0, 0, 0, 0, 0};
     }
 
     public static class InventoryAugments {
@@ -671,6 +792,17 @@ public class ModConfig {
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
         @Config.RequiresWorldRestart
         public int energyDrain = 0;
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double budgetMultiplier = 1;
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int budgetAddition = 0;
     }
 
     public static class DispenserAugments {
@@ -700,6 +832,17 @@ public class ModConfig {
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
         @Config.RequiresWorldRestart
         public int energyDrain = 0;
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double budgetMultiplier = 1;
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int budgetAddition = 0;
     }
 
     public static class Chargers {
@@ -745,6 +888,12 @@ public class ModConfig {
     }
 
     public static class Vaporizers {
+        @Config.Name("Positional Vaporizer")
+        public PositionalVaporizer positional = new PositionalVaporizer();
+
+        @Config.Name("Directional Vaporizer")
+        public DirectionalVaporizer directional = new DirectionalVaporizer();
+
         @Config.Name("Use Experience Fluid")
         @Config.Comment("Whether or not Vaporizers should use some form of fluid experience for modules that require fuel.")
         @Config.RequiresWorldRestart
@@ -792,6 +941,40 @@ public class ModConfig {
         public Modules modules = new Modules();
     }
 
+    public static class PositionalVaporizer {
+        @Config.Name("Cost per Block")
+        @Config.Comment("The cost to work on entities at a distant block goes up by this amount per tick, linearly with distance.")
+        @Config.RangeInt(min = 0)
+        public int costPerBlock = 0;
+
+        @Config.Name("Cost per Block Squared")
+        @Config.Comment("The cost to work on entities at a distant block goes up by this amount per tick as a square with distance.")
+        @Config.RangeInt(min = 0)
+        public int costPerBlockSquared = 0;
+
+        @Config.Name("Maximum / Interdimensional Cost")
+        @Config.Comment("The maximum cost to work on entities at a distant block will never exceed this value. Also the cost for interdimensional stuff.")
+        @Config.RangeInt(min = 0)
+        public int costInterdimensional = 1000;
+    }
+
+    public static class DirectionalVaporizer {
+        @Config.Name("Cost per Block")
+        @Config.Comment("The cost to transfer fluids into a distant block goes up by this amount per tick, linearly with distance.")
+        @Config.RangeInt(min = 0)
+        public int costPerBlock = 0;
+
+        @Config.Name("Cost per Block Squared")
+        @Config.Comment("The cost to transfer fluids into a distant block goes up by this amount per tick as a square with distance.")
+        @Config.RangeInt(min = 0)
+        public int costPerBlockSquared = 0;
+
+        @Config.Name("Maximum Cost")
+        @Config.Comment("The cost to transfer fluids into a distant block will never exceed this value.")
+        @Config.RangeInt(min = 0)
+        public int maximumCost = 1500;
+    }
+
     public static class VaporizerCompatibility {
         @Config.Name("Allow Vanilla Spawn Eggs")
         @Config.Comment("Allow Vanilla Spawn Eggs to be used in Vaporizers for Duplication.")
@@ -825,6 +1008,88 @@ public class ModConfig {
         @Config.Name("Teleportation Module")
         @Config.Comment("Teleportation Modules transport all entities within the Vaporizer's working area to a set location.")
         public TeleportModule teleport = new TeleportModule();
+
+        @Config.Name("Launch Module")
+        @Config.Comment("Launch Modules impart motion to all entities within the Vaporizer's working area.")
+        public LaunchModule launch = new LaunchModule();
+    }
+
+    public static class LaunchModule {
+        @Config.Name("Required Level")
+        @Config.Comment("Vaporizers must be at least this level in order to use this module.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
+        @Config.Name("Budget per Entity")
+        @Config.Comment("Use this much action budget for each entity launched.")
+        @Config.RangeInt(min = 0)
+        public int budget = 10;
+
+        @Config.Name("Energy per Entity")
+        @Config.Comment("Use this much energy for each entity launched.")
+        @Config.RangeInt(min = 0)
+        public int energy = 0;
+
+        @Config.Name("Energy per 1 Velocity")
+        @Config.Comment("Use this much energy per unit of velocity imparted upon an entity.")
+        @Config.RangeDouble(min = 0)
+        public double energyPerUnit = 25D;
+
+        @Config.Name("Energy per Velocity Squared")
+        @Config.Comment("Use this much energy per unity of velocity squared imparted upon an entity.")
+        @Config.RangeDouble(min = 0)
+        public double energyPerUnitSquared = 5D;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for vaporizers using this module.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This module will drain this amount of RF/t from non-disabled vaporizers using them.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
+
+        @Config.Name("Limit to Living Entities")
+        @Config.Comment("When enabled, only living entities will be launched. Otherwise, ALL entities can be targeted.")
+        @Config.RequiresWorldRestart
+        public boolean livingOnly = false;
+
+        @Config.Name("Target Players")
+        @Config.Comment("When enabled, players can be launched.")
+        @Config.RequiresWorldRestart
+        public boolean targetPlayers = true;
+
+        @Config.Name("Target Bosses")
+        @Config.Comment("When enabled, entities tagged as bosses can be launched.")
+        @Config.RequiresWorldRestart
+        public boolean targetBosses = true;
+
+        @Config.Name("Base Fuel")
+        @Config.Comment("Launching an entity will use this much fuel, in addition to energy. The fuel value will be rounded up to the nearest integer.")
+        @Config.RangeDouble(min = 0)
+        public double baseFuel = 0;
+
+        @Config.Name("Allow Fall Damage Negation")
+        @Config.Comment("When enabled, players can enable a module setting to prevent fall damage to launched entities.")
+        public boolean allowFallProtect = true;
+
+        @Config.Name("Fall Negation Energy per Entity")
+        @Config.Comment("When fall negation is enabled, this much extra energy will be used per entity.")
+        @Config.RangeInt(min = 0)
+        public int fallProtectEnergy = 1000;
+
+        @Config.Name("Fall Negation Budget per Entity")
+        @Config.Comment("When fall negation is enabled, this much extra budget will be used per entity.")
+        @Config.RangeInt(min = 0)
+        public int fallProtectBudget = 0;
     }
 
     public static class CaptureModule {

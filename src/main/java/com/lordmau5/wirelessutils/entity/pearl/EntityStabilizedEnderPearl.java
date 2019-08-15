@@ -11,17 +11,12 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityEndPortal;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
@@ -80,7 +75,7 @@ public class EntityStabilizedEnderPearl extends EntityBaseThrowable {
             }
         }
 
-        if ( !world.isRemote && result.typeOfHit == RayTraceResult.Type.BLOCK && ModConfig.items.voidPearl.enableVoiding ) {
+        /*if ( !world.isRemote && result.typeOfHit == RayTraceResult.Type.BLOCK && ModConfig.items.voidPearl.enableVoiding ) {
             BlockPos pos = result.getBlockPos();
             TileEntity tile = world.getTileEntity(pos);
             if ( tile instanceof TileEntityEndPortal ) {
@@ -118,12 +113,13 @@ public class EntityStabilizedEnderPearl extends EntityBaseThrowable {
                 if ( world instanceof WorldServer ) {
                     WorldServer ws = (WorldServer) world;
                     ws.spawnParticle(EnumParticleTypes.PORTAL, false, posX, posY, posZ, 0, 0, 0);
+                    ws.playSound(null, pos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.NEUTRAL, 1, 1);
                 }
 
                 setDead();
                 return;
             }
-        }
+        }*/
 
         for (int i = 0; i < 32; i++)
             world.spawnParticle(EnumParticleTypes.PORTAL, posX, posY + rand.nextDouble(), posZ, rand.nextGaussian(), 0, rand.nextGaussian());

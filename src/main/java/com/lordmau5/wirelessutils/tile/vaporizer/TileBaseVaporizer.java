@@ -19,6 +19,7 @@ import com.lordmau5.wirelessutils.tile.base.IWorkInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
 import com.lordmau5.wirelessutils.tile.base.Worker;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IBudgetInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
 import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.FluidTank;
@@ -43,6 +44,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
@@ -70,7 +72,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
-        IWorkInfoProvider, ISidedTransfer, ISidedTransferAugmentable,
+        IWorkInfoProvider, IBudgetInfoProvider, ISidedTransfer, ISidedTransferAugmentable,
         IConfigurableWorldTickRate, IUnlockableSlots,
         IWorkProvider<TileBaseVaporizer.VaporizerTarget> {
 
@@ -103,6 +105,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     protected IterationMode iterationMode = IterationMode.RANDOM;
 
     private IVaporizerBehavior behavior = null;
+    private boolean wantTargets = false;
 
     public int remainingBudget;
     private int maximumBudget;
@@ -113,7 +116,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     private int activeTargetsPerTick;
     private int validTargetsPerTick;
-    private int maxEnergyPerTick;
+
+    private int maxEnergyPerEntity;
+    private int maxEnergyPerBlock;
 
     private int remainingPerTick;
 
@@ -222,6 +227,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         System.out.println("   Valid Targets: " + validTargetsPerTick);
         System.out.println("  Active Targets: " + activeTargetsPerTick);
+
+        System.out.println("Max Energy Block: " + maxEnergyPerBlock);
+        System.out.println("  Max Energy Ent: " + maxEnergyPerEntity);
 
         System.out.println("     Input Slots: empty=" + emptyInput + ", full=" + fullInput);
         System.out.println("    Output Slots: empty=" + emptyOutput + ", full=" + fullOutput);
@@ -439,6 +447,46 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         return true;
     }
 
+    public void updateTargetEnergy() {
+        if ( world == null || world.isRemote )
+            return;
+
+        maxEnergyPerEntity = 0;
+        maxEnergyPerBlock = 0;
+
+        List<VaporizerTarget> targets = worker.getTargetCache();
+        if ( targets == null )
+            return;
+
+        int dimension = world.provider.getDimension();
+
+        for (VaporizerTarget target : targets) {
+            int blockCost = target.cost + baseEnergy;
+            int entityCost = 0;
+
+            if ( behavior != null ) {
+                BlockPosDimension pos = target.pos;
+                int dim = pos.getDimension();
+                World world;
+                if ( dim == dimension )
+                    world = this.world;
+                else
+                    world = DimensionManager.getWorld(dim);
+
+                if ( world != null )
+                    blockCost += behavior.getBlockEnergyCost(target, world);
+
+                entityCost += behavior.getMaxEntityEnergyCost(target);
+            }
+
+            if ( blockCost > maxEnergyPerBlock )
+                maxEnergyPerBlock = blockCost;
+
+            if ( entityCost > maxEnergyPerEntity )
+                maxEnergyPerEntity = entityCost;
+        }
+    }
+
     public void updateModule() {
         ItemStack stack = itemStackHandler.getStackInSlot(getModuleOffset());
         if ( stack.isEmpty() || !isValidModule(stack) ) {
@@ -462,6 +510,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         previousModule = module;
         updateBaseEnergy();
+        updateTargetEnergy();
     }
 
     public ItemStack getModule() {
@@ -492,6 +541,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         ItemStack stack = itemStackHandler.getStackInSlot(getModifierOffset());
         behavior.updateModifier(behavior.isValidModifier(stack) ? stack : ItemStack.EMPTY);
+        updateTargetEnergy();
     }
 
     @Override
@@ -558,8 +608,17 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         tank.setCapacity(calculateFluidCapacity());
 
-        budgetPerTick = level.budgetPerTick;
-        maximumBudget = level.maxBudget;
+        budgetPerTick = level.vaporizerBudgetPerTick;
+        maximumBudget = level.vaporizerMaxBudget;
+
+        updateTargetEnergy();
+    }
+
+    @Override
+    public void updateAugmentStatus() {
+        super.updateAugmentStatus();
+
+        updateTargetEnergy();
     }
 
     @Override
@@ -576,17 +635,47 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         return sideTransferAugment;
     }
 
+    /* Budget Info */
+
+    public int getBudgetCurrent() {
+        return remainingBudget;
+    }
+
+    public int getBudgetMax() {
+        return maximumBudget;
+    }
+
+    public int getBudgetPerTick() {
+        return budgetPerTick;
+    }
+
+    public int getBudgetPerOperation() {
+        if ( behavior == null )
+            return 0;
+
+        return (int) (behavior.getActionCost() * augmentBudgetMult) + augmentBudgetAdd;
+    }
+
     /* Work Info */
 
     @Override
     public boolean getWorkConfigured() {
-        return behavior != null && behavior.canRun(true);
+        if ( behavior == null )
+            return false;
+
+        if ( getBudgetPerOperation() > maximumBudget )
+            return false;
+
+        return behavior.canRun(true);
     }
 
     @Nullable
     public String getWorkUnconfiguredExplanation() {
         if ( behavior == null )
             return "info." + WirelessUtils.MODID + ".vaporizer.missing_module";
+
+        if ( getBudgetPerOperation() > maximumBudget )
+            return "info." + WirelessUtils.MODID + ".vaporizer.insufficient_budget";
 
         return behavior.getUnconfiguredExplanation();
     }
@@ -617,11 +706,15 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         return StringHelper.localize("info." + WirelessUtils.MODID + ".vaporizer_unit.tick");
     }
 
+    public boolean hasSustainedRate() {
+        return maximumBudget != budgetPerTick;
+    }
+
     @Override
-    public double getWorkMaxRate() {
+    public double getWorkSustainedRate() {
         int budget = 0;
         if ( behavior != null )
-            budget = behavior.getActionCost();
+            budget = getBudgetPerOperation();
 
         if ( budget == 0 )
             return 0;
@@ -633,6 +726,26 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             long budgetPerSecond = budgetPerTick * 20L;
             count = (budgetPerSecond / (double) budget) / 20;
         }
+
+        if ( count > level.maxVaporizerEntities )
+            return level.maxVaporizerEntities;
+
+        return count;
+    }
+
+    public double getWorkMaxRate() {
+        int budget = 0;
+        if ( behavior != null )
+            budget = getBudgetPerOperation();
+
+        if ( budget == 0 )
+            return 0;
+
+        double count;
+        if ( budget == 1 )
+            count = maximumBudget;
+        else
+            count = maximumBudget / (double) budget;
 
         if ( count > level.maxVaporizerEntities )
             return level.maxVaporizerEntities;
@@ -807,7 +920,23 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     }
 
     public VaporizerTarget createInfo(@Nullable BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nullable TileEntity tile, @Nullable Entity entity) {
-        return new VaporizerTarget(target, tile, entity, target == null ? 0 : getEnergyCost(target, source));
+        VaporizerTarget info = new VaporizerTarget(target, tile, entity, target == null ? 0 : getEnergyCost(target, source));
+
+        int blockCost = info.cost + baseEnergy;
+        int entityCost = 0;
+
+        if ( behavior != null ) {
+            blockCost += behavior.getBlockEnergyCost(info, world);
+            entityCost += behavior.getMaxEntityEnergyCost(info);
+        }
+
+        if ( blockCost > maxEnergyPerBlock )
+            maxEnergyPerBlock = blockCost;
+
+        if ( entityCost > maxEnergyPerEntity )
+            maxEnergyPerEntity = entityCost;
+
+        return info;
     }
 
     public int getEnergyCost(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
@@ -837,11 +966,17 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     public abstract int getEnergyCost(double distance, boolean interdimensional);
 
     public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
-        if ( validTargets == null )
+        if ( validTargets == null ) {
+            tickActive();
             calculateTargets();
+        }
 
-        validTargetsPerTick = 0;
-        maxEnergyPerTick = moduleDrain + augmentDrain;
+        if ( world != null && !world.isRemote ) {
+            validTargetsPerTick = 0;
+            maxEnergyPerBlock = 0;
+            maxEnergyPerEntity = 0;
+        }
+
         return validTargets;
     }
 
@@ -889,7 +1024,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     @Nonnull
     public WorkResult performWorkBlock(@Nonnull VaporizerTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile) {
         int fullCost = target.cost + baseEnergy + behavior.getBlockEnergyCost(target, world);
-        int actionCost = behavior.getActionCost();
+        int actionCost = getBudgetPerOperation();
         if ( remainingBudget < actionCost )
             return WorkResult.FAILURE_STOP_IN_PLACE;
 
@@ -1048,7 +1183,23 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     @Override
     public int getInfoMaxEnergyPerTick() {
-        return maxEnergyPerTick;
+        if ( behavior == null )
+            return 0;
+
+        int actionCost = getBudgetPerOperation();
+        int rate;
+        if ( actionCost == 0 )
+            rate = Integer.MAX_VALUE;
+        else
+            rate = Math.floorDiv(maximumBudget, actionCost);
+
+        if ( rate > level.maxVaporizerEntities )
+            rate = level.maxVaporizerEntities;
+
+        if ( rate < 1 )
+            return 0;
+
+        return augmentDrain + moduleDrain + (rate * (maxEnergyPerBlock + maxEnergyPerEntity));
     }
 
     @Override
@@ -1168,7 +1319,6 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         if ( handler == null )
             return;
 
-        // TODO: Tracking if we actually have room to insert or items to extract.
         if ( mode == Mode.INPUT && fullInput < 8 )
             transferOne(handler, inputProxy);
         else if ( mode == Mode.OUTPUT && emptyOutput < 8 )
@@ -1261,25 +1411,26 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             if ( remainingBudget < 0 )
                 remainingBudget = 0;
             remainingBudget += budgetPerTick;
+            if ( remainingBudget > maximumBudget )
+                remainingBudget = maximumBudget;
         }
 
-        gatherTick--;
-        if ( gatherTick < 0 )
-            gatherTick = (byte) getActualWorldTickRate();
+        if ( gatherTick > 0 ) {
+            gatherTick--;
+            if ( gatherTick == 0 ) {
+                activeTargetsPerTick = 0;
+                validTargetsPerTick = 0;
+                energyPerTick = 0;
+                remainingPerTick = 0;
+            }
+        }
 
         boolean enabled = behavior != null && redstoneControlOrDisable();
-
-        if ( gatherTick == 0 ) {
-            activeTargetsPerTick = 0;
-            validTargetsPerTick = 0;
-            energyPerTick = 0;
-            remainingPerTick = 0;
-        }
 
         if ( enabled && sideTransferAugment )
             executeSidedTransfer();
 
-        if ( enabled && (gatherTick != 0 || behavior == null || behavior.getActionCost() > remainingBudget || !behavior.canRun()) )
+        if ( enabled && (gatherTick != 0 || behavior == null || getBudgetPerOperation() > remainingBudget || !behavior.canRun()) )
             enabled = false;
 
         int drain = moduleDrain + augmentDrain;
@@ -1291,11 +1442,18 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         }
 
         if ( !enabled || getEnergyStored() < baseEnergy ) {
+            if ( wantTargets ) {
+                wantTargets = false;
+                worker.updateTargetCache();
+            }
+
             tickInactive();
             setActive(false);
             updateTrackers();
             return;
         }
+
+        gatherTick = (byte) getActualWorldTickRate();
 
         int total = level.maxVaporizerEntities;
         remainingPerTick = total;
@@ -1439,15 +1597,19 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     public PacketBase getGuiPacket() {
         PacketBase payload = super.getGuiPacket();
 
+        wantTargets = true;
+
         payload.addFluidStack(tank.getFluid());
         payload.addInt(fluidRate);
 
         payload.addByte(iterationMode.ordinal());
         payload.addShort(validTargetsPerTick);
         payload.addShort(activeTargetsPerTick);
-        payload.addInt(maxEnergyPerTick);
+        payload.addInt(maxEnergyPerBlock);
+        payload.addInt(maxEnergyPerEntity);
         payload.addInt(gatherTickRate);
         payload.addInt(remainingPerTick);
+        payload.addInt(remainingBudget);
 
         return payload;
     }
@@ -1463,9 +1625,11 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         setIterationMode(IterationMode.fromInt(payload.getByte()));
         validTargetsPerTick = payload.getShort();
         activeTargetsPerTick = payload.getShort();
-        maxEnergyPerTick = payload.getInt();
+        maxEnergyPerBlock = payload.getInt();
+        maxEnergyPerEntity = payload.getInt();
         setWorldTickRate(payload.getInt());
         remainingPerTick = payload.getInt();
+        remainingBudget = payload.getInt();
     }
 
     @Override
@@ -1647,6 +1811,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         int getBlockEnergyCost(@Nonnull VaporizerTarget target, @Nonnull World world);
 
         int getEntityEnergyCost(@Nonnull Entity entity, @Nonnull VaporizerTarget target);
+
+        int getMaxEntityEnergyCost(@Nonnull VaporizerTarget target);
 
         default double getEnergyMultiplier() {
             return 1;

@@ -4,7 +4,9 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
 import com.lordmau5.wirelessutils.render.RenderPearl;
+import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
+import com.lordmau5.wirelessutils.utils.mod.ModStatistics;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -12,7 +14,9 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumParticleTypes;
@@ -74,8 +78,11 @@ public class EntityVoidPearl extends EntityBaseThrowable {
     @Override
     public HitReaction hitBlock(IBlockState state, RayTraceResult result) {
         Block block = state.getBlock();
-        if ( block == Blocks.END_GATEWAY || block == Blocks.END_PORTAL )
+        if ( block == Blocks.END_GATEWAY || block == Blocks.END_PORTAL ) {
+            if ( !world.isRemote )
+                playSound(SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, 0.5F, 0.1F);
             return HitReaction.BOUNCE;
+        }
 
         return super.hitBlock(state, result);
     }
@@ -96,6 +103,15 @@ public class EntityVoidPearl extends EntityBaseThrowable {
         } else if ( result.entityHit != null ) {
             ItemStack captured = ModItems.itemVoidPearl.saveEntity(stack, result.entityHit);
             if ( !captured.isEmpty() ) {
+                EntityLivingBase thrower = getThrower();
+                if ( thrower instanceof EntityPlayerMP ) {
+                    EntityPlayerMP playerMP = (EntityPlayerMP) thrower;
+                    ModAdvancements.FOR_THEE.trigger(playerMP);
+                    playerMP.addStat(ModStatistics.CAPTURED_MOBS);
+                }
+
+                playSound(SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, 0.2F, 0.1F);
+
                 result.entityHit.setDead();
                 stack.shrink(1);
                 setStack(captured);

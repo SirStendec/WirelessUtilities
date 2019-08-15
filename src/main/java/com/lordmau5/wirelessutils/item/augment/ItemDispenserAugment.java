@@ -41,6 +41,16 @@ public class ItemDispenserAugment extends ItemAugment {
     }
 
     @Override
+    public int getBudgetAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.dispenser.budgetAddition;
+    }
+
+    @Override
+    public double getBudgetMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.dispenser.budgetMultiplier;
+    }
+
+    @Override
     public void apply(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         if ( augmentable instanceof IDispenserAugmentable )
             ((IDispenserAugmentable) augmentable).setDispenserAugmented(!stack.isEmpty());

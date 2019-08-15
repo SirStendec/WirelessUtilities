@@ -38,6 +38,16 @@ public class ItemChunkLoadAugment extends ItemAugment {
     }
 
     @Override
+    public int getBudgetAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.chunkLoad.budgetAddition;
+    }
+
+    @Override
+    public double getBudgetMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.chunkLoad.budgetMultiplier;
+    }
+
+    @Override
     public void apply(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         if ( augmentable instanceof IChunkLoadAugmentable )
             ((IChunkLoadAugmentable) augmentable).setChunkLoadAugmented(!stack.isEmpty());

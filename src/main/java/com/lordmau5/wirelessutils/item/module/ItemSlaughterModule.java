@@ -381,6 +381,13 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             return ModConfig.vaporizers.modules.slaughter.entityEnergy;
         }
 
+        public int getMaxEntityEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target) {
+            if ( useWeapon )
+                return ModConfig.vaporizers.modules.slaughter.entityWeaponEnergy;
+
+            return ModConfig.vaporizers.modules.slaughter.entityEnergy;
+        }
+
         public int getActionCost() {
             if ( useWeapon )
                 return ModConfig.vaporizers.modules.slaughter.budgetWeapon;

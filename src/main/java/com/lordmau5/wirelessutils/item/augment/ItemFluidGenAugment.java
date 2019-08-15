@@ -70,6 +70,16 @@ public class ItemFluidGenAugment extends ItemAugment {
     }
 
     @Override
+    public int getBudgetAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.fluidGen.budgetAddition;
+    }
+
+    @Override
+    public double getBudgetMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.fluidGen.budgetMultiplier;
+    }
+
+    @Override
     public void apply(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         if ( !(augmentable instanceof IFluidGenAugmentable) )
             return;

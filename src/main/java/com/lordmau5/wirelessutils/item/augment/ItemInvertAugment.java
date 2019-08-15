@@ -37,6 +37,16 @@ public class ItemInvertAugment extends ItemAugment {
     }
 
     @Override
+    public int getBudgetAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.invert.budgetAddition;
+    }
+
+    @Override
+    public double getBudgetMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.invert.budgetMultiplier;
+    }
+
+    @Override
     public void apply(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         if ( augmentable instanceof IInvertAugmentable )
             ((IInvertAugmentable) augmentable).setInvertAugmented(!stack.isEmpty());

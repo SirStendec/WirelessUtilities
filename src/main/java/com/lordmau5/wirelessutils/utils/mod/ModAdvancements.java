@@ -15,6 +15,8 @@ public class ModAdvancements {
     public static final CustomTrigger LONG_DISTANCE = new CustomTrigger("long_distance");
     public static final CustomTrigger ROUNDABOUT = new CustomTrigger("roundabout");
     public static final CustomTrigger ENLIGHTENED = new CustomTrigger("enlightened");
+    public static final CustomTrigger THE_VOID_TOLLS = new CustomTrigger("the_void_tolls");
+    public static final CustomTrigger FOR_THEE = new CustomTrigger("for_thee");
 
     public static void initTriggers() {
         CriteriaTriggers.register(STORM_CHASER);
@@ -27,5 +29,7 @@ public class ModAdvancements {
         CriteriaTriggers.register(LONG_DISTANCE);
         CriteriaTriggers.register(ROUNDABOUT);
         CriteriaTriggers.register(ENLIGHTENED);
+        CriteriaTriggers.register(THE_VOID_TOLLS);
+        CriteriaTriggers.register(FOR_THEE);
     }
 }

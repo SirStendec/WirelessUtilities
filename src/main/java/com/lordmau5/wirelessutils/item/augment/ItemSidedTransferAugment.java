@@ -38,6 +38,16 @@ public class ItemSidedTransferAugment extends ItemAugment {
     }
 
     @Override
+    public int getBudgetAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.sidedTransfer.budgetAddition;
+    }
+
+    @Override
+    public double getBudgetMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.sidedTransfer.budgetMultiplier;
+    }
+
+    @Override
     public void apply(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
         if ( augmentable instanceof ISidedTransferAugmentable )
             ((ISidedTransferAugmentable) augmentable).setSidedTransferAugmented(!ModConfig.augments.sidedTransfer.required || !stack.isEmpty());

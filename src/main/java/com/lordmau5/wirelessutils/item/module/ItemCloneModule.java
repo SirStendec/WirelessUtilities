@@ -346,6 +346,10 @@ public class ItemCloneModule extends ItemModule {
             return 0;
         }
 
+        public int getMaxEntityEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target) {
+            return 0;
+        }
+
         public int getActionCost() {
             if ( exactCopies )
                 return ModConfig.vaporizers.modules.clone.budgetExact;

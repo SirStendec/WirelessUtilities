@@ -1,0 +1,20 @@
+{
+	"parent": "wirelessutils:the_void_tolls",
+	"display": {
+		"icon": {
+			"item": "wirelessutils:void_pearl",
+			"data": 96
+		},
+		"title": {
+			"translate": "advancements.wirelessutils.void_tolls_for_thee.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.void_tolls_for_thee.description"
+		}
+	},
+	"criteria": {
+		"for_thee": {
+			"trigger": "wirelessutils:for_thee"
+		}
+	}
+}

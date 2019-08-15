@@ -1,0 +1,20 @@
+{
+	"parent": "wirelessutils:so_hot_right_now",
+	"display": {
+		"icon": {
+			"item": "wirelessutils:void_pearl"
+		},
+		"frame": "challenge",
+		"title": {
+			"translate": "advancements.wirelessutils.the_void_tolls.title"
+		},
+		"description": {
+			"translate": "advancements.wirelessutils.the_void_tolls.description"
+		}
+	},
+	"criteria": {
+		"the_void_tolls": {
+			"trigger": "wirelessutils:the_void_tolls"
+		}
+	}
+}

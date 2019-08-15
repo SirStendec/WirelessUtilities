@@ -54,6 +54,16 @@ public class ItemCropAugment extends ItemAugment {
     }
 
     @Override
+    public int getBudgetAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.crop.budgetAddition;
+    }
+
+    @Override
+    public double getBudgetMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        return ModConfig.augments.crop.budgetMultiplier;
+    }
+
+    @Override
     public boolean isEnchantable(ItemStack stack) {
         return stack.getCount() == 1;
     }

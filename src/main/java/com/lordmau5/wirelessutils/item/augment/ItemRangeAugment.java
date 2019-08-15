@@ -54,6 +54,32 @@ public class ItemRangeAugment extends ItemAugment {
     }
 
     @Override
+    public int getBudgetAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        int[] additions = ModConfig.augments.range.budgetAddition;
+        if ( additions.length == 0 )
+            return 0;
+
+        int idx = getLevel(stack).toInt();
+        if ( idx >= additions.length )
+            idx = additions.length - 1;
+
+        return additions[idx];
+    }
+
+    @Override
+    public double getBudgetMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        double[] mults = ModConfig.augments.range.budgetMultiplier;
+        if ( mults.length == 0 )
+            return 1;
+
+        int idx = getLevel(stack).toInt();
+        if ( idx >= mults.length )
+            idx = mults.length - 1;
+
+        return mults[idx];
+    }
+
+    @Override
     public int getTiers() {
         return Math.min(ModConfig.augments.range.availableTiers, Level.values().length);
     }

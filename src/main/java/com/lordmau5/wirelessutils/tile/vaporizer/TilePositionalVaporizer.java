@@ -109,13 +109,13 @@ public class TilePositionalVaporizer extends TileBaseVaporizer implements IFacin
     /* Energy */
 
     public int getEnergyCost(double distance, boolean interdimensional) {
-        int cost = ModConfig.condensers.positionalCondenser.costInterdimensional;
+        int cost = ModConfig.vaporizers.positional.costInterdimensional;
         if ( !interdimensional ) {
             int dimCost = 0;
             if ( distance > 0 )
                 dimCost = (int) Math.floor(
-                        (ModConfig.condensers.positionalCondenser.costPerBlock * distance) +
-                                (ModConfig.condensers.positionalCondenser.costPerBlockSquared * (distance * distance))
+                        (ModConfig.vaporizers.positional.costPerBlock * distance) +
+                                (ModConfig.vaporizers.positional.costPerBlockSquared * (distance * distance))
                 );
 
             if ( dimCost < cost )

@@ -17,6 +17,7 @@ import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
 import com.lordmau5.wirelessutils.tile.base.Worker;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBlockAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IBudgetInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
@@ -100,7 +101,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implements
-        IConfigurableWorldTickRate,
+        IConfigurableWorldTickRate, IBudgetInfoProvider,
         IWorldAugmentable, IBlockAugmentable, IChunkLoadAugmentable, IDispenserAugmentable,
         ICropAugmentable, IInvertAugmentable, ITransferAugmentable, ICapacityAugmentable,
         IUnlockableSlots, IRoundRobinMachine, ITickable, ISidedTransfer, ISidedTransferAugmentable,
@@ -119,6 +120,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     private int fertilizers = 0;
     private int full = 0;
     private int empty = 0;
+
+    private boolean wantTargets = false;
 
     private int transferAugment;
     private int capacityAugment;
@@ -416,9 +419,24 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
         budgetPerTick = calculateBudget();
         maximumBudget = calculateMaxBudget();
-        costPerItem = level.costPerItem;
-
+        costPerItem = calculateCost();
         itemRatePerTarget = calculateMaxPerTarget();
+
+        updateTargetEnergy();
+    }
+
+    @Override
+    public void updateAugmentStatus() {
+        super.updateAugmentStatus();
+
+        costPerItem = calculateCost();
+        itemRatePerTarget = calculateMaxPerTarget();
+
+        updateTargetEnergy();
+    }
+
+    public int calculateCost() {
+        return Math.max(1, (int) (level.costPerItem * augmentBudgetMult) + augmentBudgetAdd);
     }
 
     public int calculateBudget() {
@@ -613,6 +631,24 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         return true;
     }
 
+    /* Budget Info */
+
+    public int getBudgetCurrent() {
+        return remainingBudget;
+    }
+
+    public int getBudgetMax() {
+        return maximumBudget;
+    }
+
+    public int getBudgetPerTick() {
+        return budgetPerTick;
+    }
+
+    public int getBudgetPerOperation() {
+        return costPerItem;
+    }
+
     /* Work Info */
 
     @Override
@@ -645,12 +681,32 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         return itemsPerTick;
     }
 
+    public boolean hasSustainedRate() {
+        return maximumBudget != budgetPerTick;
+    }
+
     public double getWorkMaxRate() {
         if ( costPerItem == 0 )
             return 0;
 
         else if ( costPerItem == 1 )
+            return maximumBudget;
+
+        else if ( costPerItem > maximumBudget )
+            return 0;
+
+        return maximumBudget / (double) costPerItem;
+    }
+
+    public double getWorkSustainedRate() {
+        if ( costPerItem == 0 )
+            return 0;
+
+        else if ( costPerItem == 1 )
             return budgetPerTick;
+
+        else if ( costPerItem > maximumBudget )
+            return 0;
 
         long budgetPerSecond = budgetPerTick * 20;
         return (budgetPerSecond / (double) costPerItem) / 20;
@@ -747,9 +803,29 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             calculateTargets();
         }
 
-        validTargetsPerTick = 0;
-        maxEnergyPerTick = augmentDrain;
+        if ( world == null || !world.isRemote ) {
+            validTargetsPerTick = 0;
+            maxEnergyPerTick = 0;
+        }
+
         return validTargets;
+    }
+
+    public void updateTargetEnergy() {
+        if ( world == null || world.isRemote )
+            return;
+
+        maxEnergyPerTick = 0;
+
+        List<DesublimatorTarget> targets = worker.getTargetCache();
+        if ( targets == null )
+            return;
+
+        for (DesublimatorTarget target : targets) {
+            int cost = target.cost + baseEnergy;
+            if ( cost > maxEnergyPerTick )
+                maxEnergyPerTick = cost;
+        }
     }
 
     @Override
@@ -820,7 +896,10 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return false;
 
         validTargetsPerTick++;
-        maxEnergyPerTick += baseEnergy + getEnergyCost(target, source);
+        int cost = baseEnergy + getEnergyCost(target, source);
+        if ( cost > maxEnergyPerTick )
+            maxEnergyPerTick = cost;
+
         return true;
     }
 
@@ -834,7 +913,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return false;
 
         validTargetsPerTick++;
-        maxEnergyPerTick += baseEnergy + getEnergyCost(target, source);
+        int cost = baseEnergy + getEnergyCost(target, source);
+        if ( cost > maxEnergyPerTick )
+            maxEnergyPerTick = cost;
         return true;
     }
 
@@ -874,7 +955,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( entity.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null) ) {
             validTargetsPerTick++;
             // TODO: Energy?
-            maxEnergyPerTick += baseEnergy;
+            if ( baseEnergy > maxEnergyPerTick )
+                maxEnergyPerTick = baseEnergy;
             return true;
         }
 
@@ -1454,7 +1536,19 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     @Override
     public int getInfoMaxEnergyPerTick() {
-        return maxEnergyPerTick;
+        if ( costPerItem == 0 )
+            return 0;
+
+        int rate = Math.floorDiv(maximumBudget, costPerItem);
+        if ( rate > validTargetsPerTick )
+            rate = validTargetsPerTick;
+        if ( rate > ModConfig.performance.stepsPerTick )
+            rate = ModConfig.performance.stepsPerTick;
+
+        if ( rate < 1 )
+            return 0;
+
+        return augmentDrain + (rate * maxEnergyPerTick);
     }
 
     @Override
@@ -1651,6 +1745,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         }
 
         if ( !enabled || !canRun || getEnergyStored() < baseEnergy || (gatherTick != 0 && shouldProcessBlocks()) ) {
+            if ( wantTargets ) {
+                wantTargets = false;
+                worker.updateTargetCache();
+            }
+
             tickInactive();
             setActive(false);
             updateTrackers();
@@ -1839,6 +1938,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     public PacketBase getGuiPacket() {
         PacketBase payload = super.getGuiPacket();
 
+        wantTargets = true;
+
         payload.addByte(locks.length);
         for (int i = 0; i < locks.length; i++)
             payload.addItemStack(locks[i] == null ? ItemStack.EMPTY : locks[i].toItemStack());
@@ -1850,6 +1951,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         payload.addInt(roundRobin);
         payload.addInt(gatherTickRate);
         payload.addInt(itemsPerTick);
+        payload.addInt(remainingBudget);
 
         return payload;
     }
@@ -1870,6 +1972,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         setRoundRobin(payload.getInt());
         setWorldTickRate(payload.getInt());
         itemsPerTick = payload.getInt();
+        remainingBudget = payload.getInt();
     }
 
     @Override

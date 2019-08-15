@@ -176,10 +176,6 @@ public class ItemTeleportModule extends ItemFilteringModule {
             return new ElementTeleportModule(gui, this);
         }
 
-        public boolean canInvert() {
-            return false;
-        }
-
         @Override
         public Class<? extends Entity> getEntityClass() {
             if ( ModConfig.vaporizers.modules.teleport.livingOnly )
@@ -330,12 +326,15 @@ public class ItemTeleportModule extends ItemFilteringModule {
             return ignorePower || vaporizer.getEnergyStored() >= cost;
         }
 
-        @Override
         public int getBlockEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
             return cost;
         }
 
         public int getEntityEnergyCost(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget target) {
+            return 0;
+        }
+
+        public int getMaxEntityEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target) {
             return 0;
         }
 

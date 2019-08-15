@@ -12,6 +12,7 @@ import com.lordmau5.wirelessutils.gui.client.base.BaseGuiPositional;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementAreaButton;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementLockControls;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementModeButton;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementWorkBudget;
 import com.lordmau5.wirelessutils.gui.client.elements.TabAugmentTwoElectricBoogaloo;
 import com.lordmau5.wirelessutils.gui.client.elements.TabRoundRobin;
 import com.lordmau5.wirelessutils.gui.client.elements.TabSideControl;
@@ -47,6 +48,10 @@ public class GuiPositionalDesublimator extends BaseGuiPositional {
         super.initGui();
 
         addElement(new ElementEnergyStored(this, 17, 23, desublimator.getEnergyStorage()).setInfinite(desublimator.isCreative()));
+
+        if ( desublimator.hasSustainedRate() )
+            addElement(new ElementWorkBudget(this, 33, 23, desublimator));
+
         addElement(new ElementAreaButton(this, desublimator, 152, 72));
         addElement(new ElementLockControls(this, desublimator, 98, 72));
         addElement(new ElementModeButton(this, desublimator, 134, 72));

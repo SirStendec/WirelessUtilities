@@ -175,6 +175,10 @@ public class ItemCaptureModule extends ItemFilteringModule {
             return ModConfig.vaporizers.modules.capture.entityEnergy;
         }
 
+        public int getMaxEntityEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target) {
+            return ModConfig.vaporizers.modules.capture.entityEnergy;
+        }
+
         public int getActionCost() {
             return ModConfig.vaporizers.modules.capture.budget;
         }
