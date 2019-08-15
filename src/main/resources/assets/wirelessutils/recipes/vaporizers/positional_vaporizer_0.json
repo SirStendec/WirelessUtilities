@@ -11,7 +11,7 @@
 			"item": "#IRON_INGOT"
 		},
 		"C": {
-			"item": "#VOID_PEARL"
+			"item": "#EMPTY_VOID_PEARL"
 		},
 		"P": {
 			"item": "minecraft:piston"

@@ -8,7 +8,7 @@
 	],
 	"key": {
 		"P": {
-			"item": "#VOID_PEARL"
+			"item": "#EMPTY_VOID_PEARL"
 		},
 		"C": {
 			"item": "wirelessutils:directional_vaporizer",
