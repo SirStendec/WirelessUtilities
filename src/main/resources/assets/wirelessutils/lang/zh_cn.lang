@@ -140,8 +140,9 @@ item.wirelessutils.void_pearl.name=虚空珍珠
 item.wirelessutils.void_pearl.contains=含有：
 item.wirelessutils.void_pearl.baby=Baby %s
 item.wirelessutils.void_pearl.health=Health: %s
+item.wirelessutils.void_pearl.value=Value: %s
 item.wirelessutils.void_pearl.empty=无
-item.wirelessutils.void_pearl.jei.0=将稳定末影珍珠扔进末地传送门使其充满了虚空。
+item.wirelessutils.void_pearl.jei.0=将焦黑珍珠扔进末地传送门使其充满了虚空。
 item.wirelessutils.void_pearl.jei.1=虚空渴望被填充，因此虚空珍珠会吸收触碰到的任何生物。
 
 item.wirelessutils.stabilized_ender_pearl.jei.0=稳定末影珍珠与通量珍珠有着类似的行为，即能被发射器发射和能被反弹。
@@ -217,6 +218,14 @@ item.wirelessutils.clone_module.exact.info.0=该模块能生成生物的精
 item.wirelessutils.clone_module.exact.info.1=确复制，但会额外消耗
 item.wirelessutils.clone_module.exact.info.2=相当多的经验。
 item.wirelessutils.clone_module.exact.off=不生成精确复制
+
+item.wirelessutils.launch_module.name=发射模块
+item.wirelessutils.launch_module.info.0=该模块会将实体蒸馏
+item.wirelessutils.launch_module.info.1=并重组，但重组时会
+item.wirelessutils.launch_module.info.2=带有额外的速度。
+
+item.wirelessutils.launch_module.speed=速度：%s
+item.wirelessutils.launch_module.fall_protect=使掉落伤害无效。
 
 item.wirelessutils.base_augment.name=升级基座
 
@@ -306,6 +315,10 @@ item.wirelessutils.augment.energy=能量消耗：
 item.wirelessutils.augment.energy.entry=- %s
 item.wirelessutils.augment.energy.action=%sx + %s RF/动作
 
+item.wirelessutils.augment.budget=Work Buffer Usage:
+item.wirelessutils.augment.budget.entry=- %s
+item.wirelessutils.augment.budget.action=%sx + %s per action
+
 item.wirelessutils.augment_ctrl.inactive=按§e§oCtrl§r§7查看可用机器
 item.wirelessutils.augment_ctrl.active=可用机器：
 item.wirelessutils.augment_ctrl.entry=- %s
@@ -374,7 +387,7 @@ tab.wirelessutils.directional_rs_network.0=定向RS网络会在特定方向上�
 tab.wirelessutils.directional_rs_network.1=初始情况下，只能连接机器正对的那个方块。
 tab.wirelessutils.directional_rs_network.2=添加升级后可以无线地大范围连接RS网络！
 
-tab.wirelessutils.positional_rs_network.0=定向RS网络会对特定位置进行网络连接。
+tab.wirelessutils.positional_rs_network.0=定位RS网络会对特定位置进行网络连接。
 tab.wirelessutils.positional_rs_network.1=在目标槽中放一张位置卡来指定连接的目标。
 tab.wirelessutils.positional_rs_network.2=添加升级，可以使目标槽能放多个位置卡。
 tab.wirelessutils.positional_rs_network.3=升级也能让你连接更远的方块。最后甚至能跨维度充能！
@@ -383,10 +396,20 @@ tab.wirelessutils.directional_ae_network.0=定向AE网络会在特定方向上�
 tab.wirelessutils.directional_ae_network.1=初始情况下，只能连接机器正对的那个方块。
 tab.wirelessutils.directional_ae_network.2=添加升级后可以无线地大范围连接AE网络！
 
-tab.wirelessutils.positional_ae_network.0=定向AE网络会对特定位置进行网络连接。
+tab.wirelessutils.positional_ae_network.0=定位AE网络会对特定位置进行网络连接。
 tab.wirelessutils.positional_ae_network.1=在目标槽中放一张位置卡来指定连接的目标。
 tab.wirelessutils.positional_ae_network.2=添加升级，可以使目标槽能放多个位置卡。
 tab.wirelessutils.positional_ae_network.3=升级也能让你连接更远的方块。最后甚至能跨维度充能！
+
+tab.wirelessutils.directional_vaporizer.0=定向蒸馏器会对在特定方向的实体进行蒸馏。
+tab.wirelessutils.directional_vaporizer.1=蒸馏器的行为完全取决于安装的模块。蒸馏器没有模块就不会运行。
+tab.wirelessutils.directional_vaporizer.2=模块允许蒸馏器传送实体、杀死实体、生成实体复制、或推开实体。
+tab.wirelessutils.directional_vaporizer.3=使用升级可以提升蒸馏器的工作距离，并进一步定制其功能。
+
+tab.wirelessutils.positional_vaporizer.0=定位蒸馏器会对在特定位置的实体进行蒸馏。
+tab.wirelessutils.positional_vaporizer.1=蒸馏器的行为完全取决于安装的模块。蒸馏器没有模块就不会运行。
+tab.wirelessutils.positional_vaporizer.2=模块允许蒸馏器传送实体、杀死实体、生成实体复制、或推开实体。
+tab.wirelessutils.positional_vaporizer.3=使用升级可以提升蒸馏器的工作距离，并进一步定制其功能。
 
 tab.wirelessutils.auto_transfer=I/O控制
 tab.wirelessutils.auto_transfer.mode=模式：%s
@@ -410,6 +433,10 @@ btn.wirelessutils.dec_area.all=全部减少%s格
 btn.wirelessutils.inc_area.one=增加%s格
 btn.wirelessutils.inc_area.all=全部增加%s格
 
+info.wirelessutils.x=X:
+info.wirelessutils.y=Y:
+info.wirelessutils.z=Z:
+
 info.wirelessutils.owner=所有者：%s
 info.wirelessutils.no_owner=(未设置)
 
@@ -427,14 +454,32 @@ info.wirelessutils.work_info.tooltip.rate=功率：%s
 info.wirelessutils.work_info.tooltip.targets=目标：第%s个，共%s个
 info.wirelessutils.work_info.current=消耗功率：
 info.wirelessutils.work_info.maximum=最大功率：
+info.wirelessutils.work_info.sustained=Sustained Rate:
 info.wirelessutils.work_info.targets.name=可用目标：
 info.wirelessutils.work_info.targets.info=第%s个，共%s个
+
+info.wirelessutils.work_info.unconfigured.title=无法运行
+info.wirelessutils.work_info.unconfigured.tooltip=机器不能运行
+info.wirelessutils.work_info.unconfigured.explanation.0=该机器现在无法运作。
+
+info.wirelessutils.vaporizer_unit=实体/t
+info.wirelessutils.vaporizer_unit.second=实体/秒
+info.wirelessutils.vaporizer_unit.tick=实体/t
+info.wirelessutils.vaporizer_unit.item=秒/实体
+
+info.wirelessutils.vaporizer.missing_module.0=请安装一个有效的模块
+info.wirelessutils.vaporizer.cannot_spawn.0=该实体无法生成。
+info.wirelessutils.vaporizer.missing_entity.0=请插入一个倍捕获的实体。
+info.wirelessutils.vaporizer.missing_modifier.0=请安装一个有效的修饰。Please install a valid modifier.
+info.wirelessutils.vaporizer.bad_config.0=请配置模块。
+info.wirelessutils.vaporizer.empty_whitelist.0=目标白名单为空。
+info.wirelessutils.vaporizer.insufficient_budget.0=被配置的模块无法在此机器上运行。
 
 info.wirelessutils.item_rate.second=个物品/s
 info.wirelessutils.item_rate.tick=个物品/t
 info.wirelessutils.item_rate.item=s/一个物品
 info.wirelessutils.buffer=缓冲
-info.wirelessutils.buffer.in_out=Input / Output
+info.wirelessutils.buffer.in_out=输入/输出
 
 jei.wirelessutils.charger=物品能量灌注
 jei.wirelessutils.condenser=物品流体灌注
@@ -442,18 +487,26 @@ jei.wirelessutils.condenser=物品流体灌注
 btn.wirelessutils.main=主界面
 btn.wirelessutils.module=模块
 
-btn.wirelessutils.use_weapon=使用武器：
+btn.wirelessutils.use_weapon=作为玩家：
 btn.wirelessutils.use_weapon.info.0=启用时蒸馏器会完整
-btn.wirelessutils.use_weapon.info.1=模拟玩家正在使用其
-btn.wirelessutils.use_weapon.info.2=武器，但增加对一些
-btn.wirelessutils.use_weapon.info.3=武器的支持会导致损
-btn.wirelessutils.use_weapon.info.4=失质量和性能。
+btn.wirelessutils.use_weapon.info.1=模拟一个正在使用武
+btn.wirelessutils.use_weapon.info.2=器的玩家，若增加对
+btn.wirelessutils.use_weapon.info.3=特定武器的支持会导
+btn.wirelessutils.use_weapon.info.4=致质量和性能降低。
 
 btn.wirelessutils.drop.drops=掉落：
 btn.wirelessutils.drop.exp=经验：
 
 btn.wirelessutils.blacklist=黑名单：
 btn.wirelessutils.whitelist=白名单：
+
+btn.wirelessutils.fall_protect=掉落保护：
+btn.wirelessutils.fall_protect.0=禁用
+btn.wirelessutils.fall_protect.1=启用
+btn.wirelessutils.fall_protect.info.0=当启用，蒸馏器会使
+btn.wirelessutils.fall_protect.info.1=用额外能量来确保发
+btn.wirelessutils.fall_protect.info.2=射的任何东西不会受
+btn.wirelessutils.fall_protect.info.3=到掉落伤害。
 
 btn.wirelessutils.mode.0=---
 btn.wirelessutils.mode.1=否
@@ -492,7 +545,7 @@ btn.wirelessutils.hide_area=隐藏工作范围
 btn.wirelessutils.area_scroll=滚动以改变颜色
 btn.wirelessutils.range=距离：
 
-btn.wirelessutils.cost=Cost:
+btn.wirelessutils.cost=消耗：
 btn.wirelessutils.cost_fluid=%s (%s mB)
 
 btn.wirelessutils.offset.vertical=垂直：
@@ -501,6 +554,10 @@ btn.wirelessutils.offset.horizontal=水平：
 btn.wirelessutils.range.height=高：
 btn.wirelessutils.range.length=长：
 btn.wirelessutils.range.width=宽：
+
+info.wirelessutils.work_budget=工作缓存
+info.wirelessutils.work_budget.per_tick=+%s/tick
+info.wirelessutils.work_budget.per_op=-%s/动作
 
 info.wirelessutils.slot_lock=这个物品不能被移除
 info.wirelessutils.max=最大：%s
@@ -548,6 +605,8 @@ commands.wirelessutils.fluidgen.success=已创造升级：%s
 
 commands.wirelessutils.debug.success=已创造物品：%s
 
+stat.wirelessutils.captured_mobs=Void Pearl Captures
+
 advancements.wirelessutils.root.title=无线设备
 advancements.wirelessutils.root.description=因为线缆只会碍事。
 
@@ -592,3 +651,9 @@ advancements.wirelessutils.roundabout.description=扔出的珍珠在停下前水
 
 advancements.wirelessutils.enlightened.title=启蒙
 advancements.wirelessutils.enlightened.description=向红石灯扔出通量珍珠。
+
+advancements.wirelessutils.the_void_tolls.title=空虚为谁而鸣
+advancements.wirelessutils.the_void_tolls.description=烧焦一颗珍珠，然后把它扔进末地传送门。
+
+advancements.wirelessutils.void_tolls_for_thee.title=它为你而鸣
+advancements.wirelessutils.void_tolls_for_thee.description=用虚空珍珠抓到什么。
