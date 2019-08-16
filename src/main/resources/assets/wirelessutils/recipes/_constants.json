@@ -130,8 +130,32 @@
 	{
 		"name": "EMPTY_VOID_PEARL",
 		"ingredient": {
-			"item": "wirelessutils:void_pearl",
-			"data": 0
+			"type": "wirelessutils:void_pearl"
+		}
+	},
+	{
+		"name": "SLIME_VOID_PEARL",
+		"ingredient": {
+			"type": "wirelessutils:void_pearl",
+			"entity": [
+				"minecraft:slime",
+				"industrialforegoing:pink_slime",
+				"tconstruct:blueslime"
+			]
+		}
+	},
+	{
+		"name": "VILLAGER_VOID_PEARL",
+		"ingredient": {
+			"type": "wirelessutils:void_pearl",
+			"entity": "minecraft:villager"
+		}
+	},
+	{
+		"name": "ENDERMAN_VOID_PEARL",
+		"ingredient": {
+			"type": "wirelessutils:void_pearl",
+			"entity": "minecraft:enderman"
 		}
 	},
 	{

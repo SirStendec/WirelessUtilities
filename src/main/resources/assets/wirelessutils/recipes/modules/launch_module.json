@@ -1,0 +1,24 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		" V ",
+		"PAP",
+		" V "
+	],
+	"key": {
+		"P": {
+			"item": "#PISTON"
+		},
+		"V": {
+			"item": "#EMPTY_VOID_PEARL"
+		},
+		"A": {
+			"item": "wirelessutils:base_module"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:launch_module",
+		"count": 1
+	}
+}

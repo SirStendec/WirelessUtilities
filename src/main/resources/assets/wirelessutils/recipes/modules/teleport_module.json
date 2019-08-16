@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		" E ",
+		"VAV",
+		" P "
+	],
+	"key": {
+		"E": {
+			"item": "#ENDER_PEARL"
+		},
+		"V": {
+			"item": "#EMPTY_VOID_PEARL"
+		},
+		"P": {
+			"item": "#ENDERMAN_VOID_PEARL"
+		},
+		"A": {
+			"item": "wirelessutils:base_module"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:teleport_module",
+		"count": 1
+	}
+}

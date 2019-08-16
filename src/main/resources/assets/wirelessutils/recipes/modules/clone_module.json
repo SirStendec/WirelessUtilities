@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		" S ",
+		"VAV",
+		" D "
+	],
+	"key": {
+		"D": {
+			"item": "minecraft:dispenser"
+		},
+		"V": {
+			"item": "#EMPTY_VOID_PEARL"
+		},
+		"S": {
+			"item": "#SLIME_VOID_PEARL"
+		},
+		"A": {
+			"item": "wirelessutils:base_module"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:clone_module",
+		"count": 1
+	}
+}

@@ -105,10 +105,12 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
                     getCapturedName(stack)
             ).getFormattedText());
 
-            tooltip.add(new TextComponentTranslation(
-                    getTranslationKey() + ".health",
-                    getCapturedHealth(stack)
-            ).getFormattedText());
+            float health = getCapturedHealth(stack);
+            if ( health > 0 )
+                tooltip.add(new TextComponentTranslation(
+                        getTranslationKey() + ".health",
+                        health
+                ).getFormattedText());
 
             int exp = getBaseExperience(stack);
             if ( isBabyEntity(stack) )

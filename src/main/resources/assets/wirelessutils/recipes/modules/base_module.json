@@ -1,0 +1,24 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		"EQE",
+		"QCQ",
+		"EQE"
+	],
+	"key": {
+		"C": {
+			"item": "#EMPTY_VOID_PEARL"
+		},
+		"E": {
+			"item": "#EMERALD"
+		},
+		"Q": {
+			"item": "#QUARTZ"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:base_module",
+		"count": 1
+	}
+}

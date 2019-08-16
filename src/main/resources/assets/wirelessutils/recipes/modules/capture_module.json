@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		" V ",
+		"EAE",
+		" P "
+	],
+	"key": {
+		"V": {
+			"item": "#EMPTY_VOID_PEARL"
+		},
+		"A": {
+			"item": "wirelessutils:base_module"
+		},
+		"P": {
+			"item": "#STICKY_PISTON"
+		},
+		"E": {
+			"item": "#EMERALD"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:capture_module",
+		"count": 1
+	}
+}

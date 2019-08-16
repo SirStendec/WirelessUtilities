@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		" P ",
+		"SAS",
+		" V "
+	],
+	"key": {
+		"P": {
+			"item": "#EMPTY_VOID_PEARL"
+		},
+		"V": {
+			"item": "#VILLAGER_VOID_PEARL"
+		},
+		"S": {
+			"item": "minecraft:diamond_sword"
+		},
+		"A": {
+			"item": "wirelessutils:base_module"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:slaughter_module",
+		"count": 1
+	}
+}
