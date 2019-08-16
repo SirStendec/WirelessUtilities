@@ -138,9 +138,9 @@ item.wirelessutils.scorched_pearl.name=焦黑珍珠
 
 item.wirelessutils.void_pearl.name=虚空珍珠
 item.wirelessutils.void_pearl.contains=含有：
-item.wirelessutils.void_pearl.baby=Baby %s
-item.wirelessutils.void_pearl.health=Health: %s
-item.wirelessutils.void_pearl.value=Value: %s
+item.wirelessutils.void_pearl.baby=幼年%s
+item.wirelessutils.void_pearl.health=生命：%s
+item.wirelessutils.void_pearl.value=值：%s
 item.wirelessutils.void_pearl.empty=无
 item.wirelessutils.void_pearl.jei.0=将焦黑珍珠扔进末地传送门使其充满了虚空。
 item.wirelessutils.void_pearl.jei.1=虚空渴望被填充，因此虚空珍珠会吸收触碰到的任何生物。
@@ -315,9 +315,9 @@ item.wirelessutils.augment.energy=能量消耗：
 item.wirelessutils.augment.energy.entry=- %s
 item.wirelessutils.augment.energy.action=%sx + %s RF/动作
 
-item.wirelessutils.augment.budget=Work Buffer Usage:
+item.wirelessutils.augment.budget=工作缓存使用：
 item.wirelessutils.augment.budget.entry=- %s
-item.wirelessutils.augment.budget.action=%sx + %s per action
+item.wirelessutils.augment.budget.action=%sx + %s RF/动作
 
 item.wirelessutils.augment_ctrl.inactive=按§e§oCtrl§r§7查看可用机器
 item.wirelessutils.augment_ctrl.active=可用机器：
@@ -454,7 +454,7 @@ info.wirelessutils.work_info.tooltip.rate=功率：%s
 info.wirelessutils.work_info.tooltip.targets=目标：第%s个，共%s个
 info.wirelessutils.work_info.current=消耗功率：
 info.wirelessutils.work_info.maximum=最大功率：
-info.wirelessutils.work_info.sustained=Sustained Rate:
+info.wirelessutils.work_info.sustained=维持功率：
 info.wirelessutils.work_info.targets.name=可用目标：
 info.wirelessutils.work_info.targets.info=第%s个，共%s个
 
@@ -470,7 +470,7 @@ info.wirelessutils.vaporizer_unit.item=秒/实体
 info.wirelessutils.vaporizer.missing_module.0=请安装一个有效的模块
 info.wirelessutils.vaporizer.cannot_spawn.0=该实体无法生成。
 info.wirelessutils.vaporizer.missing_entity.0=请插入一个倍捕获的实体。
-info.wirelessutils.vaporizer.missing_modifier.0=请安装一个有效的修饰。Please install a valid modifier.
+info.wirelessutils.vaporizer.missing_modifier.0=请安装一个有效的修饰。
 info.wirelessutils.vaporizer.bad_config.0=请配置模块。
 info.wirelessutils.vaporizer.empty_whitelist.0=目标白名单为空。
 info.wirelessutils.vaporizer.insufficient_budget.0=被配置的模块无法在此机器上运行。
@@ -605,7 +605,7 @@ commands.wirelessutils.fluidgen.success=已创造升级：%s
 
 commands.wirelessutils.debug.success=已创造物品：%s
 
-stat.wirelessutils.captured_mobs=Void Pearl Captures
+stat.wirelessutils.captured_mobs=虚空珍珠捕获
 
 advancements.wirelessutils.root.title=无线设备
 advancements.wirelessutils.root.description=因为线缆只会碍事。
