@@ -13,6 +13,7 @@ import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.item.module.ItemModule;
 import com.lordmau5.wirelessutils.tile.base.IConfigurableWorldTickRate;
+import com.lordmau5.wirelessutils.tile.base.IEnergyHistory;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.IWorkInfoProvider;
@@ -24,6 +25,7 @@ import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentabl
 import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.FluidTank;
 import com.lordmau5.wirelessutils.utils.ItemHandlerProxy;
+import com.lordmau5.wirelessutils.utils.ItemStackHandler;
 import com.lordmau5.wirelessutils.utils.WUFakePlayer;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
@@ -73,7 +75,7 @@ import java.util.Map;
 
 public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         IWorkInfoProvider, IBudgetInfoProvider, ISidedTransfer, ISidedTransferAugmentable,
-        IConfigurableWorldTickRate, IUnlockableSlots,
+        IConfigurableWorldTickRate, IUnlockableSlots, IEnergyHistory,
         IWorkProvider<TileBaseVaporizer.VaporizerTarget> {
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
@@ -101,7 +103,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     protected ItemHandlerProxy inputProxy;
     protected ItemHandlerProxy outputProxy;
-    protected ItemHandlerProxy passiveProxy;
+    protected PassiveItemHandler passiveProxy;
 
     protected IterationMode iterationMode = IterationMode.RANDOM;
 
@@ -418,7 +420,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         Arrays.fill(emptySlots, true);
         Arrays.fill(fullSlots, false);
 
-        passiveProxy = new ItemHandlerProxy(itemStackHandler, getInputOffset(), 16, true, true);
+        passiveProxy = new PassiveItemHandler(this);
         inputProxy = new ItemHandlerProxy(itemStackHandler, getInputOffset(), 8, true, true);
         outputProxy = new ItemHandlerProxy(itemStackHandler, getOutputOffset(), 8, true, true);
     }
@@ -503,7 +505,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     @Override
     public boolean updateBaseEnergy() {
-        int newEnergy = (int) (level.baseEnergyPerOperation * augmentMultiplier * moduleMultiplier) + augmentEnergy + moduleEnergy;
+        int newEnergy = (int) (level.baseEnergyPerOperation * augmentMultiplier * moduleMultiplier) + augmentEnergy + moduleEnergy - level.baseEnergyPerOperation;
+        if ( newEnergy < 0 )
+            newEnergy = 0;
+
         if ( newEnergy == baseEnergy )
             return false;
 
@@ -1483,15 +1488,13 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
                 remainingBudget = maximumBudget;
         }
 
-        if ( gatherTick > 0 ) {
+        if ( gatherTick > 0 )
             gatherTick--;
-            if ( gatherTick == 0 ) {
-                activeTargetsPerTick = 0;
-                validTargetsPerTick = 0;
-                energyPerTick = 0;
-                remainingPerTick = 0;
-            }
-        }
+
+        activeTargetsPerTick = 0;
+        validTargetsPerTick = 0;
+        energyPerTick = 0;
+        remainingPerTick = 0;
 
         boolean enabled = behavior != null && redstoneControlOrDisable();
 
@@ -1518,6 +1521,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             tickInactive();
             setActive(false);
             updateTrackers();
+            saveEnergyHistory(energyPerTick);
             return;
         }
 
@@ -1529,6 +1533,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         setActive(worker.performWork());
         updateTrackers();
 
+        saveEnergyHistory(energyPerTick);
         remainingPerTick = total - remainingPerTick;
     }
 
@@ -1823,6 +1828,64 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             return super.getStringBuilder().add("cost", cost);
         }
     }
+
+    /* Passive Item Handler */
+
+    private static class PassiveItemHandler implements IItemHandler {
+        public final ItemStackHandler handler;
+
+        public final int offset;
+        public final int slots;
+
+        public PassiveItemHandler(TileBaseVaporizer vaporizer) {
+            handler = vaporizer.itemStackHandler;
+            offset = vaporizer.getInputOffset();
+            slots = 16;
+        }
+
+        public int getSlots() {
+            return slots;
+        }
+
+        @Nonnull
+        public ItemStack getStackInSlot(int slot) {
+            if ( slot < 0 || slot >= slots )
+                return ItemStack.EMPTY;
+
+            return handler.getStackInSlot(slot + offset);
+        }
+
+        @Nonnull
+        public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+            if ( slot < 0 || slot >= 8 )
+                return stack;
+
+            return handler.insertItem(slot + offset, stack, simulate);
+        }
+
+        @Nonnull
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            if ( handler == null || slot < 8 || slot >= slots )
+                return ItemStack.EMPTY;
+
+            return handler.extractItem(slot + offset, amount, simulate);
+        }
+
+        public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+            if ( slot < 0 || slot >= slots )
+                return false;
+
+            return handler.isItemValid(slot + offset, stack);
+        }
+
+        public int getSlotLimit(int slot) {
+            if ( slot < 0 || slot >= slots )
+                return 0;
+
+            return handler.getSlotLimit(slot + offset);
+        }
+    }
+
 
     /* Behaviors */
 

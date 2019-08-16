@@ -1496,6 +1496,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             tickInactive();
             setActive(false);
             updateTrackers();
+            saveEnergyHistory(energyPerTick);
             return;
         }
 
@@ -1514,6 +1515,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             tank.setFluid(null);
 
         updateTrackers();
+        saveEnergyHistory(energyPerTick);
     }
 
     /* NBT Read and Write */

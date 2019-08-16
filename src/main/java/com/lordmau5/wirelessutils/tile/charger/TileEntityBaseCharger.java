@@ -757,6 +757,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
             tickInactive();
             setActive(false);
             updateTrackers();
+            saveEnergyHistory(energyPerTick);
             return;
         }
 
@@ -793,6 +794,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
             extractEnergy(augmentDrain, false);
 
         energyPerTick = total - remainingPerTick;
+        saveEnergyHistory(energyPerTick);
         updateTrackers();
     }
 

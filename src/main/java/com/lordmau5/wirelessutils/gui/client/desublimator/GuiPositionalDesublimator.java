@@ -2,7 +2,6 @@ package com.lordmau5.wirelessutils.gui.client.desublimator;
 
 import cofh.core.gui.container.IAugmentableContainer;
 import cofh.core.gui.element.ElementEnergyStored;
-import cofh.core.gui.element.tab.TabEnergy;
 import cofh.core.gui.element.tab.TabInfo;
 import cofh.core.gui.element.tab.TabRedstoneControl;
 import cofh.core.inventory.ComparableItemStackValidatedNBT;
@@ -14,6 +13,7 @@ import com.lordmau5.wirelessutils.gui.client.elements.ElementLockControls;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementModeButton;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementWorkBudget;
 import com.lordmau5.wirelessutils.gui.client.elements.TabAugmentTwoElectricBoogaloo;
+import com.lordmau5.wirelessutils.gui.client.elements.TabEnergyHistory;
 import com.lordmau5.wirelessutils.gui.client.elements.TabRoundRobin;
 import com.lordmau5.wirelessutils.gui.client.elements.TabSideControl;
 import com.lordmau5.wirelessutils.gui.client.elements.TabWorkInfo;
@@ -56,7 +56,7 @@ public class GuiPositionalDesublimator extends BaseGuiPositional {
         addElement(new ElementLockControls(this, desublimator, 98, 72));
         addElement(new ElementModeButton(this, desublimator, 134, 72));
 
-        addTab(new TabEnergy(this, desublimator, false));
+        addTab(new TabEnergyHistory(this, desublimator, false));
         addTab(new TabWorkInfo(this, desublimator).setItem(CHEST));
         addTab(new TabWorldTickRate(this, desublimator));
         addTab(new TabInfo(this, myInfo));

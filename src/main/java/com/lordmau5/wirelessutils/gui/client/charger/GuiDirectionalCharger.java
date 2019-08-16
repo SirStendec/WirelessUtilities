@@ -4,7 +4,6 @@ import cofh.core.gui.container.IAugmentableContainer;
 import cofh.core.gui.element.ElementEnergyStored;
 import cofh.core.gui.element.tab.TabInfo;
 import cofh.core.gui.element.tab.TabRedstoneControl;
-import cofh.core.init.CoreTextures;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.SharedState;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
@@ -15,9 +14,9 @@ import com.lordmau5.wirelessutils.gui.client.elements.ElementOffsetControls;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementRangeControls;
 import com.lordmau5.wirelessutils.gui.client.elements.TabAugmentTwoElectricBoogaloo;
 import com.lordmau5.wirelessutils.gui.client.elements.TabChargerConfiguration;
+import com.lordmau5.wirelessutils.gui.client.elements.TabEnergyHistory;
 import com.lordmau5.wirelessutils.gui.client.elements.TabRoundRobin;
 import com.lordmau5.wirelessutils.gui.client.elements.TabSideControl;
-import com.lordmau5.wirelessutils.gui.client.elements.TabWorkInfo;
 import com.lordmau5.wirelessutils.gui.client.elements.TabWorldTickRate;
 import com.lordmau5.wirelessutils.gui.container.charger.ContainerDirectionalCharger;
 import com.lordmau5.wirelessutils.tile.charger.TileEntityDirectionalCharger;
@@ -52,7 +51,7 @@ public class GuiDirectionalCharger extends BaseGuiContainer {
         addElement(new ElementAreaButton(this, charger, 152, 69));
         addElement(new ElementModeButton(this, charger, 134, 69));
 
-        addTab(new TabWorkInfo(this, charger).setIcon(CoreTextures.ICON_ENERGY));
+        addTab(new TabEnergyHistory(this, charger, false).displayStored(false).displayTargets(true));
         addTab(new TabChargerConfiguration(this, charger));
         addTab(new TabWorldTickRate(this, charger));
         addTab(new TabInfo(this, myInfo));

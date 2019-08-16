@@ -2,7 +2,10 @@ package com.lordmau5.wirelessutils.tile.base;
 
 import cofh.api.tileentity.IEnergyInfo;
 import cofh.core.network.PacketBase;
+import cofh.core.network.PacketHandler;
+import cofh.core.network.PacketTileInfo;
 import com.lordmau5.wirelessutils.utils.BigEnergyStorage;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -11,8 +14,15 @@ import net.minecraftforge.energy.IEnergyStorage;
 
 import javax.annotation.Nullable;
 
-public abstract class TileEntityBaseEnergy extends TileEntityBaseMachine implements IEnergyInfo, IEnergyStorage {
+public abstract class TileEntityBaseEnergy extends TileEntityBaseMachine implements IEnergyInfo, IEnergyStorage, IEnergyHistory {
     private final BigEnergyStorage energyStorage;
+
+    public static final byte PKT_HISTORY_REQUEST = 100;
+    public static final byte PKT_HISTORY_SYNC = 101;
+
+    protected long energyHistory[] = new long[40];
+    protected byte energyHistoryPos = -1;
+    protected boolean energyHistoryRequested = false;
 
     protected long energyPerTick = 0;
 
@@ -40,6 +50,111 @@ public abstract class TileEntityBaseEnergy extends TileEntityBaseMachine impleme
     }
 
 
+    /* Energy History */
+
+    public void saveEnergyHistory(long energy) {
+        energyHistoryPos++;
+        if ( energyHistoryPos >= 40 )
+            energyHistoryPos = 0;
+
+        energyHistory[energyHistoryPos] = energy;
+    }
+
+    @Override
+    public long[] getEnergyHistory() {
+        long[] out = new long[40];
+
+        int initial = energyHistoryPos + 1;
+        int trailing = energyHistory.length - initial;
+
+        System.arraycopy(energyHistory, initial, out, 0, trailing);
+        System.arraycopy(energyHistory, 0, out, trailing, initial);
+
+        return out;
+    }
+
+    /* Packets */
+
+    @Override
+    public void handleTileInfoPacket(PacketBase payload, boolean isServer, EntityPlayer thePlayer) {
+        byte type = payload.getByte();
+
+        TilePacketID[] packets = TilePacketID.values();
+        if ( type < packets.length ) {
+            switch (packets[type]) {
+                case S_GUI:
+                    handleGuiPacket(payload);
+                    return;
+                case S_FLUID:
+                    handleFluidPacket(payload);
+                    return;
+                case C_ACCESS:
+                    handleAccessPacket(payload);
+                    return;
+                case C_CONFIG:
+                    handleConfigPacket(payload);
+                    return;
+                case C_MODE:
+                    handleModePacket(payload);
+                    return;
+                default:
+            }
+        }
+
+        handleTileInfoPackageDelegate(type, payload, isServer, thePlayer);
+    }
+
+    public void handleTileInfoPackageDelegate(byte type, PacketBase payload, boolean isServer, EntityPlayer thePlayer) {
+        if ( type == PKT_HISTORY_REQUEST ) {
+            handleEnergyHistoryRequestPacket(payload, thePlayer);
+            return;
+        } else if ( type == PKT_HISTORY_SYNC ) {
+            handleEnergyHistorySyncPacket(payload);
+        }
+    }
+
+    public PacketBase getEnergyHistoryRequestPacket() {
+        PacketBase payload = PacketTileInfo.newPacket(this);
+        payload.addByte(PKT_HISTORY_REQUEST);
+        return payload;
+    }
+
+    protected void handleEnergyHistoryRequestPacket(PacketBase payload, EntityPlayer player) {
+        PacketBase syncPacket = getEnergyHistorySyncPacket();
+        if ( syncPacket != null )
+            PacketHandler.sendTo(syncPacket, player);
+    }
+
+    public PacketBase getEnergyHistorySyncPacket() {
+        PacketBase payload = PacketTileInfo.newPacket(this);
+        payload.addByte(PKT_HISTORY_SYNC);
+
+        if ( world != null && !world.isRemote ) {
+            for (long energy : energyHistory)
+                payload.addLong(energy);
+
+            payload.addByte(energyHistoryPos);
+        }
+
+        return payload;
+    }
+
+    protected void handleEnergyHistorySyncPacket(PacketBase payload) {
+        for (int i = 0; i < energyHistory.length; i++)
+            energyHistory[i] = payload.getLong();
+
+        energyHistoryPos = payload.getByte();
+    }
+
+    public void syncHistory() {
+        if ( world == null || !world.isRemote )
+            return;
+
+        PacketBase requestPacket = getEnergyHistoryRequestPacket();
+        if ( requestPacket != null )
+            PacketHandler.sendToServer(requestPacket);
+    }
+
     @Override
     public PacketBase getGuiPacket() {
         PacketBase payload = super.getGuiPacket();
@@ -62,6 +177,9 @@ public abstract class TileEntityBaseEnergy extends TileEntityBaseMachine impleme
         energyStorage.setMaxExtract(payload.getLong());
         energyStorage.setMaxReceive(payload.getLong());
         energyPerTick = payload.getLong();
+
+        if ( world != null && world.isRemote )
+            saveEnergyHistory(energyPerTick);
     }
 
     @Override

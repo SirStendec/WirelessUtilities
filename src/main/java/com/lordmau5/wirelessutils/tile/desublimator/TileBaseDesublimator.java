@@ -1752,6 +1752,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             tickInactive();
             setActive(false);
             updateTrackers();
+            saveEnergyHistory(energyPerTick);
             return;
         }
 
@@ -1761,6 +1762,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         tickActive();
         setActive(worker.performWork());
         updateTrackers();
+        saveEnergyHistory(energyPerTick);
     }
 
     /* Capabilities */

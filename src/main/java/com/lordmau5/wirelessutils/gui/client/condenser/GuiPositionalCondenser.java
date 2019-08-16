@@ -2,7 +2,6 @@ package com.lordmau5.wirelessutils.gui.client.condenser;
 
 import cofh.core.gui.container.IAugmentableContainer;
 import cofh.core.gui.element.ElementEnergyStored;
-import cofh.core.gui.element.tab.TabEnergy;
 import cofh.core.gui.element.tab.TabInfo;
 import cofh.core.gui.element.tab.TabRedstoneControl;
 import cofh.core.util.helpers.StringHelper;
@@ -13,6 +12,7 @@ import com.lordmau5.wirelessutils.gui.client.elements.ElementFluidLock;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementFluidTankCondenser;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementModeButton;
 import com.lordmau5.wirelessutils.gui.client.elements.TabAugmentTwoElectricBoogaloo;
+import com.lordmau5.wirelessutils.gui.client.elements.TabEnergyHistory;
 import com.lordmau5.wirelessutils.gui.client.elements.TabRoundRobin;
 import com.lordmau5.wirelessutils.gui.client.elements.TabSideControl;
 import com.lordmau5.wirelessutils.gui.client.elements.TabWorkInfo;
@@ -54,7 +54,7 @@ public class GuiPositionalCondenser extends BaseGuiPositional {
         addElement(new ElementAreaButton(this, condenser, 152, 74));
         addElement(new ElementModeButton(this, condenser, 134, 74));
 
-        addTab(new TabEnergy(this, condenser, false));
+        addTab(new TabEnergyHistory(this, condenser, false));
         workInfo = (TabWorkInfo) addTab(new TabWorkInfo(this, condenser).setItem(BUCKET));
         addTab(new TabWorldTickRate(this, condenser));
         addTab(new TabInfo(this, myInfo));

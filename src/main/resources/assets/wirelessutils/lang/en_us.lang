@@ -437,6 +437,8 @@ info.wirelessutils.x=X:
 info.wirelessutils.y=Y:
 info.wirelessutils.z=Z:
 
+info.wirelessutils.energy_at_tick=Power at Tick
+
 info.wirelessutils.owner=Owner: %s
 info.wirelessutils.no_owner=(Not Set)
 

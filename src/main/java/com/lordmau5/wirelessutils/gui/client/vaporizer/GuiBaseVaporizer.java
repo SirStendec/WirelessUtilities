@@ -3,13 +3,13 @@ package com.lordmau5.wirelessutils.gui.client.vaporizer;
 import cofh.core.gui.container.IAugmentableContainer;
 import cofh.core.gui.element.ElementBase;
 import cofh.core.gui.element.tab.TabBase;
-import cofh.core.gui.element.tab.TabEnergy;
 import cofh.core.gui.element.tab.TabInfo;
 import cofh.core.gui.element.tab.TabRedstoneControl;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.gui.client.elements.TabAugmentTwoElectricBoogaloo;
+import com.lordmau5.wirelessutils.gui.client.elements.TabEnergyHistory;
 import com.lordmau5.wirelessutils.gui.client.elements.TabSideControl;
 import com.lordmau5.wirelessutils.gui.client.elements.TabSpacer;
 import com.lordmau5.wirelessutils.gui.client.elements.TabWorkInfo;
@@ -55,7 +55,7 @@ public class GuiBaseVaporizer extends BaseGuiContainer {
         super.initGui();
 
         addTab(new TabSpacer(this, TabBase.LEFT, 20));
-        addTab(new TabEnergy(this, vaporizer, false));
+        addTab(new TabEnergyHistory(this, vaporizer, false));
         addTab(new TabWorkInfo(this, vaporizer).setItem(new ItemStack(ModItems.itemVoidPearl)));
         addTab(new TabWorldTickRate(this, vaporizer));
         addTab(new TabInfo(this, myInfo));
