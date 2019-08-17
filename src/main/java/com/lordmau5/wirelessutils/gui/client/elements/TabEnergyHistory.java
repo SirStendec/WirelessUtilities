@@ -39,6 +39,7 @@ public class TabEnergyHistory extends TabBase {
 
     private long[] history;
     private double max;
+    private byte tick;
     private int hoveredLine = -1;
 
     static final String UNIT_INSTANT = " RF/t";
@@ -148,9 +149,26 @@ public class TabEnergyHistory extends TabBase {
             if ( hoveredLine == -1 ) {
                 history = energyHistory.getEnergyHistory();
                 max = energyInfo.getInfoMaxEnergyPerTick();
+                tick = (byte) (40 - energyHistory.getHistoryTick());
             }
 
+            gui.drawSizedModalRect(sideOffset() + 6, y, sideOffset() + 88, y + 21, 0x20000000);
             gui.drawSizedModalRect(sideOffset() + 6, y + 10, sideOffset() + 88, y + 11, 0x40000000);
+
+            int t = tick;
+            for (int i = 0; i < 4; i++) {
+                gui.drawSizedModalRect(
+                        sideOffset() + 5 + (t * 2), y,
+                        sideOffset() + 6 + (t * 2), y + 20,
+                        0x40000000
+                );
+
+                t += 10;
+                if ( t > 40 )
+                    t -= 40;
+                if ( t == tick )
+                    break;
+            }
 
             int x = 2;
             for (int i = 0; i < history.length; i++, x += 2) {
@@ -167,7 +185,7 @@ public class TabEnergyHistory extends TabBase {
                     gui.drawSizedModalRect(
                             sideOffset() + 6 + x, y,
                             sideOffset() + 7 + x, y + 20,
-                            0x40000000
+                            0xFF000000
                     );
 
                     gui.drawSizedModalRect(

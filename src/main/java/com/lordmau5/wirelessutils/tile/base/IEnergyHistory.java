@@ -4,6 +4,8 @@ public interface IEnergyHistory {
 
     void syncHistory();
 
+    byte getHistoryTick();
+
     long[] getEnergyHistory();
 
 }

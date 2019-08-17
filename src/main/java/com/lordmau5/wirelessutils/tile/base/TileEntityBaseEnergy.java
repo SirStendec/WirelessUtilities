@@ -60,6 +60,10 @@ public abstract class TileEntityBaseEnergy extends TileEntityBaseMachine impleme
         energyHistory[energyHistoryPos] = energy;
     }
 
+    public byte getHistoryTick() {
+        return energyHistoryPos;
+    }
+
     @Override
     public long[] getEnergyHistory() {
         long[] out = new long[40];

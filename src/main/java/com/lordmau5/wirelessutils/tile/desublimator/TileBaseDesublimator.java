@@ -1756,11 +1756,12 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return;
         }
 
+        tickActive();
+        setActive(worker.performWork());
+
         if ( gatherTick == 0 )
             gatherTick = (byte) getActualWorldTickRate();
 
-        tickActive();
-        setActive(worker.performWork());
         updateTrackers();
         saveEnergyHistory(energyPerTick);
     }

@@ -13,7 +13,6 @@ import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.item.module.ItemModule;
 import com.lordmau5.wirelessutils.tile.base.IConfigurableWorldTickRate;
-import com.lordmau5.wirelessutils.tile.base.IEnergyHistory;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.IWorkInfoProvider;
@@ -75,7 +74,7 @@ import java.util.Map;
 
 public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         IWorkInfoProvider, IBudgetInfoProvider, ISidedTransfer, ISidedTransferAugmentable,
-        IConfigurableWorldTickRate, IUnlockableSlots, IEnergyHistory,
+        IConfigurableWorldTickRate, IUnlockableSlots,
         IWorkProvider<TileBaseVaporizer.VaporizerTarget> {
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
