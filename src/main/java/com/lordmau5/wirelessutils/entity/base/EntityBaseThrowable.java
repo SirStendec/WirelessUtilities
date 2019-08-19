@@ -8,6 +8,7 @@ import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -22,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -181,6 +183,15 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
             return HitReaction.NONE;
         }
 
+        if ( !world.isRemote && reaction.type == HitReactionType.BOUNCE ) {
+            SoundType soundType = block.getSoundType(state, world, result.getBlockPos(), this);
+            SoundEvent fallSound = soundType == null ? null : soundType.getFallSound();
+            if ( fallSound != null ) {
+                float volume = Math.min(0.5F, soundType.getVolume());
+                playSound(fallSound, volume, soundType.getPitch());
+            }
+        }
+
         return reaction;
     }
 
@@ -309,6 +320,13 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
                             motionX = realResult.velocity.x;
                             motionY = realResult.velocity.y;
                             motionZ = realResult.velocity.z;
+
+                            if ( !world.isRemote ) {
+                                SoundType soundType = block.getSoundType(blockState, world, ray.getBlockPos(), this);
+                                SoundEvent fallSound = soundType == null ? null : soundType.getFallSound();
+                                if ( fallSound != null )
+                                    playSound(fallSound, 0.5F, soundType.getPitch());
+                            }
 
                             bounces++;
                             if ( !world.isRemote && !triggeredBounce && bounces >= 10 ) {

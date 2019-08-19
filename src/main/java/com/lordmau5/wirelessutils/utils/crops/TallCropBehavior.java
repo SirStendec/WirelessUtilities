@@ -6,6 +6,7 @@ import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -42,7 +43,7 @@ public class TallCropBehavior implements IHarvestBehavior {
         return targets.contains(state.getBlock());
     }
 
-    public boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+    public boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator) {
         if ( TileBaseDesublimator.isBlacklisted(state) )
             return false;
 
@@ -50,11 +51,14 @@ public class TallCropBehavior implements IHarvestBehavior {
         if ( !targets.contains(block) || world.getBlockState(pos.down()).getBlock() instanceof BlockCrops )
             return false;
 
+        if ( blockLimit < minimumBlocks )
+            return false;
+
         IBlockState workingState = state;
         BlockPos workingPos = pos;
         Block workingBlock = block;
         int i = 0;
-        while ( targets.contains(workingBlock) ) {
+        while ( targets.contains(workingBlock) && i < minimumBlocks ) {
             if ( i++ > 255 )
                 break;
 
@@ -66,47 +70,58 @@ public class TallCropBehavior implements IHarvestBehavior {
             workingBlock = workingState.getBlock();
         }
 
-        if ( i < minimumBlocks )
-            return false;
-
-        return true;
+        return i >= minimumBlocks;
     }
 
-    public HarvestResult harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
-        return doHarvest(0, state, world, pos, silkTouch, fortune, desublimator) ?
-                HarvestResult.SUCCESS : HarvestResult.FAILED;
+    public Tuple<HarvestResult, Integer> harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator) {
+        int count = doHarvest(0, state, world, pos, silkTouch, fortune, blockLimit, desublimator);
+        if ( count == 0 )
+            return FAILURE;
+
+        return new Tuple<>(HarvestResult.SUCCESS, count);
     }
 
-    public boolean doHarvest(int i, IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+    public int doHarvest(int i, IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator) {
         if ( TileBaseDesublimator.isBlacklisted(state) )
-            return false;
+            return 0;
 
         Block block = state.getBlock();
         if ( !targets.contains(block) || !(block instanceof BlockCrops) || !((BlockCrops) block).isMaxAge(state) )
-            return false;
+            return 0;
 
-        boolean harvested = false;
+        int harvested = 0;
         BlockPos posAbove = pos.up();
         IBlockState above = world.getBlockState(posAbove);
 
         if ( !reverseHarvestOrder && i < 255 && (!silkTouch || !ModConfig.augments.crop.useActivation || silkAll) ) {
-            harvested = doHarvest(i + 1, above, world, posAbove, silkTouch, fortune, desublimator);
-            if ( harvested ) {
+            int count = doHarvest(i + 1, above, world, posAbove, silkTouch, fortune, blockLimit - harvested, desublimator);
+            if ( count > 0 ) {
+                harvested += count;
                 IBlockState newState = world.getBlockState(pos);
                 if ( newState != state ) {
-                    doHarvest(i + 1, newState, world, pos, silkTouch, fortune, desublimator);
-                    return true;
+                    if ( blockLimit - harvested > 0 )
+                        harvested += doHarvest(i + 1, newState, world, pos, silkTouch, fortune, blockLimit - harvested, desublimator);
+                    return harvested;
                 }
             }
         }
 
-        if ( silkTouch && ModConfig.augments.crop.useActivation )
-            harvested = harvestByUsing(state, world, pos, fortune, desublimator) || harvested;
-        else
-            harvested = harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator) || harvested;
+        if ( blockLimit - harvested < 1 )
+            return harvested;
+
+        if ( silkTouch && ModConfig.augments.crop.useActivation ) {
+            if ( harvestByUsing(state, world, pos, fortune, desublimator) )
+                harvested++;
+        } else {
+            if ( harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator) )
+                harvested++;
+        }
+
+        if ( blockLimit - harvested < 1 )
+            return harvested;
 
         if ( reverseHarvestOrder && i < 255 && (!silkTouch || !ModConfig.augments.crop.useActivation || silkAll) )
-            harvested = doHarvest(i + 1, above, world, posAbove, silkTouch, fortune, desublimator) || harvested;
+            harvested += doHarvest(i + 1, above, world, posAbove, silkTouch, fortune, blockLimit - harvested, desublimator);
 
         return harvested;
     }

@@ -11,7 +11,7 @@ import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
-import com.lordmau5.wirelessutils.utils.mod.ModStatistics;
+import com.lordmau5.wirelessutils.utils.mod.ModStats;
 import mezz.jei.api.IModRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -37,6 +37,7 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -163,11 +164,20 @@ public class ItemVoidPearl extends ItemBasePearl implements IDimensionallyStable
         if ( player instanceof EntityPlayerMP ) {
             EntityPlayerMP playerMP = (EntityPlayerMP) player;
             ModAdvancements.FOR_THEE.trigger(playerMP);
-            playerMP.addStat(ModStatistics.CAPTURED_MOBS);
+            ModStats.CapturedEntities.addToPlayer(playerMP);
         }
 
-        if ( entity.world instanceof WorldServer )
-            entity.world.playSound(null, entity.getPosition(), SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.NEUTRAL, .2F, .2F);
+        if ( entity.world instanceof WorldServer ) {
+            WorldServer ws = (WorldServer) entity.world;
+            ws.playSound(null, entity.getPosition(), SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.NEUTRAL, .2F, .2F);
+            AxisAlignedBB box = entity.getRenderBoundingBox();
+
+            double centerX = entity.posX + (box.maxX - box.minX) / 2;
+            double centerY = entity.posY + (box.maxY - box.minY) / 2;
+            double centerZ = entity.posZ + (box.maxZ - box.minZ) / 2;
+
+            ws.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, centerX, centerY, centerZ, 3, .2D, .2D, .2D, 0D);
+        }
 
         if ( stack.getCount() == 1 )
             player.setHeldItem(hand, out);

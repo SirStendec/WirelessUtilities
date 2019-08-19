@@ -213,6 +213,11 @@ item.wirelessutils.clone_module.name=Duplication Module
 item.wirelessutils.clone_module.info.0=This module uses experience and other
 item.wirelessutils.clone_module.info.1=captured creatures to create duplicates
 item.wirelessutils.clone_module.info.2=of the provided captured creature.
+item.wirelessutils.clone_module.limit=Spawn Limit: %s
+item.wirelessutils.clone_module.limit.info.0=The Vaporizer will only spawn duplicates
+item.wirelessutils.clone_module.limit.info.1=if the area within %s blocks of its
+item.wirelessutils.clone_module.limit.info.2=working area contains fewer than this
+item.wirelessutils.clone_module.limit.info.3=many creatures of the target type.
 item.wirelessutils.clone_module.exact=Spawn Exact Copies
 item.wirelessutils.clone_module.exact.info.0=Spawning exact copies does exactly
 item.wirelessutils.clone_module.exact.info.1=what it sounds like, at the cost
@@ -607,7 +612,8 @@ commands.wirelessutils.fluidgen.success=Created Augment: %s
 
 commands.wirelessutils.debug.success=Created Item: %s
 
-stat.wirelessutils.captured_mobs=Void Pearl Captures
+stat.wirelessutils.CapturedEntities=Void Pearl Captures
+stat.wirelessutils.ThrownPearls=Thrown Pearls
 
 advancements.wirelessutils.root.title=Wireless Utilities
 advancements.wirelessutils.root.description=Because wires just get in the way.

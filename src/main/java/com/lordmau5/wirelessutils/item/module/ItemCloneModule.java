@@ -64,12 +64,16 @@ public class ItemCloneModule extends ItemModule {
         if ( tag == null )
             return super.isConfigured(stack);
 
-        return tag.hasKey("ExactCopies") || super.isConfigured(stack);
+        return tag.hasKey("ExactCopies") || tag.hasKey("EntityLimit") || super.isConfigured(stack);
     }
 
     @Override
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
+
+        int count = getEntityLimit(stack);
+        if ( count < ModConfig.vaporizers.modules.clone.maxCount )
+            tooltip.add(StringHelper.localizeFormat("item." + WirelessUtils.MODID + ".clone_module.limit", count));
 
         if ( getExactCopies(stack) )
             tooltip.add(StringHelper.localize("item." + WirelessUtils.MODID + ".clone_module.exact"));
@@ -107,6 +111,43 @@ public class ItemCloneModule extends ItemModule {
         return stack;
     }
 
+    public int getEntityLimit(@Nonnull ItemStack stack) {
+        int out = 0;
+        if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("EntityLimit") )
+                out = tag.getInteger("EntityLimit");
+        }
+
+        if ( out == 0 || out > ModConfig.vaporizers.modules.clone.maxCount )
+            return ModConfig.vaporizers.modules.clone.maxCount;
+
+        return out;
+    }
+
+    @Nonnull
+    public ItemStack setEntityLimit(@Nonnull ItemStack stack, int count) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return ItemStack.EMPTY;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        if ( tag == null )
+            tag = new NBTTagCompound();
+        else if ( tag.getBoolean("Locked") )
+            return ItemStack.EMPTY;
+
+        if ( count == 0 || count >= ModConfig.vaporizers.modules.clone.maxCount )
+            tag.removeTag("EntityLimit");
+        else
+            tag.setInteger("EntityLimit", count);
+
+        if ( tag.isEmpty() )
+            tag = null;
+
+        stack.setTagCompound(tag);
+        return stack;
+    }
+
     @Nullable
     @Override
     public TileBaseVaporizer.IVaporizerBehavior getBehavior(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
@@ -126,6 +167,7 @@ public class ItemCloneModule extends ItemModule {
         private float entityHealth = 0;
         private int entityCost = 0;
         private int finalCost = 0;
+        private int entityLimit = 0;
 
         private int entities = 0;
 
@@ -181,6 +223,10 @@ public class ItemCloneModule extends ItemModule {
             return false;
         }
 
+        public int getEntityLimit() {
+            return entityLimit;
+        }
+
         public boolean isExact() {
             return exactCopies;
         }
@@ -199,6 +245,7 @@ public class ItemCloneModule extends ItemModule {
 
         public void updateModule(@Nonnull ItemStack stack) {
             exactCopies = canExact() && ModItems.itemCloneModule.getExactCopies(stack);
+            entityLimit = ModItems.itemCloneModule.getEntityLimit(stack);
             recalculateCost();
         }
 
@@ -210,12 +257,14 @@ public class ItemCloneModule extends ItemModule {
         @Override
         public void updateModePacket(@Nonnull PacketBase packet) {
             packet.addBool(exactCopies);
+            packet.addInt(entityLimit);
         }
 
         @Override
         public void handleModePacket(@Nonnull PacketBase packet) {
             ItemStack module = vaporizer.getModule();
             ModItems.itemCloneModule.setExactCopies(module, packet.getBool());
+            ModItems.itemCloneModule.setEntityLimit(module, packet.getInt());
             vaporizer.setModule(module);
         }
 
@@ -316,7 +365,7 @@ public class ItemCloneModule extends ItemModule {
                 List<Entity> entities = vaporizer.getWorld().getEntitiesWithinAABB(klass, vaporizer.getFullEntitiesAABB().grow(ModConfig.vaporizers.modules.clone.maxRange));
                 this.entities = entities.size();
 
-                if ( this.entities >= ModConfig.vaporizers.modules.clone.maxCount )
+                if ( this.entities >= entityLimit )
                     return false;
             }
 
@@ -384,7 +433,7 @@ public class ItemCloneModule extends ItemModule {
                 }
 
                 List<Entity> existing = world.getEntitiesWithinAABB(klass, new AxisAlignedBB(target.pos).grow(ModConfig.vaporizers.modules.clone.maxRange));
-                if ( existing.size() > ModConfig.vaporizers.modules.clone.maxCount ) {
+                if ( existing.size() >= entityLimit ) {
                     vaporizer.addFuel(removed);
                     return IWorkProvider.WorkResult.FAILURE_STOP;
                 }
@@ -423,7 +472,7 @@ public class ItemCloneModule extends ItemModule {
 
             if ( vaporizer.canGetFullEntities() ) {
                 entities++;
-                if ( entities >= ModConfig.vaporizers.modules.clone.maxCount )
+                if ( entities >= entityLimit )
                     return IWorkProvider.WorkResult.SUCCESS_STOP;
             }
 

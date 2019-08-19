@@ -21,6 +21,7 @@ import net.minecraft.util.BlockRenderLayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -337,6 +338,14 @@ public class BlockAngledSlime extends BlockBase {
 
             if ( !(entityIn instanceof EntityLivingBase) )
                 entityIn.motionY *= 0.8D;
+
+            double motion = Math.abs(entityIn.motionX) + Math.abs(entityIn.motionY) + Math.abs(entityIn.motionZ);
+            if ( motion > 0.5 && !worldIn.isRemote ) {
+                SoundType soundType = getSoundType(state, worldIn, pos, entityIn);
+                SoundEvent fallSound = soundType == null ? null : soundType.getFallSound();
+                if ( fallSound != null )
+                    entityIn.playSound(fallSound, soundType.getVolume(), soundType.getPitch());
+            }
         }
     }
 

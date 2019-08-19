@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.utils.crops;
 import com.google.common.collect.ImmutableSet;
 import com.lordmau5.wirelessutils.tile.desublimator.TileBaseDesublimator;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -31,15 +32,14 @@ public class MetaBreakBehavior implements IHarvestBehavior {
         return targets.contains(state);
     }
 
-    public boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+    public boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator) {
         if ( TileBaseDesublimator.isBlacklisted(state) )
             return false;
 
         return targets.contains(state);
     }
 
-    public HarvestResult harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
-        return harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator) ?
-                HarvestResult.SUCCESS : HarvestResult.FAILED;
+    public Tuple<HarvestResult, Integer> harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator) {
+        return harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator) ? SUCCESS_ONE : FAILURE;
     }
 }

@@ -863,6 +863,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( isBlacklisted(state) )
             return false;
 
+        int blocks = 0;
+
         if ( processCrops ) {
             if ( inverted ) {
                 if ( world.isAirBlock(target) )
@@ -872,8 +874,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 if ( behavior == null )
                     return false;
 
-                if ( !behavior.canHarvest(state, world, target, silkyCrops, fortuneCrops, this) )
+                int limit = Math.floorDiv(getMaxEnergyStored(), baseEnergy);
+                if ( !behavior.canHarvest(state, world, target, silkyCrops, fortuneCrops, limit, this) )
                     return false;
+
+                blocks = behavior.getBlockEstimate(state, world, target, silkyCrops, fortuneCrops, limit, this);
 
             } else {
                 Block block = state.getBlock();
@@ -896,7 +901,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return false;
 
         validTargetsPerTick++;
-        int cost = baseEnergy + getEnergyCost(target, source);
+        int cost = (blocks * baseEnergy) + getEnergyCost(target, source);
         if ( cost > maxEnergyPerTick )
             maxEnergyPerTick = cost;
 
@@ -1047,15 +1052,22 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                     if ( behavior == null )
                         return WorkResult.FAILURE_REMOVE;
 
-                    if ( !behavior.canHarvest(state, world, target.pos, silkyCrops, fortuneCrops, this) )
+                    // We don't actually use the budget limit when running the harvest itself
+                    // because the budget is measured with collected items, not processed blocks.
+                    int limit = Math.floorDiv(getEnergyStored() - target.cost, baseEnergy);
+
+                    if ( !behavior.canHarvest(state, world, target.pos, silkyCrops, fortuneCrops, limit, this) )
                         return WorkResult.FAILURE_REMOVE;
 
-                    IHarvestBehavior.HarvestResult result = behavior.harvest(state, world, target.pos, silkyCrops, fortuneCrops, this);
+                    Tuple<IHarvestBehavior.HarvestResult, Integer> resultTuple = behavior.harvest(state, world, target.pos, silkyCrops, fortuneCrops, limit, this);
+                    IHarvestBehavior.HarvestResult result = resultTuple.getFirst();
                     if ( result == IHarvestBehavior.HarvestResult.FAILED )
                         return WorkResult.FAILURE_REMOVE;
                     else {
                         activeTargetsPerTick++;
-                        extractEnergy(baseEnergy + target.cost, false);
+                        int count = resultTuple.getSecond();
+                        extractEnergy((baseEnergy * count) + target.cost, false);
+
                         if ( result == IHarvestBehavior.HarvestResult.HUGE_SUCCESS )
                             return WorkResult.SUCCESS_STOP_REMOVE;
                         else if ( result == IHarvestBehavior.HarvestResult.PROGRESS )

@@ -5,6 +5,7 @@ import com.lordmau5.wirelessutils.tile.desublimator.TileBaseDesublimator;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -37,15 +38,15 @@ public class SimpleBreakBehavior implements IHarvestBehavior {
         return targets.contains(state.getBlock());
     }
 
-    public boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+    public boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator) {
         if ( TileBaseDesublimator.isBlacklisted(state) )
             return false;
 
         return appliesTo(state);
     }
 
-    public HarvestResult harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+    public Tuple<HarvestResult, Integer> harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator) {
         return harvestByBreaking(state, world, pos, silkTouch, fortune, desublimator) ?
-                HarvestResult.SUCCESS : HarvestResult.FAILED;
+                SUCCESS_ONE : FAILURE;
     }
 }

@@ -10,6 +10,7 @@ import net.minecraft.block.BlockLog;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IShearable;
@@ -33,7 +34,26 @@ public class TreeBehavior implements IHarvestBehavior {
     }
 
     @Override
-    public boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+    public int getBlockEstimate(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator) {
+        if ( !canHarvest(state, world, pos, silkTouch, fortune, blockLimit, desublimator) )
+            return 0;
+
+        BlockPosDimension machinePos = desublimator.getPosition();
+        int dimension = world.provider.getDimension();
+        Map<BlockPosDimension, TreeCache> worldTrees = trees.get(dimension);
+        if ( worldTrees == null )
+            return 0;
+
+        TreeCache cache = worldTrees.get(machinePos);
+        if ( cache == null )
+            return 0;
+
+        int count = cache.blocks.size() + cache.leaves.size();
+        return Math.min(ModConfig.augments.crop.treeBlocksPerTick, count);
+    }
+
+    @Override
+    public boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator) {
         if ( world == null || desublimator == null )
             return false;
 
@@ -71,23 +91,23 @@ public class TreeBehavior implements IHarvestBehavior {
         return true;
     }
 
-    public HarvestResult harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator) {
+    public Tuple<HarvestResult, Integer> harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator) {
         if ( world == null || desublimator == null )
-            return HarvestResult.FAILED;
+            return FAILURE;
 
         BlockPosDimension machinePos = desublimator.getPosition();
         int dimension = world.provider.getDimension();
         Map<BlockPosDimension, TreeCache> worldTrees = trees.get(dimension);
         TreeCache cache = worldTrees == null ? null : worldTrees.get(machinePos);
         if ( cache == null )
-            return HarvestResult.FAILED;
+            return FAILURE;
 
         int count = 0;
 
         while ( !cache.leaves.isEmpty() || !cache.blocks.isEmpty() ) {
             count++;
-            if ( count > ModConfig.augments.crop.treeBlocksPerTick )
-                return HarvestResult.PROGRESS;
+            if ( count > ModConfig.augments.crop.treeBlocksPerTick || count > blockLimit )
+                return new Tuple<>(HarvestResult.PROGRESS, count - 1);
 
             BlockPos current = cache.leaves.poll();
             boolean isLeaf = true;
@@ -114,7 +134,8 @@ public class TreeBehavior implements IHarvestBehavior {
                         cache.leaves.add(current);
                     else
                         cache.blocks.add(current);
-                    return HarvestResult.PROGRESS;
+
+                    return new Tuple<>(HarvestResult.PROGRESS, count - 1);
                 }
 
                 desublimator.insertAll(drops);
@@ -128,7 +149,8 @@ public class TreeBehavior implements IHarvestBehavior {
                     cache.leaves.add(current);
                 else
                     cache.blocks.add(current);
-                return HarvestResult.PROGRESS;
+
+                return new Tuple<>(HarvestResult.PROGRESS, count - 1);
             }
 
             // Remove this from the list of known bases.
@@ -136,7 +158,7 @@ public class TreeBehavior implements IHarvestBehavior {
         }
 
         worldTrees.remove(machinePos);
-        return HarvestResult.HUGE_SUCCESS;
+        return new Tuple<>(HarvestResult.HUGE_SUCCESS, count);
     }
 
     public static class TreeCache {

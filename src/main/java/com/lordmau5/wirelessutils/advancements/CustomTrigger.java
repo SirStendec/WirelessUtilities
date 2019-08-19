@@ -22,7 +22,7 @@ public class CustomTrigger implements ICriterionTrigger<CustomTrigger.Instance> 
     private final Map<PlayerAdvancements, Listeners> listeners = new HashMap<>();
 
     public CustomTrigger(String id) {
-        this.id = new ResourceLocation(WirelessUtils.MODID, id);
+        this(new ResourceLocation(WirelessUtils.MODID, id));
     }
 
     public CustomTrigger(ResourceLocation resource) {

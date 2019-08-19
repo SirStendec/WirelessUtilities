@@ -4,6 +4,7 @@ import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.item.BehaviorProjectileAccurateDispense;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import com.lordmau5.wirelessutils.utils.mod.ModStats;
 import mezz.jei.api.IModRegistry;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -161,6 +162,7 @@ public abstract class ItemBasePearl extends ItemBase implements IJEIInformationI
         if ( shouldStackShrink(stack, playerIn) )
             stack.shrink(1);
 
+        ModStats.ThrownPearls.addToPlayer(playerIn);
         playerIn.addStat(StatList.getObjectUseStats(this));
         return new ActionResult<>(EnumActionResult.SUCCESS, stack);
     }

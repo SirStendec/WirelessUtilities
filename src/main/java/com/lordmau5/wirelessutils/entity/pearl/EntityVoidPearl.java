@@ -6,7 +6,7 @@ import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
 import com.lordmau5.wirelessutils.render.RenderPearl;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
-import com.lordmau5.wirelessutils.utils.mod.ModStatistics;
+import com.lordmau5.wirelessutils.utils.mod.ModStats;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -20,8 +20,10 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -107,10 +109,25 @@ public class EntityVoidPearl extends EntityBaseThrowable {
                 if ( thrower instanceof EntityPlayerMP ) {
                     EntityPlayerMP playerMP = (EntityPlayerMP) thrower;
                     ModAdvancements.FOR_THEE.trigger(playerMP);
-                    playerMP.addStat(ModStatistics.CAPTURED_MOBS);
+                    ModStats.CapturedEntities.addToPlayer(playerMP);
                 }
 
                 playSound(SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, 0.2F, 0.1F);
+
+                if ( world instanceof WorldServer ) {
+                    WorldServer ws = (WorldServer) world;
+                    AxisAlignedBB box = result.entityHit.getRenderBoundingBox();
+
+                    double sizeX = (box.maxX - box.minX) / 2;
+                    double sizeY = (box.maxY - box.minY) / 2;
+                    double sizeZ = (box.maxZ - box.minZ) / 2;
+
+                    double centerX = result.entityHit.posX + sizeX;
+                    double centerY = result.entityHit.posY + sizeY;
+                    double centerZ = result.entityHit.posZ + sizeZ;
+
+                    ws.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, centerX, centerY, centerZ, 5, sizeX, sizeY, sizeZ, 0D);
+                }
 
                 result.entityHit.setDead();
                 stack.shrink(1);

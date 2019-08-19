@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -34,15 +35,22 @@ public interface IHarvestBehavior {
         FAILED;
     }
 
+    public final static Tuple<HarvestResult, Integer> SUCCESS_ONE = new Tuple<>(HarvestResult.SUCCESS, 1);
+    public final static Tuple<HarvestResult, Integer> FAILURE = new Tuple<>(HarvestResult.FAILED, 0);
+
     default int getPriority() {
         return 0;
     }
 
+    default int getBlockEstimate(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator) {
+        return 1;
+    }
+
     boolean appliesTo(IBlockState state);
 
-    boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator);
+    boolean canHarvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator);
 
-    HarvestResult harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, TileBaseDesublimator desublimator);
+    Tuple<HarvestResult, Integer> harvest(IBlockState state, World world, BlockPos pos, boolean silkTouch, int fortune, int blockLimit, TileBaseDesublimator desublimator);
 
     default boolean harvestByUsing(IBlockState state, World world, BlockPos pos, int fortune, TileBaseDesublimator desublimator) {
         NonNullList<ItemStack> drops = NonNullList.create();
