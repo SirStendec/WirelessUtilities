@@ -5,19 +5,23 @@ import cofh.core.gui.element.ElementBase;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityBaseCondenser;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.EnumRarity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class ElementFluidLock extends ElementBase {
@@ -74,8 +78,11 @@ public class ElementFluidLock extends ElementBase {
         return gui.mc.player.inventory.getItemStack();
     }
 
-    public FluidStack getFluidStack(ItemStack stack) {
-        if ( !stack.isEmpty() && stack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null) ) {
+    public static FluidStack getItemStackFluid(ItemStack stack) {
+        if ( stack.isEmpty() )
+            return null;
+
+        if ( stack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null) ) {
             IFluidHandlerItem handler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
             if ( handler != null ) {
                 IFluidTankProperties[] properties = handler.getTankProperties();
@@ -84,11 +91,40 @@ public class ElementFluidLock extends ElementBase {
             }
         }
 
-        return null;
+        Item item = stack.getItem();
+
+
+        Block block = Block.getBlockFromItem(stack.getItem());
+        if ( block == null )
+            return null;
+
+        Fluid fluid = FluidRegistry.lookupFluidForBlock(block);
+        if ( fluid == null )
+            return null;
+
+        return new FluidStack(fluid, Fluid.BUCKET_VOLUME);
     }
 
     public FluidStack getHeldFluidStack() {
-        return getFluidStack(getHeldItem());
+        return getItemStackFluid(getHeldItem());
+    }
+
+    public boolean isLocked() {
+        return condenser.isLocked();
+    }
+
+    @Nullable
+    public FluidStack getFluidStack() {
+        return condenser.getLockStack();
+    }
+
+    public void setFluidStack(FluidStack stack) {
+        if ( stack == null )
+            condenser.setLocked(false);
+        else
+            condenser.setLocked(stack);
+
+        condenser.sendModePacket();
     }
 
     @Override
@@ -103,7 +139,7 @@ public class ElementFluidLock extends ElementBase {
         }
 
         ItemStack held = getHeldItem();
-        FluidStack stack = getFluidStack(held);
+        FluidStack stack = getItemStackFluid(held);
         if ( stack != null ) {
             condenser.setLocked(stack);
             condenser.sendModePacket();
@@ -134,7 +170,7 @@ public class ElementFluidLock extends ElementBase {
         boolean drawLocked;
 
         ItemStack held = getHeldItem();
-        FluidStack stack = getFluidStack(held);
+        FluidStack stack = getItemStackFluid(held);
         if ( intersected && stack != null )
             drawLocked = true;
         else if ( intersected && !held.isEmpty() )

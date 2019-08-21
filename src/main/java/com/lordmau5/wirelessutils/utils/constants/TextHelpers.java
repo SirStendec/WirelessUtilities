@@ -16,6 +16,7 @@ public class TextHelpers {
     public static final Style GOLD = new Style().setColor(TextFormatting.GOLD);
     public static final Style GREEN = new Style().setColor(TextFormatting.GREEN);
     public static final Style YELLOW = new Style().setColor(TextFormatting.YELLOW);
+    public static final Style BLACK = new Style().setColor(TextFormatting.BLACK);
 
     public static final Style ITALIC = new Style().setItalic(true);
 

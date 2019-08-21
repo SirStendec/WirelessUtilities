@@ -1135,8 +1135,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         boolean noAdvance = result.noAdvance;
 
         if ( result.success ) {
+            stored = getEnergyStored();
             remainingBudget -= actionCost;
-            if ( remainingPerTick < actionCost ) {
+            if ( stored < fullCost || remainingBudget < actionCost || remainingPerTick <= 0 ) {
                 stop = true;
                 noAdvance = true;
             }
@@ -1221,7 +1222,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         if ( worked ) {
             extractEnergy(fullCost, false);
-            if ( getEnergyStored() < baseEnergy )
+            if ( getEnergyStored() < baseEnergy || remainingBudget < actionCost || remainingPerTick <= 0 )
                 stop = true;
 
             if ( noAdvance && stop )

@@ -2,6 +2,7 @@
 	"parent": "item/generated",
 	"textures": {
 		"layer0": "wirelessutils:item/augment_base",
-		"layer1": "wirelessutils:item/void_augment_mark"
+		"layer1": "wirelessutils:item/filter_augment_symbol",
+		"layer2": "wirelessutils:item/filter_augment_mark"
 	}
 }

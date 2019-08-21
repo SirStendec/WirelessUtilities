@@ -10,6 +10,7 @@ import com.lordmau5.wirelessutils.packet.PacketUpdateItem;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IFilterAugmentable;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -45,35 +46,155 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
         setName("filter_augment");
     }
 
-    @Nullable
     @Override
-    public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {
-        return super.getRequiredLevelDelegate(stack);
+    public int getTiers() {
+        return Math.min(ModConfig.augments.filter.availableTiers, Level.values().length);
+    }
+
+    public boolean canWhitelist(@Nonnull ItemStack stack) {
+        int tier = getLevel(stack).toInt();
+        boolean[] options = ModConfig.augments.filter.allowWhitelist;
+        if ( options.length == 0 )
+            return true;
+
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
+    }
+
+    public boolean canIgnoreMetadata(@Nonnull ItemStack stack) {
+        int tier = getLevel(stack).toInt();
+        boolean[] options = ModConfig.augments.filter.allowIgnoreMetadata;
+        if ( options.length == 0 )
+            return true;
+
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
+    }
+
+    public boolean canOreDict(@Nonnull ItemStack stack) {
+        int tier = getLevel(stack).toInt();
+        boolean[] options = ModConfig.augments.filter.allowOreDict;
+        if ( options.length == 0 )
+            return true;
+
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
+    }
+
+    public boolean canIgnoreNBT(@Nonnull ItemStack stack) {
+        int tier = getLevel(stack).toInt();
+        boolean[] options = ModConfig.augments.filter.allowIgnoreNBT;
+        if ( options.length == 0 )
+            return true;
+
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
+    }
+
+    public boolean canMatchMod(@Nonnull ItemStack stack) {
+        int tier = getLevel(stack).toInt();
+        boolean[] options = ModConfig.augments.filter.allowMatchingMod;
+        if ( options.length == 0 )
+            return true;
+
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
+    }
+
+    public boolean canVoid(@Nonnull ItemStack stack) {
+        int tier = getLevel(stack).toInt();
+        boolean[] options = ModConfig.augments.filter.allowVoiding;
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
+    }
+
+    public int getAvailableSlots(@Nonnull ItemStack stack) {
+        int tier = getLevel(stack).toInt();
+        int[] options = ModConfig.augments.filter.slotsPerTier;
+        if ( options.length == 0 )
+            return 18;
+
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
     }
 
     @Override
     public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
-        return super.getEnergyMultiplierDelegate(stack, augmentable);
+        int tier = getLevel(stack).toInt();
+        double[] options = ModConfig.augments.filter.energyMultiplier;
+        if ( options.length == 0 )
+            return 1;
+
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
     }
 
     @Override
     public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
-        return super.getEnergyAdditionDelegate(stack, augmentable);
+        int tier = getLevel(stack).toInt();
+        int[] options = ModConfig.augments.filter.energyAddition;
+        if ( options.length == 0 )
+            return 0;
+
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
     }
 
     @Override
     public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
-        return super.getEnergyDrainDelegate(stack, augmentable);
+        int tier = getLevel(stack).toInt();
+        int[] options = ModConfig.augments.filter.energyDrain;
+        if ( options.length == 0 )
+            return 0;
+
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
     }
 
     @Override
     public int getBudgetAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
-        return super.getBudgetAdditionDelegate(stack, augmentable);
+        int tier = getLevel(stack).toInt();
+        int[] options = ModConfig.augments.filter.budgetAddition;
+        if ( options.length == 0 )
+            return 0;
+
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
     }
 
     @Override
     public double getBudgetMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
-        return super.getBudgetMultiplierDelegate(stack, augmentable);
+        int tier = getLevel(stack).toInt();
+        double[] options = ModConfig.augments.filter.budgetMultiplier;
+        if ( options.length == 0 )
+            return 1;
+
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
     }
 
     @Override
@@ -113,7 +234,7 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
                         mods.add(ns);
                 }
 
-                if ( mods.size() == 1 || StringHelper.isControlKeyDown() ) {
+                if ( mods.size() == 1 || StringHelper.isAltKeyDown() ) {
                     Map<String, ModContainer> modMap = Loader.instance().getIndexedModList();
                     tooltip.add(bl);
                     for (String modId : mods) {
@@ -130,7 +251,7 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
                             mods.size()
                     ).getFormattedText());
 
-            } else if ( list.length == 1 || StringHelper.isControlKeyDown() ) {
+            } else if ( list.length == 1 || StringHelper.isAltKeyDown() ) {
                 tooltip.add(bl);
                 for (ItemStack item : list) {
                     tooltip.add(new TextComponentTranslation(
@@ -148,6 +269,9 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
     }
 
     public boolean getMatchMod(@Nonnull ItemStack stack) {
+        if ( !canMatchMod(stack) )
+            return false;
+
         if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
             NBTTagCompound tag = stack.getTagCompound();
             return tag != null && tag.getBoolean("MatchMod");
@@ -180,6 +304,9 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
     }
 
     public boolean getIgnoreMetadata(@Nonnull ItemStack stack) {
+        if ( !canIgnoreMetadata(stack) )
+            return false;
+
         if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
             NBTTagCompound tag = stack.getTagCompound();
             return tag != null && tag.getBoolean("IgnoreMeta");
@@ -212,6 +339,9 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
     }
 
     public boolean getIgnoreNBT(@Nonnull ItemStack stack) {
+        if ( !canIgnoreNBT(stack) )
+            return false;
+
         if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
             NBTTagCompound tag = stack.getTagCompound();
             return tag != null && tag.getBoolean("IgnoreNBT");
@@ -244,6 +374,9 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
     }
 
     public boolean getUseOreDict(@Nonnull ItemStack stack) {
+        if ( !canOreDict(stack) )
+            return false;
+
         if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
             NBTTagCompound tag = stack.getTagCompound();
             return tag != null && tag.getBoolean("UseOreDict");
@@ -276,6 +409,9 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
     }
 
     public boolean isWhitelist(@Nonnull ItemStack stack) {
+        if ( !canWhitelist(stack) )
+            return false;
+
         if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
             NBTTagCompound tag = stack.getTagCompound();
             return tag != null && tag.getBoolean("Whitelist");
@@ -308,6 +444,9 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
     }
 
     public boolean isVoiding(@Nonnull ItemStack stack) {
+        if ( !canVoid(stack) )
+            return false;
+
         if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
             NBTTagCompound tag = stack.getTagCompound();
             return tag != null && tag.getBoolean("Voiding");
@@ -358,17 +497,24 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
             return null;
 
         int length = list.tagCount();
+        int maxSlots = getAvailableSlots(stack);
+
+        if ( length > maxSlots )
+            length = maxSlots;
+
         ItemStack[] out;
 
         if ( sparseList ) {
-            out = new ItemStack[18];
+            out = new ItemStack[maxSlots];
             Arrays.fill(out, ItemStack.EMPTY);
         } else
             out = new ItemStack[length];
 
         for (int i = 0; i < length; i++) {
             NBTTagCompound itemTag = list.getCompoundTagAt(i);
-            out[sparseList ? itemTag.getByte("WUIndex") : i] = new ItemStack(itemTag);
+            int idx = sparseList ? itemTag.getByte("WUIndex") : i;
+            if ( idx < out.length )
+                out[idx] = new ItemStack(itemTag);
         }
 
         return out;
@@ -457,7 +603,6 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
         IntOpenHashSet oreIDs = useOre ? new IntOpenHashSet() : null;
         List<ItemStack> stacks = matchMod ? null : new ObjectArrayList<>(matching.length);
 
-        outerLoop:
         for (ItemStack input : matching) {
             if ( input == null || input.isEmpty() )
                 continue;
@@ -483,11 +628,15 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
                 if ( ignoreNBT )
                     test.setTagCompound(null);
 
+                boolean matched = false;
                 for (ItemStack s : stacks)
-                    if ( s.isItemEqual(test) )
-                        continue outerLoop;
+                    if ( s.isItemEqual(test) ) {
+                        matched = true;
+                        break;
+                    }
 
-                stacks.add(test);
+                if ( !matched )
+                    stacks.add(test);
             }
         }
 

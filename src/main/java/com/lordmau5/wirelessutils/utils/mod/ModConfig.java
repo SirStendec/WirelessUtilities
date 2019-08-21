@@ -255,6 +255,10 @@ public class ModConfig {
         @Config.Name("Auxiliary Condenser Augments")
         @Config.Comment("Auxiliary Condenser Augments allow machines to generate fluid with energy.")
         public final FluidGenAugments fluidGen = new FluidGenAugments();
+
+        @Config.Name("Filter Augment")
+        @Config.Comment("Filter Augments allow machines to filter items before allowing them into their internal buffers.")
+        public final FilterAugments filter = new FilterAugments();
     }
 
     public static class WorldAugments {
@@ -721,6 +725,70 @@ public class ModConfig {
         public int[] budgetAddition = {0, 0, 0};
     }
 
+    public static class FilterAugments {
+        @Config.Name("Available Tiers")
+        @Config.Comment("Filter Augments will be made available in this many tiers. Limited by the number of available levels.")
+        @Config.RangeInt(min = 0, max = Short.MAX_VALUE - 1)
+        @Config.RequiresMcRestart
+        public int availableTiers = 3;
+
+        @Config.Name("Slots per Tier")
+        @Config.Comment("Filter Augments will have this many available filter slots, per tier.")
+        @Config.RangeInt(min = 1, max = 18)
+        public int[] slotsPerTier = {6, 12, 18};
+
+        @Config.Name("Allow Whitelist")
+        @Config.Comment("Whether Filter Augments can be put into Whitelist mode, per tier.")
+        public boolean[] allowWhitelist = {true, true, true};
+
+        @Config.Name("Allow Ignore Metadata")
+        @Config.Comment("Whether Filter Augments will have access to Ignore Metadata, per tier.")
+        public boolean[] allowIgnoreMetadata = {true, true, true};
+
+        @Config.Name("Allow Ore Dictionary")
+        @Config.Comment("Whether Filter Augments will have access to Use Ore Dictionary, per tier.")
+        public boolean[] allowOreDict = {false, true, true};
+
+        @Config.Name("Allow Ignore NBT")
+        @Config.Comment("Whether Filter Augments will have access to Ignore NBT, per tier.")
+        public boolean[] allowIgnoreNBT = {false, true, true};
+
+        @Config.Name("Allow Mod Matching")
+        @Config.Comment("Whether Filter Augments will have access to Mod Matching, per tier.")
+        public boolean[] allowMatchingMod = {false, false, true};
+
+        @Config.Name("Allow Voiding")
+        @Config.Comment("Whether Filter Augments will have access to Voiding, per tier.")
+        public boolean[] allowVoiding = {false, false, true};
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] energyMultiplier = {1, 1, 1};
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] energyAddition = {0, 0, 0};
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int[] energyDrain = {0, 0, 0};
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] budgetMultiplier = {1, 1, 1};
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] budgetAddition = {0, 0, 0};
+    }
+
     public static class RangeAugments {
         @Config.Name("Available Tiers")
         @Config.Comment("Range Augments will be made available in this many tiers. The maximum is limited by the available levels.")
@@ -994,6 +1062,11 @@ public class ModConfig {
         @Config.Comment("Allow the use of Mob Imprisonment Tools from Industrial Foregoing in Vaporizers.")
         @Config.RequiresMcRestart
         public boolean useMITs = true;
+
+        @Config.Name("Use Cyclic Monster Balls")
+        @Config.Comment("Allow the use of Monster Balls from Cyclic in Vaporizers.")
+        @Config.RequiresMcRestart
+        public boolean useCyclicNets = true;
     }
 
     public static class Modules {

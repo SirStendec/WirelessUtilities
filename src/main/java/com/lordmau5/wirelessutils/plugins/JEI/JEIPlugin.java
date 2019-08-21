@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.plugins.JEI;
 
+import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.item.base.IJEIInformationItem;
 import com.lordmau5.wirelessutils.plugins.JEI.charger.ChargerRecipeCategory;
 import com.lordmau5.wirelessutils.plugins.JEI.condenser.CondenserRecipeCategory;
@@ -34,6 +35,8 @@ public class JEIPlugin implements IModPlugin {
     public void register(IModRegistry registry) {
         IJeiHelpers jeiHelpers = registry.getJeiHelpers();
         IGuiHelper guiHelper = jeiHelpers.getGuiHelper();
+
+        registry.addGhostIngredientHandler(BaseGuiContainer.class, new GhostIngredientHandler());
 
         for (Item item : CommonProxy.ITEMS) {
             if ( item instanceof IJEIInformationItem ) {

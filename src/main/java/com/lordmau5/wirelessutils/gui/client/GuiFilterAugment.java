@@ -3,8 +3,9 @@ package com.lordmau5.wirelessutils.gui.client;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
+import com.lordmau5.wirelessutils.gui.client.base.BaseGuiItem;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementDynamicContainedButton;
-import com.lordmau5.wirelessutils.gui.container.ContainerFilterAugment;
+import com.lordmau5.wirelessutils.gui.container.items.ContainerFilterAugment;
 import com.lordmau5.wirelessutils.gui.slot.SlotFilter;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
@@ -13,12 +14,13 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.oredict.OreDictionary;
 
-public class GuiFilterAugment extends BaseGuiContainer {
+import java.util.List;
 
-    public static final ResourceLocation TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/directional_machine.png");
+public class GuiFilterAugment extends BaseGuiItem {
 
     public static final ItemStack DAMAGE_ON = new ItemStack(Items.BOW, 1, 195);
     public static final ItemStack DAMAGE_OFF = new ItemStack(Items.BOW, 1, 0);
@@ -48,9 +50,9 @@ public class GuiFilterAugment extends BaseGuiContainer {
     private ElementDynamicContainedButton btnMatchMod;
 
     public GuiFilterAugment(ContainerFilterAugment container) {
-        super(container, TEXTURE);
+        super(container);
         this.container = container;
-        name = container.getAugment().getDisplayName();
+        name = container.getItemStack().getDisplayName();
     }
 
     @Override
@@ -92,12 +94,23 @@ public class GuiFilterAugment extends BaseGuiContainer {
                 .setToolTipExtra("btn." + WirelessUtils.MODID + ".match_mod.info")
                 .setToolTipLocalized(true);
 
-        addElement(btnIgnoreMeta);
-        addElement(btnIgnoreNBT);
-        addElement(btnUseOre);
-        addElement(btnWhitelist);
-        addElement(btnVoiding);
-        addElement(btnMatchMod);
+        if ( container.canIgnoreMetadata() )
+            addElement(btnIgnoreMeta);
+
+        if ( container.canIgnoreNBT() )
+            addElement(btnIgnoreNBT);
+
+        if ( container.canOreDict() )
+            addElement(btnUseOre);
+
+        if ( container.canWhitelist() )
+            addElement(btnWhitelist);
+
+        if ( container.canVoid() )
+            addElement(btnVoiding);
+
+        if ( container.canMatchMod() )
+            addElement(btnMatchMod);
     }
 
     @Override
@@ -112,7 +125,7 @@ public class GuiFilterAugment extends BaseGuiContainer {
         GlStateManager.color(1F, 1F, 1F, 1F);
         for (Slot slot : inventorySlots.inventorySlots)
             if ( slot instanceof SlotFilter ) {
-                drawSizedTexturedModalRect(guiLeft + slot.xPos - 1, guiTop + slot.yPos - 1, 204, 0, 18, 18, 256, 256);
+                drawSizedTexturedModalRect(guiLeft + slot.xPos - 1, guiTop + slot.yPos - 1, 29, 93, 18, 18, 256, 256);
             }
     }
 
@@ -210,5 +223,30 @@ public class GuiFilterAugment extends BaseGuiContainer {
 
     private String getMode(boolean mode) {
         return StringHelper.localize("btn." + WirelessUtils.MODID + ".mode." + (mode ? 2 : 1));
+    }
+
+    @Override
+    public List<String> getItemToolTip(ItemStack stack) {
+        List<String> list = super.getItemToolTip(stack);
+
+        Slot slot = getSlotUnderMouse();
+        if ( slot instanceof SlotFilter ) {
+            if ( container.getUseOreDict() && !container.getMatchMod() ) {
+                int[] ores = OreDictionary.getOreIDs(stack);
+                if ( ores != null && ores.length > 0 ) {
+                    list.add(new TextComponentTranslation(
+                            "btn." + WirelessUtils.MODID + ".use_ore.list"
+                    ).setStyle(TextHelpers.GRAY).getFormattedText());
+                    for (int oreId : ores) {
+                        list.add(new TextComponentTranslation(
+                                "item." + WirelessUtils.MODID + ".filter_augment.entry",
+                                new TextComponentString(OreDictionary.getOreName(oreId)).setStyle(TextHelpers.WHITE)
+                        ).setStyle(TextHelpers.GRAY).getFormattedText());
+                    }
+                }
+            }
+        }
+
+        return list;
     }
 }

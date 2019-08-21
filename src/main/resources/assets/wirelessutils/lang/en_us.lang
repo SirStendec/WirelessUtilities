@@ -168,7 +168,7 @@ item.wirelessutils.slaughter_module.drops=Drops: %s
 item.wirelessutils.slaughter_module.exp=Experience: %s
 
 item.wirelessutils.filtered_module.entry=- %s
-item.wirelessutils.filtered_module.info_list=%s %s Items
+item.wirelessutils.filtered_module.info_list=%s Hold §e§oCtrl§r§7 for %s Items
 item.wirelessutils.filtered_module.age=Age: %s
 item.wirelessutils.filtered_module.age_info.0=Filter living creatures based
 item.wirelessutils.filtered_module.age_info.1=upon their adulthood.
@@ -326,7 +326,7 @@ item.wirelessutils.filter_augment.ore=Using Ore Dictionary
 item.wirelessutils.filter_augment.match_mod=Matching Mod Items
 
 item.wirelessutils.filter_augment.entry=- %s
-item.wirelessutils.filter_augment.info_list=%s %s Items
+item.wirelessutils.filter_augment.info_list=%s Hold §e§oAlt§r§7 for %s Items
 
 item.wirelessutils.disabled=This item is disabled in configuration.
 
@@ -537,6 +537,8 @@ btn.wirelessutils.use_ore.info.0=When this is enabled, items will be
 btn.wirelessutils.use_ore.info.1=checked against the ore dictionary
 btn.wirelessutils.use_ore.info.2=for filtering. Equivalent items will
 btn.wirelessutils.use_ore.info.3=be treated equally.
+
+btn.wirelessutils.use_ore.list=Matching Ores:
 
 btn.wirelessutils.voiding=Voiding Items: %s
 btn.wirelessutils.voiding.info.0=When this is enabled, machines with

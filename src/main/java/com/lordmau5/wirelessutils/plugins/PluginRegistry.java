@@ -2,6 +2,7 @@ package com.lordmau5.wirelessutils.plugins;
 
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics2Plugin;
 import com.lordmau5.wirelessutils.plugins.CraftTweaker.CraftTweakerPlugin;
+import com.lordmau5.wirelessutils.plugins.Cyclic.CyclicPlugin;
 import com.lordmau5.wirelessutils.plugins.IndustrialForegoing.IFPlugin;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.RefinedStoragePlugin;
 import com.lordmau5.wirelessutils.plugins.SimpleCorn.SimpleCornPlugin;
@@ -65,6 +66,9 @@ public class PluginRegistry {
 
         if ( Loader.isModLoaded("thermalexpansion") )
             addPlugin("thermalexpansion", new TEPlugin());
+
+        if ( Loader.isModLoaded("cyclicmagic") )
+            addPlugin("cyclicmagic", new CyclicPlugin());
     }
 
     public static void preInit(FMLPreInitializationEvent event) {

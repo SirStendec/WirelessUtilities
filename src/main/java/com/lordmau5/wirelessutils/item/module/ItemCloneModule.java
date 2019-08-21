@@ -28,6 +28,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.UUID;
 
 public class ItemCloneModule extends ItemModule {
 
@@ -457,6 +458,9 @@ public class ItemCloneModule extends ItemModule {
                 return IWorkProvider.WorkResult.FAILURE_STOP;
             }
 
+            if ( exactCopies )
+                entity.setUniqueId(UUID.randomUUID());
+
             // ... and spawn it!
             double offsetX = 0.5D;
             double offsetY = 0D;
@@ -477,7 +481,7 @@ public class ItemCloneModule extends ItemModule {
                 return IWorkProvider.WorkResult.FAILURE_CONTINUE;
             }
 
-            entity.setLocationAndAngles(
+            entity.setPositionAndRotation(
                     posX, posY, posZ,
                     360.0F * world.rand.nextFloat(),
                     entity.rotationPitch
@@ -485,8 +489,13 @@ public class ItemCloneModule extends ItemModule {
 
             world.spawnEntity(entity);
 
-            if ( !exactCopies && (entity instanceof EntityLiving) )
-                entityLivingData = ((EntityLiving) entity).onInitialSpawn(world.getDifficultyForLocation(target.pos), entityLivingData);
+            if ( entity instanceof EntityLiving ) {
+                EntityLiving living = (EntityLiving) entity;
+                if ( !exactCopies )
+                    entityLivingData = living.onInitialSpawn(world.getDifficultyForLocation(target.pos), entityLivingData);
+
+                living.spawnExplosionParticle();
+            }
 
             if ( removed > finalCost )
                 vaporizer.addFuel(removed - finalCost);

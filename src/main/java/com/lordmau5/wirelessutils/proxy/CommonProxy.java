@@ -180,6 +180,8 @@ public class CommonProxy {
                 machines.add(machine);
         }
 
+        // TODO: Item crawler for Filter Augment.
+
         global_fixer.registerWalker(FixTypes.BLOCK_ENTITY, new InventoryWalker(machines, "Inventory"));
         global_fixer.registerWalker(FixTypes.BLOCK_ENTITY, new NullableItemListWalker(ImmutableSet.of(
                 TileDirectionalDesublimator.class,

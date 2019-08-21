@@ -72,16 +72,22 @@ public class ItemPlayerPositionalCard extends ItemBaseEntityPositionalCard imple
         return getEntityTarget(stack);
     }
 
+    public String getPlayerName(@Nonnull ItemStack stack) {
+        if ( stack.isEmpty() || stack.getItem() != this || !stack.hasTagCompound() )
+            return null;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        return tag == null ? null : tag.getString("Player");
+    }
+
     @Override
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
-        if ( isCardConfigured(stack) ) {
-            NBTTagCompound tag = stack.getTagCompound();
-            if ( tag.hasKey("Player") )
-                tooltip.add(new TextComponentTranslation(
-                        getTranslationKey() + ".player",
-                        tag.getString("Player")
-                ).getFormattedText());
-        }
+        String name = getPlayerName(stack);
+        if ( name != null && !name.isEmpty() )
+            tooltip.add(new TextComponentTranslation(
+                    getTranslationKey() + ".player",
+                    name
+            ).getFormattedText());
 
         super.addInformation(stack, worldIn, tooltip, flagIn);
     }
@@ -124,7 +130,7 @@ public class ItemPlayerPositionalCard extends ItemBaseEntityPositionalCard imple
             if ( stack.getCount() == 1 ) {
                 stack.setTagCompound(tag);
                 // The GUI is not ready yet.
-                //player.openGui(WirelessUtils.instance, WirelessUtils.GUI_PLAYER_CARD, player.getEntityWorld(), (int) player.posX, (int) player.posY, (int) player.posZ);
+                // player.openGui(WirelessUtils.instance, WirelessUtils.GUI_PLAYER_CARD, player.getEntityWorld(), hand.ordinal(), 0, 0);
 
             } else {
                 ItemStack newStack = new ItemStack(this, 1);

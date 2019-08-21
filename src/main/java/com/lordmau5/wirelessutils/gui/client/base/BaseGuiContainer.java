@@ -67,6 +67,10 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements ICont
         return this;
     }
 
+    public List<ElementBase> getElements() {
+        return elements;
+    }
+
     public RenderItem getItemRenderer() {
         return itemRender;
     }

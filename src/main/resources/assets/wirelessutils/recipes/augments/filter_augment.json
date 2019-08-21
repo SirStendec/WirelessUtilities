@@ -22,6 +22,7 @@
 	},
 	"result": {
 		"item": "wirelessutils:filter_augment",
+		"data": 0,
 		"count": 1
 	}
 }
