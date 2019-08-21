@@ -143,7 +143,7 @@ public class ItemPlayerPositionalCard extends ItemBaseEntityPositionalCard imple
         return super.onItemRightClick(world, player, hand);
     }
 
-    public void handleUpdatePacket(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, int slot, boolean isServer, @Nonnull PacketUpdateItem packet) {
+    public void handleUpdatePacket(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, int slot, @Nonnull ItemStack newStack, @Nonnull PacketUpdateItem packet) {
         NBTTagCompound tag = stack.getTagCompound();
         if ( tag == null )
             tag = new NBTTagCompound();

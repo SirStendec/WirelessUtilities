@@ -14,6 +14,7 @@ import com.lordmau5.wirelessutils.item.augment.ItemCapacityAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemChunkLoadAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemCropAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemDispenserAugment;
+import com.lordmau5.wirelessutils.item.augment.ItemFilterAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemFluidGenAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemInventoryAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemInvertAugment;
@@ -144,6 +145,9 @@ public class ModItems {
     @GameRegistry.ObjectHolder("wirelessutils:dispenser_augment")
     public static ItemDispenserAugment itemDispenserAugment;
 
+    @GameRegistry.ObjectHolder("wirelessutils:filter_augment")
+    public static ItemFilterAugment itemFilterAugment;
+
     @GameRegistry.ObjectHolder("wirelessutils:base_module")
     public static ItemBaseModule itemBaseModule;
 
@@ -250,6 +254,7 @@ public class ModItems {
         itemPlayerPositionalCard.initModel();
         itemSidedTransferAugment.initModel();
         itemDispenserAugment.initModel();
+        itemFilterAugment.initModel();
         itemVoidPearl.initModel();
         itemBaseModule.initModel();
         itemSlaughterModule.initModel();

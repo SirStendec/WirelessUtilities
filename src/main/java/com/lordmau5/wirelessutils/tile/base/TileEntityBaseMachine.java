@@ -330,6 +330,10 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         return false;
     }
 
+    public boolean shouldVoidItem(int slot, @Nonnull ItemStack stack) {
+        return false;
+    }
+
     public void readInventoryFromNBT(NBTTagCompound tag) {
         if ( itemStackHandler != null && tag.hasKey("Inventory") )
             itemStackHandler.deserializeNBT(tag.getCompoundTag("Inventory"));
@@ -358,6 +362,9 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
             public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
                 if ( !isItemValid(slot, stack) )
                     return stack;
+
+                if ( shouldVoidItem(slot, stack) )
+                    return ItemStack.EMPTY;
 
                 return super.insertItem(slot, stack, simulate);
             }

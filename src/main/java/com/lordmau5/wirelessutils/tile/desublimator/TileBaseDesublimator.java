@@ -6,6 +6,7 @@ import cofh.core.util.CoreUtils;
 import cofh.core.util.helpers.InventoryHelper;
 import cofh.core.util.helpers.MathHelper;
 import cofh.core.util.helpers.StringHelper;
+import com.google.common.base.Predicate;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.block.BlockDirectionalAir;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
@@ -22,6 +23,7 @@ import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IDispenserAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IFilterAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
@@ -101,7 +103,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implements
-        IConfigurableWorldTickRate, IBudgetInfoProvider,
+        IConfigurableWorldTickRate, IBudgetInfoProvider, IFilterAugmentable,
         IWorldAugmentable, IBlockAugmentable, IChunkLoadAugmentable, IDispenserAugmentable,
         ICropAugmentable, IInvertAugmentable, ITransferAugmentable, ICapacityAugmentable,
         IUnlockableSlots, IRoundRobinMachine, ITickable, ISidedTransfer, ISidedTransferAugmentable,
@@ -160,6 +162,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     private Mode[] sideTransfer;
     private boolean[] sideIsCached;
     private TileEntity[] sideCache;
+
+    private Predicate<ItemStack> itemFilter;
+    private boolean voidingItems = false;
 
     public TileBaseDesublimator() {
         super();
@@ -289,7 +294,18 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 return false;
         }
 
+        if ( !voidingItems && itemFilter != null && !itemFilter.apply(stack) )
+            return false;
+
         return isSlotUnlocked(slot);
+    }
+
+    @Override
+    public boolean shouldVoidItem(int slot, @Nonnull ItemStack stack) {
+        if ( voidingItems && itemFilter != null )
+            return !itemFilter.apply(stack);
+
+        return super.shouldVoidItem(slot, stack);
     }
 
     @Override
@@ -489,6 +505,16 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     @Override
     public void setCapacityFactor(int factor) {
         capacityAugment = calculateMaxSlots(factor);
+    }
+
+    @Override
+    public void setItemFilter(@Nullable Predicate<ItemStack> filter) {
+        itemFilter = filter;
+    }
+
+    @Override
+    public void setVoidingItems(boolean voiding) {
+        voidingItems = voiding;
     }
 
     @Override
@@ -1473,6 +1499,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         for (int i = 0; i < slots; i++) {
             ItemStack stack = source.getStackInSlot(i);
             if ( stack.isEmpty() )
+                continue;
+
+            if ( !voidingItems && itemFilter != null && !itemFilter.apply(stack) )
                 continue;
 
             int count = stack.getCount();

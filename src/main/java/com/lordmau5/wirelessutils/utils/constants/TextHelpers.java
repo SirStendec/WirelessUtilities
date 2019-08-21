@@ -70,9 +70,25 @@ public class TextHelpers {
         if ( i == 0 )
             return null;
 
+        int total = 0;
+        int blank = 0;
         String[] out = new String[i];
         for (int j = 0; j < i; j++) {
-            out[j] = StringHelper.localize(base + "." + j);
+            String line = StringHelper.localize(base + "." + j);
+            out[j] = line;
+            if ( line.isEmpty() )
+                blank++;
+            else {
+                total += blank;
+                blank = 0;
+                total++;
+            }
+        }
+
+        if ( total < i ) {
+            String[] realOut = new String[total];
+            System.arraycopy(out, 0, realOut, 0, total);
+            return realOut;
         }
 
         return out;

@@ -313,6 +313,21 @@ item.wirelessutils.range_augment.lock.0=Range Augments cannot be removed
 item.wirelessutils.range_augment.lock.1=when a target requires the Range
 item.wirelessutils.range_augment.lock.2=Augment to be within range.
 
+item.wirelessutils.filter_augment.name=Filter Augment
+item.wirelessutils.filter_augment.info.0=This augment prevents
+item.wirelessutils.filter_augment.info.1=matching items from being
+item.wirelessutils.filter_augment.info.2=inserted into the inventory
+item.wirelessutils.filter_augment.info.3=of machines.
+
+item.wirelessutils.filter_augment.voiding=Voiding Items
+item.wirelessutils.filter_augment.nbt=Ignoring NBT
+item.wirelessutils.filter_augment.meta=Ignoring Metadata
+item.wirelessutils.filter_augment.ore=Using Ore Dictionary
+item.wirelessutils.filter_augment.match_mod=Matching Mod Items
+
+item.wirelessutils.filter_augment.entry=- %s
+item.wirelessutils.filter_augment.info_list=%s %s Items
+
 item.wirelessutils.disabled=This item is disabled in configuration.
 
 item.wirelessutils.augment.min_level=Required Machine Level: %s
@@ -506,6 +521,39 @@ btn.wirelessutils.drop.exp=Experience:
 
 btn.wirelessutils.blacklist=Blacklist:
 btn.wirelessutils.whitelist=Whitelist:
+
+btn.wirelessutils.ignore_meta=Ignore Metadata: %s
+btn.wirelessutils.ignore_meta.info.0=When this is enabled, meta values
+btn.wirelessutils.ignore_meta.info.1=on items, such as damage, will be
+btn.wirelessutils.ignore_meta.info.2=ignored when filtering.
+
+btn.wirelessutils.ignore_nbt=Ignore NBT: %s
+btn.wirelessutils.ignore_nbt.info.0=When this is enabled, NBT data
+btn.wirelessutils.ignore_nbt.info.1=on items will be ignored when
+btn.wirelessutils.ignore_nbt.info.2=filtering.
+
+btn.wirelessutils.use_ore=Use Ore Dictionary: %s
+btn.wirelessutils.use_ore.info.0=When this is enabled, items will be
+btn.wirelessutils.use_ore.info.1=checked against the ore dictionary
+btn.wirelessutils.use_ore.info.2=for filtering. Equivalent items will
+btn.wirelessutils.use_ore.info.3=be treated equally.
+
+btn.wirelessutils.voiding=Voiding Items: %s
+btn.wirelessutils.voiding.info.0=When this is enabled, machines with
+btn.wirelessutils.voiding.info.1=this augment will accept items that
+btn.wirelessutils.voiding.info.2=don't pass these filters, but the items
+btn.wirelessutils.voiding.info.3=will be scattered to the void straight
+btn.wirelessutils.voiding.info.4=away rather than being stored.
+
+btn.wirelessutils.match_mod=Match Mod: %s
+btn.wirelessutils.match_mod.info.0=When this is enabled, items will
+btn.wirelessutils.match_mod.info.1=be matched so long as they are
+btn.wirelessutils.match_mod.info.2=added by the same mod as one of
+btn.wirelessutils.match_mod.info.3=the filter items.
+btn.wirelessutils.match_mod.info.4=This option is incompatible with
+btn.wirelessutils.match_mod.info.5=other filtering modes.
+
+btn.wirelessutils.match_mod.disabled=This option is incompatible with Match Mod.
 
 btn.wirelessutils.fall_protect=Fall Protection:
 btn.wirelessutils.fall_protect.0=Disabled

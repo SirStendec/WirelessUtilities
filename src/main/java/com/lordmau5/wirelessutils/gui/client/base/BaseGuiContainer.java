@@ -5,6 +5,7 @@ import cofh.core.gui.element.ElementBase;
 import cofh.core.gui.element.tab.TabBase;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.elements.IContainsButtons;
+import com.lordmau5.wirelessutils.gui.slot.SlotFilter;
 import com.lordmau5.wirelessutils.item.base.ILockExplanation;
 import com.lordmau5.wirelessutils.item.base.ISlotContextTooltip;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBase;
@@ -146,7 +147,7 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements ICont
             if ( item instanceof ISlotContextTooltip )
                 ((ISlotContextTooltip) item).addTooltipContext(list, tile, cachedSlot, stack);
 
-            if ( !cachedSlot.canTakeStack(mc.player) ) {
+            if ( !cachedSlot.canTakeStack(mc.player) && !(cachedSlot instanceof SlotFilter) ) {
                 List<String> additional = new ArrayList<>();
                 additional.add(new TextComponentTranslation("info." + WirelessUtils.MODID + ".slot_lock")
                         .setStyle(TextHelpers.RED)

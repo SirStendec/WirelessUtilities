@@ -15,11 +15,15 @@ import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fml.common.eventhandler.Event;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -170,6 +174,7 @@ public class ItemCloneModule extends ItemModule {
         private int entityLimit = 0;
 
         private int entities = 0;
+        private IEntityLivingData entityLivingData;
 
         public CloneBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack module) {
             this.vaporizer = vaporizer;
@@ -406,12 +411,18 @@ public class ItemCloneModule extends ItemModule {
             return ModConfig.vaporizers.modules.clone.budget;
         }
 
+        @Override
+        public void preWork() {
+            entityLivingData = null;
+        }
+
         @Nonnull
         public IWorkProvider.WorkResult processEntity(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget target) {
             return IWorkProvider.WorkResult.FAILURE_REMOVE;
         }
 
         @Nonnull
+        @SuppressWarnings("deprecation")
         public IWorkProvider.WorkResult processBlock(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
             ItemStack modifier = vaporizer.getModifier();
             if ( finalCost == 0 )
@@ -448,7 +459,7 @@ public class ItemCloneModule extends ItemModule {
 
             // ... and spawn it!
             double offsetX = 0.5D;
-            double offsetY = 0.5D;
+            double offsetY = 0D;
             double offsetZ = 0.5D;
 
             if ( ModConfig.vaporizers.modules.clone.randomSpawn ) {
@@ -457,15 +468,25 @@ public class ItemCloneModule extends ItemModule {
                 offsetZ = world.rand.nextDouble();
             }
 
-            entity.setPositionAndRotation(
-                    target.pos.getX() + offsetX,
-                    target.pos.getY() + offsetY,
-                    target.pos.getZ() + offsetZ,
+            double posX = target.pos.getX() + offsetX;
+            double posY = target.pos.getY() + offsetY;
+            double posZ = target.pos.getZ() + offsetZ;
+
+            if ( (entity instanceof EntityLiving) && ForgeEventFactory.canEntitySpawn((EntityLiving) entity, world, (float) posX, (float) posY, (float) posZ, true) == Event.Result.DENY ) {
+                vaporizer.addFuel(removed);
+                return IWorkProvider.WorkResult.FAILURE_CONTINUE;
+            }
+
+            entity.setLocationAndAngles(
+                    posX, posY, posZ,
                     360.0F * world.rand.nextFloat(),
                     entity.rotationPitch
             );
 
             world.spawnEntity(entity);
+
+            if ( !exactCopies && (entity instanceof EntityLiving) )
+                entityLivingData = ((EntityLiving) entity).onInitialSpawn(world.getDifficultyForLocation(target.pos), entityLivingData);
 
             if ( removed > finalCost )
                 vaporizer.addFuel(removed - finalCost);

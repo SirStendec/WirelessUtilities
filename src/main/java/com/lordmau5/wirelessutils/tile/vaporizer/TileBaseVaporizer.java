@@ -20,6 +20,7 @@ import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
 import com.lordmau5.wirelessutils.tile.base.Worker;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBudgetInfoProvider;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IFilterAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
 import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.FluidTank;
@@ -74,7 +75,7 @@ import java.util.Map;
 
 public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         IWorkInfoProvider, IBudgetInfoProvider, ISidedTransfer, ISidedTransferAugmentable,
-        IConfigurableWorldTickRate, IUnlockableSlots,
+        IConfigurableWorldTickRate, IUnlockableSlots, IFilterAugmentable,
         IWorkProvider<TileBaseVaporizer.VaporizerTarget> {
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
@@ -134,6 +135,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     private boolean didFullEntities = false;
 
     private Item previousModule = null;
+    private Predicate<ItemStack> itemFilter = null;
+    private boolean voidingItems = false;
 
     public TileBaseVaporizer() {
         super();
@@ -425,8 +428,27 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     }
 
     @Override
+    public boolean shouldVoidItem(int slot, @Nonnull ItemStack stack) {
+        if ( voidingItems && itemFilter != null )
+            return !itemFilter.apply(stack);
+
+        return super.shouldVoidItem(slot, stack);
+    }
+
+    public void setVoidingItems(boolean voiding) {
+        voidingItems = voiding;
+    }
+
+    public void setItemFilter(@Nullable Predicate<ItemStack> filter) {
+        itemFilter = filter;
+    }
+
+    @Override
     public boolean isItemValidForSlot(int slot, @Nonnull ItemStack stack) {
         if ( !isSlotUnlocked(slot) )
+            return false;
+
+        if ( !voidingItems && itemFilter != null && !itemFilter.apply(stack) )
             return false;
 
         if ( slot == getModuleOffset() )
@@ -1529,6 +1551,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         int total = level.maxVaporizerEntities;
         remainingPerTick = total;
         tickActive();
+        behavior.preWork();
         setActive(worker.performWork());
         updateTrackers();
 
@@ -1974,6 +1997,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         }
 
         int getActionCost();
+
+        default void preWork() {
+
+        }
 
         @Nonnull
         WorkResult processBlock(@Nonnull VaporizerTarget target, @Nonnull World world);

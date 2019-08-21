@@ -5,9 +5,10 @@ import com.lordmau5.wirelessutils.gui.slot.SlotDontTakeHeld;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 
-public class ContainerPlayerCard extends ContainerCore {
+public class ContainerItem extends ContainerCore {
 
-    public ContainerPlayerCard(InventoryPlayer inventory) {
+    public ContainerItem(InventoryPlayer inventory) {
+        bindOwnSlots();
         bindPlayerInventory(inventory);
     }
 
@@ -23,6 +24,10 @@ public class ContainerPlayerCard extends ContainerCore {
 
     protected int getPlayerInventoryVerticalOffset() {
         return 94;
+    }
+
+    protected void bindOwnSlots() {
+
     }
 
     @Override

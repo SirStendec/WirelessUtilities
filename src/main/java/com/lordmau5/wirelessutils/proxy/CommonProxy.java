@@ -39,6 +39,7 @@ import com.lordmau5.wirelessutils.item.augment.ItemCapacityAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemChunkLoadAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemCropAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemDispenserAugment;
+import com.lordmau5.wirelessutils.item.augment.ItemFilterAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemFluidGenAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemInventoryAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemInvertAugment;
@@ -63,6 +64,7 @@ import com.lordmau5.wirelessutils.item.pearl.ItemVoidPearl;
 import com.lordmau5.wirelessutils.item.upgrade.ItemConversionUpgrade;
 import com.lordmau5.wirelessutils.item.upgrade.ItemLevelUpgrade;
 import com.lordmau5.wirelessutils.packet.PacketParticleLine;
+import com.lordmau5.wirelessutils.packet.PacketUpdateItem;
 import com.lordmau5.wirelessutils.plugins.PluginRegistry;
 import com.lordmau5.wirelessutils.tile.TileAngledSlime;
 import com.lordmau5.wirelessutils.tile.base.Machine;
@@ -133,6 +135,7 @@ public class CommonProxy {
         NetworkRegistry.INSTANCE.registerGuiHandler(WirelessUtils.instance, new GuiHandler());
 
         PacketParticleLine.initialize();
+        PacketUpdateItem.initialize();
 
         if ( ModItems.itemStabilizedEnderPearl != null )
             OreDictionary.registerOre("enderpearl", ModItems.itemStabilizedEnderPearl);
@@ -383,6 +386,7 @@ public class CommonProxy {
         registerItem(event, new ItemFluidGenAugment());
         registerItem(event, new ItemSidedTransferAugment());
         registerItem(event, new ItemDispenserAugment());
+        registerItem(event, new ItemFilterAugment());
 
         registerItem(event, new ItemBaseModule());
         registerItem(event, new ItemSlaughterModule());
