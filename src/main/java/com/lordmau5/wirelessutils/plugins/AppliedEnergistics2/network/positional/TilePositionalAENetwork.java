@@ -413,7 +413,7 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
     @Override
     public EnumSet<EnumFacing> getConnectableSides() {
         EnumSet<EnumFacing> sides = super.getConnectableSides();
-        if ( !ModConfig.positionalConnections ) {
+        if ( !ModConfig.common.positionalConnections ) {
             sides.remove(getEnumFacing());
             sides.remove(EnumFacing.UP);
         }

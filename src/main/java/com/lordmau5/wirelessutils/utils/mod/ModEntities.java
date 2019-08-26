@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.utils.mod;
 
 import com.lordmau5.wirelessutils.entity.pearl.EntityChargedPearl;
+import com.lordmau5.wirelessutils.entity.pearl.EntityCrystallizedVoidPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityFluxedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityQuenchedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityScorchedPearl;
@@ -19,5 +20,6 @@ public class ModEntities {
         RenderingRegistry.registerEntityRenderingHandler(EntityScorchedPearl.class, new EntityScorchedPearl.Factory());
         RenderingRegistry.registerEntityRenderingHandler(EntityStabilizedEnderPearl.class, new EntityStabilizedEnderPearl.Factory());
         RenderingRegistry.registerEntityRenderingHandler(EntityVoidPearl.class, new EntityVoidPearl.Factory());
+        RenderingRegistry.registerEntityRenderingHandler(EntityCrystallizedVoidPearl.class, new EntityCrystallizedVoidPearl.Factory());
     }
 }

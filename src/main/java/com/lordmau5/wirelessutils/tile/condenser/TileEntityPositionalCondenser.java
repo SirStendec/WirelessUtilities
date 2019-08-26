@@ -65,7 +65,7 @@ public class TileEntityPositionalCondenser extends TileEntityBaseCondenser imple
 
     @Override
     public boolean canSideTransfer(TransferSide side) {
-        return ModConfig.positionalConnections || (side != TransferSide.FRONT && side != TransferSide.TOP);
+        return ModConfig.common.positionalConnections || (side != TransferSide.FRONT && side != TransferSide.TOP);
     }
 
     @Override

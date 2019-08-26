@@ -136,6 +136,10 @@ item.wirelessutils.charged_pearl.jei.1=Rumor has it that Charged Pearls were fir
 item.wirelessutils.quenched_pearl.name=Quenched Pearl
 item.wirelessutils.scorched_pearl.name=Scorched Pearl
 
+item.wirelessutils.crystallized_void_pearl.name=Crystallized Void Pearl
+item.wirelessutils.crystallized_void_pearl.jei.0=Smashing a Void Pearl up against an Ender Crystal has somehow crystallized the Void Pearl itself.
+item.wirelessutils.crystallized_void_pearl.jei.1=Void Pearls in this state become very stable, and they can't be used to capture creatures anymore. However, any creatures previously trapped inside become somehow easier to access.
+
 item.wirelessutils.void_pearl.name=Void Pearl
 item.wirelessutils.void_pearl.contains=Contains: %s
 item.wirelessutils.void_pearl.baby=Baby %s
@@ -664,6 +668,7 @@ commands.wirelessutils.debug.success=Created Item: %s
 
 stat.wirelessutils.CapturedEntities=Void Pearl Captures
 stat.wirelessutils.ThrownPearls=Thrown Pearls
+stat.wirelessutils.CrystallizedPearls=Crystallized Void Pearls
 
 advancements.wirelessutils.root.title=Wireless Utilities
 advancements.wirelessutils.root.description=Because wires just get in the way.

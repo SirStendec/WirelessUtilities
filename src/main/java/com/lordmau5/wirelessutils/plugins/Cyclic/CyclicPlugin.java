@@ -111,6 +111,16 @@ public class CyclicPlugin implements IPlugin {
                 NBTTagCompound tag = stack.getTagCompound();
                 return tag != null && (tag.getBoolean("IsBaby") || tag.getInteger("Age") < 0);
             }
+
+            @Override
+            public boolean canFillBall(@Nonnull ItemStack stack) {
+                return isValidBall(stack) && !isFilledBall(stack);
+            }
+
+            @Override
+            public boolean canEmptyBall(@Nonnull ItemStack stack) {
+                return isFilledBall(stack);
+            }
         });
     }
 }

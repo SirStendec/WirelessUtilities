@@ -428,7 +428,7 @@ public class TilePositionalRSNetwork extends TileRSNetworkBase<NetworkNodePositi
 
     @Override
     public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing side) {
-        if ( !ModConfig.positionalConnections && (side == EnumFacing.UP || side == getEnumFacing()) )
+        if ( !ModConfig.common.positionalConnections && (side == EnumFacing.UP || side == getEnumFacing()) )
             return false;
 
         return super.hasCapability(capability, side);
@@ -436,7 +436,7 @@ public class TilePositionalRSNetwork extends TileRSNetworkBase<NetworkNodePositi
 
     @Override
     public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing side) {
-        if ( !ModConfig.positionalConnections && (side == EnumFacing.UP || side == getEnumFacing()) )
+        if ( !ModConfig.common.positionalConnections && (side == EnumFacing.UP || side == getEnumFacing()) )
             return null;
 
         return super.getCapability(capability, side);

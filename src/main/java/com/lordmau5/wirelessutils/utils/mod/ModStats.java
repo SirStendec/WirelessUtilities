@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 public enum ModStats {
 
     ThrownPearls,
+    CrystallizedPearls,
     CapturedEntities;
 
     private final StatBasic stat;

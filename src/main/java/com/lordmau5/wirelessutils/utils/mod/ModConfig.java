@@ -50,10 +50,24 @@ public class ModConfig {
     @Config.Comment("Configuration for Plugins.")
     public static final Plugins plugins = new Plugins();
 
-    @Config.Name("Positional Machines - Allow Front/Top Connections")
-    @Config.Comment("Whether or not to allow connections to Positional Machines from their tops or fronts.")
-    @Config.RequiresWorldRestart
-    public static boolean positionalConnections = false;
+    @Config.Name("Common")
+    @Config.Comment("Options that don't fit into other categories.")
+    public static final Common common = new Common();
+
+    public static class Common {
+        @Config.Name("Positional Machines - Allow Front/Top Connections")
+        @Config.Comment("Whether or not to allow connections to Positional Machines from their tops or fronts.")
+        @Config.RequiresWorldRestart
+        public boolean positionalConnections = false;
+
+        @Config.Name("Display Work Budget GUI")
+        @Config.Comment("Whether or not to display the Work Budget GUI elements for machines that use budget. When set to AUTO, machines will only display a Work Budget GUI when their maximum budget and budget gained per tick are not equal.")
+        public WorkBudgetGUIState workBudgetGUI = WorkBudgetGUIState.AUTO;
+
+        public enum WorkBudgetGUIState {
+            DISABLED, AUTO, ENABLED;
+        }
+    }
 
     public static class Items {
         @Config.Name("Charged Pearl")
@@ -181,6 +195,10 @@ public class ModConfig {
         @Config.Name("Entity Blacklist")
         @Config.Comment("A list of entities that cannot be placed within Void Pearls.")
         public String[] blacklist = {};
+
+        @Config.Name("Enable Crystallization")
+        @Config.Comment("Enable crafting Crystallized Void Pearls by throwing Void Pearls into an Ender Crystal.")
+        public boolean enableCrystallization = true;
     }
 
     public static class Upgrades {
@@ -1106,7 +1124,7 @@ public class ModConfig {
         @Config.Name("Energy per Entity")
         @Config.Comment("Use this much energy for each entity launched.")
         @Config.RangeInt(min = 0)
-        public int energy = 0;
+        public int energy = 250;
 
         @Config.Name("Energy per 1 Velocity")
         @Config.Comment("Use this much energy per unit of velocity imparted upon an entity.")
@@ -1184,7 +1202,7 @@ public class ModConfig {
         @Config.Name("Energy per Capture")
         @Config.Comment("Use this much energy to capture a single entity.")
         @Config.RangeInt(min = 0)
-        public int entityEnergy = 100;
+        public int entityEnergy = 1000;
 
         @Config.Name("Energy Multiplier")
         @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
@@ -1204,6 +1222,10 @@ public class ModConfig {
     }
 
     public static class CloneModule {
+        @Config.Name("Require Crystallized Void Pearl")
+        @Config.Comment("When enabled, this module will only accept Crystallized Void Pearls as input to set the target entity.")
+        public boolean requireCrystallizedVoidPearls = false;
+
         @Config.Name("Required Level")
         @Config.Comment("Vaporizers must be at least this level in order to use this module.")
         @Config.RangeInt(min = 0)
@@ -1301,6 +1323,18 @@ public class ModConfig {
         @Config.Name("Randomize Spawn Position")
         @Config.Comment("When enabled, entities will be spawned at a random position within the target block.")
         public boolean randomSpawn = true;
+
+        @Config.Name("Use Spawn Particles")
+        @Config.Comment("When enabled, living entities will be instructed to create their spawn particles when spawned by the Vaporizer.")
+        public boolean useSpawnParticles = true;
+
+        @Config.Name("Allow Cloning Babies")
+        @Config.Comment("Whether or not the module should accept baby entities as entities to clone. If set to BABY_CLONES, all spawned entites will be babies.")
+        public BabyCloningMode babyMode = BabyCloningMode.BABY_CLONES;
+
+        public enum BabyCloningMode {
+            DISALLOW, ALLOW, BABY_CLONES;
+        }
     }
 
     public static class TeleportModule {
@@ -1313,7 +1347,7 @@ public class ModConfig {
         @Config.Name("Budget per Entity")
         @Config.Comment("Use this much action budget for each entity teleported.")
         @Config.RangeInt(min = 0)
-        public int budget = 10;
+        public int budget = 20;
 
         @Config.Name("Energy Multiplier")
         @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
@@ -1361,6 +1395,12 @@ public class ModConfig {
         @Config.RangeDouble(min = 0)
         public double fuelInterdimensional = 0;
 
+        @Config.Name("Base Energy")
+        @Config.Comment("Teleporting an entity will use this much base energy, no matter the distance.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int baseEnergy = 1000;
+
         @Config.Name("Cost per Block")
         @Config.Comment("The energy cost to teleport entities to a distant block goes up by this amount per block, linearly with distance.")
         @Config.RangeInt(min = 0)
@@ -1387,12 +1427,12 @@ public class ModConfig {
         @Config.Name("Budget per Entity")
         @Config.Comment("Use this much action budget for each entity attacked.")
         @Config.RangeInt(min = 0)
-        public int budget = 10;
+        public int budget = 25;
 
         @Config.Name("Budget per Entity - Use Weapon")
         @Config.Comment("Use this much action budget for each entity attacked with a weapon.")
         @Config.RangeInt(min = 0)
-        public int budgetWeapon = 15;
+        public int budgetWeapon = 50;
 
         @Config.Name("Energy per Entity")
         @Config.Comment("Use this much base energy for each entity attacked.")
@@ -1402,7 +1442,7 @@ public class ModConfig {
         @Config.Name("Energy per Entity - Use Weapon")
         @Config.Comment("Use this much base energy for each entity attacked with a weapon.")
         @Config.RangeInt(min = 0)
-        public int entityWeaponEnergy = 1000;
+        public int entityWeaponEnergy = 2000;
 
         @Config.Name("Energy Multiplier")
         @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")

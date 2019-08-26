@@ -1,0 +1,26 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"IVI",
+		"VAV",
+		"IVI"
+	],
+	"key": {
+		"I": {
+			"item": "#IRON_INGOT"
+		},
+		"V": {
+			"item": "#PAPER"
+		},
+		"A": {
+			"item": "wirelessutils:filter_augment",
+			"data": 0
+		}
+	},
+	"result": {
+		"item": "wirelessutils:filter_augment",
+		"data": 1,
+		"count": 1
+	}
+}

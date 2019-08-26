@@ -951,7 +951,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         if ( ModConfig.vaporizers.useEntitiesFuel && amount > 0 && hasInput() && hasEmptyOutput() ) {
             for (int i = 0; i < inputProxy.getSlots(); i++) {
                 ItemStack slotted = inputProxy.extractItem(i, 64, true);
-                if ( !EntityUtilities.isFilledEntityBall(slotted) )
+                if ( !EntityUtilities.canEmptyBall(slotted) )
                     continue;
 
                 int value = EntityUtilities.getBaseExperience(slotted, world);

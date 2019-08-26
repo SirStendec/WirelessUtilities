@@ -58,7 +58,7 @@ public class GuiDirectionalDesublimator extends BaseGuiContainer {
 
         addElement(new ElementEnergyStored(this, 17, 20, desublimator.getEnergyStorage()).setInfinite(desublimator.isCreative()));
 
-        if ( desublimator.hasSustainedRate() )
+        if ( shouldDisplayWorkBudget(desublimator.hasSustainedRate()) )
             addElement(new ElementWorkBudget(this, 33, 20, desublimator));
 
         addElement(new ElementAreaButton(this, desublimator, 152, 69));

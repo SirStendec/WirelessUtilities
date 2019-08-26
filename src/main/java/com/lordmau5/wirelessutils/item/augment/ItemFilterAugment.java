@@ -10,14 +10,17 @@ import com.lordmau5.wirelessutils.packet.PacketUpdateItem;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IFilterAugmentable;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import com.lordmau5.wirelessutils.utils.crafting.INBTPreservingIngredient;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ActionResult;
@@ -39,11 +42,52 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ItemFilterAugment extends ItemAugment implements IUpdateableItem {
+public class ItemFilterAugment extends ItemAugment implements IUpdateableItem, INBTPreservingIngredient {
 
     public ItemFilterAugment() {
         super();
         setName("filter_augment");
+    }
+
+    private final static String[] VALID_KEYS = {
+            "MatchMod",
+            "IgnoreMeta",
+            "IgnoreNBT",
+            "UseOreDict",
+            "Whitelist",
+            "Voiding",
+            "List"
+    };
+
+    @Override
+    public boolean isValidForCraft(@Nonnull IRecipe recipe, @Nonnull InventoryCrafting craft, @Nonnull ItemStack stack, @Nonnull ItemStack output) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return false;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        return tag == null || !tag.getBoolean("Locked");
+    }
+
+    @Nullable
+    @Override
+    public NBTTagCompound getNBTTagForCraft(@Nonnull IRecipe recipe, @Nonnull InventoryCrafting craft, @Nonnull ItemStack stack, @Nonnull ItemStack output) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return null;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        if ( tag == null )
+            return null;
+
+        NBTTagCompound out = new NBTTagCompound();
+        for (String key : VALID_KEYS) {
+            if ( tag.hasKey(key) )
+                out.setTag(key, tag.getTag(key));
+        }
+
+        if ( out.getSize() == 0 )
+            return null;
+
+        return out;
     }
 
     @Override

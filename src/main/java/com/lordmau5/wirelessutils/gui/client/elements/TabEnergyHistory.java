@@ -146,7 +146,7 @@ public class TabEnergyHistory extends TabBase {
         int current = energyInfo.getInfoEnergyPerTick();
 
         if ( displayGraph ) {
-            if ( hoveredLine == -1 ) {
+            if ( hoveredLine == -1 || history == null ) {
                 history = energyHistory.getEnergyHistory();
                 max = energyInfo.getInfoMaxEnergyPerTick();
                 tick = (byte) (40 - energyHistory.getHistoryTick());
@@ -170,36 +170,38 @@ public class TabEnergyHistory extends TabBase {
                     break;
             }
 
-            int x = 2;
-            for (int i = 0; i < history.length; i++, x += 2) {
-                int height = (int) Math.floor(20 * history[i] / (double) max);
-                if ( height == 0 && history[i] > 0 )
-                    height = 1;
-                else if ( height > 20 )
-                    height = 20;
+            if ( history != null ) {
+                int x = 2;
+                for (int i = 0; i < history.length; i++, x += 2) {
+                    int height = (int) Math.floor(20 * history[i] / (double) max);
+                    if ( height == 0 && history[i] > 0 )
+                        height = 1;
+                    else if ( height > 20 )
+                        height = 20;
 
-                if ( hoveredLine == i ) {
-                    atTime = true;
-                    current = (int) history[i];
+                    if ( hoveredLine == i ) {
+                        atTime = true;
+                        current = (int) history[i];
+
+                        gui.drawSizedModalRect(
+                                sideOffset() + 6 + x, y,
+                                sideOffset() + 7 + x, y + 20,
+                                0xFF000000
+                        );
+
+                        gui.drawSizedModalRect(
+                                sideOffset() + 5 + x, y + (19 - height),
+                                sideOffset() + 8 + x, y + 21,
+                                0xFF000000
+                        );
+                    }
 
                     gui.drawSizedModalRect(
-                            sideOffset() + 6 + x, y,
+                            sideOffset() + 6 + x, y + (20 - height),
                             sideOffset() + 7 + x, y + 20,
-                            0xFF000000
-                    );
-
-                    gui.drawSizedModalRect(
-                            sideOffset() + 5 + x, y + (19 - height),
-                            sideOffset() + 8 + x, y + 21,
-                            0xFF000000
+                            hoveredLine == i ? 0xFFe1c92f : 0xFFFFFFFF
                     );
                 }
-
-                gui.drawSizedModalRect(
-                        sideOffset() + 6 + x, y + (20 - height),
-                        sideOffset() + 7 + x, y + 20,
-                        hoveredLine == i ? 0xFFe1c92f : 0xFFFFFFFF
-                );
             }
 
             gui.drawSizedModalRect(sideOffset() + 6, y, sideOffset() + 7, y + 21, 0xFF000000);

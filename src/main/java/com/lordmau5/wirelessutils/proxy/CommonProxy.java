@@ -18,13 +18,16 @@ import com.lordmau5.wirelessutils.commands.DebugCommand;
 import com.lordmau5.wirelessutils.commands.FluidGenCommand;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.entity.pearl.EntityChargedPearl;
+import com.lordmau5.wirelessutils.entity.pearl.EntityCrystallizedVoidPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityFluxedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityQuenchedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityScorchedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityStabilizedEnderPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityVoidPearl;
-import com.lordmau5.wirelessutils.fixers.InventoryWalker;
-import com.lordmau5.wirelessutils.fixers.NullableItemListWalker;
+import com.lordmau5.wirelessutils.fixers.BlockInventoryWalker;
+import com.lordmau5.wirelessutils.fixers.BlockNullableItemListWalker;
+import com.lordmau5.wirelessutils.fixers.ItemNullableItemListWalker;
+import com.lordmau5.wirelessutils.fixers.ItemVoidEntityWalker;
 import com.lordmau5.wirelessutils.item.ItemAbsolutePositionalCard;
 import com.lordmau5.wirelessutils.item.ItemBlockExplainable;
 import com.lordmau5.wirelessutils.item.ItemBlockMachine;
@@ -56,6 +59,7 @@ import com.lordmau5.wirelessutils.item.module.ItemLaunchModule;
 import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
 import com.lordmau5.wirelessutils.item.pearl.ItemChargedPearl;
+import com.lordmau5.wirelessutils.item.pearl.ItemCrystallizedVoidPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemFluxedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemQuenchedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemScorchedPearl;
@@ -171,19 +175,21 @@ public class CommonProxy {
     public void initFixers() {
         CompoundDataFixer global_fixer = FMLCommonHandler.instance().getDataFixer();
 
-        /*ModFixs fixer = global_fixer.init(WirelessUtils.MODID, WirelessUtils.DATA_VERSION);
-        fixer.registerFix(FixTypes.CHUNK, new FixBlockLevels());*/
-
         Set<Class<?>> machines = new HashSet<>();
         for (Class<? extends TileEntity> machine : MACHINES) {
             if ( TileEntityBaseMachine.class.isAssignableFrom(machine) )
                 machines.add(machine);
         }
 
-        // TODO: Item crawler for Filter Augment.
+        global_fixer.registerWalker(FixTypes.ITEM_INSTANCE, new ItemVoidEntityWalker(ImmutableSet.of(
+                ModItems.itemVoidPearl,
+                ModItems.itemCrystallizedVoidPearl
+        )));
 
-        global_fixer.registerWalker(FixTypes.BLOCK_ENTITY, new InventoryWalker(machines, "Inventory"));
-        global_fixer.registerWalker(FixTypes.BLOCK_ENTITY, new NullableItemListWalker(ImmutableSet.of(
+        global_fixer.registerWalker(FixTypes.ITEM_INSTANCE, new ItemNullableItemListWalker(ModItems.itemFilterAugment, "List"));
+
+        global_fixer.registerWalker(FixTypes.BLOCK_ENTITY, new BlockInventoryWalker(machines, "Inventory"));
+        global_fixer.registerWalker(FixTypes.BLOCK_ENTITY, new BlockNullableItemListWalker(ImmutableSet.of(
                 TileDirectionalDesublimator.class,
                 TilePositionalDesublimator.class
         ), "Locks"));
@@ -280,6 +286,13 @@ public class CommonProxy {
                 .name("void_pearl")
                 .tracker(64, 20, true)
                 .build());
+
+        event.getRegistry().register(EntityEntryBuilder.create()
+                .entity(EntityCrystallizedVoidPearl.class)
+                .id(new ResourceLocation(WirelessUtils.MODID, "crystallized_void_pearl"), id++)
+                .name("crystallized_void_pearl")
+                .tracker(64, 20, true)
+                .build());
     }
 
     @SuppressWarnings("unused")
@@ -362,6 +375,7 @@ public class CommonProxy {
         registerItem(event, new ItemScorchedPearl());
         registerItem(event, new ItemStabilizedEnderPearl());
         registerItem(event, new ItemVoidPearl());
+        registerItem(event, new ItemCrystallizedVoidPearl());
 
         registerItem(event, new ItemAbsolutePositionalCard());
         registerItem(event, new ItemRelativePositionalCard());

@@ -49,7 +49,7 @@ public class GuiPositionalDesublimator extends BaseGuiPositional {
 
         addElement(new ElementEnergyStored(this, 17, 23, desublimator.getEnergyStorage()).setInfinite(desublimator.isCreative()));
 
-        if ( desublimator.hasSustainedRate() )
+        if ( shouldDisplayWorkBudget(desublimator.hasSustainedRate()) )
             addElement(new ElementWorkBudget(this, 33, 23, desublimator));
 
         addElement(new ElementAreaButton(this, desublimator, 152, 72));

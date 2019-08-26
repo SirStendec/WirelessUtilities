@@ -121,7 +121,7 @@ public class ItemCaptureModule extends ItemFilteringModule {
         }
 
         public boolean isValidInput(@Nonnull ItemStack stack, int slot) {
-            return EntityUtilities.isEntityBall(stack) && !EntityUtilities.isFilledEntityBall(stack);
+            return EntityUtilities.canFillBall(stack);
         }
 
         @Nonnull

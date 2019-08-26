@@ -10,6 +10,7 @@ import com.lordmau5.wirelessutils.item.base.ILockExplanation;
 import com.lordmau5.wirelessutils.item.base.ISlotContextTooltip;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBase;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
@@ -165,5 +166,11 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements ICont
         }
 
         return list;
+    }
+
+    public static boolean shouldDisplayWorkBudget(boolean hasSustained) {
+        if ( ModConfig.common.workBudgetGUI == ModConfig.Common.WorkBudgetGUIState.DISABLED )
+            return false;
+        return hasSustained || ModConfig.common.workBudgetGUI == ModConfig.Common.WorkBudgetGUIState.ENABLED;
     }
 }

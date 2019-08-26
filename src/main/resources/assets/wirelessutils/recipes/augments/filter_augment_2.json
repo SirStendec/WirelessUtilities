@@ -1,0 +1,26 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"NVN",
+		"VAV",
+		"NVN"
+	],
+	"key": {
+		"N": {
+			"item": "#NETHER_BRICK"
+		},
+		"V": {
+			"item": "#PAPER"
+		},
+		"A": {
+			"item": "wirelessutils:filter_augment",
+			"data": 1
+		}
+	},
+	"result": {
+		"item": "wirelessutils:filter_augment",
+		"data": 2,
+		"count": 1
+	}
+}

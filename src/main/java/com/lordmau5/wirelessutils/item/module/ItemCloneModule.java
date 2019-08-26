@@ -15,9 +15,11 @@ import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
+import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -278,7 +280,7 @@ public class ItemCloneModule extends ItemModule {
             return ModConfig.vaporizers.useEntitiesFuel;
         }
 
-        public boolean isValidInput(@Nonnull ItemStack stack, int slot) {
+        public boolean isValidBall(@Nonnull ItemStack stack) {
             if ( !EntityUtilities.isFilledEntityBall(stack) )
                 return false;
 
@@ -289,12 +291,29 @@ public class ItemCloneModule extends ItemModule {
             return value > 0;
         }
 
+        public boolean isValidInput(@Nonnull ItemStack stack, int slot) {
+            if ( !EntityUtilities.canEmptyBall(stack) )
+                return false;
+
+            return isValidBall(stack);
+        }
+
         public boolean isModifierUnlocked() {
             return true;
         }
 
         public boolean isValidModifier(@Nonnull ItemStack stack) {
-            return isValidInput(stack, 0);
+            if ( !isValidBall(stack) )
+                return false;
+
+            if ( ModConfig.vaporizers.modules.clone.requireCrystallizedVoidPearls && stack.getItem() != ModItems.itemCrystallizedVoidPearl )
+                return false;
+
+            final boolean isBaby = EntityUtilities.containsBabyEntity(stack);
+            if ( !isBaby )
+                return true;
+
+            return ModConfig.vaporizers.modules.clone.babyMode != ModConfig.CloneModule.BabyCloningMode.DISALLOW;
         }
 
         public void updateModifier(@Nonnull ItemStack stack) {
@@ -461,6 +480,13 @@ public class ItemCloneModule extends ItemModule {
             if ( exactCopies )
                 entity.setUniqueId(UUID.randomUUID());
 
+            else if ( entityBaby && ModConfig.vaporizers.modules.clone.babyMode == ModConfig.CloneModule.BabyCloningMode.BABY_CLONES ) {
+                if ( entity instanceof EntityAgeable )
+                    ((EntityAgeable) entity).setGrowingAge(-24000);
+                else if ( entity instanceof EntityZombie )
+                    ((EntityZombie) entity).setChild(true);
+            }
+
             // ... and spawn it!
             double offsetX = 0.5D;
             double offsetY = 0D;
@@ -494,7 +520,8 @@ public class ItemCloneModule extends ItemModule {
                 if ( !exactCopies )
                     entityLivingData = living.onInitialSpawn(world.getDifficultyForLocation(target.pos), entityLivingData);
 
-                living.spawnExplosionParticle();
+                if ( ModConfig.vaporizers.modules.clone.useSpawnParticles )
+                    living.spawnExplosionParticle();
             }
 
             if ( removed > finalCost )

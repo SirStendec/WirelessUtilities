@@ -168,6 +168,7 @@ public class ItemTeleportModule extends ItemFilteringModule {
                     fuel = fuelCost;
             }
 
+            cost += ModConfig.vaporizers.modules.teleport.baseEnergy;
             this.fuel = (int) Math.ceil(fuel + ModConfig.vaporizers.modules.teleport.baseFuel);
         }
 
@@ -242,6 +243,17 @@ public class ItemTeleportModule extends ItemFilteringModule {
             return 64;
         }
 
+        public boolean isValidBall(@Nonnull ItemStack stack) {
+            if ( !EntityUtilities.isFilledEntityBall(stack) )
+                return false;
+
+            int value = EntityUtilities.getBaseExperience(stack, vaporizer.getWorld());
+            if ( EntityUtilities.containsBabyEntity(stack) )
+                value = (int) Math.floor(value * ModConfig.vaporizers.babyMultiplier);
+
+            return value > 0;
+        }
+
         public boolean isValidInput(@Nonnull ItemStack stack, int slot) {
             if ( slot == 0 ) {
                 if ( stack.getItem() != ModItems.itemRangeAugment )
@@ -254,14 +266,7 @@ public class ItemTeleportModule extends ItemFilteringModule {
             if ( !usesFuel() )
                 return false;
 
-            if ( !EntityUtilities.isFilledEntityBall(stack) )
-                return false;
-
-            int value = EntityUtilities.getBaseExperience(stack, vaporizer.getWorld());
-            if ( EntityUtilities.containsBabyEntity(stack) )
-                value = (int) Math.floor(value * ModConfig.vaporizers.babyMultiplier);
-
-            return value > 0;
+            return EntityUtilities.canEmptyBall(stack) && isValidBall(stack);
         }
 
         @Override

@@ -35,7 +35,7 @@ public class GuiDirectionalVaporizer extends GuiBaseVaporizer {
 
         addElement(new ElementEnergyStored(this, 10, 46, vaporizer.getEnergyStorage()).setInfinite(vaporizer.isCreative()));
 
-        if ( vaporizer.hasSustainedRate() )
+        if ( shouldDisplayWorkBudget(vaporizer.hasSustainedRate()) )
             addElement(new ElementWorkBudget(this, 26, 46, vaporizer));
 
         if ( vaporizer.hasFluid() )

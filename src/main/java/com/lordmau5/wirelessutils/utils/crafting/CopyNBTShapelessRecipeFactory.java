@@ -8,6 +8,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.crafting.IRecipeFactory;
@@ -38,28 +39,28 @@ public class CopyNBTShapelessRecipeFactory implements IRecipeFactory {
         @Override
         public ItemStack getCraftingResult(@Nonnull InventoryCrafting craft) {
             ItemStack output = this.output.copy();
-            ItemStack input = ItemStack.EMPTY;
+            NBTTagCompound outTag = null;
 
             for (int i = 0; i < craft.getSizeInventory(); i++) {
                 ItemStack stack = craft.getStackInSlot(i);
                 if ( !stack.isEmpty() ) {
                     Item item = stack.getItem();
                     if ( item instanceof INBTPreservingIngredient && ((INBTPreservingIngredient) item).isValidForCraft(this, craft, stack, output) ) {
-                        input = stack;
-                        break;
+                        outTag = ((INBTPreservingIngredient) item).getNBTTagForCraft(this, craft, stack, output);
+                        if ( outTag != null )
+                            break;
                     } else {
                         Block block = Block.getBlockFromItem(item);
                         if ( block instanceof INBTPreservingIngredient && ((INBTPreservingIngredient) block).isValidForCraft(this, craft, stack, output) ) {
-                            input = stack;
-                            break;
+                            outTag = ((INBTPreservingIngredient) block).getNBTTagForCraft(this, craft, stack, output);
+                            if ( outTag != null )
+                                break;
                         }
                     }
                 }
             }
 
-            if ( !input.isEmpty() && input.hasTagCompound() )
-                output.setTagCompound(input.getTagCompound());
-
+            output.setTagCompound(outTag);
             return output;
         }
     }

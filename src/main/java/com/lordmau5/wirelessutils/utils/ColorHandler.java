@@ -1,8 +1,8 @@
 package com.lordmau5.wirelessutils.utils;
 
+import com.lordmau5.wirelessutils.item.base.ItemBaseVoidPearl;
 import com.lordmau5.wirelessutils.tile.base.ILevellingBlock;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityBaseCondenser;
-import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.block.BlockRedstoneWire;
 import net.minecraft.block.state.IBlockState;
@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -153,8 +154,9 @@ public class ColorHandler {
                 return 0xFFFFFF;
 
             EntityList.EntityEggInfo info = null;
-            if ( ModItems.itemVoidPearl.isFilledBall(stack) )
-                info = EntityList.ENTITY_EGGS.get(ModItems.itemVoidPearl.getEntityId(stack));
+            Item item = stack.getItem();
+            if ( item instanceof ItemBaseVoidPearl && ((ItemBaseVoidPearl) item).isFilledBall(stack) )
+                info = EntityList.ENTITY_EGGS.get(((ItemBaseVoidPearl) item).getEntityId(stack));
             else if ( stack.getItemDamage() != 0 ) {
                 Class<? extends Entity> klass = EntityList.getClassFromID(stack.getItemDamage());
                 ResourceLocation key = klass == null ? null : EntityList.getKey(klass);

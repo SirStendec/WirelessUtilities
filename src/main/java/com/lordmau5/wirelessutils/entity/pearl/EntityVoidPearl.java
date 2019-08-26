@@ -5,6 +5,7 @@ import com.google.common.base.Predicates;
 import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
 import com.lordmau5.wirelessutils.render.RenderPearl;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import com.lordmau5.wirelessutils.utils.mod.ModStats;
 import net.minecraft.block.Block;
@@ -13,11 +14,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -32,7 +36,7 @@ import javax.annotation.Nullable;
 
 public class EntityVoidPearl extends EntityBaseThrowable {
 
-    public static final Predicate<Entity> HIT_PREDICATE = Predicates.and(EntitySelectors.NOT_SPECTATING, EntitySelectors.IS_ALIVE, Entity::canBeCollidedWith);
+    public static final Predicate<Entity> HIT_PREDICATE = Predicates.and(EntitySelectors.NOT_SPECTATING, Entity::canBeCollidedWith);
 
     public EntityVoidPearl(World world) {
         super(world);
@@ -95,15 +99,27 @@ public class EntityVoidPearl extends EntityBaseThrowable {
             return;
 
         ItemStack stack = getStack();
-        if ( ModItems.itemVoidPearl.isFilledBall(stack) ) {
+        Entity entity = result.entityHit;
+
+        if ( ModConfig.items.voidPearl.enableCrystallization && entity instanceof EntityEnderCrystal ) {
+            entity.attackEntityFrom(DamageSource.GENERIC, 1F);
+            ItemStack out = new ItemStack(ModItems.itemCrystallizedVoidPearl, 1);
+            out.setTagCompound(stack.getTagCompound());
+            setStack(out);
+
+            EntityLivingBase thrower = getThrower();
+            if ( thrower instanceof EntityPlayerMP )
+                ModStats.CrystallizedPearls.addToPlayer((EntityPlayerMP) thrower);
+
+        } else if ( ModItems.itemVoidPearl.isFilledBall(stack) ) {
             ItemStack released = ModItems.itemVoidPearl.releaseEntity(stack, world, result.hitVec);
             if ( !released.isEmpty() ) {
                 stack.shrink(1);
                 setStack(released);
             }
 
-        } else if ( result.entityHit != null ) {
-            ItemStack captured = ModItems.itemVoidPearl.saveEntity(stack, result.entityHit);
+        } else if ( entity instanceof EntityLiving ) {
+            ItemStack captured = ModItems.itemVoidPearl.saveEntity(stack, entity);
             if ( !captured.isEmpty() ) {
                 EntityLivingBase thrower = getThrower();
                 if ( thrower instanceof EntityPlayerMP ) {
@@ -129,7 +145,7 @@ public class EntityVoidPearl extends EntityBaseThrowable {
                     ws.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, centerX, centerY, centerZ, 5, sizeX, sizeY, sizeZ, 0D);
                 }
 
-                result.entityHit.setDead();
+                entity.setDead();
                 stack.shrink(1);
                 setStack(captured);
             }

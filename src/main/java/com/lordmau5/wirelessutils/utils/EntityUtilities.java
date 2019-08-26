@@ -158,6 +158,22 @@ public class EntityUtilities {
         return false;
     }
 
+    public static boolean canFillBall(@Nonnull ItemStack stack) {
+        IEntityBall handler = entityBallMap.get(stack.getItem());
+        if ( handler != null )
+            return handler.canFillBall(stack);
+
+        return false;
+    }
+
+    public static boolean canEmptyBall(@Nonnull ItemStack stack) {
+        IEntityBall handler = entityBallMap.get(stack.getItem());
+        if ( handler != null )
+            return handler.canEmptyBall(stack);
+
+        return false;
+    }
+
     public static boolean isFilledEntityBall(@Nonnull ItemStack stack) {
         IEntityBall handler = entityBallMap.get(stack.getItem());
         if ( handler != null )
@@ -264,23 +280,27 @@ public class EntityUtilities {
             }
 
             @Nonnull
-            @Override
             public ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
                 return ItemStack.EMPTY;
             }
 
             @Nonnull
-            @Override
             public ItemStack removeEntity(@Nonnull ItemStack stack) {
                 return ItemStack.EMPTY;
             }
 
-            @Override
+            public boolean canFillBall(@Nonnull ItemStack stack) {
+                return false;
+            }
+
+            public boolean canEmptyBall(@Nonnull ItemStack stack) {
+                return false;
+            }
+
             public boolean isValidBall(@Nonnull ItemStack stack) {
                 return !stack.isEmpty() && stack.getItem() instanceof ItemMonsterPlacer;
             }
 
-            @Override
             public boolean isFilledBall(@Nonnull ItemStack stack) {
                 if ( !isValidBall(stack) )
                     return false;
@@ -293,7 +313,6 @@ public class EntityUtilities {
                 return entity != null && entity.hasKey("id");
             }
 
-            @Override
             public boolean isBabyEntity(@Nonnull ItemStack stack) {
                 return false;
             }
@@ -350,6 +369,22 @@ public class EntityUtilities {
          */
         @Nonnull
         ItemStack removeEntity(@Nonnull ItemStack stack);
+
+        /**
+         * Check if the provided item stack is an entity ball that can be filled.
+         *
+         * @param stack The ItemStack to check
+         * @return True if the provided item stack can be filled.
+         */
+        boolean canFillBall(@Nonnull ItemStack stack);
+
+        /**
+         * Check if the provided item stack is an entity ball that can be emptied.
+         *
+         * @param stack The ItemStack to check
+         * @return True if the provided item stack can be emptied.
+         */
+        boolean canEmptyBall(@Nonnull ItemStack stack);
 
         /**
          * Check if the provided item stack is a valid entity ball.

@@ -61,7 +61,7 @@ public class TilePositionalVaporizer extends TileBaseVaporizer implements IFacin
 
     @Override
     public boolean canSideTransfer(TransferSide side) {
-        return ModConfig.positionalConnections || (side != TransferSide.FRONT && side != TransferSide.TOP);
+        return ModConfig.common.positionalConnections || (side != TransferSide.FRONT && side != TransferSide.TOP);
     }
 
     @Override

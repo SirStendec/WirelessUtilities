@@ -30,6 +30,7 @@ import com.lordmau5.wirelessutils.item.module.ItemLaunchModule;
 import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
 import com.lordmau5.wirelessutils.item.pearl.ItemChargedPearl;
+import com.lordmau5.wirelessutils.item.pearl.ItemCrystallizedVoidPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemFluxedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemQuenchedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemScorchedPearl;
@@ -87,6 +88,9 @@ public class ModItems {
 
     @GameRegistry.ObjectHolder("wirelessutils:void_pearl")
     public static ItemVoidPearl itemVoidPearl;
+
+    @GameRegistry.ObjectHolder("wirelessutils:crystallized_void_pearl")
+    public static ItemCrystallizedVoidPearl itemCrystallizedVoidPearl;
 
     @GameRegistry.ObjectHolder("wirelessutils:base_augment")
     public static ItemBaseAugment itemBaseAugment;
@@ -256,6 +260,7 @@ public class ModItems {
         itemDispenserAugment.initModel();
         itemFilterAugment.initModel();
         itemVoidPearl.initModel();
+        itemCrystallizedVoidPearl.initModel();
         itemBaseModule.initModel();
         itemSlaughterModule.initModel();
         itemTeleportModule.initModel();
@@ -277,6 +282,7 @@ public class ModItems {
         itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemFilterAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.FluidGen.handleItemColor, itemFluidGenAugment);
         itemColors.registerItemColorHandler(ColorHandler.VoidPearl.handleItemColor, itemVoidPearl);
+        itemColors.registerItemColorHandler(ColorHandler.VoidPearl.handleItemColor, itemCrystallizedVoidPearl);
 
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockDirectionalCharger));
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(ModBlocks.blockPositionalCharger));
