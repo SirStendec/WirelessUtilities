@@ -18,11 +18,16 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class EntityUtilities {
 
     private static Map<String, Integer> baseExperience = new HashMap<>();
     private static Map<Item, IEntityBall> entityBallMap = new Object2ObjectOpenHashMap<>();
+
+    public static Set<Item> getValidItems() {
+        return entityBallMap.keySet();
+    }
 
     public static void setBaseExperience(@Nonnull ResourceLocation name, int cost) {
         String key = name.toString();

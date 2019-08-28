@@ -167,7 +167,10 @@ item.wirelessutils.slaughter_module.info.1=creatures unfortunate enough to
 item.wirelessutils.slaughter_module.info.2=find themselves in the working
 item.wirelessutils.slaughter_module.info.3=area of its Vaporizer.
 
-item.wirelessutils.slaughter_module.using_weapon=Using Weapon
+item.wirelessutils.slaughter_module.weapon.valid=This is a valid weapon.
+item.wirelessutils.slaughter_module.weapon.invalid=This is not a valid weapon.
+
+item.wirelessutils.slaughter_module.as_player=Simulating Player
 item.wirelessutils.slaughter_module.drops=Drops: %s
 item.wirelessutils.slaughter_module.exp=Experience: %s
 
@@ -495,11 +498,12 @@ info.wirelessutils.vaporizer_unit.item=s/Entity
 
 info.wirelessutils.vaporizer.missing_module.0=Please install a valid module.
 info.wirelessutils.vaporizer.cannot_spawn.0=This entity cannot be spawned.
-info.wirelessutils.vaporizer.missing_entity.0=Please insert a captured entity.
+info.wirelessutils.vaporizer.missing_entity.0=Please install a valid entity template.
 info.wirelessutils.vaporizer.missing_modifier.0=Please install a valid modifier.
-info.wirelessutils.vaporizer.bad_config.0=Please configure the module.
+info.wirelessutils.vaporizer.bad_config.0=Please configure the installed module.
 info.wirelessutils.vaporizer.empty_whitelist.0=The target whitelist is empty.
 info.wirelessutils.vaporizer.insufficient_budget.0=The configured module cannot run in this machine.
+info.wirelessutils.vaporizer.missing_weapon.0=Please insert a weapon for the Slaughter Module to use.
 
 info.wirelessutils.item_rate.second=Items/s
 info.wirelessutils.item_rate.tick=Items/t
@@ -513,12 +517,12 @@ jei.wirelessutils.condenser=Item Condensing
 btn.wirelessutils.main=Main
 btn.wirelessutils.module=Module
 
-btn.wirelessutils.use_weapon=As Player:
-btn.wirelessutils.use_weapon.info.0=When enabled, the Vaporizer will
-btn.wirelessutils.use_weapon.info.1=fully simulate a player using its
-btn.wirelessutils.use_weapon.info.2=weapon, increasing support for
-btn.wirelessutils.use_weapon.info.3=certain weapons at the cost of
-btn.wirelessutils.use_weapon.info.4=reduced quality and performance.
+btn.wirelessutils.as_player=As Player:
+btn.wirelessutils.as_player.info.0=When enabled, the Vaporizer will
+btn.wirelessutils.as_player.info.1=fully simulate a player using its
+btn.wirelessutils.as_player.info.2=weapon, increasing support for
+btn.wirelessutils.as_player.info.3=certain weapons at the cost of
+btn.wirelessutils.as_player.info.4=reduced quality and performance.
 
 btn.wirelessutils.drop.drops=Drops:
 btn.wirelessutils.drop.exp=Experience:

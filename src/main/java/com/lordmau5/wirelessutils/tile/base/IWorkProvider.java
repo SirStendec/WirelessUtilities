@@ -155,7 +155,7 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
      * Attempt to perform work on the provided item stack for
      * inventory processing.
      *
-     * @param stack     The item stack to processEntity.
+     * @param stack     The item stack to process.
      * @param slot      The slot the item stack is in.
      * @param inventory The inventory containing the item stack.
      * @param target    A TargetInfo instance for the target containing this item.

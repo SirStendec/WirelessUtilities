@@ -9,14 +9,15 @@ import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.ItemHandlerProxy;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
-import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Set;
 
 public class ItemCaptureModule extends ItemFilteringModule {
 
@@ -59,12 +60,19 @@ public class ItemCaptureModule extends ItemFilteringModule {
 
     public static class CaptureBehavior extends FilteredBehavior {
 
-        private ItemStack ghost;
+        private final ItemStack[] ghosts;
 
         public CaptureBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack module) {
             super(vaporizer);
 
-            ghost = new ItemStack(ModItems.itemVoidPearl);
+            Set<Item> ghostItems = EntityUtilities.getValidItems();
+            ghosts = new ItemStack[ghostItems.size()];
+            int i = 0;
+
+            for (Item item : ghostItems) {
+                ghosts[i] = new ItemStack(item);
+                i++;
+            }
 
             allowPlayers = false;
             allowCreative = false;
@@ -127,7 +135,7 @@ public class ItemCaptureModule extends ItemFilteringModule {
         @Nonnull
         @Override
         public ItemStack getInputGhost(int slot) {
-            return ghost;
+            return pickGhost(ghosts, slot);
         }
 
         public boolean isModifierUnlocked() {

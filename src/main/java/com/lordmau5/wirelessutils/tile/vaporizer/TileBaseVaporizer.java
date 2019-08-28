@@ -33,9 +33,11 @@ import com.lordmau5.wirelessutils.utils.location.TargetInfo;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -702,6 +704,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         budgetPerTick = level.vaporizerBudgetPerTick;
         maximumBudget = level.vaporizerMaxBudget;
 
+        if ( behavior != null )
+            behavior.updateAugmentsAndLevel();
+
         updateTargetEnergy();
     }
 
@@ -709,7 +714,18 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     public void updateAugmentStatus() {
         super.updateAugmentStatus();
 
+        if ( behavior != null )
+            behavior.updateAugmentsAndLevel();
+
         updateTargetEnergy();
+    }
+
+    @Override
+    public boolean canRemoveAugment(EntityPlayer player, int slot, ItemStack augment, ItemStack replacement) {
+        if ( behavior != null && !behavior.canRemoveAugment(player, slot, augment, replacement) )
+            return false;
+
+        return super.canRemoveAugment(player, slot, augment, replacement);
     }
 
     @Override
@@ -1914,6 +1930,24 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     public interface IVaporizerBehavior {
 
+        @Nonnull
+        default ItemStack pickGhost(ItemStack[] ghosts) {
+            return pickGhost(ghosts, 0);
+        }
+
+        @Nonnull
+        default ItemStack pickGhost(ItemStack[] ghosts, int offset) {
+            if ( ghosts == null || ghosts.length == 0 )
+                return ItemStack.EMPTY;
+
+            long now = (Minecraft.getSystemTime() / 1000) + offset;
+            ItemStack out = ghosts[(int) now % ghosts.length];
+            if ( out == null )
+                return ItemStack.EMPTY;
+
+            return out;
+        }
+
         default void debugPrint() {
 
         }
@@ -1948,6 +1982,18 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         }
 
         default void updateInput(int slot) {
+
+        }
+
+        default boolean canRemoveAugment(EntityPlayer player, int slot, ItemStack augment, ItemStack replacement) {
+            return true;
+        }
+
+        default void updateAugmentsAndLevel() {
+
+        }
+
+        default void getItemToolTip(@Nonnull List<String> tooltip, @Nullable Slot slot, @Nonnull ItemStack stack) {
 
         }
 

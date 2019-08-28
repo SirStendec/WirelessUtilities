@@ -92,6 +92,9 @@ public class GuiPositionalVaporizer extends GuiBaseVaporizer {
     protected void drawGuiContainerForegroundLayer(int x, int y) {
         super.drawGuiContainerForegroundLayer(x, y);
 
+        if ( moduleTab )
+            return;
+
         String range = StringHelper.formatNumber(vaporizer.getRange());
         if ( vaporizer.isInterdimensional() )
             range = TextFormatting.OBFUSCATED + "999";

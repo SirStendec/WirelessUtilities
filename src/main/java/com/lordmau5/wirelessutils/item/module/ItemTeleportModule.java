@@ -14,8 +14,13 @@ import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.DimensionManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -61,8 +66,12 @@ public class ItemTeleportModule extends ItemFilteringModule {
 
     public static class TeleportBehavior extends FilteredBehavior {
 
+        private final static ItemStack[] GHOSTS = {
+                new ItemStack(ModItems.itemAbsolutePositionalCard),
+                new ItemStack(ModItems.itemRelativePositionalCard)
+        };
+
         private final ItemStack INPUT_GHOST;
-        private final ItemStack GHOST;
 
         private BlockPosDimension target;
         private boolean isInterdimensional = false;
@@ -73,7 +82,6 @@ public class ItemTeleportModule extends ItemFilteringModule {
         public TeleportBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack stack) {
             super(vaporizer);
             INPUT_GHOST = new ItemStack(ModItems.itemRangeAugment);
-            GHOST = new ItemStack(ModItems.itemAbsolutePositionalCard);
 
             allowPlayers = ModConfig.vaporizers.modules.teleport.targetPlayers;
             allowCreative = true;
@@ -84,6 +92,11 @@ public class ItemTeleportModule extends ItemFilteringModule {
             updateModule(stack);
             updateRange();
             updateModifier(vaporizer.getModifier());
+        }
+
+        @Override
+        public void updateAugmentsAndLevel() {
+            updateRange();
         }
 
         public boolean isInterdimensional() {
@@ -126,7 +139,19 @@ public class ItemTeleportModule extends ItemFilteringModule {
         }
 
         public void updateRange() {
-            ItemStack stack = vaporizer.getInput().getStackInSlot(0);
+            ItemStack stack = ItemStack.EMPTY;
+            if ( ModConfig.vaporizers.modules.teleport.ownRangeAugment )
+                stack = vaporizer.getInput().getStackInSlot(0);
+            else {
+                ItemStack[] stacks = vaporizer.getAugmentSlots();
+                if ( stacks != null )
+                    for (ItemStack augment : stacks) {
+                        if ( augment != null && !augment.isEmpty() && augment.getItem() == ModItems.itemRangeAugment ) {
+                            stack = augment;
+                            break;
+                        }
+                    }
+            }
 
             isInterdimensional = ModItems.itemRangeAugment.isInterdimensional(stack);
             range = ModItems.itemRangeAugment.getPositionalRange(stack);
@@ -186,7 +211,8 @@ public class ItemTeleportModule extends ItemFilteringModule {
         }
 
         public boolean isPositionalCardValid(@Nonnull ItemStack stack) {
-            if ( stack.isEmpty() || !(stack.getItem() instanceof ItemBasePositionalCard) )
+            Item item = stack.getItem();
+            if ( stack.isEmpty() || !(item instanceof ItemBasePositionalCard) || item == ModItems.itemPlayerPositionalCard )
                 return false;
 
             ItemBasePositionalCard card = (ItemBasePositionalCard) stack.getItem();
@@ -222,22 +248,52 @@ public class ItemTeleportModule extends ItemFilteringModule {
             if ( pos == null )
                 return false;
 
-            return isTargetInRange(card.getTarget(stack, pos), range, interdimensional);
+            BlockPosDimension target = card.getTarget(stack, pos);
+            if ( target == null )
+                return false;
+
+            return isTargetInRange(target, range, interdimensional);
         }
 
         public boolean isInputUnlocked(int slot) {
-            if ( slot == 0 ) {
+            if ( slot == 0 && ModConfig.vaporizers.modules.teleport.ownRangeAugment ) {
                 ItemStack modifier = vaporizer.getModifier();
                 if ( isPositionalCardValid(modifier) )
                     return isTargetInRange(modifier, ModItems.itemRangeAugment.getPositionalRange(ItemStack.EMPTY), false);
+
+                return true;
             }
 
-            return usesFuel();
+            // Make sure we can remove items in case they get stuck in there somehow.
+            if ( !usesFuel() )
+                return !vaporizer.getInput().getStackInSlot(slot).isEmpty();
+
+            return true;
+        }
+
+        @Override
+        public boolean canRemoveAugment(EntityPlayer player, int slot, ItemStack augment, ItemStack replacement) {
+            if ( ModConfig.vaporizers.modules.teleport.ownRangeAugment )
+                return true;
+
+            Item item = augment.getItem();
+            if ( item != ModItems.itemRangeAugment )
+                return true;
+
+            ItemStack modifier = vaporizer.getModifier();
+            if ( !isPositionalCardValid(modifier) )
+                return true;
+
+            return isTargetInRange(
+                    modifier,
+                    ModItems.itemRangeAugment.getPositionalRange(replacement),
+                    ModItems.itemRangeAugment.isInterdimensional(replacement)
+            );
         }
 
         @Override
         public int getInputLimit(int slot) {
-            if ( slot == 0 )
+            if ( slot == 0 && ModConfig.vaporizers.modules.teleport.ownRangeAugment )
                 return 1;
 
             return 64;
@@ -255,7 +311,7 @@ public class ItemTeleportModule extends ItemFilteringModule {
         }
 
         public boolean isValidInput(@Nonnull ItemStack stack, int slot) {
-            if ( slot == 0 ) {
+            if ( slot == 0 && ModConfig.vaporizers.modules.teleport.ownRangeAugment ) {
                 if ( stack.getItem() != ModItems.itemRangeAugment )
                     return false;
 
@@ -271,14 +327,14 @@ public class ItemTeleportModule extends ItemFilteringModule {
 
         @Override
         public void updateInput(int slot) {
-            if ( slot == 0 )
+            if ( slot == 0 && ModConfig.vaporizers.modules.teleport.ownRangeAugment )
                 updateRange();
         }
 
         @Nonnull
         @Override
         public ItemStack getInputGhost(int slot) {
-            if ( slot == 0 )
+            if ( slot == 0 && ModConfig.vaporizers.modules.teleport.ownRangeAugment )
                 return INPUT_GHOST;
 
             return ItemStack.EMPTY;
@@ -290,7 +346,7 @@ public class ItemTeleportModule extends ItemFilteringModule {
 
         @Nonnull
         public ItemStack getModifierGhost() {
-            return GHOST;
+            return pickGhost(GHOSTS);
         }
 
         public boolean isValidModifier(@Nonnull ItemStack stack) {
@@ -360,7 +416,27 @@ public class ItemTeleportModule extends ItemFilteringModule {
                 return IWorkProvider.WorkResult.FAILURE_STOP;
             }
 
-            Entity newEntity = TeleportUtils.teleportEntity(entity, target.getDimension(), target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5);
+            BlockPos currentTarget = target;
+
+            if ( ModConfig.vaporizers.modules.teleport.offsetTargetIfSolid && target.getFacing() != null ) {
+                World targetWorld;
+                if ( world.provider.getDimension() == target.getDimension() )
+                    targetWorld = world;
+                else
+                    targetWorld = DimensionManager.getWorld(target.getDimension());
+
+                if ( targetWorld != null ) {
+                    AxisAlignedBB entityBox = entity.getEntityBoundingBox();
+                    if ( entityBox != null ) {
+                        entityBox = entityBox.offset(-entity.posX + currentTarget.getX() + 0.5, -entity.posY + currentTarget.getY() + 0.5, -entity.posZ + currentTarget.getZ() + 0.5);
+
+                        if ( targetWorld.collidesWithAnyBlock(entityBox) )
+                            currentTarget = currentTarget.offset(target.getFacing());
+                    }
+                }
+            }
+
+            Entity newEntity = TeleportUtils.teleportEntity(entity, target.getDimension(), currentTarget.getX() + 0.5, currentTarget.getY() + 0.5, currentTarget.getZ() + 0.5);
             if ( newEntity == null ) {
                 if ( removed > 0 )
                     vaporizer.addFuel(removed);

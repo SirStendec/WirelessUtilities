@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.utils.mod;
 
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -1224,6 +1225,7 @@ public class ModConfig {
     public static class CloneModule {
         @Config.Name("Require Crystallized Void Pearl")
         @Config.Comment("When enabled, this module will only accept Crystallized Void Pearls as input to set the target entity.")
+        @Config.RequiresWorldRestart
         public boolean requireCrystallizedVoidPearls = false;
 
         @Config.Name("Required Level")
@@ -1344,6 +1346,15 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public int requiredLevel = 0;
 
+        @Config.Name("Offset Target if Solid")
+        @Config.Comment("Check the target block before teleporting an entity and, if it's solid, offset the target by one block in the facing direction.")
+        public boolean offsetTargetIfSolid = true;
+
+        @Config.Name("Use Secondary Range Augment")
+        @Config.Comment("By default, the Teleport Module uses the Range Augment installed into the Vaporizer's Augment slots. If this setting is enabled, it instead requires a Range Augment to be installed to the first input slot of the Vaporizer.")
+        @Config.RequiresWorldRestart
+        public boolean ownRangeAugment = false;
+
         @Config.Name("Budget per Entity")
         @Config.Comment("Use this much action budget for each entity teleported.")
         @Config.RangeInt(min = 0)
@@ -1429,20 +1440,30 @@ public class ModConfig {
         @Config.RangeInt(min = 0)
         public int budget = 25;
 
-        @Config.Name("Budget per Entity - Use Weapon")
-        @Config.Comment("Use this much action budget for each entity attacked with a weapon.")
+        @Config.Name("Budget per Entity - Using Weapon")
+        @Config.Comment("Use this much additional action budget per entity when using a weapon.")
         @Config.RangeInt(min = 0)
-        public int budgetWeapon = 50;
+        public int budgetWeapon = 0;
+
+        @Config.Name("Budget per Entity - As Player")
+        @Config.Comment("Use this much additional action budget per entity when simulating a player.")
+        @Config.RangeInt(min = 0)
+        public int budgetPlayer = 25;
 
         @Config.Name("Energy per Entity")
         @Config.Comment("Use this much base energy for each entity attacked.")
         @Config.RangeInt(min = 0)
-        public int entityEnergy = 1000;
+        public int energy = 1000;
 
         @Config.Name("Energy per Entity - Use Weapon")
-        @Config.Comment("Use this much base energy for each entity attacked with a weapon.")
+        @Config.Comment("Use this much additional energy per entity attacked when using a weapon.")
         @Config.RangeInt(min = 0)
-        public int entityWeaponEnergy = 2000;
+        public int energyWeapon = 500;
+
+        @Config.Name("Energy per Entity - As Player")
+        @Config.Comment("Use this much additional energy per entity attacked when simulating a player.")
+        @Config.RangeInt(min = 0)
+        public int energyPlayer = 1000;
 
         @Config.Name("Energy Multiplier")
         @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
@@ -1475,10 +1496,25 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public boolean enableWeapon = true;
 
-        @Config.Name("Enable Simulate Player Mode")
-        @Config.Comment("In Simulate Player Mode, the Slaughter Module will use its weapon in the same way a player does, allowing normal weapon things to happen, such as Tinker Tools gaining experience.")
+        @Config.Name("Require Weapons")
+        @Config.Comment("When enabled, the Slaughter Module will not run without a weapon in its Input slot.")
         @Config.RequiresWorldRestart
-        public boolean enableUseWeapon = true;
+        public boolean requireWeapon = false;
+
+        @Config.Name("Weapon Blacklist")
+        @Config.Comment("Items added to this list cannot be used as a weapon within a Vaporizer. All items from a mod can be filtered with \"modid:*\". Metadata can be specified after a @. Example: \"minecraft:wool@2\"")
+        @Config.RequiresWorldRestart
+        public String[] weaponList = {};
+
+        @Config.Name("Weapon Whitelist")
+        @Config.Comment("When true, the blacklist will instead be treated as a whitelist.")
+        @Config.RequiresWorldRestart
+        public boolean weaponIsWhitelist = false;
+
+        @Config.Name("Enable As Player Mode")
+        @Config.Comment("In As Player Mode, the Slaughter Module will simulate using its weapon in the same way a player does, allowing normal weapon things to happen, such as Tinker Tools gaining experience.")
+        @Config.RequiresWorldRestart
+        public boolean enableAsPlayer = true;
 
         @Config.Name("Weapon Durability Use")
         @Config.Comment("The amount of durability damage to apply to weapons for each successful use.")
@@ -1722,7 +1758,7 @@ public class ModConfig {
 
     public static class Performance {
         @Config.Name("Steps Per Tick")
-        @Config.Comment("Machines should processEntity this many tile entities and/or items per tick, until they run out of energy.")
+        @Config.Comment("Machines should process this many tile entities and/or items per tick, until they run out of energy.")
         @Config.RangeInt(min = 1)
         public int stepsPerTick = 20;
 
@@ -1755,6 +1791,9 @@ public class ModConfig {
         public static void onConfigChanged(final ConfigChangedEvent.OnConfigChangedEvent event) {
             if ( event.getModID().equals(WirelessUtils.MODID) ) {
                 ConfigManager.sync(WirelessUtils.MODID, Config.Type.INSTANCE);
+
+                ItemSlaughterModule.weaponList.clear();
+                ItemSlaughterModule.weaponList.addInput(ModConfig.vaporizers.modules.slaughter.weaponList);
             }
         }
     }

@@ -163,7 +163,7 @@ item.wirelessutils.slaughter_module.info.1=自己不幸正位于蒸馏器
 item.wirelessutils.slaughter_module.info.2=工作区域内的生物。
 item.wirelessutils.slaughter_module.info.3=
 
-item.wirelessutils.slaughter_module.using_weapon=使用武器
+item.wirelessutils.slaughter_module.as_player=使用武器
 item.wirelessutils.slaughter_module.drops=掉落：%s
 item.wirelessutils.slaughter_module.exp=经验：%s
 
@@ -487,12 +487,12 @@ jei.wirelessutils.condenser=物品流体灌注
 btn.wirelessutils.main=主界面
 btn.wirelessutils.module=模块
 
-btn.wirelessutils.use_weapon=作为玩家：
-btn.wirelessutils.use_weapon.info.0=启用时蒸馏器会完整
-btn.wirelessutils.use_weapon.info.1=模拟一个正在使用武
-btn.wirelessutils.use_weapon.info.2=器的玩家，若增加对
-btn.wirelessutils.use_weapon.info.3=特定武器的支持会导
-btn.wirelessutils.use_weapon.info.4=致质量和性能降低。
+btn.wirelessutils.as_player=作为玩家：
+btn.wirelessutils.as_player.info.0=启用时蒸馏器会完整
+btn.wirelessutils.as_player.info.1=模拟一个正在使用武
+btn.wirelessutils.as_player.info.2=器的玩家，若增加对
+btn.wirelessutils.as_player.info.3=特定武器的支持会导
+btn.wirelessutils.as_player.info.4=致质量和性能降低。
 
 btn.wirelessutils.drop.drops=掉落：
 btn.wirelessutils.drop.exp=经验：

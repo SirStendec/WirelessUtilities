@@ -25,6 +25,7 @@ import net.minecraft.util.ResourceLocation;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class GuiBaseVaporizer extends BaseGuiContainer {
 
@@ -262,6 +263,18 @@ public class GuiBaseVaporizer extends BaseGuiContainer {
         GlStateManager.color(1F, 1F, 1F, 1F);
         drawSizedTexturedModalRect(guiLeft + 7, guiTop + 110, 176, 43, 72, 36, 256, 256);
         drawSizedTexturedModalRect(guiLeft + 97, guiTop + 110, 176, 43, 72, 36, 256, 256);
+    }
+
+    @Override
+    public List<String> getItemToolTip(ItemStack stack) {
+        List<String> out = super.getItemToolTip(stack);
+
+        TileBaseVaporizer.IVaporizerBehavior behavior = vaporizer.getBehavior();
+        if ( behavior == null )
+            return out;
+
+        behavior.getItemToolTip(out, getSlotUnderMouse(), stack);
+        return out;
     }
 
     protected void drawSlotLocks(int slotIndex, int slotOffset, int xPos, int yPos, int rows, int cols, boolean inputGhosts) {

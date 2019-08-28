@@ -20,6 +20,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -30,6 +31,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class ItemCloneModule extends ItemModule {
@@ -163,8 +165,10 @@ public class ItemCloneModule extends ItemModule {
 
     public static class CloneBehavior implements TileBaseVaporizer.IVaporizerBehavior {
 
+        private final static ItemStack CRYSTAL_GHOST = new ItemStack(ModItems.itemCrystallizedVoidPearl);
+
         public final TileBaseVaporizer vaporizer;
-        private final ItemStack ghost;
+        private final ItemStack[] ghosts;
 
         private boolean exactCopies = false;
 
@@ -181,7 +185,16 @@ public class ItemCloneModule extends ItemModule {
 
         public CloneBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack module) {
             this.vaporizer = vaporizer;
-            ghost = new ItemStack(ModItems.itemVoidPearl);
+
+            Set<Item> ghostItems = EntityUtilities.getValidItems();
+            ghosts = new ItemStack[ghostItems.size()];
+            int i = 0;
+
+            for (Item item : ghostItems) {
+                ghosts[i] = new ItemStack(item);
+                i++;
+            }
+
             updateModule(module);
             updateModifier(vaporizer.getModifier());
         }
@@ -317,6 +330,12 @@ public class ItemCloneModule extends ItemModule {
         }
 
         public void updateModifier(@Nonnull ItemStack stack) {
+            if ( !isValidModifier(stack) ) {
+                entityBall = ItemStack.EMPTY;
+                entityLoaded = false;
+                return;
+            }
+
             entityBall = stack;
             entityLoaded = false;
 
@@ -369,7 +388,10 @@ public class ItemCloneModule extends ItemModule {
 
         @Nonnull
         public ItemStack getModifierGhost() {
-            return ghost;
+            if ( ModConfig.vaporizers.modules.clone.requireCrystallizedVoidPearls )
+                return CRYSTAL_GHOST;
+
+            return pickGhost(ghosts);
         }
 
         public boolean canRun(boolean ignorePower) {

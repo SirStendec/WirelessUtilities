@@ -8,7 +8,9 @@ import com.lordmau5.wirelessutils.gui.client.modules.base.ElementModuleBase;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
+import com.lordmau5.wirelessutils.utils.CachedItemList;
 import com.lordmau5.wirelessutils.utils.Level;
+import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.util.ITooltipFlag;
@@ -18,6 +20,7 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EntityDamageSource;
@@ -33,6 +36,13 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public class ItemSlaughterModule extends ItemFilteringModule {
+
+    public static CachedItemList weaponList = new CachedItemList();
+
+    static {
+        weaponList.addInput(ModConfig.vaporizers.modules.slaughter.weaponList);
+    }
+
 
     public ItemSlaughterModule() {
         super();
@@ -89,21 +99,21 @@ public class ItemSlaughterModule extends ItemFilteringModule {
                 StringHelper.localize("btn." + WirelessUtils.MODID + ".drop_mode." + getExperienceMode(stack))
         ).getFormattedText());
 
-        if ( ModConfig.vaporizers.modules.slaughter.enableUseWeapon && getUseWeapon(stack) )
-            tooltip.add(StringHelper.localize(name + ".using_weapon"));
+        if ( ModConfig.vaporizers.modules.slaughter.enableAsPlayer && getAsPlayer(stack) )
+            tooltip.add(StringHelper.localize(name + ".as_player"));
     }
 
-    public boolean getUseWeapon(@Nonnull ItemStack stack) {
+    public boolean getAsPlayer(@Nonnull ItemStack stack) {
         if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
             NBTTagCompound tag = stack.getTagCompound();
-            return tag != null && tag.getBoolean("UseWeapon");
+            return tag != null && tag.getBoolean("AsPlayer");
         }
 
         return false;
     }
 
     @Nonnull
-    public ItemStack setUseWeapon(@Nonnull ItemStack stack, boolean enabled) {
+    public ItemStack setAsPlayer(@Nonnull ItemStack stack, boolean enabled) {
         if ( stack.isEmpty() || stack.getItem() != this )
             return ItemStack.EMPTY;
 
@@ -114,9 +124,9 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             return ItemStack.EMPTY;
 
         if ( enabled )
-            tag.setBoolean("UseWeapon", true);
+            tag.setBoolean("AsPlayer", true);
         else
-            tag.removeTag("UseWeapon");
+            tag.removeTag("AsPlayer");
 
         if ( tag.isEmpty() )
             tag = null;
@@ -239,11 +249,17 @@ public class ItemSlaughterModule extends ItemFilteringModule {
 
     public static class SlaughterBehavior extends FilteredBehavior {
 
+        private static ItemStack DIAMOND_GHOST = new ItemStack(Items.DIAMOND_SWORD);
+
+        private int cost = 0;
+
         private int dropMode = 0;
         private int experienceMode = 0;
-        private boolean useWeapon = true;
+        private boolean asPlayer = true;
+        private boolean hasWeapon = false;
 
-        private ItemStack ghost = new ItemStack(Items.DIAMOND_SWORD);
+        private long lastGhostTime = 0;
+        private ItemStack ghost = ItemStack.EMPTY;
 
         public SlaughterBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack module) {
             super(vaporizer);
@@ -257,6 +273,32 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             requireAlive = true;
 
             updateModule(module);
+            updateWeapon();
+        }
+
+        public void updateCost() {
+            cost = ModConfig.vaporizers.modules.slaughter.energy;
+
+            if ( asPlayer )
+                cost += ModConfig.vaporizers.modules.slaughter.energyPlayer;
+
+            if ( hasWeapon )
+                cost += ModConfig.vaporizers.modules.slaughter.energyWeapon;
+        }
+
+        public void updateWeapon() {
+            if ( !ModConfig.vaporizers.modules.slaughter.enableWeapon ) {
+                hasWeapon = false;
+            } else {
+                ItemStack weapon = vaporizer.getInput().getStackInSlot(0);
+                hasWeapon = !weapon.isEmpty() && isValidWeapon(weapon);
+            }
+
+            updateCost();
+        }
+
+        public boolean isValidWeapon(@Nonnull ItemStack weapon) {
+            return ModConfig.vaporizers.modules.slaughter.weaponIsWhitelist == weaponList.matches(weapon);
         }
 
         public double getEnergyMultiplier() {
@@ -292,7 +334,9 @@ public class ItemSlaughterModule extends ItemFilteringModule {
 
             dropMode = ModItems.itemSlaughterModule.getDropMode(stack);
             experienceMode = ModItems.itemSlaughterModule.getExperienceMode(stack);
-            useWeapon = ModConfig.vaporizers.modules.slaughter.enableWeapon && ModConfig.vaporizers.modules.slaughter.enableUseWeapon && ModItems.itemSlaughterModule.getUseWeapon(stack);
+            asPlayer = ModConfig.vaporizers.modules.slaughter.enableWeapon && ModConfig.vaporizers.modules.slaughter.enableAsPlayer && ModItems.itemSlaughterModule.getAsPlayer(stack);
+
+            updateCost();
         }
 
         public void updateModifier(@Nonnull ItemStack stack) {
@@ -316,7 +360,7 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             super.updateModePacket(packet);
             packet.addByte(dropMode);
             packet.addByte(experienceMode);
-            packet.addBool(useWeapon);
+            packet.addBool(asPlayer);
         }
 
         @Nonnull
@@ -324,12 +368,12 @@ public class ItemSlaughterModule extends ItemFilteringModule {
         public ItemStack handleModeDelegate(@Nonnull ItemStack stack, @Nonnull PacketBase packet) {
             ModItems.itemSlaughterModule.setDropMode(stack, packet.getByte());
             ModItems.itemSlaughterModule.setExperienceMode(stack, packet.getByte());
-            ModItems.itemSlaughterModule.setUseWeapon(stack, packet.getBool());
+            ModItems.itemSlaughterModule.setAsPlayer(stack, packet.getBool());
             return stack;
         }
 
-        public boolean useWeapon() {
-            return useWeapon;
+        public boolean asPlayer() {
+            return asPlayer;
         }
 
         public int getExperienceMode() {
@@ -346,14 +390,41 @@ public class ItemSlaughterModule extends ItemFilteringModule {
         }
 
         public boolean isValidInput(@Nonnull ItemStack stack, int slot) {
-            return ModConfig.vaporizers.modules.slaughter.enableWeapon && slot == 0;
+            if ( !ModConfig.vaporizers.modules.slaughter.enableWeapon || slot != 0 )
+                return false;
+
+            return isValidWeapon(stack);
+        }
+
+        public void updateInput(int slot) {
+            updateWeapon();
+        }
+
+        @Override
+        public void getItemToolTip(@Nonnull List<String> tooltip, @Nullable Slot slot, @Nonnull ItemStack stack) {
+            if ( stack.isEmpty() )
+                return;
+
+            final boolean valid = isValidWeapon(stack);
+
+            tooltip.add(new TextComponentTranslation(
+                    "item." + WirelessUtils.MODID + ".slaughter_module.weapon." + (valid ? "valid" : "invalid")
+            ).setStyle(valid ? TextHelpers.GREEN : TextHelpers.RED).getFormattedText());
         }
 
         @Nonnull
         @Override
         public ItemStack getInputGhost(int slot) {
-            if ( slot == 0 )
+            if ( slot == 0 ) {
+                ItemStack ghost = ItemStack.EMPTY;
+                if ( ModConfig.vaporizers.modules.slaughter.weaponIsWhitelist )
+                    ghost = pickGhost(weaponList.getGhosts());
+
+                if ( ghost.isEmpty() )
+                    return DIAMOND_GHOST;
                 return ghost;
+            }
+
             return ItemStack.EMPTY;
         }
 
@@ -375,24 +446,43 @@ public class ItemSlaughterModule extends ItemFilteringModule {
         }
 
         public int getEntityEnergyCost(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget target) {
-            if ( useWeapon )
-                return ModConfig.vaporizers.modules.slaughter.entityWeaponEnergy;
-
-            return ModConfig.vaporizers.modules.slaughter.entityEnergy;
+            return cost;
         }
 
         public int getMaxEntityEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target) {
-            if ( useWeapon )
-                return ModConfig.vaporizers.modules.slaughter.entityWeaponEnergy;
-
-            return ModConfig.vaporizers.modules.slaughter.entityEnergy;
+            return cost;
         }
 
         public int getActionCost() {
-            if ( useWeapon )
-                return ModConfig.vaporizers.modules.slaughter.budgetWeapon;
+            int cost = ModConfig.vaporizers.modules.slaughter.budget;
 
-            return ModConfig.vaporizers.modules.slaughter.budget;
+            if ( asPlayer )
+                cost += ModConfig.vaporizers.modules.slaughter.budgetPlayer;
+
+            if ( hasWeapon )
+                cost += ModConfig.vaporizers.modules.slaughter.budgetWeapon;
+
+            return cost;
+        }
+
+        @Override
+        public boolean canRun(boolean ignorePower) {
+            if ( ModConfig.vaporizers.modules.slaughter.requireWeapon && !hasWeapon )
+                return false;
+
+            if ( !ignorePower && vaporizer.getEnergyStored() < cost )
+                return false;
+
+            return super.canRun(ignorePower);
+        }
+
+        @Nullable
+        @Override
+        public String getUnconfiguredExplanation() {
+            if ( ModConfig.vaporizers.modules.slaughter.requireWeapon && !hasWeapon )
+                return "info." + WirelessUtils.MODID + ".vaporizer.missing_weapon";
+
+            return super.getUnconfiguredExplanation();
         }
 
         @Nonnull
@@ -403,7 +493,7 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             if ( player == null )
                 return IWorkProvider.WorkResult.FAILURE_STOP;
 
-            ItemStack weapon = ModConfig.vaporizers.modules.slaughter.enableWeapon ? vaporizer.getInput().getStackInSlot(0) : ItemStack.EMPTY;
+            ItemStack weapon = hasWeapon ? vaporizer.getInput().getStackInSlot(0) : ItemStack.EMPTY;
             // Set up the player to actually do stuff.
             player.capabilities.isCreativeMode = vaporizer.isCreative();
             player.inventory.clear();
@@ -435,7 +525,7 @@ public class ItemSlaughterModule extends ItemFilteringModule {
                     damage = (float) real;
             }
 
-            if ( useWeapon ) {
+            if ( asPlayer ) {
                 // To give this the best chance of working set the base attack damage
                 // of the fake player to the damage value calculated for the big hit.
                 // This won't ignore resistances, but it'll still hurt. A lot.
@@ -470,8 +560,10 @@ public class ItemSlaughterModule extends ItemFilteringModule {
             int weaponDamage = ModConfig.vaporizers.modules.slaughter.damageWeapon;
             if ( success && weaponDamage > 0 && !vaporizer.isCreative() ) {
                 weapon.damageItem(weaponDamage, player);
-                if ( weapon.isEmpty() )
+                if ( weapon.isEmpty() ) {
+                    hasWeapon = false;
                     vaporizer.getInput().setStackInSlot(0, weapon);
+                }
                 vaporizer.markChunkDirty();
             }
 

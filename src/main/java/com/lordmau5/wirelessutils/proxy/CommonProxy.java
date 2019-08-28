@@ -169,6 +169,7 @@ public class CommonProxy {
     public void handleIdMapping(FMLModIdMappingEvent event) {
         ChargerRecipeManager.refresh();
         CondenserRecipeManager.refresh();
+        ItemSlaughterModule.weaponList.refresh();
     }
 
     @SuppressWarnings("deprecation")
