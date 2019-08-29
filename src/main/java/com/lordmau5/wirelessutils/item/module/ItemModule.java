@@ -12,6 +12,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
@@ -148,20 +149,20 @@ public abstract class ItemModule extends ItemBaseUpgrade {
 
             if ( drain != 0 )
                 tooltip.add(new TextComponentTranslation(
-                        "item." + WirelessUtils.MODID + ".augment.energy.entry",
+                        "info." + WirelessUtils.MODID + ".modifier.entry",
                         !StringHelper.isShiftKeyDown() && drain >= 1000 ? TextHelpers.getScaledNumber(drain, "RF/t", true) : StringHelper.formatNumber(drain) + " RF/t"
                 ).getFormattedText());
 
-            if ( multiplier != 1 || addition != 0 ) {
+            ITextComponent text = TextHelpers.getModifier(multiplier, addition);
+            if ( text != null )
                 tooltip.add(new TextComponentTranslation(
-                        "item." + WirelessUtils.MODID + ".augment.energy.entry",
+                        "info." + WirelessUtils.MODID + ".modifier.entry",
                         new TextComponentTranslation(
-                                "item." + WirelessUtils.MODID + ".augment.energy.action",
-                                String.format("%.2f", multiplier),
-                                StringHelper.isShiftKeyDown() ? StringHelper.formatNumber(addition) : TextHelpers.getScaledNumber(addition, "", true)
+                                "info." + WirelessUtils.MODID + ".modifier.combiner",
+                                text,
+                                StringHelper.localize("info." + WirelessUtils.MODID + ".modifier.energy")
                         )
                 ).getFormattedText());
-            }
         }
     }
 

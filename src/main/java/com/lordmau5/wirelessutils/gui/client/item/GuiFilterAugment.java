@@ -1,4 +1,4 @@
-package com.lordmau5.wirelessutils.gui.client;
+package com.lordmau5.wirelessutils.gui.client.item;
 
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;

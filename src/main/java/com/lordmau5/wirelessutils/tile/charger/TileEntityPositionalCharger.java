@@ -151,12 +151,38 @@ public class TileEntityPositionalCharger extends TileEntityBaseCharger implement
         if ( card == null )
             return false;
 
-        if ( card instanceof ItemBaseEntityPositionalCard )
-            return card.isCardConfigured(stack);
-
         BlockPosDimension origin = getPosition();
         if ( origin == null )
             return false;
+
+        if ( card instanceof ItemBaseEntityPositionalCard ) {
+            ItemBaseEntityPositionalCard entityCard = (ItemBaseEntityPositionalCard) card;
+            Entity target = entityCard.getEntityTarget(stack, origin);
+            if ( target == null )
+                return true;
+
+            int slots = itemStackHandler.getSlots();
+            for (int i = 0; i < slots; i++) {
+                if ( i == slot )
+                    continue;
+
+                ItemStack existing = itemStackHandler.getStackInSlot(i);
+                if ( !isPositionalCardValid(existing) )
+                    continue;
+
+                Item item = existing.getItem();
+                if ( !(item instanceof ItemBaseEntityPositionalCard) )
+                    continue;
+
+                ItemBaseEntityPositionalCard existingItem = (ItemBaseEntityPositionalCard) item;
+                Entity existingTarget = existingItem.getEntityTarget(existing, origin);
+
+                if ( target == existingTarget )
+                    return false;
+            }
+
+            return true;
+        }
 
         BlockPosDimension target = card.getTarget(stack, origin);
         if ( target == null )

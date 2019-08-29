@@ -1,9 +1,11 @@
 package com.lordmau5.wirelessutils.utils.constants;
 
 import cofh.core.util.helpers.StringHelper;
+import com.lordmau5.wirelessutils.WirelessUtils;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nonnull;
@@ -57,6 +59,31 @@ public class TextHelpers {
         String post = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
         return String.format("%.1f %s%s", number / Math.pow(unit, exp), post, postfix);
     }
+
+    @Nullable
+    public static ITextComponent getModifier(double multiplier, int addition) {
+        ITextComponent out = null;
+        if ( multiplier != 1 )
+            out = new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".modifier.multiplier",
+                    String.format("%.2f", multiplier)
+            );
+
+        if ( addition != 0 && out != null ) {
+            return new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".modifier.combiner",
+                    out,
+                    new TextComponentTranslation(
+                            "info." + WirelessUtils.MODID + ".modifier." + (addition > 0 ? "addition" : "subtraction"),
+                            StringHelper.isShiftKeyDown() ? StringHelper.formatNumber(Math.abs(addition)) : getScaledNumber(Math.abs(addition), "", true)
+                    )
+            );
+        } else if ( addition != 0 )
+            return new TextComponentString(StringHelper.isShiftKeyDown() ? StringHelper.formatNumber(addition) : getScaledNumber(addition, "", true));
+
+        return out;
+    }
+
 
     @Nullable
     public static String[] getLocalizedLines(@Nonnull String base) {

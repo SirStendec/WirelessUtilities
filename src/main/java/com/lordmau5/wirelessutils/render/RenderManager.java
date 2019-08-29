@@ -29,6 +29,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -44,6 +45,8 @@ public class RenderManager {
 
     private final Minecraft minecraft = Minecraft.getMinecraft();
     private BufferBuilder buffer;
+
+    private boolean heldAreas = true;
 
     private float cR;
     private float cG;
@@ -91,6 +94,23 @@ public class RenderManager {
             if ( now - entry.getValue() > 5000 )
                 removeArea(entry.getKey());
         }
+    }
+
+    public void enableHeldAreas() {
+        heldAreas = true;
+    }
+
+    public void disableHeldAreas() {
+        if ( heldID[0] >= 0 )
+            removeArea(heldID[0]);
+
+        if ( heldID[1] >= 0 )
+            removeArea(heldID[1]);
+
+        Arrays.fill(heldItemStack, ItemStack.EMPTY);
+        Arrays.fill(heldID, -1);
+
+        heldAreas = false;
     }
 
     public int addArea(BlockArea area) {
@@ -182,6 +202,9 @@ public class RenderManager {
     @SuppressWarnings("unused")
     @SubscribeEvent
     public void renderHand(RenderSpecificHandEvent event) {
+        if ( !heldAreas )
+            return;
+
         int idx = event.getHand() == EnumHand.MAIN_HAND ? 0 : 1;
 
         ItemStack newStack = event.getItemStack();

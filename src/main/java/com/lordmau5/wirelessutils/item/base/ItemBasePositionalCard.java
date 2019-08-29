@@ -85,19 +85,20 @@ public abstract class ItemBasePositionalCard extends ItemBase implements ISlotCo
             if ( vaporizer.getBehavior() instanceof ItemTeleportModule.TeleportBehavior ) {
                 ItemTeleportModule.TeleportBehavior behavior = (ItemTeleportModule.TeleportBehavior) vaporizer.getBehavior();
                 target = getTarget(stack, vaporizer.getPosition());
+                if ( target != null ) {
+                    World world = vaporizer.getWorld();
+                    if ( world != null ) {
+                        int dimension = world.provider.getDimension();
 
-                World world = vaporizer.getWorld();
-                if ( world != null ) {
-                    int dimension = world.provider.getDimension();
+                        if ( dimension != target.getDimension() )
+                            interdimensional = true;
+                        else {
+                            BlockPos pos = vaporizer.getPos();
+                            distance = (int) Math.floor(target.getDistance(pos.getX(), pos.getY(), pos.getZ()));
+                        }
 
-                    if ( dimension != target.getDimension() )
-                        interdimensional = true;
-                    else {
-                        BlockPos pos = vaporizer.getPos();
-                        distance = (int) Math.floor(target.getDistance(pos.getX(), pos.getY(), pos.getZ()));
+                        inRange = behavior.isTargetInRange(stack);
                     }
-
-                    inRange = behavior.isTargetInRange(stack);
                 }
             } else
                 return;
@@ -106,18 +107,20 @@ public abstract class ItemBasePositionalCard extends ItemBase implements ISlotCo
             IPositionalMachine machine = (IPositionalMachine) tile;
             target = getTarget(stack, machine.getPosition());
 
-            World world = tile.getWorld();
-            if ( world != null ) {
-                int dimension = world.provider.getDimension();
+            if ( target != null ) {
+                World world = tile.getWorld();
+                if ( world != null ) {
+                    int dimension = world.provider.getDimension();
 
-                if ( dimension != target.getDimension() )
-                    interdimensional = true;
-                else {
-                    BlockPos pos = tile.getPos();
-                    distance = (int) Math.floor(target.getDistance(pos.getX(), pos.getY(), pos.getZ()));
+                    if ( dimension != target.getDimension() )
+                        interdimensional = true;
+                    else {
+                        BlockPos pos = tile.getPos();
+                        distance = (int) Math.floor(target.getDistance(pos.getX(), pos.getY(), pos.getZ()));
+                    }
+
+                    inRange = !shouldIgnoreDistance(stack) && machine.isTargetInRange(target);
                 }
-
-                inRange = !shouldIgnoreDistance(stack) && machine.isTargetInRange(target);
             }
 
         } else
@@ -139,7 +142,7 @@ public abstract class ItemBasePositionalCard extends ItemBase implements ISlotCo
 
         tooltip.add(1, new TextComponentTranslation(
                 getTranslationKey() + ".distance",
-                distance
+                dist
         ).setStyle(GRAY).getFormattedText());
 
         if ( !inRange )

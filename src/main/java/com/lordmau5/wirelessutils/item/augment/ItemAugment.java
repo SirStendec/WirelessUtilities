@@ -26,6 +26,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
@@ -219,34 +220,35 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
 
             if ( drain != 0 )
                 tooltip.add(new TextComponentTranslation(
-                        "item." + WirelessUtils.MODID + ".augment.energy.entry",
+                        "info." + WirelessUtils.MODID + ".modifier.entry",
                         !StringHelper.isShiftKeyDown() && drain >= 1000 ? TextHelpers.getScaledNumber(drain, "RF/t", true) : StringHelper.formatNumber(drain) + " RF/t"
                 ).getFormattedText());
 
-            if ( multiplier != 1 || addition != 0 ) {
+            ITextComponent text = TextHelpers.getModifier(multiplier, addition);
+            if ( text != null )
                 tooltip.add(new TextComponentTranslation(
-                        "item." + WirelessUtils.MODID + ".augment.energy.entry",
+                        "info." + WirelessUtils.MODID + ".modifier.entry",
                         new TextComponentTranslation(
-                                "item." + WirelessUtils.MODID + ".augment.energy.action",
-                                String.format("%.2f", multiplier),
-                                StringHelper.isShiftKeyDown() ? StringHelper.formatNumber(addition) : TextHelpers.getScaledNumber(addition, "", true)
+                                "info." + WirelessUtils.MODID + ".modifier.combiner",
+                                text,
+                                StringHelper.localize("info." + WirelessUtils.MODID + ".modifier.energy")
                         )
                 ).getFormattedText());
-            }
         }
 
         multiplier = getBudgetMultiplier(stack, null);
         addition = getBudgetAddition(stack, null);
 
-        if ( multiplier != 1 || addition != 0 ) {
+        ITextComponent text = TextHelpers.getModifier(multiplier, addition);
+        if ( text != null ) {
             tooltip.add(StringHelper.localize("item." + WirelessUtils.MODID + ".augment.budget"));
 
             tooltip.add(new TextComponentTranslation(
-                    "item." + WirelessUtils.MODID + ".augment.budget.entry",
+                    "info." + WirelessUtils.MODID + ".modifier.entry",
                     new TextComponentTranslation(
-                            "item." + WirelessUtils.MODID + ".augment.budget.action",
-                            String.format("%.2f", multiplier),
-                            StringHelper.formatNumber(addition)
+                            "info." + WirelessUtils.MODID + ".modifier.combiner",
+                            text,
+                            StringHelper.localize("info." + WirelessUtils.MODID + ".modifier.budget")
                     )
             ).getFormattedText());
         }

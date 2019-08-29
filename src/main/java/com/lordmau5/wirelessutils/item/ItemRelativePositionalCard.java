@@ -2,7 +2,9 @@ package com.lordmau5.wirelessutils.item;
 
 import cofh.core.util.CoreUtils;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.item.base.IUpdateableItem;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
+import com.lordmau5.wirelessutils.packet.PacketUpdateItem;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
@@ -18,7 +20,6 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -31,10 +32,35 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemRelativePositionalCard extends ItemBasePositionalCard {
+public class ItemRelativePositionalCard extends ItemBasePositionalCard implements IUpdateableItem {
 
     public ItemRelativePositionalCard() {
         setName("relative_positional_card");
+    }
+
+    public void handleUpdatePacket(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, int slot, @Nonnull ItemStack newStack, @Nonnull PacketUpdateItem packet) {
+        if ( stack.isEmpty() || newStack.isEmpty() || stack.getItem() != newStack.getItem() )
+            return;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        if ( tag == null )
+            tag = new NBTTagCompound();
+        else if ( tag.getBoolean("Locked") )
+            return;
+
+        NBTTagCompound newTag = newStack.getTagCompound();
+        if ( newTag != null )
+            IUpdateableItem.copyOrRemoveNBTKeys(
+                    newTag, tag, false,
+                    "Origin", "Dimension",
+                    "X", "Y", "Z", "Facing",
+                    "Stage", "Range"
+            );
+
+        if ( tag.getSize() == 0 )
+            tag = null;
+        stack.setTagCompound(tag);
+        player.inventory.setInventorySlotContents(slot, stack);
     }
 
     @Override
@@ -46,7 +72,7 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard {
         if ( tag == null )
             return false;
 
-        return tag.hasKey("X") && tag.hasKey("Y") && tag.hasKey("Z");
+        return tag.getInteger("X") != 0 || tag.getInteger("Y") != 0 || tag.getInteger("Z") != 0;
     }
 
     @Override
@@ -154,40 +180,10 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-        if ( !worldIn.isRemote && playerIn.isSneaking() && handIn == EnumHand.MAIN_HAND ) {
+        if ( !worldIn.isRemote && !playerIn.isSneaking() && handIn == EnumHand.MAIN_HAND ) {
             ItemStack stack = playerIn.getHeldItemMainhand();
-            RayTraceResult ray = rayTrace(worldIn, playerIn, false);
-            if ( ray != null && ray.typeOfHit == RayTraceResult.Type.BLOCK )
-                return new ActionResult<>(EnumActionResult.PASS, stack);
 
-            NBTTagCompound tag = stack.getTagCompound();
-            if ( tag == null || tag.getBoolean("Locked") )
-                return new ActionResult<>(EnumActionResult.PASS, stack);
-            else if ( stack.getCount() > 1 )
-                tag = tag.copy();
-
-            tag.removeTag("X");
-            tag.removeTag("Y");
-            tag.removeTag("Z");
-            tag.removeTag("Stage");
-            tag.removeTag("Origin");
-            tag.removeTag("Dimension");
-            tag.removeTag("Range");
-            tag.removeTag("Facing");
-
-            if ( tag.isEmpty() )
-                tag = null;
-
-            if ( stack.getCount() == 1 ) {
-                stack.setTagCompound(tag);
-            } else {
-                ItemStack newStack = new ItemStack(this, 1);
-                newStack.setTagCompound(tag);
-                stack.shrink(1);
-                if ( !playerIn.addItemStackToInventory(newStack) )
-                    CoreUtils.dropItemStackIntoWorldWithVelocity(newStack, worldIn, playerIn.getPositionVector());
-            }
-
+            playerIn.openGui(WirelessUtils.instance, WirelessUtils.GUI_RELATIVE_POSITIONAL_CARD, worldIn, handIn.ordinal(), 0, 0);
             return new ActionResult<>(EnumActionResult.SUCCESS, stack);
         }
 
@@ -223,7 +219,7 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard {
                 tag.removeTag("X");
                 tag.removeTag("Y");
                 tag.removeTag("Z");
-                tag.removeTag("Facing");
+                tag.setByte("Facing", (byte) target.getFacing().ordinal());
 
             } else {
                 BlockPosDimension origin = new BlockPosDimension(

@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.item.module;
 import com.lordmau5.wirelessutils.gui.client.modules.ElementTeleportModule;
 import com.lordmau5.wirelessutils.gui.client.modules.base.ElementModuleBase;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
+import com.lordmau5.wirelessutils.item.augment.ItemAugment;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
@@ -79,6 +80,10 @@ public class ItemTeleportModule extends ItemFilteringModule {
         private int cost = 0;
         private int fuel = 0;
 
+        private double energyMultiplier = 1;
+        private int energyDrain = 0;
+        private int energyAddition = 0;
+
         public TeleportBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack stack) {
             super(vaporizer);
             INPUT_GHOST = new ItemStack(ModItems.itemRangeAugment);
@@ -92,6 +97,12 @@ public class ItemTeleportModule extends ItemFilteringModule {
             updateModule(stack);
             updateRange();
             updateModifier(vaporizer.getModifier());
+        }
+
+        @Override
+        public void updateModule(@Nonnull ItemStack stack) {
+            super.updateModule(stack);
+            updateEnergy();
         }
 
         @Override
@@ -111,31 +122,41 @@ public class ItemTeleportModule extends ItemFilteringModule {
             return fuel;
         }
 
-        public double getEnergyMultiplier() {
-            ItemStack stack = vaporizer.getModule();
-            if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )
-                return 1;
+        public void updateEnergy() {
+            energyAddition = 0;
+            energyDrain = 0;
+            energyMultiplier = 1;
 
-            ItemModule item = (ItemModule) stack.getItem();
-            return item.getEnergyMultiplier(stack, vaporizer);
+            ItemStack stack = vaporizer.getModule();
+            if ( !stack.isEmpty() && stack.getItem() == ModItems.itemTeleportModule ) {
+                energyAddition += ModItems.itemTeleportModule.getEnergyAddition(stack, vaporizer);
+                energyDrain += ModItems.itemTeleportModule.getEneryDrain(stack, vaporizer);
+                energyMultiplier *= ModItems.itemTeleportModule.getEnergyMultiplier(stack, vaporizer);
+            }
+
+            if ( ModConfig.vaporizers.modules.teleport.ownRangeAugment ) {
+                ItemStack augmentStack = vaporizer.getInput().getStackInSlot(0);
+                if ( !augmentStack.isEmpty() && augmentStack.getItem() instanceof ItemAugment ) {
+                    ItemAugment augment = (ItemAugment) augmentStack.getItem();
+                    energyAddition += augment.getEnergyAddition(augmentStack, vaporizer);
+                    energyDrain += augment.getEneryDrain(augmentStack, vaporizer);
+                    energyMultiplier *= augment.getEnergyMultiplier(augmentStack, vaporizer);
+                }
+            }
+
+            vaporizer.updateBaseEnergy();
+        }
+
+        public double getEnergyMultiplier() {
+            return energyMultiplier;
         }
 
         public int getEnergyAddition() {
-            ItemStack stack = vaporizer.getModule();
-            if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )
-                return 0;
-
-            ItemModule item = (ItemModule) stack.getItem();
-            return item.getEnergyAddition(stack, vaporizer);
+            return energyAddition;
         }
 
         public int getEnergyDrain() {
-            ItemStack stack = vaporizer.getModule();
-            if ( stack.isEmpty() || !(stack.getItem() instanceof ItemModule) )
-                return 0;
-
-            ItemModule item = (ItemModule) stack.getItem();
-            return item.getEneryDrain(stack, vaporizer);
+            return energyDrain;
         }
 
         public void updateRange() {
@@ -327,8 +348,10 @@ public class ItemTeleportModule extends ItemFilteringModule {
 
         @Override
         public void updateInput(int slot) {
-            if ( slot == 0 && ModConfig.vaporizers.modules.teleport.ownRangeAugment )
+            if ( slot == 0 && ModConfig.vaporizers.modules.teleport.ownRangeAugment ) {
                 updateRange();
+                updateEnergy();
+            }
         }
 
         @Nonnull

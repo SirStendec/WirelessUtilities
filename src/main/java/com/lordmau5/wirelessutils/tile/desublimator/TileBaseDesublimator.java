@@ -209,6 +209,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         System.out.println("       Item Cost: " + costPerItem);
         System.out.println("          Budget: " + remainingBudget + " (max: " + maximumBudget + ")");
         System.out.println("        Budget/t: " + budgetPerTick);
+        System.out.println("      Max Energy: " + maxEnergyPerTick);
         System.out.println("   Process Drops: " + processDrops);
         System.out.println("  Process Blocks: " + processBlocks);
         System.out.println("  Dispenser Mode: " + dispenserMode);
@@ -437,8 +438,6 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         maximumBudget = calculateMaxBudget();
         costPerItem = calculateCost();
         itemRatePerTarget = calculateMaxPerTarget();
-
-        updateTargetEnergy();
     }
 
     @Override
@@ -447,8 +446,6 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
         costPerItem = calculateCost();
         itemRatePerTarget = calculateMaxPerTarget();
-
-        updateTargetEnergy();
     }
 
     public int calculateCost() {
@@ -794,7 +791,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     public DesublimatorTarget createInfo(@Nullable BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nullable TileEntity tile, @Nullable Entity entity) {
-        return new DesublimatorTarget(target, tile, entity, target == null ? 0 : getEnergyCost(target, source));
+        int cost = target == null ? 0 : (int) (getEnergyCost(target, source) * augmentMultiplier);
+        return new DesublimatorTarget(target, source, tile, entity, cost);
     }
 
     public int getEnergyCost(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
@@ -837,23 +835,6 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         return validTargets;
     }
 
-    public void updateTargetEnergy() {
-        if ( world == null || world.isRemote )
-            return;
-
-        maxEnergyPerTick = 0;
-
-        List<DesublimatorTarget> targets = worker.getTargetCache();
-        if ( targets == null )
-            return;
-
-        for (DesublimatorTarget target : targets) {
-            int cost = target.cost + baseEnergy;
-            if ( cost > maxEnergyPerTick )
-                maxEnergyPerTick = cost;
-        }
-    }
-
     @Override
     public void onInactive() {
         super.onInactive();
@@ -889,7 +870,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( isBlacklisted(state) )
             return false;
 
-        int blocks = 0;
+        int blocks = 1;
 
         if ( processCrops ) {
             if ( inverted ) {
@@ -927,7 +908,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return false;
 
         validTargetsPerTick++;
-        int cost = (blocks * baseEnergy) + getEnergyCost(target, source);
+        int cost = (blocks * baseEnergy) + (int) (getEnergyCost(target, source) * augmentMultiplier);
         if ( cost > maxEnergyPerTick )
             maxEnergyPerTick = cost;
 
@@ -2090,10 +2071,10 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     public static class DesublimatorTarget extends TargetInfo {
-        public final int cost;
+        public int cost;
 
-        public DesublimatorTarget(BlockPosDimension pos, TileEntity tile, Entity entity, int cost) {
-            super(pos, tile, entity);
+        public DesublimatorTarget(BlockPosDimension pos, ItemStack source, TileEntity tile, Entity entity, int cost) {
+            super(pos, source, tile, entity);
             this.cost = cost;
         }
 

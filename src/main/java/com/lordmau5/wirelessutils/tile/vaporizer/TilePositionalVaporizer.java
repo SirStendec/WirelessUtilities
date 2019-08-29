@@ -3,7 +3,6 @@ package com.lordmau5.wirelessutils.tile.vaporizer;
 import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiPositionalVaporizer;
 import com.lordmau5.wirelessutils.gui.container.vaporizer.ContainerPositionalVaporizer;
-import com.lordmau5.wirelessutils.item.base.ItemBaseEntityPositionalCard;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IFacing;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
@@ -146,6 +145,11 @@ public class TilePositionalVaporizer extends TileBaseVaporizer implements IFacin
     }
 
     @Override
+    public boolean allowEntityCards() {
+        return false;
+    }
+
+    @Override
     public boolean isItemValidForSlot(int slot, @Nonnull ItemStack stack) {
         if ( slot >= getInputOffset() )
             return super.isItemValidForSlot(slot, stack);
@@ -155,10 +159,6 @@ public class TilePositionalVaporizer extends TileBaseVaporizer implements IFacin
 
         ItemBasePositionalCard card = (ItemBasePositionalCard) stack.getItem();
         if ( card == null )
-            return false;
-
-        // No entities!
-        if ( card instanceof ItemBaseEntityPositionalCard )
             return false;
 
         BlockPosDimension origin = getPosition();
@@ -257,8 +257,8 @@ public class TilePositionalVaporizer extends TileBaseVaporizer implements IFacin
                         card == itemRelativePositionalCard ? itemRelativePositionalCard.getVector(slotted) : null
                 );
 
-            /*if ( chunkLoading )
-                loadChunk(target);*/
+            if ( chunkLoading )
+                loadChunk(target);
 
             validTargets.add(new Tuple<>(target, slotted));
         }

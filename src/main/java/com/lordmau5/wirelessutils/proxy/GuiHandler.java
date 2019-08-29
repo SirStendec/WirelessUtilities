@@ -1,10 +1,12 @@
 package com.lordmau5.wirelessutils.proxy;
 
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.gui.client.GuiFilterAugment;
-import com.lordmau5.wirelessutils.gui.client.GuiPlayerCard;
+import com.lordmau5.wirelessutils.gui.client.item.GuiFilterAugment;
+import com.lordmau5.wirelessutils.gui.client.item.GuiPlayerCard;
+import com.lordmau5.wirelessutils.gui.client.item.GuiRelativePositionalCard;
 import com.lordmau5.wirelessutils.gui.container.items.ContainerFilterAugment;
 import com.lordmau5.wirelessutils.gui.container.items.ContainerPlayerCard;
+import com.lordmau5.wirelessutils.gui.container.items.ContainerRelativePositionalCard;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -39,6 +41,14 @@ public class GuiHandler extends cofh.core.gui.GuiHandler {
             return new GuiFilterAugment(new ContainerFilterAugment(stack, player.inventory));
         }
 
+        if ( id == WirelessUtils.GUI_RELATIVE_POSITIONAL_CARD ) {
+            ItemStack stack = getHeldItem(player, x);
+            if ( stack.isEmpty() || stack.getItem() != ModItems.itemRelativePositionalCard )
+                return null;
+
+            return new GuiRelativePositionalCard(new ContainerRelativePositionalCard(stack, player.inventory));
+        }
+
         return super.getClientGuiElement(id, player, world, x, y, z);
     }
 
@@ -58,6 +68,14 @@ public class GuiHandler extends cofh.core.gui.GuiHandler {
                 return null;
 
             return new ContainerFilterAugment(stack, player.inventory);
+        }
+
+        if ( id == WirelessUtils.GUI_RELATIVE_POSITIONAL_CARD ) {
+            ItemStack stack = getHeldItem(player, x);
+            if ( stack.isEmpty() || stack.getItem() != ModItems.itemRelativePositionalCard )
+                return null;
+
+            return new ContainerRelativePositionalCard(stack, player.inventory);
         }
 
         return super.getServerGuiElement(id, player, world, x, y, z);

@@ -453,7 +453,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     }
 
     public ChargerTarget createInfo(@Nullable BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nullable TileEntity tile, @Nullable Entity entity) {
-        return new ChargerTarget(target, tile, entity, target == null ? 0 : getEnergyCost(target, source));
+        int cost = target == null ? 0 : (int) (getEnergyCost(target, source) * augmentMultiplier);
+        return new ChargerTarget(target, source, tile, entity, cost);
     }
 
     public int getEnergyCost(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
@@ -544,13 +545,14 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         if ( recipe == null )
             return WorkResult.FAILURE_REMOVE;
 
-        if ( craftingEnergy < recipe.cost && craftingEnergy + getEnergyStored() >= recipe.cost ) {
-            long added = Math.min(recipe.cost - craftingEnergy, remainingPerTick);
+        int cost = (int) (recipe.cost * augmentMultiplier);
+        if ( craftingEnergy < cost && craftingEnergy + getEnergyStored() >= cost ) {
+            long added = Math.min(cost - craftingEnergy, remainingPerTick);
             added = isCreative ? added : getEnergyStorage().extractEnergy(added, false);
             craftingEnergy += added;
             remainingPerTick -= added;
 
-            if ( craftingEnergy < recipe.cost || remainingPerTick <= 0 ) {
+            if ( craftingEnergy < cost || remainingPerTick <= 0 ) {
                 if ( added > 0 ) {
                     activeTargetsPerTick++;
                     return WorkResult.SUCCESS_STOP_IN_PLACE;
@@ -582,7 +584,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         inventory.extractItem(slot, 1, false);
         destination.insertItem(destSlot, outStack, false);
         remainingPerTick -= getEnergyStorage().extractEnergy(target.cost, false);
-        craftingEnergy -= recipe.cost;
+        craftingEnergy -= cost;
         craftingTicks = 0;
         activeTargetsPerTick++;
 
@@ -935,11 +937,11 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
     public static class ChargerTarget extends TargetInfo {
 
-        public final int cost;
+        public int cost;
         public boolean canCharge = true;
 
-        public ChargerTarget(BlockPosDimension target, TileEntity tile, Entity entity, int cost) {
-            super(target, tile, entity);
+        public ChargerTarget(BlockPosDimension target, ItemStack source, TileEntity tile, Entity entity, int cost) {
+            super(target, source, tile, entity);
             this.cost = cost;
         }
 

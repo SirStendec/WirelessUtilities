@@ -291,7 +291,10 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     }
 
     public boolean updateBaseEnergy() {
-        int newEnergy = (int) (level.baseEnergyPerOperation * augmentMultiplier) + augmentEnergy;
+        int newEnergy = (int) ((level.baseEnergyPerOperation + augmentEnergy) * augmentMultiplier);
+        if ( newEnergy < 0 )
+            newEnergy = 0;
+
         if ( newEnergy == baseEnergy )
             return false;
 

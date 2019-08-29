@@ -46,18 +46,21 @@ public class BaseGuiPositional extends BaseGuiContainer {
         boolean hasInvalidStack = false;
 
         ItemStack held = mc.player.inventory.getItemStack();
-        if ( !held.isEmpty() && pos.isPositionalCardValid(held) ) {
+        if ( !held.isEmpty() && held.getItem() instanceof ItemBasePositionalCard ) {
             ItemBasePositionalCard card = (ItemBasePositionalCard) held.getItem();
-            if ( card != null && !card.shouldIgnoreDistance(held) ) {
-                if ( card instanceof ItemBaseEntityPositionalCard ) {
-                    // TODO: Distance to entity?
+            if ( pos.isPositionalCardValid(held) ) {
+                if ( !card.shouldIgnoreDistance(held) ) {
+                    if ( card instanceof ItemBaseEntityPositionalCard ) {
+                        // TODO: Distance to entity?
 
-                } else {
-                    BlockPosDimension target = card.getTarget(held, pos.getPosition());
-                    if ( target == null || !pos.isTargetInRange(target) )
-                        hasInvalidStack = true;
+                    } else {
+                        BlockPosDimension target = card.getTarget(held, pos.getPosition());
+                        if ( target == null || !pos.isTargetInRange(target) )
+                            hasInvalidStack = true;
+                    }
                 }
-            }
+            } else
+                hasInvalidStack = true;
         }
 
         for (int y = 0; y < 3; y++) {

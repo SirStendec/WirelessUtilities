@@ -183,8 +183,10 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
                 int filled = tank.fill(resource, doFill);
                 if ( filled > 0 && doFill ) {
-                    if ( burstAmount != -1 )
+                    if ( burstAmount != -1 ) {
                         burstAmount = -1;
+                        burstTick = false;
+                    }
 
                     markChunkDirty();
                     if ( locked && lockStack == null )
@@ -234,8 +236,10 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
                 FluidStack output = tank.drain(maxDrain, doDrain);
                 if ( output != null && doDrain ) {
-                    if ( burstAmount != -1 )
+                    if ( burstAmount != -1 ) {
                         burstAmount = -1;
+                        burstTick = false;
+                    }
 
                     markChunkDirty();
                     FluidStack tankFluid = tank.getFluid();
@@ -380,7 +384,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         System.out.println("       Inverted: " + inverted);
         System.out.println("     Iter. Mode: " + iterationMode);
         System.out.println("    Round Robin: " + roundRobin);
+        System.out.println("    Gather Tick: " + gatherTick);
         System.out.println("World Tick Rate: " + gatherTickRate);
+        System.out.println("ActualTick Rate: " + getActualWorldTickRate());
         System.out.println(" Max Fluid Rate: " + fluidMaxRate);
         System.out.println(" Fluid per Tick: " + fluidPerTick);
         System.out.println("  Valid Targets: " + validTargetsPerTick);
@@ -406,15 +412,6 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         tank.setCapacity(calculateFluidCapacity());
         fluidMaxRate = calculateMaxFluidRate();
         fluidRate = calculateFluidRate();
-
-        updateTargetEnergy();
-    }
-
-    @Override
-    public void updateAugmentStatus() {
-        super.updateAugmentStatus();
-
-        updateTargetEnergy();
     }
 
     @Override
@@ -775,7 +772,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     public CondenserTarget createInfo(@Nullable BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile, @Nullable Entity entity) {
         // TODO: Entity target cost.
-        return new CondenserTarget(target, tile, entity, target == null ? 0 : getEnergyCost(target, source));
+        int cost = target == null ? 0 : (int) (getEnergyCost(target, source) * augmentMultiplier);
+        return new CondenserTarget(target, source, tile, entity, cost);
     }
 
     public int getEnergyCost(@Nonnull BlockPosDimension target, @Nonnull ItemStack source) {
@@ -816,27 +814,6 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         }
 
         return validTargets;
-    }
-
-    public void updateTargetEnergy() {
-        if ( world == null || world.isRemote )
-            return;
-
-        maxEnergyPerTick = 0;
-
-        List<CondenserTarget> targets = worker.getTargetCache();
-        if ( targets == null )
-            return;
-
-        for (CondenserTarget target : targets) {
-            int cost = target.cost + baseEnergy;
-            if ( cost > maxEnergyPerTick )
-                maxEnergyPerTick = cost;
-
-            // This won't accurately reflect the maximum energy when crafting
-            // is involved. Just... ignore that. The GUI will update in a second
-            // to be correct.
-        }
     }
 
     @Override
@@ -902,33 +879,49 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             FluidStack stack = tank.getFluid();
             if ( stack == null || stack.amount < Fluid.BUCKET_VOLUME || stack.getFluid() == null || !stack.getFluid().canBePlacedInWorld() )
                 return false;
+
+            if ( material.isLiquid() ) {
+                IFluidHandler handler = getHandlerForBlock(world, target, block);
+                if ( handler != null ) {
+                    IFluidTankProperties[] properties = handler.getTankProperties();
+                    if ( properties == null || properties.length != 1 || !properties[0].canFill() )
+                        return false;
+
+                    FluidStack other = properties[0].getContents();
+                    if ( other != null && (other.amount >= properties[0].getCapacity() || !other.isFluidEqual(stack)) )
+                        return false;
+                }
+            }
         }
 
         validTargetsPerTick++;
-        int cost = baseEnergy + getEnergyCost(target, source);
+        int cost = baseEnergy + (int) (getEnergyCost(target, source) * augmentMultiplier);
         if ( cost > maxEnergyPerTick )
             maxEnergyPerTick = cost;
 
         return true;
     }
 
-    public boolean canWorkTile(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
+    public boolean canWorkTile(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World
+            world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
         if ( !tile.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, target.getFacing()) )
             return false;
 
         validTargetsPerTick++;
-        int cost = baseEnergy + getEnergyCost(target, source);
+        int cost = baseEnergy + (int) (getEnergyCost(target, source) * augmentMultiplier);
         if ( cost > maxEnergyPerTick )
             maxEnergyPerTick = cost;
 
         return true;
     }
 
-    public boolean canWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nullable BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nullable TileEntity tile, @Nullable Entity entity) {
+    public boolean canWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory,
+                               @Nullable BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world,
+                               @Nullable IBlockState block, @Nullable TileEntity tile, @Nullable Entity entity) {
         if ( stack.isEmpty() )
             return false;
 
-        int cost = target == null ? 0 : getEnergyCost(target);
+        int cost = target == null ? 0 : (int) (getEnergyCost(target) * augmentMultiplier);
 
         if ( stack.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null) ) {
             IFluidHandlerItem handler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
@@ -971,7 +964,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         CondenserRecipeManager.CondenserRecipe recipe = CondenserRecipeManager.getRecipe(getTankFluid(), stack);
         if ( recipe != null ) {
             validTargetsPerTick++;
-            int tCost = baseEnergy + cost + recipe.cost;
+            int tCost = baseEnergy + cost + (int) (recipe.cost * augmentMultiplier);
             if ( tCost > maxEnergyPerTick )
                 maxEnergyPerTick = tCost;
             return true;
@@ -993,7 +986,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         return false;
     }
 
-    public static IFluidHandler getHandlerForBlock(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull IBlockState state) {
+    public static IFluidHandler getHandlerForBlock(@Nonnull World world, @Nonnull BlockPos
+            pos, @Nonnull IBlockState state) {
         Block block = state.getBlock();
         if ( block instanceof IFluidBlock )
             return new FluidBlockWrapper((IFluidBlock) block, world, pos);
@@ -1004,7 +998,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     @Nonnull
-    public WorkResult performWorkBlock(@Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile) {
+    public WorkResult performWorkBlock(@Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState
+            state, @Nullable TileEntity tile) {
         if ( gatherTick != 0 )
             return WorkResult.FAILURE_CONTINUE;
 
@@ -1041,21 +1036,38 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                     return WorkResult.FAILURE_REMOVE;
 
                 if ( burstAmount < Fluid.BUCKET_VOLUME ) {
+                    boolean justBurst = false;
                     if ( !burstTick ) {
-                        burstAmount += remainingPerTick;
+                        burstAmount = burstAmount == -1 ? remainingPerTick : burstAmount + remainingPerTick;
                         burstTick = true;
+                        justBurst = true;
                     }
                     if ( burstAmount > Fluid.BUCKET_VOLUME )
                         burstAmount = Fluid.BUCKET_VOLUME;
                     else if ( burstAmount < Fluid.BUCKET_VOLUME ) {
-                        // Make us stick on gather tick until we have enough.
-                        activeTargetsPerTick++;
-                        gatherTick++;
+                        // Make us stick on gather tick until we have enough
+                        // assuming this was the burst tick.
+                        if ( justBurst ) {
+                            activeTargetsPerTick++;
+                            gatherTick++;
+                        }
                         return WorkResult.FAILURE_STOP_IN_PLACE;
                     }
                 }
 
-                return fillContainer(handler, target.cost);
+                WorkResult result = fillContainer(handler, target.cost);
+                switch (result) {
+                    case FAILURE_CONTINUE:
+                        return WorkResult.FAILURE_REMOVE;
+                    case SUCCESS_CONTINUE:
+                        return WorkResult.SUCCESS_REMOVE;
+                    case SUCCESS_STOP:
+                        return WorkResult.SUCCESS_STOP_REMOVE;
+                    case FAILURE_STOP:
+                        return WorkResult.FAILURE_STOP_REMOVE;
+                    default:
+                        return result;
+                }
             }
 
             if ( contained != null && contained.amount == properties[0].getCapacity() )
@@ -1066,16 +1078,20 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             return WorkResult.FAILURE_REMOVE;
 
         if ( burstAmount < Fluid.BUCKET_VOLUME ) {
+            boolean justBurst = false;
             if ( !burstTick ) {
-                burstAmount += remainingPerTick;
+                burstAmount = burstAmount == -1 ? remainingPerTick : burstAmount + remainingPerTick;
                 burstTick = true;
+                justBurst = true;
             }
             if ( burstAmount > Fluid.BUCKET_VOLUME )
                 burstAmount = Fluid.BUCKET_VOLUME;
             else if ( burstAmount < Fluid.BUCKET_VOLUME ) {
                 // Make us stick on gather tick until we have enough.
-                activeTargetsPerTick++;
-                gatherTick++;
+                if ( justBurst ) {
+                    activeTargetsPerTick++;
+                    gatherTick++;
+                }
                 return WorkResult.FAILURE_STOP_IN_PLACE;
             }
         }
@@ -1094,7 +1110,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     @Nonnull
-    public WorkResult performWorkTile(@Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState state, @Nonnull TileEntity tile) {
+    public WorkResult performWorkTile(@Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState
+            state, @Nonnull TileEntity tile) {
         if ( getEnergyStored() < baseEnergy )
             return WorkResult.FAILURE_STOP_IN_PLACE;
         else if ( getEnergyStored() < (baseEnergy + target.cost) )
@@ -1118,7 +1135,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     @Nonnull
     @Override
-    public WorkResult performWorkEntity(@Nonnull CondenserTarget target, @Nonnull World world, @Nonnull Entity entity) {
+    public WorkResult performWorkEntity(@Nonnull CondenserTarget target, @Nonnull World world, @Nonnull Entity
+            entity) {
         if ( getEnergyStored() < baseEnergy )
             return WorkResult.FAILURE_STOP_IN_PLACE;
         else if ( getEnergyStored() < (baseEnergy + target.cost) )
@@ -1142,7 +1160,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     @Nonnull
-    public WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile, @Nullable Entity entity) {
+    public WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory,
+                                      @Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile,
+                                      @Nullable Entity entity) {
         if ( stack.isEmpty() )
             return WorkResult.FAILURE_REMOVE;
 
@@ -1159,7 +1179,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( handler != null ) {
             if ( burstAmount < Fluid.BUCKET_VOLUME ) {
                 if ( !burstTick ) {
-                    burstAmount += remainingPerTick;
+                    burstAmount = burstAmount == -1 ? remainingPerTick : burstAmount + remainingPerTick;
                     burstTick = true;
                 }
                 if ( burstAmount > Fluid.BUCKET_VOLUME )
@@ -1212,8 +1232,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             remainingPerTick -= added;
         }
 
-        int totalCost = recipe.cost + baseEnergy + target.cost;
+        int totalCost = (int) (recipe.cost * augmentMultiplier) + baseEnergy + target.cost;
         if ( craftingTicks < recipe.ticks || craftingFluid.amount < recipe.fluid.amount || fluid.amount < craftingFluid.amount || getEnergyStored() < totalCost ) {
+            if ( totalCost > getMaxEnergyStored() )
+                return WorkResult.FAILURE_REMOVE;
+
             if ( added > 0 ) {
                 activeTargetsPerTick++;
                 return WorkResult.SUCCESS_STOP_IN_PLACE;
@@ -1718,11 +1741,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     /* Target Info */
 
     public static class CondenserTarget extends TargetInfo {
-        public final int cost;
+        public int cost;
         public boolean canCraft = true;
 
-        public CondenserTarget(BlockPosDimension target, TileEntity tile, Entity entity, int cost) {
-            super(target, tile, entity);
+        public CondenserTarget(BlockPosDimension target, ItemStack source, TileEntity tile, Entity entity, int cost) {
+            super(target, source, tile, entity);
             this.cost = cost;
         }
 

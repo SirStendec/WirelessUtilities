@@ -184,8 +184,8 @@ public class TileDirectionalVaporizer extends TileBaseVaporizer implements IRang
                 continue;
 
             BlockPosDimension bpd = new BlockPosDimension(target, dimension, facing);
-            /*if ( chunkLoading )
-                loadChunk(bpd);*/
+            if ( chunkLoading )
+                loadChunk(bpd);
 
             validTargets.add(new Tuple<>(bpd, ItemStack.EMPTY));
         }

@@ -66,6 +66,7 @@ public class WirelessUtils {
 
     public static final int GUI_PLAYER_CARD = guiIndex++;
     public static final int GUI_FILTER_AUGMENT = guiIndex++;
+    public static final int GUI_RELATIVE_POSITIONAL_CARD = guiIndex++;
 
     static {
         if ( !FluidRegistry.isUniversalBucketEnabled() )

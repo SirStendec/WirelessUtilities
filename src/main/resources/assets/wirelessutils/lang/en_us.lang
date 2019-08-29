@@ -109,10 +109,10 @@ item.wirelessutils.positional_card.invalid.range=The target location is not with
 item.wirelessutils.positional_card.invalid.unset=No target has been set.
 
 item.wirelessutils.relative_positional_card.name=Relative Positional Card
-item.wirelessutils.relative_positional_card.info.0=Sneak-Use this item on a block to set
-item.wirelessutils.relative_positional_card.info.1=an origin, and then Sneak-Use this item
-item.wirelessutils.relative_positional_card.info.2=on another block to store the relative
-item.wirelessutils.relative_positional_card.info.3=position.
+item.wirelessutils.relative_positional_card.info.0=You can Sneak-Use this item on a block
+item.wirelessutils.relative_positional_card.info.1=to set an origin, and then Sneak-Use
+item.wirelessutils.relative_positional_card.info.2=this item on another block to store
+item.wirelessutils.relative_positional_card.info.3=the relative position.
 item.wirelessutils.relative_positional_card.highlight=%s (%s)
 item.wirelessutils.relative_positional_card.distance=Distance: %s
 item.wirelessutils.relative_positional_card.invalid.range=The target location is not within range.
@@ -339,12 +339,16 @@ item.wirelessutils.disabled=This item is disabled in configuration.
 
 item.wirelessutils.augment.min_level=Required Machine Level: %s
 item.wirelessutils.augment.energy=Energy Usage:
-item.wirelessutils.augment.energy.entry=- %s
-item.wirelessutils.augment.energy.action=%sx + %s RF/action
+
+info.wirelessutils.modifier.multiplier=%sx
+info.wirelessutils.modifier.addition=+ %s
+info.wirelessutils.modifier.subtraction=- %s
+info.wirelessutils.modifier.entry=- %s
+info.wirelessutils.modifier.combiner=%s %s
+info.wirelessutils.modifier.energy=RF/action
+info.wirelessutils.modifier.budget=per action
 
 item.wirelessutils.augment.budget=Work Buffer Usage:
-item.wirelessutils.augment.budget.entry=- %s
-item.wirelessutils.augment.budget.action=%sx + %s per action
 
 item.wirelessutils.augment_ctrl.inactive=Hold §e§oCtrl§r§7 for Valid Machines
 item.wirelessutils.augment_ctrl.active=Valid Machines:
@@ -588,6 +592,9 @@ btn.wirelessutils.drop_mode.3=Void All
 
 btn.wirelessutils.edit=Edit
 btn.wirelessutils.save=Save
+
+btn.wirelessutils.clear=Clear
+btn.wirelessutils.clear.info.0=Ctrl-click this button to clear this card.
 
 btn.wirelessutils.slot_locks.lock=Lock Slots
 btn.wirelessutils.slot_locks.unlock=Clear Slot Locks

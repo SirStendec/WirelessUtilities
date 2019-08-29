@@ -1,4 +1,4 @@
-package com.lordmau5.wirelessutils.gui.client;
+package com.lordmau5.wirelessutils.gui.client.item;
 
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiItem;
