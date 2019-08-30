@@ -10,6 +10,7 @@ import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.JsonToNBT;
@@ -29,9 +30,21 @@ public class VoidPearlIngredientFactory implements IIngredientFactory {
 
     private static Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
+    enum PearlType {
+        BOTH,
+        VOID,
+        CRYSTALLIZED;
+    }
+
     @Nonnull
     @Override
     public Ingredient parse(JsonContext context, JsonObject json) {
+        PearlType pearlType = PearlType.BOTH;
+        if ( JsonUtils.hasField(json, "crystallized") )
+            pearlType = JsonUtils.getBoolean(json, "crystallized") ? PearlType.CRYSTALLIZED : PearlType.VOID;
+
+        final boolean both = pearlType == PearlType.BOTH;
+
         if ( JsonUtils.hasField(json, "entity") ) {
             JsonElement entity = json.get("entity");
             String[] entityIds;
@@ -45,7 +58,7 @@ public class VoidPearlIngredientFactory implements IIngredientFactory {
             } else
                 entityIds = new String[]{entity.getAsString()};
 
-            ItemStack[] stacks = new ItemStack[entityIds.length];
+            ItemStack[] stacks = new ItemStack[entityIds.length * (both ? 2 : 1)];
             int i = 0;
             int count = JsonUtils.getInt(json, "count", 1);
 
@@ -58,7 +71,8 @@ public class VoidPearlIngredientFactory implements IIngredientFactory {
                 if ( klass == null )
                     continue;
 
-                stacks[i] = new ItemStack(ModItems.itemVoidPearl, count, EntityList.getID(klass));
+                int entityNumber = EntityList.getID(klass);
+
                 NBTTagCompound tag = new NBTTagCompound();
                 tag.setString("EntityID", entityName);
 
@@ -78,8 +92,17 @@ public class VoidPearlIngredientFactory implements IIngredientFactory {
                     }
                 }
 
-                stacks[i].setTagCompound(tag);
-                i++;
+                if ( both || pearlType == PearlType.VOID ) {
+                    stacks[i] = new ItemStack(ModItems.itemVoidPearl, 1, entityNumber);
+                    stacks[i].setTagCompound(tag.copy());
+                    i++;
+                }
+
+                if ( both || pearlType == PearlType.CRYSTALLIZED ) {
+                    stacks[i] = new ItemStack(ModItems.itemCrystallizedVoidPearl, 1, entityNumber);
+                    stacks[i].setTagCompound(tag);
+                    i++;
+                }
             }
 
             if ( i == 0 )
@@ -87,20 +110,36 @@ public class VoidPearlIngredientFactory implements IIngredientFactory {
 
             ItemStack[] out = new ItemStack[i];
             System.arraycopy(stacks, 0, out, 0, i);
-            return new IngredientVoidPearl(out);
+            return new IngredientVoidPearl(pearlType, out);
         }
 
-        ItemStack stack = new ItemStack(ModItems.itemVoidPearl, 1);
-        return new IngredientVoidPearl(stack);
+        if ( both ) {
+            ItemStack[] out = new ItemStack[]{
+                    new ItemStack(ModItems.itemVoidPearl, 1),
+                    new ItemStack(ModItems.itemCrystallizedVoidPearl, 1)
+            };
+
+            return new IngredientVoidPearl(pearlType, out);
+        }
+
+        ItemStack stack = new ItemStack(
+                pearlType == PearlType.VOID ?
+                        ModItems.itemVoidPearl : ModItems.itemCrystallizedVoidPearl,
+                1);
+        return new IngredientVoidPearl(pearlType, stack);
     }
 
     public static class IngredientVoidPearl extends Ingredient {
 
         private final String[] entityIDs;
         private final NBTTagCompound entityData;
+        private final PearlType pearlType;
+        private final boolean both;
 
-        public IngredientVoidPearl(ItemStack... stacks) {
+        public IngredientVoidPearl(PearlType pearlType, ItemStack... stacks) {
             super(stacks);
+            this.pearlType = pearlType;
+            both = pearlType == PearlType.BOTH;
 
             String[] ids = new String[stacks.length];
             int i = 0;
@@ -136,7 +175,12 @@ public class VoidPearlIngredientFactory implements IIngredientFactory {
             if ( input == null )
                 return false;
 
-            if ( input.getItem() != ModItems.itemVoidPearl )
+            Item item = input.getItem();
+            if ( item == ModItems.itemVoidPearl && (both || pearlType == PearlType.VOID) ) {
+                /* ok */
+            } else if ( item == ModItems.itemCrystallizedVoidPearl && (both || pearlType == PearlType.CRYSTALLIZED) ) {
+                /* ok */
+            } else
                 return false;
 
             NBTTagCompound inputTag = input.getTagCompound();

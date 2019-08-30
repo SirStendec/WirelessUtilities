@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -616,21 +617,32 @@ public class Worker<T extends TargetInfo> {
     }
 
     public void performEffect(T target) {
-        final BlockPosDimension pos = target.pos;
-        if ( pos == null )
+        World world;
+        BlockPos pos;
+        boolean entity;
+
+        if ( target.entity != null && !target.entity.isDead ) {
+            world = target.entity.world;
+            pos = target.entity.getPosition();
+            entity = true;
+
+        } else if ( target.pos != null ) {
+            world = DimensionManager.getWorld(target.pos.getDimension(), false);
+            pos = target.pos;
+            entity = false;
+
+        } else
             return;
 
-        final World world = DimensionManager.getWorld(pos.getDimension());
-        if ( world == null || !world.isBlockLoaded(pos) )
+        if ( world == null || pos == null || !world.isBlockLoaded(pos) )
             return;
 
-        final int wait = provider.getEffectFrequency(target, world);
-
-        long now = world.getTotalWorldTime();
+        final int wait = provider.getEffectFrequency(target, world, entity);
+        final long now = world.getTotalWorldTime();
         if ( now - target.lastEffect < wait )
             return;
 
         target.lastEffect = now;
-        provider.performEffect(target, world);
+        provider.performEffect(target, world, entity);
     }
 }

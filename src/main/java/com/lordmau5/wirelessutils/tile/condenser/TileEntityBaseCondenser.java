@@ -1327,7 +1327,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( rate < 1 )
             return 0;
 
-        return augmentDrain + fluidGenCost + (rate * maxEnergyPerTick);
+        return augmentDrain + (fluidGen ? fluidGenCost : 0) + (rate * maxEnergyPerTick);
     }
 
     @Override

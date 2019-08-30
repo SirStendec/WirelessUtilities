@@ -169,13 +169,13 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
     WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull T target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile, @Nullable Entity entity);
 
     /**
-     * Attempt to render an effect on the provided target. Generally this is a
-     * particle effect or something similar.
+     * Attempt to render an effect on the provided target block. Generally this
+     * is a particle effect or something similar.
      *
      * @param target The TargetInfo returned from createInfo.
      * @param world  The world the target is in.
      */
-    default void performEffect(@Nonnull T target, @Nonnull World world) {
+    default void performEffect(@Nonnull T target, @Nonnull World world, boolean isEntity) {
 
     }
 
@@ -186,7 +186,7 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
      * @param world  The World the target is in.
      * @return Number of ticks to wait between calling performEffect.
      */
-    default int getEffectFrequency(@Nonnull T target, @Nonnull World world) {
+    default int getEffectFrequency(@Nonnull T target, @Nonnull World world, boolean isEntity) {
         return 20;
     }
 

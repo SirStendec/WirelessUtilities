@@ -22,6 +22,7 @@ import com.lordmau5.wirelessutils.tile.base.Worker;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBudgetInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IFilterAugmentable;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IFluidGenAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
 import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.FluidTank;
@@ -32,6 +33,7 @@ import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.location.TargetInfo;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
+import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -79,6 +81,7 @@ import java.util.Map;
 public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         IWorkInfoProvider, IBudgetInfoProvider, ISidedTransfer, ISidedTransferAugmentable,
         IConfigurableWorldTickRate, IUnlockableSlots, IFilterAugmentable, IChunkLoadAugmentable,
+        IFluidGenAugmentable,
         IWorkProvider<TileBaseVaporizer.VaporizerTarget> {
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
@@ -89,6 +92,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     protected FluidTank tank;
     protected Fluid lastFluid;
     private final boolean hasFluid;
+
+    private boolean fluidGen = false;
+    private FluidStack fluidGenStack = null;
+    private int fluidGenCost = 0;
 
     private int fluidRate = 0;
     private int excessFuel = 0;
@@ -193,6 +200,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
                 if ( doFill && existing == null && tank.getFluid() != null ) {
                     lastFluid = resource.getFluid();
                     fluidRate = rate;
+
+                    updateFluidGen();
                 }
 
                 return out;
@@ -202,8 +211,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             @Override
             public FluidStack drain(FluidStack resource, boolean doDrain) {
                 FluidStack out = tank.drain(resource, doDrain);
-                if ( doDrain && tank.getFluid() == null )
+                if ( doDrain && (tank.getFluid() == null || tank.getFluidAmount() == 0) ) {
                     fluidRate = 0;
+                    updateFluidGen();
+                }
                 return out;
             }
 
@@ -211,8 +222,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             @Override
             public FluidStack drain(int maxDrain, boolean doDrain) {
                 FluidStack out = tank.drain(maxDrain, doDrain);
-                if ( doDrain && tank.getFluid() == null )
+                if ( doDrain && (tank.getFluid() == null || tank.getFluidAmount() == 0) ) {
                     fluidRate = 0;
+                    updateFluidGen();
+                }
                 return out;
             }
         };
@@ -252,6 +265,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         System.out.println("Max Energy Block: " + maxEnergyPerBlock);
         System.out.println("  Max Energy Ent: " + maxEnergyPerEntity);
+
+        System.out.println("       Fluid Gen: " + fluidGen);
+        System.out.println(" Fluid Gen Fluid: " + debugPrintStack(fluidGenStack));
+        System.out.println("  Fluid Gen Cost: " + fluidGenCost);
 
         System.out.println("     Input Slots: empty=" + emptyInput + ", full=" + fullInput);
         System.out.println("    Output Slots: empty=" + emptyOutput + ", full=" + fullOutput);
@@ -310,6 +327,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
                     tank.setFluid(new FluidStack(newFluid, newAmount));
                     fluidRate = newRate;
                     lastFluid = newFluid;
+                    updateFluidGen();
                     markChunkDirty();
                     return;
                 }
@@ -389,6 +407,36 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     public int calculateFluidCapacity() {
         return level.maxVaporizerFluid;
+    }
+
+    public void setFluidGenAugmented(boolean enabled, FluidStack fluidStack, int energy) {
+        if ( !enabled ) {
+            fluidGenStack = null;
+            fluidGenCost = 0;
+        } else {
+            fluidGenStack = fluidStack;
+            fluidGenCost = energy;
+        }
+
+        updateFluidGen();
+    }
+
+    public void updateFluidGen() {
+        if ( fluidGenStack == null || tank == null || !wantsFluid() ) {
+            fluidGen = false;
+            return;
+        }
+
+        FluidStack fluid = tank.getFluid();
+        if ( fluid != null && !fluid.isFluidEqual(fluidGenStack) ) {
+            fluidGen = false;
+            return;
+        } else if ( fluid == null && !isFluidValid(fluidGenStack.getFluid()) ) {
+            fluidGen = false;
+            return;
+        }
+
+        fluidGen = true;
     }
 
     /* Inventory */
@@ -491,6 +539,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     public boolean isSlotUnlocked(int slot) {
         if ( slot == getModuleOffset() ) {
             if ( !itemStackHandler.getStackInSlot(getModifierOffset()).isEmpty() )
+                return false;
+
+            if ( fluidGen )
                 return false;
 
             for (int s = getInputOffset(); s < getOutputOffset(); s++)
@@ -757,6 +808,20 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             behavior.updateAugmentsAndLevel();
 
         updateTargetEnergy();
+    }
+
+    @Override
+    public boolean isValidAugment(int slot, ItemStack augment) {
+        if ( augment.getItem() == ModItems.itemFluidGenAugment ) {
+            if ( !wantsFluid() )
+                return false;
+
+            FluidStack fluid = ModItems.itemFluidGenAugment.getFluid(augment);
+            if ( fluid == null || !isFluidValid(fluid.getFluid()) )
+                return false;
+        }
+
+        return super.isValidAugment(slot, augment);
     }
 
     @Override
@@ -1308,7 +1373,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         return WorkResult.FAILURE_REMOVE;
     }
 
-    public void performEffect(@Nonnull VaporizerTarget target, @Nonnull World world) {
+    public void performEffect(@Nonnull VaporizerTarget target, @Nonnull World world, boolean isEntity) {
 
     }
 
@@ -1350,7 +1415,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         if ( rate < 1 )
             return 0;
 
-        return energyDrain + (rate * (maxEnergyPerBlock + maxEnergyPerEntity));
+        return energyDrain + (fluidGen ? fluidGenCost : 0) + (rate * (maxEnergyPerBlock + maxEnergyPerEntity));
     }
 
     @Override
@@ -1587,6 +1652,12 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
                 enabled = false;
             else
                 extractEnergy(energyDrain, false);
+        }
+
+        if ( fluidGen && getEnergyStored() >= fluidGenCost ) {
+            int filled = fluidHandler.fill(fluidGenStack, true);
+            if ( filled > 0 )
+                extractEnergy(fluidGenCost, false);
         }
 
         if ( !enabled || getEnergyStored() < baseEnergy ) {

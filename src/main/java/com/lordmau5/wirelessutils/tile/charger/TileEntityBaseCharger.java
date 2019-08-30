@@ -27,6 +27,7 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -612,18 +613,35 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         }
     }
 
+    @Nullable
+    abstract BlockPos getEffectOrigin();
+
     @Override
-    public void performEffect(@Nonnull ChargerTarget target, @Nonnull World world) {
+    public void performEffect(@Nonnull ChargerTarget target, @Nonnull World world, boolean isEntity) {
         /*if ( world.isRemote || world != this.world )
             return;
 
-        float x = pos.getX() + 0.5F;
-        float y = pos.getY() + 0.5F;
-        float z = pos.getZ() + 0.5F;
+        BlockPos origin = getEffectOrigin();
+        if ( origin == null )
+            return;
 
-        double x2 = target.entity != null ? target.entity.posX : target.pos.getX() + 0.5;
-        double y2 = target.entity != null ? target.entity.posY : target.pos.getY() + 0.5;
-        double z2 = target.entity != null ? target.entity.posZ : target.pos.getZ() + 0.5;
+        float x = origin.getX() + 0.5F;
+        float y = origin.getY() + 0.5F;
+        float z = origin.getZ() + 0.5F;
+
+        double x2, y2, z2;
+
+        if ( isEntity && target.entity != null ) {
+            x2 = target.entity.posX;
+            y2 = target.entity.posY + (target.entity.height / 2);
+            z2 = target.entity.posZ;
+
+        } else if ( target.pos != null ) {
+            x2 = target.pos.getX() + 0.5;
+            y2 = target.pos.getY() + 0.5;
+            z2 = target.pos.getZ() + 0.5;
+        } else
+            return;
 
         int distance = (int) Math.floor(Math.sqrt(Math.pow(x2 - x, 2) + Math.pow(y2 - y, 2) + Math.pow(z2 - z, 2))) * 2;
         if ( distance == 0 )

@@ -130,7 +130,8 @@
 	{
 		"name": "EMPTY_VOID_PEARL",
 		"ingredient": {
-			"type": "wirelessutils:void_pearl"
+			"type": "wirelessutils:void_pearl",
+			"crystallized": false
 		}
 	},
 	{
