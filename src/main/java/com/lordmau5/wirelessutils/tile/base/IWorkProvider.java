@@ -172,11 +172,22 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
      * Attempt to render an effect on the provided target. Generally this is a
      * particle effect or something similar.
      *
-     * @param target The TargetInfo returned from canWork.
+     * @param target The TargetInfo returned from createInfo.
      * @param world  The world the target is in.
      */
     default void performEffect(@Nonnull T target, @Nonnull World world) {
 
+    }
+
+    /**
+     * How frequently should performEffect be called for the target.
+     *
+     * @param target The TargetInfo returned from createInfo
+     * @param world  The World the target is in.
+     * @return Number of ticks to wait between calling performEffect.
+     */
+    default int getEffectFrequency(@Nonnull T target, @Nonnull World world) {
+        return 20;
     }
 
     enum IterationMode {

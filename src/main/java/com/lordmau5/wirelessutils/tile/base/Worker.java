@@ -616,13 +616,18 @@ public class Worker<T extends TargetInfo> {
     }
 
     public void performEffect(T target) {
-        BlockPosDimension pos = target.pos;
-        World world = DimensionManager.getWorld(pos.getDimension());
+        final BlockPosDimension pos = target.pos;
+        if ( pos == null )
+            return;
+
+        final World world = DimensionManager.getWorld(pos.getDimension());
         if ( world == null || !world.isBlockLoaded(pos) )
             return;
 
+        final int wait = provider.getEffectFrequency(target, world);
+
         long now = world.getTotalWorldTime();
-        if ( now - target.lastEffect < 20 )
+        if ( now - target.lastEffect < wait )
             return;
 
         target.lastEffect = now;
