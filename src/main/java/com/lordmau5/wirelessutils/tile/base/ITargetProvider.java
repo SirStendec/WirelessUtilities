@@ -55,7 +55,7 @@ public interface ITargetProvider {
             World originWorld = DimensionManager.getWorld(origin.getDimension());
             World targetWorld = DimensionManager.getWorld(target.getDimension());
 
-            double originFactor = (originWorld == null || targetWorld.provider == null) ? 0 : originWorld.provider.getMovementFactor();
+            double originFactor = (originWorld == null || originWorld.provider == null) ? 0 : originWorld.provider.getMovementFactor();
             double targetFactor = (targetWorld == null || targetWorld.provider == null) ? 0 : targetWorld.provider.getMovementFactor();
 
             double factor = originFactor / targetFactor;
