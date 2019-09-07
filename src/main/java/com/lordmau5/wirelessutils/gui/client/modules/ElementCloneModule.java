@@ -103,6 +103,11 @@ public class ElementCloneModule extends ElementModuleBase {
     public void updateElementInformation() {
         super.updateElementInformation();
 
+        boolean locked = isLocked();
+
+        sliderLimit.setEnabled(!locked);
+        btnExact.setEnabled(!locked);
+
         sliderLimit.setValue(behavior.getEntityLimit());
 
         btnExact.setText(StringHelper.localize("item." + WirelessUtils.MODID + ".clone_module.exact" +

@@ -69,6 +69,24 @@ public class BlockBaseTile extends BlockCoreTile implements IConfigGui {
         ModelLoader.setCustomMeshDefinition(item, stack -> new ModelResourceLocation(stack.getItem().getRegistryName(), "inventory"));
     }
 
+    @Nullable
+    public Class<? extends TileEntity> getTileEntityClass() {
+        return null;
+    }
+
+    @Override
+    public TileEntity createTileEntity(World world, IBlockState state) {
+        Class<? extends TileEntity> klass = getTileEntityClass();
+        if ( klass == null )
+            return null;
+
+        try {
+            return klass.newInstance();
+        } catch (InstantiationException | IllegalAccessException ex) {
+            return null;
+        }
+    }
+
     @Nonnull
     public ItemStack getItemStack(@Nullable IBlockState state, @Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
         Item item = Item.getItemFromBlock(this);

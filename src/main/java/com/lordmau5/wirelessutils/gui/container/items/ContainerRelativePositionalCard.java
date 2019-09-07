@@ -16,10 +16,6 @@ import javax.annotation.Nullable;
 
 public class ContainerRelativePositionalCard extends BaseContainerItem {
 
-    public ContainerRelativePositionalCard(@Nonnull ItemStack stack, @Nonnull InventoryPlayer inventory) {
-        this(stack, inventory.currentItem, inventory);
-    }
-
     public ContainerRelativePositionalCard(@Nonnull ItemStack stack, int slot, @Nonnull InventoryPlayer inventory) {
         super(stack, slot, inventory);
 

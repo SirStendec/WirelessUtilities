@@ -7,6 +7,7 @@ import com.lordmau5.wirelessutils.item.augment.ItemRangeAugment;
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
 import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.Machine;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IFacingAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
@@ -24,13 +25,18 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 @Machine(name = "directional_condenser")
-public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser implements IRangeAugmentable, IDirectionalMachine {
+public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser implements
+        IRangeAugmentable, IDirectionalMachine, IFacingAugmentable {
 
     private EnumFacing facing = EnumFacing.NORTH;
     private boolean rotationX = false;
+
+    private boolean hasFacingAugment = false;
+    private EnumFacing facingAugment = null;
 
     private int range = 0;
     private int rangeHeight = 0;
@@ -53,6 +59,17 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
         System.out.println("Offset V: " + offsetVertical);
         System.out.println("  Facing: " + facing);
         System.out.println(" Rotated: " + rotationX);
+        System.out.println(" FaceAug: " + hasFacingAugment + " -- " + facingAugment);
+    }
+
+    /* IFacingAugmentable */
+
+    public void setFacingAugmented(boolean augmented, @Nullable EnumFacing facing) {
+        hasFacingAugment = augmented;
+        facingAugment = facing;
+
+        if ( validTargets != null )
+            calculateTargets();
     }
 
     /* IFacing */
@@ -180,7 +197,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
         Tuple<BlockPosDimension, BlockPosDimension> corners = calculateTargetCorners(origin);
 
         int dimension = origin.getDimension();
-        EnumFacing facing = getEnumFacing().getOpposite();
+        EnumFacing facing = hasFacingAugment ? facingAugment : getEnumFacing().getOpposite();
 
         for (BlockPos target : BlockPos.getAllInBox(corners.getFirst(), corners.getSecond())) {
             if ( target.equals(pos) )

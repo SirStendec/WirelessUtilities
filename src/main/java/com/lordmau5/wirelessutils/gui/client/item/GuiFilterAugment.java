@@ -40,7 +40,7 @@ public class GuiFilterAugment extends BaseGuiItem {
     public static final ItemStack MATCH_ON = new ItemStack(ModItems.itemFluxedPearl);
     public static final ItemStack MATCH_OFF = new ItemStack(Items.ENDER_PEARL);
 
-    private ContainerFilterAugment container;
+    private final ContainerFilterAugment container;
 
     private ElementDynamicContainedButton btnIgnoreMeta;
     private ElementDynamicContainedButton btnIgnoreNBT;
@@ -162,6 +162,7 @@ public class GuiFilterAugment extends BaseGuiItem {
     protected void updateElementInformation() {
         super.updateElementInformation();
 
+        boolean locked = container.isLocked();
         boolean ignoreMetadata = container.getIgnoreMetadata();
         boolean ignoreNBT = container.getIgnoreNBT();
         boolean useOre = container.getUseOreDict();
@@ -169,9 +170,13 @@ public class GuiFilterAugment extends BaseGuiItem {
         boolean voiding = container.isVoiding();
         boolean matchMod = container.getMatchMod();
 
-        btnIgnoreMeta.setEnabled(!matchMod);
-        btnIgnoreNBT.setEnabled(!matchMod);
-        btnUseOre.setEnabled(!matchMod);
+        btnIgnoreMeta.setEnabled(!locked && !matchMod);
+        btnIgnoreNBT.setEnabled(!locked && !matchMod);
+        btnUseOre.setEnabled(!locked && !matchMod);
+
+        btnMatchMod.setEnabled(!locked);
+        btnVoiding.setEnabled(!locked);
+        btnWhitelist.setEnabled(!locked);
 
         btnIgnoreMeta.setItem(ignoreMetadata ? DAMAGE_OFF : DAMAGE_ON);
         btnIgnoreNBT.setItem(ignoreNBT ? NBT_OFF : NBT_ON);

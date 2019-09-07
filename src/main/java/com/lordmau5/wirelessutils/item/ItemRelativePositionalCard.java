@@ -2,6 +2,9 @@ package com.lordmau5.wirelessutils.item;
 
 import cofh.core.util.CoreUtils;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.gui.client.item.GuiRelativePositionalCard;
+import com.lordmau5.wirelessutils.gui.container.items.ContainerRelativePositionalCard;
+import com.lordmau5.wirelessutils.item.base.IGuiItem;
 import com.lordmau5.wirelessutils.item.base.IUpdateableItem;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.packet.PacketUpdateItem;
@@ -32,7 +35,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemRelativePositionalCard extends ItemBasePositionalCard implements IUpdateableItem {
+public class ItemRelativePositionalCard extends ItemBasePositionalCard implements IUpdateableItem, IGuiItem {
 
     public ItemRelativePositionalCard() {
         setName("relative_positional_card");
@@ -181,13 +184,19 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard implement
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         if ( !worldIn.isRemote && !playerIn.isSneaking() && handIn == EnumHand.MAIN_HAND ) {
-            ItemStack stack = playerIn.getHeldItemMainhand();
-
-            playerIn.openGui(WirelessUtils.instance, WirelessUtils.GUI_RELATIVE_POSITIONAL_CARD, worldIn, handIn.ordinal(), 0, 0);
-            return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+            openGui(playerIn, handIn);
+            return new ActionResult<>(EnumActionResult.SUCCESS, playerIn.getHeldItemMainhand());
         }
 
         return super.onItemRightClick(worldIn, playerIn, handIn);
+    }
+
+    public Object getClientGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
+        return new GuiRelativePositionalCard(new ContainerRelativePositionalCard(stack, slot, player.inventory));
+    }
+
+    public Object getServerGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
+        return new ContainerRelativePositionalCard(stack, slot, player.inventory);
     }
 
     @Override

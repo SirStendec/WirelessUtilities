@@ -15,10 +15,6 @@ public class ContainerFilterAugment extends BaseContainerItem implements IFilter
 
     private ItemStack[] list;
 
-    public ContainerFilterAugment(@Nonnull ItemStack stack, @Nonnull InventoryPlayer inventory) {
-        this(stack, inventory.currentItem, inventory);
-    }
-
     public ContainerFilterAugment(@Nonnull ItemStack augment, int slot, InventoryPlayer inventory) {
         super(augment, slot, inventory);
 
@@ -58,6 +54,9 @@ public class ContainerFilterAugment extends BaseContainerItem implements IFilter
 
     @Override
     public boolean setStackInSlot(int slot, @Nonnull ItemStack stack) {
+        if ( isLocked() )
+            return false;
+
         if ( stack == null )
             stack = ItemStack.EMPTY;
 
@@ -66,7 +65,15 @@ public class ContainerFilterAugment extends BaseContainerItem implements IFilter
     }
 
     @Override
+    public boolean isSlotLocked(int slot) {
+        return isLocked();
+    }
+
+    @Override
     public void onSlotChanged(int slot) {
+        if ( isLocked() )
+            return;
+
         setList(list);
     }
 
@@ -79,6 +86,9 @@ public class ContainerFilterAugment extends BaseContainerItem implements IFilter
     }
 
     public boolean setMatchMod(boolean match) {
+        if ( isLocked() )
+            return false;
+
         ItemStack augment = ModItems.itemFilterAugment.setMatchMod(stack, match);
         if ( augment.isEmpty() )
             return false;
@@ -96,6 +106,9 @@ public class ContainerFilterAugment extends BaseContainerItem implements IFilter
     }
 
     public boolean setIgnoreMetadata(boolean ignore) {
+        if ( isLocked() )
+            return false;
+
         ItemStack augment = ModItems.itemFilterAugment.setIgnoreMetadata(stack, ignore);
         if ( augment.isEmpty() )
             return false;
@@ -113,6 +126,9 @@ public class ContainerFilterAugment extends BaseContainerItem implements IFilter
     }
 
     public boolean setIgnoreNBT(boolean ignore) {
+        if ( isLocked() )
+            return false;
+
         ItemStack augment = ModItems.itemFilterAugment.setIgnoreNBT(stack, ignore);
         if ( augment.isEmpty() )
             return false;
@@ -130,6 +146,9 @@ public class ContainerFilterAugment extends BaseContainerItem implements IFilter
     }
 
     public boolean setWhitelist(boolean whitelist) {
+        if ( isLocked() )
+            return false;
+
         ItemStack augment = ModItems.itemFilterAugment.setWhitelist(stack, whitelist);
         if ( augment.isEmpty() )
             return false;
@@ -147,6 +166,9 @@ public class ContainerFilterAugment extends BaseContainerItem implements IFilter
     }
 
     public boolean setVoiding(boolean voiding) {
+        if ( isLocked() )
+            return false;
+
         ItemStack augment = ModItems.itemFilterAugment.setVoiding(stack, voiding);
         if ( augment.isEmpty() )
             return false;
@@ -164,6 +186,9 @@ public class ContainerFilterAugment extends BaseContainerItem implements IFilter
     }
 
     public boolean setUseOreDict(boolean use) {
+        if ( isLocked() )
+            return false;
+
         ItemStack augment = ModItems.itemFilterAugment.setUseOreDict(stack, use);
         if ( augment.isEmpty() )
             return false;
@@ -178,6 +203,9 @@ public class ContainerFilterAugment extends BaseContainerItem implements IFilter
     }
 
     public boolean setList(ItemStack[] list) {
+        if ( isLocked() )
+            return false;
+
         ItemStack augment = ModItems.itemFilterAugment.setList(stack, list);
         if ( augment.isEmpty() )
             return false;

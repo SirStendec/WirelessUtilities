@@ -1,6 +1,5 @@
 package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2;
 
-import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.ItemBlockMachine;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.directional.BlockDirectionalAENetwork;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.directional.TileDirectionalAENetwork;
@@ -15,7 +14,6 @@ import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -48,8 +46,8 @@ public class AppliedEnergistics2Plugin implements IPlugin {
         event.getRegistry().register(blockDirectionalAENetwork);
         event.getRegistry().register(blockPositionalAENetwork);
 
-        GameRegistry.registerTileEntity(TileDirectionalAENetwork.class, new ResourceLocation(WirelessUtils.MODID, "directional_ae_network"));
-        GameRegistry.registerTileEntity(TilePositionalAENetwork.class, new ResourceLocation(WirelessUtils.MODID, "positional_ae_network"));
+        CommonProxy.registerTile(TileDirectionalAENetwork.class);
+        CommonProxy.registerTile(TilePositionalAENetwork.class);
     }
 
     @Override

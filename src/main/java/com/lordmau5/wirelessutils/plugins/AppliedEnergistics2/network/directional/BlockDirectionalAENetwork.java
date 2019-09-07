@@ -18,9 +18,10 @@ public class BlockDirectionalAENetwork extends BlockBaseMachine {
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
-        return new TileDirectionalAENetwork();
+    public Class<? extends TileEntity> getTileEntityClass() {
+        return TileDirectionalAENetwork.class;
     }
+
 
 //    @Override
 //    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {

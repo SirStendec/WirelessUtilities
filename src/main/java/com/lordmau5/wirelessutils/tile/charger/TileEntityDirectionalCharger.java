@@ -6,6 +6,7 @@ import com.lordmau5.wirelessutils.gui.container.charger.ContainerDirectionalChar
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
 import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.Machine;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IFacingAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
@@ -27,10 +28,13 @@ import java.util.ArrayList;
 
 @Machine(name = "directional_charger")
 public class TileEntityDirectionalCharger extends TileEntityBaseCharger implements
-        IRangeAugmentable, IDirectionalMachine {
+        IRangeAugmentable, IDirectionalMachine, IFacingAugmentable {
 
     private EnumFacing facing = EnumFacing.NORTH;
     private boolean rotationX = false;
+
+    private boolean hasFacingAugment = false;
+    private EnumFacing facingAugment = null;
 
     private int range = 0;
     private int rangeHeight = 0;
@@ -53,6 +57,17 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
         System.out.println("Offset V: " + offsetVertical);
         System.out.println("  Facing: " + facing);
         System.out.println(" Rotated: " + rotationX);
+        System.out.println(" FaceAug: " + hasFacingAugment + " -- " + facingAugment);
+    }
+
+    /* IFacingAugmentable */
+
+    public void setFacingAugmented(boolean augmented, @Nullable EnumFacing facing) {
+        hasFacingAugment = augmented;
+        facingAugment = facing;
+
+        if ( validTargets != null )
+            calculateTargets();
     }
 
     /* IFacing */
@@ -188,7 +203,7 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
         Tuple<BlockPosDimension, BlockPosDimension> corners = calculateTargetCorners(origin);
 
         int dimension = origin.getDimension();
-        EnumFacing facing = getEnumFacing().getOpposite();
+        EnumFacing facing = hasFacingAugment ? facingAugment : getEnumFacing().getOpposite();
 
         unloadAllChunks();
 

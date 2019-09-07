@@ -61,12 +61,16 @@ public class WirelessUtils {
         }
     }.setBackgroundImageName("wirelessutils.png");
 
+    // Permissions
+    public static final String PERM_FLUIDGEN = MODID + ".commands.fluidgen";
+    public static final String PERM_DEBUG = MODID + ".commands.debug";
+    public static final String PERM_EDIT_ITEM = MODID + ".commands.edit_item";
+
     // GUIs
     private static int guiIndex = 10;
 
-    public static final int GUI_PLAYER_CARD = guiIndex++;
-    public static final int GUI_FILTER_AUGMENT = guiIndex++;
-    public static final int GUI_RELATIVE_POSITIONAL_CARD = guiIndex++;
+    public static final int GUI_ITEM = guiIndex++;
+    public static final int GUI_ADMIN_ITEM = guiIndex++;
 
     static {
         if ( !FluidRegistry.isUniversalBucketEnabled() )
@@ -82,6 +86,8 @@ public class WirelessUtils {
     @EventHandler
     public void init(FMLInitializationEvent event) {
         proxy.init(event);
+
+
     }
 
     @SuppressWarnings("unused")

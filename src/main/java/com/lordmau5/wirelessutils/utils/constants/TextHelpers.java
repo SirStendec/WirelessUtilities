@@ -10,6 +10,7 @@ import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class TextHelpers {
     public static final Style GRAY = new Style().setColor(TextFormatting.GRAY);
@@ -82,6 +83,33 @@ public class TextHelpers {
             return new TextComponentString(StringHelper.isShiftKeyDown() ? StringHelper.formatNumber(addition) : getScaledNumber(addition, "", true));
 
         return out;
+    }
+
+
+    public static void addLocalizedLines(@Nonnull List<String> list, @Nonnull String key, @Nullable Style style, Object... args) {
+        int i = 0;
+        int blank = 0;
+        String path = key + "." + i;
+
+        while ( StringHelper.canLocalize(path) ) {
+            ITextComponent component = new TextComponentTranslation(path, args);
+            if ( component.getUnformattedText().isEmpty() )
+                blank++;
+            else {
+                if ( style != null )
+                    component = component.setStyle(style);
+
+                while ( blank > 0 ) {
+                    list.add("");
+                    blank--;
+                }
+
+                list.add(component.getFormattedText());
+            }
+
+            i++;
+            path = key + "." + i;
+        }
     }
 
 

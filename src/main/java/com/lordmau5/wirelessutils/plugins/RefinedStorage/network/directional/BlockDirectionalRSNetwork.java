@@ -25,8 +25,8 @@ public class BlockDirectionalRSNetwork extends BlockBaseMachine {
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
-        return new TileDirectionalRSNetwork();
+    public Class<? extends TileEntity> getTileEntityClass() {
+        return TileDirectionalRSNetwork.class;
     }
 
     @Override

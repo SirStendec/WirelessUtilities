@@ -109,6 +109,14 @@ public class ElementLaunchModule extends ElementFilterableModule {
     public void updateElementInformation() {
         super.updateElementInformation();
 
+        boolean locked = isLocked();
+
+        sliderX.setEnabled(!locked);
+        sliderY.setEnabled(!locked);
+        sliderZ.setEnabled(!locked);
+
+        btnFallProtect.setEnabled(!locked);
+
         sliderX.setValue((int) Math.floor(behavior.getSpeedX() * 100));
         sliderY.setValue((int) Math.floor(behavior.getSpeedY() * 100));
         sliderZ.setValue((int) Math.floor(behavior.getSpeedZ() * 100));

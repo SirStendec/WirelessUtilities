@@ -78,8 +78,9 @@ public class RefinedStoragePlugin implements IPlugin {
         event.getRegistry().register(blockPositionalRSNetwork);
 
         GameRegistry.registerTileEntity(TileInfiniteWirelessTransmitter.class, new ResourceLocation(WirelessUtils.MODID, "infinite_wireless_transmitter"));
-        GameRegistry.registerTileEntity(TileDirectionalRSNetwork.class, new ResourceLocation(WirelessUtils.MODID, "directional_rs_network"));
-        GameRegistry.registerTileEntity(TilePositionalRSNetwork.class, new ResourceLocation(WirelessUtils.MODID, "positional_rs_network"));
+
+        CommonProxy.registerTile(TileDirectionalRSNetwork.class);
+        CommonProxy.registerTile(TilePositionalRSNetwork.class);
     }
 
     @Override

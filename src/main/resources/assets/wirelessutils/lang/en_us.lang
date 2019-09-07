@@ -335,6 +335,12 @@ item.wirelessutils.filter_augment.match_mod=Matching Mod Items
 item.wirelessutils.filter_augment.entry=- %s
 item.wirelessutils.filter_augment.info_list=%s Hold §e§oAlt§r§7 for %s Items
 
+item.wirelessutils.facing_augment.name=Phantom Face Augment
+item.wirelessutils.facing_augment.info.0=This augment allows Directional
+item.wirelessutils.facing_augment.info.1=Machines to target different sides
+item.wirelessutils.facing_augment.info.2=of blocks than the sides facing
+item.wirelessutils.facing_augment.info.3=the machines themselves.
+
 item.wirelessutils.disabled=This item is disabled in configuration.
 
 item.wirelessutils.augment.min_level=Required Machine Level: %s
@@ -349,6 +355,11 @@ info.wirelessutils.modifier.energy=RF/action
 info.wirelessutils.modifier.budget=per action
 
 item.wirelessutils.augment.budget=Work Buffer Usage:
+
+item.wirelessutils.machine_ctrl.inactive=Hold §e§oCtrl§r§7 for Valid Augments
+item.wirelessutils.machine_ctrl.active=Valid Augments:
+item.wirelessutils.machine_ctrl.entry=- %s
+item.wirelessutils.machine_ctrl.none=None
 
 item.wirelessutils.augment_ctrl.inactive=Hold §e§oCtrl§r§7 for Valid Machines
 item.wirelessutils.augment_ctrl.active=Valid Machines:
@@ -458,6 +469,16 @@ tab.wirelessutils.auto_transfer.side.RIGHT=Right
 tab.wirelessutils.auto_transfer.side.BOTTOM=Bottom
 tab.wirelessutils.auto_transfer.side.FRONT=Front
 tab.wirelessutils.auto_transfer.side.BACK=Back
+
+tab.wirelessutils.open_gui.0=Open the standard GUI for this item.
+
+tab.wirelessutils.lock.locked.0=Click here to un-lock.
+tab.wirelessutils.lock.locked.1=This item is currently locked
+tab.wirelessutils.lock.locked.2=against all changes.
+
+tab.wirelessutils.lock.unlocked.0=Click here to lock.
+tab.wirelessutils.lock.unlocked.1=This item is currently unlocked
+tab.wirelessutils.lock.unlocked.2=and can be modified by anyone.
 
 btn.wirelessutils.dec_area.one=Decrease by %s
 btn.wirelessutils.dec_area.all=Decrease all by %s
@@ -643,6 +664,8 @@ info.wirelessutils.blockpos.dimension.simple=Dim: %s
 info.wirelessutils.blockpos.dimension.named=Dim: %s (%s)
 
 info.wirelessutils.configured=%s (Configured)
+info.wirelessutils.locked=%s (Locked)
+info.wirelessutils.locked.tip=This item is locked and cannot be reconfigured.
 
 info.wirelessutils.tiered.name=%s (%s)
 info.wirelessutils.tiered.tier=Tier %s
@@ -674,6 +697,8 @@ commands.wirelessutils.fluidgen.tag_error=Fluid tag parsing failed: %s
 commands.wirelessutils.fluidgen.not_holding=Not holding an item containing fluid to copy.
 commands.wirelessutils.fluidgen.no_such_fluid=There is no such fluid with name: %s
 commands.wirelessutils.fluidgen.success=Created Augment: %s
+
+commands.wirelessutils.edit_item.not_holding=Not holding an item that can be edited.
 
 commands.wirelessutils.debug.success=Created Item: %s
 

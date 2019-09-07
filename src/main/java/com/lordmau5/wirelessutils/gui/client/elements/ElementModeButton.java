@@ -7,9 +7,7 @@ import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBase;
 import com.lordmau5.wirelessutils.utils.Textures;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
-import net.minecraft.util.text.TextComponentTranslation;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 public class ElementModeButton extends ElementDynamicButton {
@@ -49,17 +47,7 @@ public class ElementModeButton extends ElementDynamicButton {
             return;
 
         list.add(StringHelper.localize(key + ".name"));
-        addLocalizedLines(list, key + ".info");
-    }
-
-    void addLocalizedLines(@Nonnull List<String> tooltip, @Nonnull String name, Object... args) {
-        int i = 0;
-        String path = name + "." + i;
-        while ( StringHelper.canLocalize(path) ) {
-            tooltip.add(new TextComponentTranslation(path, args).setStyle(TextHelpers.GRAY).getFormattedText());
-            i++;
-            path = name + "." + i;
-        }
+        TextHelpers.addLocalizedLines(list, key + ".info", TextHelpers.GRAY);
     }
 
     @Override

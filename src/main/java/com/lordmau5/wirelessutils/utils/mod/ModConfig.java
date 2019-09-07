@@ -227,6 +227,10 @@ public class ModConfig {
         @Config.Comment("Sided I/O Control Augments allow machines to automatically import or export via their sides.")
         public final SidedTransferAugments sidedTransfer = new SidedTransferAugments();
 
+        @Config.Name("Phantom Face Augments")
+        @Config.Comment("Phantom Face Augments allow directional machines to target different sides of their targets.")
+        public final FacingAugments facing = new FacingAugments();
+
         @Config.Name("Capacity Augments")
         @Config.Comment("Capacity Augments increase the maximum capacity of machines.")
         public final CapacityAugments capacity = new CapacityAugments();
@@ -278,6 +282,45 @@ public class ModConfig {
         @Config.Name("Filter Augment")
         @Config.Comment("Filter Augments allow machines to filter items before allowing them into their internal buffers.")
         public final FilterAugments filter = new FilterAugments();
+    }
+
+    public static class FacingAugments {
+        @Config.Name("Required Level")
+        @Config.Comment("Machines must be at least this level in order to be augmented with this augment.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double budgetMultiplier = 1;
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int budgetAddition = 0;
+
+        @Config.Name("Allow Null")
+        @Config.Comment("When enabled, the \"null\" face will be one of the selectable faces.")
+        public boolean allowNull = true;
     }
 
     public static class WorldAugments {

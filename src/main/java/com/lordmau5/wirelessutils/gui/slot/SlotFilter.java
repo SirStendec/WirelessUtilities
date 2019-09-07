@@ -28,7 +28,7 @@ public class SlotFilter extends SlotFalseCopy {
 
     @Override
     public void putStack(@Nonnull ItemStack stack) {
-        if ( !isItemValid(stack) )
+        if ( !isItemValid(stack) || host.isSlotLocked(index) )
             return;
 
         if ( !stack.isEmpty() )
@@ -50,7 +50,10 @@ public class SlotFilter extends SlotFalseCopy {
 
     @Override
     public boolean isItemValid(ItemStack stack) {
-        return true;
+        if ( host.isSlotLocked(index) )
+            return false;
+
+        return host.isItemValid(index, stack);
     }
 
     @Override

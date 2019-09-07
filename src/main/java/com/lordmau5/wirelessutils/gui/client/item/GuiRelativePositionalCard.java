@@ -154,8 +154,8 @@ public class GuiRelativePositionalCard extends BaseGuiItem {
         super.drawGuiContainerForegroundLayer(x, y);
 
         fontRenderer.drawString(StringHelper.localize("info." + WirelessUtils.MODID + ".x"), 30, 19, 0x404040);
-        fontRenderer.drawString(StringHelper.localize("info." + WirelessUtils.MODID + ".y"), 30, 32, 0x404040);
-        fontRenderer.drawString(StringHelper.localize("info." + WirelessUtils.MODID + ".z"), 30, 47, 0x404040);
+        fontRenderer.drawString(StringHelper.localize("info." + WirelessUtils.MODID + ".y"), 30, 34, 0x404040);
+        fontRenderer.drawString(StringHelper.localize("info." + WirelessUtils.MODID + ".z"), 30, 49, 0x404040);
 
         Vec3d vector = container.getVector();
         if ( vector == null )
@@ -173,7 +173,14 @@ public class GuiRelativePositionalCard extends BaseGuiItem {
     protected void updateElementInformation() {
         super.updateElementInformation();
 
-        btnClear.setEnabled(StringHelper.isControlKeyDown());
+        boolean locked = container.isLocked();
+
+        txtX.setEnabled(!locked);
+        txtY.setEnabled(!locked);
+        txtZ.setEnabled(!locked);
+        btnFacing.setEnabled(!locked);
+
+        btnClear.setEnabled(!locked && StringHelper.isControlKeyDown());
 
         if ( !txtX.isFocused() )
             txtX.setText(Integer.toString(container.getX()));
@@ -212,8 +219,6 @@ public class GuiRelativePositionalCard extends BaseGuiItem {
     public void handleElementButtonClick(String buttonName, int mouseButton) {
         float pitch = mouseButton == 1 ? 1F : 0.7F;
         int amount = mouseButton == 1 ? -1 : 1;
-
-        this.onGuiClosed();
 
         switch (buttonName) {
             case "Facing":

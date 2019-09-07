@@ -14,6 +14,7 @@ import com.lordmau5.wirelessutils.item.augment.ItemCapacityAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemChunkLoadAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemCropAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemDispenserAugment;
+import com.lordmau5.wirelessutils.item.augment.ItemFacingAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemFilterAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemFluidGenAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemInventoryAugment;
@@ -152,6 +153,9 @@ public class ModItems {
     @GameRegistry.ObjectHolder("wirelessutils:filter_augment")
     public static ItemFilterAugment itemFilterAugment;
 
+    @GameRegistry.ObjectHolder("wirelessutils:facing_augment")
+    public static ItemFacingAugment itemFacingAugment;
+
     @GameRegistry.ObjectHolder("wirelessutils:base_module")
     public static ItemBaseModule itemBaseModule;
 
@@ -231,23 +235,31 @@ public class ModItems {
 
     @SideOnly(Side.CLIENT)
     public static void initModels() {
-        itemAbsolutePositionalCard.initModel();
-        itemRelativePositionalCard.initModel();
         itemFluxedPearl.initModel();
         itemChargedPearl.initModel();
         itemQuenchedPearl.initModel();
         itemScorchedPearl.initModel();
         itemStabilizedEnderPearl.initModel();
+        itemVoidPearl.initModel();
+        itemCrystallizedVoidPearl.initModel();
+
+        itemAbsolutePositionalCard.initModel();
+        itemRelativePositionalCard.initModel();
+        itemPlayerPositionalCard.initModel();
+
+        itemGlasses.initModel();
+        itemEnderCoil.initModel();
+
+        itemLevelUpgrade.initModel();
+        itemConversionUpgrade.initModel();
+
         itemRangeAugment.initModel();
         itemSlotAugment.initModel();
         itemInventoryAugment.initModel();
         itemBaseAugment.initModel();
         itemCapacityAugment.initModel();
         itemTransferAugment.initModel();
-        itemGlasses.initModel();
-        itemEnderCoil.initModel();
-        itemLevelUpgrade.initModel();
-        itemConversionUpgrade.initModel();
+
         itemMachinePanel.initModel();
         itemWorldAugment.initModel();
         itemInvertAugment.initModel();
@@ -255,12 +267,11 @@ public class ModItems {
         itemCropAugment.initModel();
         itemChunkLoadAugment.initModel();
         itemFluidGenAugment.initModel();
-        itemPlayerPositionalCard.initModel();
+        itemFacingAugment.initModel();
         itemSidedTransferAugment.initModel();
         itemDispenserAugment.initModel();
         itemFilterAugment.initModel();
-        itemVoidPearl.initModel();
-        itemCrystallizedVoidPearl.initModel();
+
         itemBaseModule.initModel();
         itemSlaughterModule.initModel();
         itemTeleportModule.initModel();

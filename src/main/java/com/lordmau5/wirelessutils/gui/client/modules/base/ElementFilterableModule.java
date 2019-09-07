@@ -85,6 +85,16 @@ public abstract class ElementFilterableModule extends ElementModuleBase {
     public void updateElementInformation() {
         super.updateElementInformation();
 
+        boolean locked = isLocked();
+
+        btnSneakMode.setEnabled(!locked);
+        btnChildMode.setEnabled(!locked);
+        btnPlayerMode.setEnabled(!locked && behavior.allowPlayers());
+        btnNamedMode.setEnabled(!locked);
+        btnListMode.setEnabled(!locked);
+        txtList.setEnabled(!locked);
+
+
         int yPos = getContentHeight();
 
         btnSneakMode.setPosition(btnSneakMode.getPosX(), yPos);

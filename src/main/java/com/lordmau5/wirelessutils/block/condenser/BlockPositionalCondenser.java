@@ -2,9 +2,9 @@ package com.lordmau5.wirelessutils.block.condenser;
 
 import com.lordmau5.wirelessutils.block.base.BlockBaseMachine;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityPositionalCondenser;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
+
+import javax.annotation.Nullable;
 
 public class BlockPositionalCondenser extends BlockBaseMachine {
     public BlockPositionalCondenser() {
@@ -13,8 +13,9 @@ public class BlockPositionalCondenser extends BlockBaseMachine {
         setName("positional_condenser");
     }
 
+    @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
-        return new TileEntityPositionalCondenser();
+    public Class<? extends TileEntity> getTileEntityClass() {
+        return TileEntityPositionalCondenser.class;
     }
 }

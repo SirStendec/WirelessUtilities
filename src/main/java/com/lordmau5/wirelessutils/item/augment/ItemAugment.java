@@ -3,8 +3,13 @@ package com.lordmau5.wirelessutils.item.augment;
 import cofh.api.core.IAugmentable;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.gui.client.item.GuiAdminAugment;
+import com.lordmau5.wirelessutils.gui.container.items.ContainerAdminAugment;
+import com.lordmau5.wirelessutils.item.base.IAdminEditableItem;
+import com.lordmau5.wirelessutils.item.base.IGuiItem;
 import com.lordmau5.wirelessutils.item.base.ILockExplanation;
 import com.lordmau5.wirelessutils.item.base.ItemBaseUpgrade;
+import com.lordmau5.wirelessutils.packet.PacketUpdateItem;
 import com.lordmau5.wirelessutils.proxy.CommonProxy;
 import com.lordmau5.wirelessutils.tile.base.IUpgradeable;
 import com.lordmau5.wirelessutils.tile.base.Machine;
@@ -37,7 +42,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplanation {
+public abstract class ItemAugment extends ItemBaseUpgrade implements IAdminEditableItem, ILockExplanation {
 
     public final static List<ItemAugment> AUGMENT_TYPES = new ArrayList<>();
 
@@ -181,8 +186,7 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
                 if ( !IAugmentable.class.isAssignableFrom(klass) )
                     continue;
 
-                @SuppressWarnings("unchecked")
-                Class<? extends IAugmentable> augClass = (Class<? extends IAugmentable>) klass;
+                Class<? extends IAugmentable> augClass = klass.asSubclass(IAugmentable.class);
 
                 Machine machine = klass.getAnnotation(Machine.class);
                 if ( machine != null && canApplyTo(stack, augClass) ) {
@@ -371,6 +375,11 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
             addLocalizedLines(tooltip, "info." + WirelessUtils.MODID + ".tiered.required.higher", TextHelpers.YELLOW);
     }
 
+    @Nullable
+    public String getTierNameDelegate(@Nonnull ItemStack stack) {
+        return null;
+    }
+
     @Override
     @Nonnull
     public String getItemStackDisplayName(@Nonnull ItemStack stack) {
@@ -383,6 +392,9 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
                 tier = tag.getString("TierName");
         }
 
+        if ( tier == null )
+            tier = getTierNameDelegate(stack);
+
         if ( tier == null && getTiers() > 1 )
             tier = Level.fromAugment(stack).getName();
 
@@ -394,5 +406,27 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements ILockExplan
             ).getUnformattedText();
 
         return name;
+    }
+
+    @Override
+    public void handleAdminPacket(@Nonnull ItemStack stack, EntityPlayer player, int slot, ItemStack newStack, @Nonnull PacketUpdateItem packet) {
+        if ( stack.isEmpty() || newStack.isEmpty() || stack.getItem() != newStack.getItem() || stack.getItem() != this )
+            return;
+
+        player.inventory.setInventorySlotContents(slot, newStack);
+
+        boolean wantGui = packet.getBool();
+        if ( wantGui && this instanceof IGuiItem )
+            ((IGuiItem) this).openGui(player, slot);
+    }
+
+    @Override
+    public Object getClientAdminGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
+        return new GuiAdminAugment(new ContainerAdminAugment(stack, slot, player.inventory));
+    }
+
+    @Override
+    public Object getServerAdminGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
+        return new ContainerAdminAugment(stack, slot, player.inventory);
     }
 }

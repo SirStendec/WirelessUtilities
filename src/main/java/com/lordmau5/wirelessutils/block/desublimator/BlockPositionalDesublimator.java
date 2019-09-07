@@ -2,9 +2,9 @@ package com.lordmau5.wirelessutils.block.desublimator;
 
 import com.lordmau5.wirelessutils.block.base.BlockBaseMachine;
 import com.lordmau5.wirelessutils.tile.desublimator.TilePositionalDesublimator;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
+
+import javax.annotation.Nullable;
 
 public class BlockPositionalDesublimator extends BlockBaseMachine {
     public BlockPositionalDesublimator() {
@@ -13,8 +13,9 @@ public class BlockPositionalDesublimator extends BlockBaseMachine {
         setName("positional_desublimator");
     }
 
+    @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
-        return new TilePositionalDesublimator();
+    public Class<? extends TileEntity> getTileEntityClass() {
+        return TilePositionalDesublimator.class;
     }
 }

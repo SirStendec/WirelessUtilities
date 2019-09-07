@@ -5,6 +5,9 @@ import cofh.core.util.helpers.ItemHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.google.common.base.Predicate;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.gui.client.item.GuiFilterAugment;
+import com.lordmau5.wirelessutils.gui.container.items.ContainerFilterAugment;
+import com.lordmau5.wirelessutils.item.base.IGuiItem;
 import com.lordmau5.wirelessutils.item.base.IUpdateableItem;
 import com.lordmau5.wirelessutils.packet.PacketUpdateItem;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IFilterAugmentable;
@@ -42,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ItemFilterAugment extends ItemAugment implements IUpdateableItem, INBTPreservingIngredient {
+public class ItemFilterAugment extends ItemAugment implements IGuiItem, IUpdateableItem, INBTPreservingIngredient {
 
     public ItemFilterAugment() {
         super();
@@ -606,9 +609,16 @@ public class ItemFilterAugment extends ItemAugment implements IUpdateableItem, I
         if ( world.isRemote || player.isSneaking() )
             return super.onItemRightClick(world, player, hand);
 
-        ItemStack stack = player.getHeldItem(hand);
-        player.openGui(WirelessUtils.instance, WirelessUtils.GUI_FILTER_AUGMENT, player.getEntityWorld(), hand.ordinal(), 0, 0);
-        return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+        openGui(player, hand);
+        return new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand));
+    }
+
+    public Object getClientGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
+        return new GuiFilterAugment(new ContainerFilterAugment(stack, slot, player.inventory));
+    }
+
+    public Object getServerGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
+        return new ContainerFilterAugment(stack, slot, player.inventory);
     }
 
     @Override

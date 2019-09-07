@@ -14,4 +14,12 @@ public interface IFilterHost {
     boolean setStackInSlot(int slot, @Nonnull ItemStack stack);
 
     void onSlotChanged(int slot);
+
+    default boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+        return true;
+    }
+
+    default boolean isSlotLocked(int slot) {
+        return false;
+    }
 }

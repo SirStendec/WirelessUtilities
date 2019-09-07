@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.item.augment;
 
 import cofh.api.core.IAugmentable;
+import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
@@ -168,18 +169,13 @@ public class ItemRangeAugment extends ItemAugment {
             items.add(new ItemStack(this, 1, INTERDIMENSIONAL_VALUE));
     }
 
+    @Nullable
     @Override
-    @Nonnull
-    public String getItemStackDisplayName(@Nonnull ItemStack stack) {
-        String name = getTranslationKey(stack);
+    public String getTierNameDelegate(@Nonnull ItemStack stack) {
+        if ( isInterdimensional(stack) )
+            return StringHelper.localize(getTranslationKey(stack) + ".interdimensional");
 
-        return new TextComponentTranslation(
-                "info." + WirelessUtils.MODID + ".tiered.name",
-                new TextComponentTranslation(name + ".name"),
-                isInterdimensional(stack) ?
-                        new TextComponentTranslation(name + ".interdimensional") :
-                        Level.fromAugment(stack).getName()
-        ).getUnformattedText();
+        return null;
     }
 
     @Override

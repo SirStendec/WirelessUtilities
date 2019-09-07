@@ -63,6 +63,12 @@ public class ElementSlaughterModule extends ElementFilterableModule {
     public void updateElementInformation() {
         super.updateElementInformation();
 
+        boolean locked = isLocked();
+
+        btnAsPlayer.setEnabled(!locked);
+        btnExp.setEnabled(!locked);
+        btnDrops.setEnabled(!locked);
+
         btnAsPlayer.setText(StringHelper.localize("btn." + WirelessUtils.MODID + ".mode." + (behavior.asPlayer() ? 2 : 1)));
         btnDrops.setText(getModeLabel(behavior.getDropMode()));
         btnExp.setText(getModeLabel(behavior.getExperienceMode()));

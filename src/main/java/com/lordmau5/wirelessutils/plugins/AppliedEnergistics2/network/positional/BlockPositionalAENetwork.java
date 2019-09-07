@@ -18,9 +18,10 @@ public class BlockPositionalAENetwork extends BlockBaseMachine {
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
-        return new TilePositionalAENetwork();
+    public Class<? extends TileEntity> getTileEntityClass() {
+        return TilePositionalAENetwork.class;
     }
+
 
 //    @Override
 //    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {

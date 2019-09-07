@@ -70,7 +70,10 @@ public abstract class ItemBasePositionalCard extends ItemBase implements ISlotCo
 
     @Override
     public boolean isValidForCraft(@Nonnull IRecipe recipe, @Nonnull InventoryCrafting craft, @Nonnull ItemStack stack, @Nonnull ItemStack output) {
-        return output.getItem() == this && stack.hasTagCompound();
+        if ( isLocked(stack) )
+            return false;
+
+        return output.getItem() == this;
     }
 
     @Override

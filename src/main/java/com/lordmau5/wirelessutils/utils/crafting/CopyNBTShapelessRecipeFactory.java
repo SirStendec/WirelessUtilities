@@ -11,6 +11,7 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.common.crafting.IRecipeFactory;
 import net.minecraftforge.common.crafting.JsonContext;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
@@ -35,6 +36,27 @@ public class CopyNBTShapelessRecipeFactory implements IRecipeFactory {
             super(group, input, result);
         }
 
+        @Override
+        public boolean matches(@Nonnull InventoryCrafting craft, @Nonnull World world) {
+            for (int i = 0; i < craft.getSizeInventory(); i++) {
+                ItemStack stack = craft.getStackInSlot(i);
+                if ( !stack.isEmpty() ) {
+                    Item item = stack.getItem();
+                    if ( item instanceof INBTPreservingIngredient ) {
+                        if ( !((INBTPreservingIngredient) item).isValidForCraft(this, craft, stack, output) )
+                            return false;
+
+                    } else {
+                        Block block = Block.getBlockFromItem(item);
+                        if ( block instanceof INBTPreservingIngredient && !((INBTPreservingIngredient) block).isValidForCraft(this, craft, stack, output) )
+                            return false;
+                    }
+                }
+            }
+
+            return super.matches(craft, world);
+        }
+
         @Nonnull
         @Override
         public ItemStack getCraftingResult(@Nonnull InventoryCrafting craft) {
@@ -45,13 +67,13 @@ public class CopyNBTShapelessRecipeFactory implements IRecipeFactory {
                 ItemStack stack = craft.getStackInSlot(i);
                 if ( !stack.isEmpty() ) {
                     Item item = stack.getItem();
-                    if ( item instanceof INBTPreservingIngredient && ((INBTPreservingIngredient) item).isValidForCraft(this, craft, stack, output) ) {
+                    if ( item instanceof INBTPreservingIngredient ) {
                         outTag = ((INBTPreservingIngredient) item).getNBTTagForCraft(this, craft, stack, output);
                         if ( outTag != null )
                             break;
                     } else {
                         Block block = Block.getBlockFromItem(item);
-                        if ( block instanceof INBTPreservingIngredient && ((INBTPreservingIngredient) block).isValidForCraft(this, craft, stack, output) ) {
+                        if ( block instanceof INBTPreservingIngredient ) {
                             outTag = ((INBTPreservingIngredient) block).getNBTTagForCraft(this, craft, stack, output);
                             if ( outTag != null )
                                 break;

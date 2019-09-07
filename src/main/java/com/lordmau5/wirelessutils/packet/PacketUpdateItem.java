@@ -2,6 +2,7 @@ package com.lordmau5.wirelessutils.packet;
 
 import cofh.core.network.PacketBase;
 import cofh.core.network.PacketHandler;
+import com.lordmau5.wirelessutils.item.base.IAdminEditableItem;
 import com.lordmau5.wirelessutils.item.base.IUpdateableItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
@@ -19,24 +20,35 @@ public class PacketUpdateItem extends PacketBase {
 
     }
 
-    public static void updateItem(EntityPlayer player, int slot, @Nonnull ItemStack stack) {
-        PacketHandler.sendToServer(new PacketUpdateItem()
-                .addByte(slot)
-                .addItemStack(stack)
-        );
+    public static PacketUpdateItem getUpdatePacket(boolean admin, int slot, @Nonnull ItemStack stack) {
+        PacketUpdateItem payload = new PacketUpdateItem();
+
+        payload.addBool(admin);
+        payload.addByte(slot);
+        payload.addItemStack(stack);
+
+        return payload;
+    }
+
+    public static void updateItem(EntityPlayer player, boolean admin, int slot, @Nonnull ItemStack stack) {
+        PacketHandler.sendToServer(getUpdatePacket(admin, slot, stack));
     }
 
     public void handlePacket(EntityPlayer player, boolean isServer) {
         if ( player == null || !isServer )
             return;
 
-        int slot = getByte();
-        ItemStack stack = player.inventory.getStackInSlot(slot);
-
-        Item item = stack.getItem();
-        if ( stack.isEmpty() || !(item instanceof IUpdateableItem) )
+        final boolean isAdmin = getBool();
+        final int slot = getByte();
+        final ItemStack stack = player.inventory.getStackInSlot(slot);
+        final Item item = stack.getItem();
+        if ( stack.isEmpty() )
             return;
 
-        ((IUpdateableItem) item).handleUpdatePacket(stack, player, slot, getItemStack(), this);
+        if ( isAdmin && item instanceof IAdminEditableItem )
+            ((IAdminEditableItem) item).handleAdminPacket(stack, player, slot, getItemStack(), this);
+
+        else if ( !isAdmin && item instanceof IUpdateableItem )
+            ((IUpdateableItem) item).handleUpdatePacket(stack, player, slot, getItemStack(), this);
     }
 }

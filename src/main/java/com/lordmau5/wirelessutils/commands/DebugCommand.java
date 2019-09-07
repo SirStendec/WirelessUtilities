@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.commands;
 
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.utils.mod.ModPermissions;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -32,8 +33,8 @@ public class DebugCommand extends CommandBase {
     }
 
     @Override
-    public int getRequiredPermissionLevel() {
-        return 1;
+    public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
+        return ModPermissions.COMMAND_DEBUG.hasPermission(sender);
     }
 
     @Override

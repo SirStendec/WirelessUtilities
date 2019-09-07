@@ -15,6 +15,7 @@ import com.lordmau5.wirelessutils.block.slime.BlockAngledSlime;
 import com.lordmau5.wirelessutils.block.vaporizer.BlockDirectionalVaporizer;
 import com.lordmau5.wirelessutils.block.vaporizer.BlockPositionalVaporizer;
 import com.lordmau5.wirelessutils.commands.DebugCommand;
+import com.lordmau5.wirelessutils.commands.EditItemCommand;
 import com.lordmau5.wirelessutils.commands.FluidGenCommand;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.entity.pearl.EntityChargedPearl;
@@ -42,6 +43,7 @@ import com.lordmau5.wirelessutils.item.augment.ItemCapacityAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemChunkLoadAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemCropAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemDispenserAugment;
+import com.lordmau5.wirelessutils.item.augment.ItemFacingAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemFilterAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemFluidGenAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemInventoryAugment;
@@ -91,6 +93,7 @@ import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
+import com.lordmau5.wirelessutils.utils.mod.ModPermissions;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -136,6 +139,8 @@ public class CommonProxy {
     }
 
     public void init(FMLInitializationEvent e) {
+        ModPermissions.register();
+
         NetworkRegistry.INSTANCE.registerGuiHandler(WirelessUtils.instance, new GuiHandler());
 
         PacketParticleLine.initialize();
@@ -164,6 +169,7 @@ public class CommonProxy {
     public void serverLoad(FMLServerStartingEvent event) {
         event.registerServerCommand(new DebugCommand());
         event.registerServerCommand(new FluidGenCommand());
+        event.registerServerCommand(new EditItemCommand());
     }
 
     public void handleIdMapping(FMLModIdMappingEvent event) {
@@ -336,7 +342,7 @@ public class CommonProxy {
         PluginRegistry.registerBlocks(event);
     }
 
-    private static void registerTile(Class<? extends TileEntity> klass) {
+    public static void registerTile(Class<? extends TileEntity> klass) {
         Machine machine = klass.getAnnotation(Machine.class);
         if ( machine == null )
             return;
@@ -404,6 +410,7 @@ public class CommonProxy {
         registerItem(event, new ItemSidedTransferAugment());
         registerItem(event, new ItemDispenserAugment());
         registerItem(event, new ItemFilterAugment());
+        registerItem(event, new ItemFacingAugment());
 
         registerItem(event, new ItemBaseModule());
         registerItem(event, new ItemSlaughterModule());

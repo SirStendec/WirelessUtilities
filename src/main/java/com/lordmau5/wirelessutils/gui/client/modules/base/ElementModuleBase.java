@@ -4,8 +4,10 @@ import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementContainer;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
+import com.lordmau5.wirelessutils.item.base.ItemBase;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.item.ItemStack;
 
 public class ElementModuleBase extends ElementContainer {
 
@@ -17,6 +19,12 @@ public class ElementModuleBase extends ElementContainer {
     public ElementModuleBase(GuiBaseVaporizer gui) {
         super(gui, 0, 20, 176, 222);
         this.gui = gui;
+    }
+
+    public boolean isLocked() {
+        ItemStack stack = gui.getVaporizer().getModule();
+        ItemBase item = (ItemBase) stack.getItem();
+        return item != null && item.isLocked(stack);
     }
 
     public void drawTab(boolean focused) {

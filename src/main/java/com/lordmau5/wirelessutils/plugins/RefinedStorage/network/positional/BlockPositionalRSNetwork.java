@@ -25,8 +25,8 @@ public class BlockPositionalRSNetwork extends BlockBaseMachine {
 
     @Nullable
     @Override
-    public TileEntity createTileEntity(World world, IBlockState state) {
-        return new TilePositionalRSNetwork();
+    public Class<? extends TileEntity> getTileEntityClass() {
+        return TilePositionalRSNetwork.class;
     }
 
     @Override

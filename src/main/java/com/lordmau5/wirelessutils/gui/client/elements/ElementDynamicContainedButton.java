@@ -6,7 +6,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nonnull;
-import java.util.Collections;
 import java.util.List;
 
 public class ElementDynamicContainedButton extends ElementDynamicButton {
@@ -115,40 +114,15 @@ public class ElementDynamicContainedButton extends ElementDynamicButton {
     public void addTooltip(List<String> list) {
         if ( tooltip != null ) {
             if ( tooltipLines ) {
-                String[] lines = TextHelpers.getLocalizedLines(tooltip);
-                if ( lines != null )
-                    Collections.addAll(list, lines);
-
-                /*int i = 0;
-                int blank = 0;
-                String path = tooltip + "." + i;
-                while ( StringHelper.canLocalize(path) ) {
-                    String tip = StringHelper.localize(path);
-                    if ( tip.isEmpty() )
-                        blank++;
-                    else {
-                        while ( blank > 0 ) {
-                            list.add("");
-                            blank--;
-                        }
-
-                        list.add(tip);
-                    }
-
-                    i++;
-                    path = tooltip + "." + i;
-                }*/
+                TextHelpers.addLocalizedLines(list, tooltip, null);
             } else if ( tooltipLocalized ) {
                 list.add(tooltip);
             } else
                 list.add(StringHelper.localize(tooltip));
         }
 
-        if ( tooltipExtra != null ) {
-            String[] lines = TextHelpers.getLocalizedLines(tooltipExtra);
-            if ( lines != null )
-                Collections.addAll(list, lines);
-        }
+        if ( tooltipExtra != null )
+            TextHelpers.addLocalizedLines(list, tooltipExtra, null);
     }
 
     @Override

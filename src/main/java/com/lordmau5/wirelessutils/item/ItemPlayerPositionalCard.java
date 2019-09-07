@@ -1,6 +1,9 @@
 package com.lordmau5.wirelessutils.item;
 
 import cofh.core.util.CoreUtils;
+import com.lordmau5.wirelessutils.gui.client.item.GuiPlayerCard;
+import com.lordmau5.wirelessutils.gui.container.items.ContainerPlayerCard;
+import com.lordmau5.wirelessutils.item.base.IGuiItem;
 import com.lordmau5.wirelessutils.item.base.IUpdateableItem;
 import com.lordmau5.wirelessutils.item.base.ItemBaseEntityPositionalCard;
 import com.lordmau5.wirelessutils.packet.PacketUpdateItem;
@@ -32,7 +35,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public class ItemPlayerPositionalCard extends ItemBaseEntityPositionalCard implements IUpdateableItem {
+public class ItemPlayerPositionalCard extends ItemBaseEntityPositionalCard implements IUpdateableItem, IGuiItem {
 
     public ItemPlayerPositionalCard() {
         setName("player_positional_card");
@@ -147,6 +150,14 @@ public class ItemPlayerPositionalCard extends ItemBaseEntityPositionalCard imple
         }
 
         return super.onItemRightClick(world, player, hand);
+    }
+
+    public Object getClientGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
+        return new GuiPlayerCard(new ContainerPlayerCard(stack, slot, player.inventory));
+    }
+
+    public Object getServerGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
+        return new ContainerPlayerCard(stack, slot, player.inventory);
     }
 
     public void handleUpdatePacket(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, int slot, @Nonnull ItemStack newStack, @Nonnull PacketUpdateItem packet) {
