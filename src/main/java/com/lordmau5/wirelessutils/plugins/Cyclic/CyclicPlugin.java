@@ -6,6 +6,7 @@ import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,7 +30,7 @@ public class CyclicPlugin implements IPlugin {
 
         EntityUtilities.registerHandler(itemMagicNet, new EntityUtilities.IEntityBall() {
             @Nullable
-            public Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData) {
+            public Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData, @Nullable EntityPlayer player) {
                 if ( !isFilledBall(stack) )
                     return null;
 
@@ -60,7 +61,7 @@ public class CyclicPlugin implements IPlugin {
             }
 
             @Nonnull
-            public ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
+            public ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity, @Nullable EntityPlayer player) {
                 if ( stack.isEmpty() || stack.getItem() != itemMagicNet || isFilledBall(stack) )
                     return ItemStack.EMPTY;
 

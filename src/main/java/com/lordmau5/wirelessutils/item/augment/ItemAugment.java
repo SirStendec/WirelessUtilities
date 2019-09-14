@@ -4,6 +4,7 @@ import cofh.api.core.IAugmentable;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.item.GuiAdminAugment;
+import com.lordmau5.wirelessutils.gui.client.pages.base.PageBase;
 import com.lordmau5.wirelessutils.gui.container.items.ContainerAdminAugment;
 import com.lordmau5.wirelessutils.item.base.IAdminEditableItem;
 import com.lordmau5.wirelessutils.item.base.IGuiItem;
@@ -418,6 +419,11 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements IAdminEdita
         boolean wantGui = packet.getBool();
         if ( wantGui && this instanceof IGuiItem )
             ((IGuiItem) this).openGui(player, slot);
+    }
+
+    @Nullable
+    public PageBase getAdminGuiPage(GuiAdminAugment gui) {
+        return null;
     }
 
     @Override

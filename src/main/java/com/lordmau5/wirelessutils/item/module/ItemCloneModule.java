@@ -175,6 +175,7 @@ public class ItemCloneModule extends ItemModule {
         private ItemStack entityBall = ItemStack.EMPTY;
         private boolean entityLoaded = false;
         private boolean entityBaby = false;
+        private boolean entityBoss = false;
         private float entityHealth = 0;
         private int entityCost = 0;
         private int finalCost = 0;
@@ -322,6 +323,16 @@ public class ItemCloneModule extends ItemModule {
             if ( ModConfig.vaporizers.modules.clone.requireCrystallizedVoidPearls && stack.getItem() != ModItems.itemCrystallizedVoidPearl )
                 return false;
 
+            final ModConfig.BossMode bossMode = ModConfig.vaporizers.modules.clone.bossMode;
+            if ( bossMode == ModConfig.BossMode.DISABLED || (bossMode == ModConfig.BossMode.CREATIVE_ONLY && !vaporizer.isCreative()) ) {
+                final World world = vaporizer.getWorld();
+                if ( world != null ) {
+                    final Entity entity = EntityUtilities.getEntity(stack, world, false, null);
+                    if ( entity != null && !entity.isNonBoss() )
+                        return false;
+                }
+            }
+
             final boolean isBaby = EntityUtilities.containsBabyEntity(stack);
             if ( !isBaby )
                 return true;
@@ -342,11 +353,12 @@ public class ItemCloneModule extends ItemModule {
             World world = vaporizer.getWorld();
             // No, world isn't always non-null you idiot.
             if ( world != null ) {
-                Entity entity = EntityUtilities.getEntity(stack, world, exactCopies);
+                Entity entity = EntityUtilities.getEntity(stack, world, exactCopies, null);
                 if ( entity != null ) {
                     entityLoaded = true;
                     entityCost = EntityUtilities.getBaseExperience(entity);
                     entityBaby = EntityUtilities.containsBabyEntity(stack);
+                    entityBoss = !entity.isNonBoss();
 
                     if ( entity instanceof EntityLivingBase )
                         entityHealth = ((EntityLivingBase) entity).getMaxHealth();
@@ -360,6 +372,12 @@ public class ItemCloneModule extends ItemModule {
 
         public void recalculateCost() {
             if ( !entityLoaded ) {
+                finalCost = 0;
+                return;
+            }
+
+            ModConfig.BossMode bossMode = ModConfig.vaporizers.modules.clone.bossMode;
+            if ( entityBoss && (bossMode == ModConfig.BossMode.DISABLED || (bossMode == ModConfig.BossMode.CREATIVE_ONLY && !vaporizer.isCreative())) ) {
                 finalCost = 0;
                 return;
             }
@@ -493,7 +511,7 @@ public class ItemCloneModule extends ItemModule {
             }
 
             // Now get the entity...
-            Entity entity = EntityUtilities.getEntity(modifier, world, exactCopies);
+            Entity entity = EntityUtilities.getEntity(modifier, world, exactCopies, null);
             if ( entity == null ) {
                 vaporizer.addFuel(removed);
                 return IWorkProvider.WorkResult.FAILURE_STOP;

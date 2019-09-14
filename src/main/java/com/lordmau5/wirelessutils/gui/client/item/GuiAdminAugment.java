@@ -1,7 +1,6 @@
 package com.lordmau5.wirelessutils.gui.client.item;
 
 import cofh.api.core.IAugmentable;
-import cofh.core.gui.element.ElementBase;
 import cofh.core.gui.element.ElementTextField;
 import cofh.core.gui.element.ElementTextFieldLimited;
 import cofh.core.util.helpers.StringHelper;
@@ -9,34 +8,30 @@ import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiItem;
 import com.lordmau5.wirelessutils.gui.client.elements.TabLock;
 import com.lordmau5.wirelessutils.gui.client.elements.TabOpenGui;
+import com.lordmau5.wirelessutils.gui.client.pages.base.PageBase;
 import com.lordmau5.wirelessutils.gui.container.items.ContainerAdminAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemAugment;
 import com.lordmau5.wirelessutils.proxy.CommonProxy;
 import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class GuiAdminAugment extends BaseGuiItem {
 
     public final static ResourceLocation TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/directional_machine.png");
-    public final static ResourceLocation TAB_TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/vaporizer.png");
 
     public final static String INT_CHARACTERS = "-1234567890";
     public final static String DOUBLE_CHARACTERS = ",." + INT_CHARACTERS;
 
     private final ContainerAdminAugment container;
-
-    protected boolean showItemTab = false;
-    protected boolean itemTabActive = false;
 
     private ElementTextField txtEnergyAdd;
     private ElementTextField txtEnergyMult;
@@ -49,9 +44,6 @@ public class GuiAdminAugment extends BaseGuiItem {
     private ElementTextField txtLevel;
     private ElementTextField txtMachines;
 
-    protected ArrayList<ElementBase> mainElements = new ArrayList<>();
-    protected ArrayList<ElementBase> itemElements = new ArrayList<>();
-
     public GuiAdminAugment(ContainerAdminAugment container) {
         super(container, TEXTURE);
         this.container = container;
@@ -62,11 +54,28 @@ public class GuiAdminAugment extends BaseGuiItem {
         drawName = false;
     }
 
+    public ContainerAdminAugment getContainer() {
+        return container;
+    }
+
+    @Override
+    public boolean wantsSlots() {
+        return false;
+    }
+
     @Override
     public void initGui() {
         super.initGui();
-        mainElements.clear();
-        itemElements.clear();
+
+        setMainPageTabLabel("btn." + WirelessUtils.MODID + ".main");
+
+        ItemStack stack = container.getItemStack();
+        Item item = stack.getItem();
+        if ( item instanceof ItemAugment ) {
+            PageBase page = ((ItemAugment) item).getAdminGuiPage(this);
+            if ( page != null )
+                addPage(page);
+        }
 
         addTab(new TabLock(this, container));
         addTab(new TabOpenGui(this));
@@ -353,50 +362,22 @@ public class GuiAdminAugment extends BaseGuiItem {
             }
         }.setMultiline(true).setMaxLength(Short.MAX_VALUE);
 
-        addMainElement(txtEnergyAdd);
-        addMainElement(txtEnergyMult);
-        addMainElement(txtEnergyDrain);
+        addElement(txtEnergyAdd);
+        addElement(txtEnergyMult);
+        addElement(txtEnergyDrain);
 
-        addMainElement(txtBudgetAdd);
-        addMainElement(txtBudgetMult);
+        addElement(txtBudgetAdd);
+        addElement(txtBudgetMult);
 
-        addMainElement(txtTierName);
-        addMainElement(txtLevel);
-        addMainElement(txtMachines);
+        addElement(txtTierName);
+        addElement(txtLevel);
+        addElement(txtMachines);
 
         String[] machines = container.getAllowedMachines();
         if ( machines == null )
             txtMachines.setText("");
         else
             txtMachines.setText(String.join("\n", machines));
-    }
-
-    public ElementBase addMainElement(ElementBase element) {
-        mainElements.add(element);
-        element.setVisible(!itemTabActive);
-        return addElement(element);
-    }
-
-    public ElementBase addItemElement(ElementBase element) {
-        itemElements.add(element);
-        element.setVisible(itemTabActive);
-        return addElement(element);
-    }
-
-    public void setItemTabActive(boolean active) {
-        if ( !showItemTab )
-            active = false;
-
-        if ( itemTabActive == active )
-            return;
-
-        itemTabActive = active;
-
-        for (ElementBase element : mainElements)
-            element.setVisible(!itemTabActive);
-
-        for (ElementBase element : itemElements)
-            element.setVisible(itemTabActive);
     }
 
     @Override
@@ -418,10 +399,7 @@ public class GuiAdminAugment extends BaseGuiItem {
     protected void updateElementInformation() {
         super.updateElementInformation();
 
-        if ( itemTabActive && !showItemTab )
-            setItemTabActive(false);
-
-        if ( !itemTabActive ) {
+        if ( isMainPage() ) {
             final boolean locked = container.isLocked();
 
             txtBudgetAdd.setEnabled(!locked);
@@ -469,7 +447,7 @@ public class GuiAdminAugment extends BaseGuiItem {
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
         super.drawGuiContainerForegroundLayer(mouseX, mouseY);
 
-        if ( !itemTabActive ) {
+        if ( isMainPage() ) {
             int x = xSize - 91;
 
             drawRightAlignedText("Energy Add:", x, 19, container.hasEnergyAddition() ? 0x008000 : 0x404040);
@@ -483,25 +461,5 @@ public class GuiAdminAugment extends BaseGuiItem {
             drawRightAlignedText("Required Lvl:", x, 109, container.hasRequiredLevel() ? 0x008000 : 0x404040);
             drawRightAlignedText("Machines:", x, 124, container.hasAllowedMachines() ? 0x008000 : 0x404040);
         }
-    }
-
-    @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTick, int x, int y) {
-        GlStateManager.color(1, 1, 1, 1);
-        bindTexture(TEXTURE);
-
-        drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
-        drawTexturedModalRect(guiLeft + 7, guiTop + 93, 8, 8, 162, 76);
-
-        mouseX = x - guiLeft;
-        mouseY = y - guiTop;
-
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(guiLeft, guiTop, 0.0F);
-
-        drawElements(partialTick, false);
-        drawTabs(partialTick, false);
-
-        GlStateManager.popMatrix();
     }
 }

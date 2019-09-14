@@ -88,6 +88,7 @@ public class ItemTeleportModule extends ItemFilteringModule {
             super(vaporizer);
             INPUT_GHOST = new ItemStack(ModItems.itemRangeAugment);
 
+            allowBosses = ModConfig.vaporizers.modules.teleport.targetBosses;
             allowPlayers = ModConfig.vaporizers.modules.teleport.targetPlayers;
             allowCreative = true;
 

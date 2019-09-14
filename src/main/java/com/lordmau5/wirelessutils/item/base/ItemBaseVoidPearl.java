@@ -262,7 +262,7 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
     }
 
     @Nullable
-    public Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData) {
+    public Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData, @Nullable EntityPlayer player) {
         if ( !isFilledBall(stack) )
             return null;
 
@@ -293,11 +293,17 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
     }
 
     @Nonnull
-    public ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
+    public ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity, @Nullable EntityPlayer player) {
         if ( !isValidBall(stack) || isFilledBall(stack) )
             return ItemStack.EMPTY;
 
-        if ( !(entity instanceof EntityLiving) || !entity.isEntityAlive() || !entity.isNonBoss() )
+        if ( !(entity instanceof EntityLiving) || !entity.isEntityAlive() )
+            return ItemStack.EMPTY;
+
+        if ( ModConfig.items.voidPearl.captureBosses == ModConfig.BossMode.DISABLED )
+            return ItemStack.EMPTY;
+
+        if ( ModConfig.items.voidPearl.captureBosses == ModConfig.BossMode.CREATIVE_ONLY && (player == null || !player.isCreative()) )
             return ItemStack.EMPTY;
 
         ResourceLocation key = EntityList.getKey(entity);

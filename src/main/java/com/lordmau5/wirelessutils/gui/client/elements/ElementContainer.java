@@ -10,7 +10,7 @@ import java.util.List;
 
 public abstract class ElementContainer extends ElementBase implements IContainsButtons {
 
-    private final ArrayList<ElementBase> elements = new ArrayList<>();
+    protected final ArrayList<ElementBase> elements = new ArrayList<>();
 
     public ElementContainer(GuiContainerCore gui, int posX, int posY) {
         super(gui, posX, posY);
@@ -22,6 +22,10 @@ public abstract class ElementContainer extends ElementBase implements IContainsB
 
     public GuiContainerCore getGui() {
         return gui;
+    }
+
+    public ArrayList<ElementBase> getElements() {
+        return elements;
     }
 
     /* Basic Updates */
@@ -89,7 +93,10 @@ public abstract class ElementContainer extends ElementBase implements IContainsB
         return element;
     }
 
-    protected ElementBase getElementAtPosition(int mouseX, int mouseY) {
+    public ElementBase getElementAtPosition(int mouseX, int mouseY) {
+        mouseX -= posX;
+        mouseY -= posY;
+
         for (ElementBase element : elements)
             if ( element.isVisible() && element.intersectsWith(mouseX, mouseY) )
                 return element;

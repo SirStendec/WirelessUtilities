@@ -137,7 +137,18 @@ public class ItemRangeAugment extends ItemAugment {
                 return tag.getInteger("DirectionalRange");
         }
 
-        return 3 * (stack.getMetadata() + 1);
+        int index = stack.getMetadata();
+        if ( index >= ModConfig.augments.range.maxTierDirectional )
+            return 0;
+
+        int[] range = ModConfig.augments.range.directionalBlocks;
+        if ( range == null || range.length == 0 )
+            return 0;
+
+        if ( index >= range.length || index < 0 )
+            index = range.length - 1;
+
+        return 3 * range[index];
     }
 
     public int getPositionalRange(@Nonnull ItemStack stack) {
@@ -182,21 +193,22 @@ public class ItemRangeAugment extends ItemAugment {
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
 
-        String name = stack.getTranslationKey();
-        int metadata = stack.getMetadata();
+        final String name = stack.getTranslationKey();
         boolean isInterdimensional = isInterdimensional(stack);
         int positionalRange = getPositionalRange(stack);
-        int directionalArea = 1 + (2 * (1 + metadata));
+        int directionalRange = getDirectionalRange(stack);
 
         if ( isInterdimensional && !ModConfig.augments.range.enableInterdimensional ) {
             tooltip.add(
                     new TextComponentTranslation("item." + WirelessUtils.MODID + ".disabled")
                             .setStyle(new Style().setColor(TextFormatting.RED)).getFormattedText());
 
-        } else if ( !isInterdimensional && metadata < ModConfig.augments.range.maxTierDirectional ) {
+        } else if ( !isInterdimensional && directionalRange > 0 ) {
+            directionalRange = 1 + (2 * Math.floorDiv(directionalRange, 3));
+
             tooltip.add(new TextComponentTranslation(
                     name + ".tip.directional",
-                    directionalArea, directionalArea, directionalArea
+                    directionalRange, directionalRange, directionalRange
             ).getFormattedText());
         }
 

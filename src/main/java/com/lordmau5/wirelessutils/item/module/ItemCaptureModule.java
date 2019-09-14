@@ -208,7 +208,7 @@ public class ItemCaptureModule extends ItemFilteringModule {
                 }
             }
 
-            ItemStack result = EntityUtilities.saveEntity(stack, entity);
+            ItemStack result = EntityUtilities.saveEntity(stack, entity, null);
             if ( result.isEmpty() )
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
 

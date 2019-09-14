@@ -32,7 +32,7 @@ public class ItemCrystallizedVoidPearl extends ItemBaseVoidPearl {
 
     @Nonnull
     @Override
-    public ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
+    public ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity, @Nullable EntityPlayer player) {
         return ItemStack.EMPTY;
     }
 

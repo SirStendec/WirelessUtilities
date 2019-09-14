@@ -109,9 +109,14 @@ public interface IDirectionalMachine extends IFacing {
             offset = offset.add(getOffsetHorizontal() * -facing.getAxisDirection().getOffset(), getOffsetVertical(), 0);
         }
 
-        return new Tuple<>(
-                offset.add(-rangeX, -rangeY, -rangeZ),
-                offset.add(rangeX, rangeY, rangeZ)
-        );
+        BlockPosDimension minPos = offset.add(-rangeX, -rangeY, -rangeZ);
+        BlockPosDimension maxPos = offset.add(rangeX, rangeY, rangeZ);
+
+        if ( origin.isInsideBorders() ) {
+            minPos = minPos.clipToWorld();
+            maxPos = maxPos.clipToWorld();
+        }
+
+        return new Tuple<>(minPos, maxPos);
     }
 }

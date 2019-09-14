@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemMonsterPlacer;
@@ -196,14 +197,14 @@ public class EntityUtilities {
     }
 
     @Nonnull
-    public static ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
+    public static ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity, @Nullable EntityPlayer player) {
         ResourceLocation name = EntityList.getKey(entity);
         if ( name != null )
             saveBaseExperience(name, entity);
 
         IEntityBall handler = entityBallMap.get(stack.getItem());
         if ( handler != null )
-            return handler.saveEntity(stack, entity);
+            return handler.saveEntity(stack, entity, player);
 
         return ItemStack.EMPTY;
     }
@@ -218,10 +219,10 @@ public class EntityUtilities {
     }
 
     @Nullable
-    public static Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData) {
+    public static Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData, @Nullable EntityPlayer player) {
         IEntityBall handler = entityBallMap.get(stack.getItem());
         if ( handler != null )
-            return handler.getEntity(stack, world, withData);
+            return handler.getEntity(stack, world, withData, player);
 
         return null;
     }
@@ -255,7 +256,7 @@ public class EntityUtilities {
     public static void registerSpawnEggs() {
         registerHandler(Items.SPAWN_EGG, new IEntityBall() {
             @Nullable
-            public Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData) {
+            public Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData, @Nullable EntityPlayer player) {
                 ResourceLocation name = getEntityId(stack);
                 if ( name == null )
                     return null;
@@ -285,7 +286,7 @@ public class EntityUtilities {
             }
 
             @Nonnull
-            public ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity) {
+            public ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity, @Nullable EntityPlayer player) {
                 return ItemStack.EMPTY;
             }
 
@@ -331,10 +332,11 @@ public class EntityUtilities {
          * @param stack    The ItemStack to read the entity from.
          * @param world    The World to create the entity in.
          * @param withData If true, the entity should load its NBT data from the entity ball. If false, it will not.
+         * @param player   The player using the entity ball. Can be null.
          * @return An instance of the entity. null if no entity can be loaded.
          */
         @Nullable
-        Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData);
+        Entity getEntity(@Nonnull ItemStack stack, @Nonnull World world, boolean withData, @Nullable EntityPlayer player);
 
         /**
          * Get the Class of the captured entity.
@@ -360,10 +362,11 @@ public class EntityUtilities {
          *
          * @param stack  The ItemStack to insert the entity into.
          * @param entity The entity to be inserted.
+         * @param player The player using the entity ball. May be null.
          * @return An ItemStack with the entity saved. EMPTY if this failed.
          */
         @Nonnull
-        ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity);
+        ItemStack saveEntity(@Nonnull ItemStack stack, @Nonnull Entity entity, @Nullable EntityPlayer player);
 
         /**
          * Attempt to remove the captured entity data from the entity ball, returning the

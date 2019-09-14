@@ -39,7 +39,7 @@ public class ItemVoidPearl extends ItemBaseVoidPearl {
         if ( entity.world.isRemote || isFilledBall(stack) )
             return false;
 
-        ItemStack out = saveEntity(stack, entity);
+        ItemStack out = saveEntity(stack, entity, player);
         if ( out.isEmpty() )
             return false;
 
@@ -105,8 +105,8 @@ public class ItemVoidPearl extends ItemBaseVoidPearl {
     }
 
     @Nonnull
-    public ItemStack releaseEntity(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull Vec3d pos) {
-        Entity entity = getEntity(stack, world, true);
+    public ItemStack releaseEntity(@Nonnull ItemStack stack, @Nonnull World world, @Nonnull Vec3d pos, @Nullable EntityPlayer player) {
+        Entity entity = getEntity(stack, world, true, player);
         if ( entity == null )
             return ItemStack.EMPTY;
 

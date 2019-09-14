@@ -112,20 +112,28 @@ public class EntityVoidPearl extends EntityBaseThrowable {
                 ModStats.CrystallizedPearls.addToPlayer((EntityPlayerMP) thrower);
 
         } else if ( ModItems.itemVoidPearl.isFilledBall(stack) ) {
-            ItemStack released = ModItems.itemVoidPearl.releaseEntity(stack, world, result.hitVec);
+            EntityLivingBase thrower = getThrower();
+            EntityPlayerMP player = null;
+            if ( thrower instanceof EntityPlayerMP )
+                player = (EntityPlayerMP) thrower;
+
+            ItemStack released = ModItems.itemVoidPearl.releaseEntity(stack, world, result.hitVec, player);
             if ( !released.isEmpty() ) {
                 stack.shrink(1);
                 setStack(released);
             }
 
         } else if ( entity instanceof EntityLiving ) {
-            ItemStack captured = ModItems.itemVoidPearl.saveEntity(stack, entity);
+            EntityLivingBase thrower = getThrower();
+            EntityPlayerMP player = null;
+            if ( thrower instanceof EntityPlayerMP )
+                player = (EntityPlayerMP) thrower;
+
+            ItemStack captured = ModItems.itemVoidPearl.saveEntity(stack, entity, player);
             if ( !captured.isEmpty() ) {
-                EntityLivingBase thrower = getThrower();
-                if ( thrower instanceof EntityPlayerMP ) {
-                    EntityPlayerMP playerMP = (EntityPlayerMP) thrower;
-                    ModAdvancements.FOR_THEE.trigger(playerMP);
-                    ModStats.CapturedEntities.addToPlayer(playerMP);
+                if ( player != null ) {
+                    ModAdvancements.FOR_THEE.trigger(player);
+                    ModStats.CapturedEntities.addToPlayer(player);
                 }
 
                 playSound(SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, 0.2F, 0.1F);

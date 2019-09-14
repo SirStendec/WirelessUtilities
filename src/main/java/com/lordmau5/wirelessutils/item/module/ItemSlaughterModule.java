@@ -264,10 +264,9 @@ public class ItemSlaughterModule extends ItemFilteringModule {
         public SlaughterBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack module) {
             super(vaporizer);
 
+            allowBosses = ModConfig.vaporizers.modules.slaughter.attackBosses;
             allowPlayers = ModConfig.vaporizers.modules.slaughter.targetPlayers;
             allowCreative = false;
-
-            allowBosses = ModConfig.vaporizers.modules.slaughter.attackBosses;
 
             requireAttackable = true;
             requireAlive = true;

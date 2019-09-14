@@ -6,6 +6,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.border.WorldBorder;
+import net.minecraftforge.common.DimensionManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -79,6 +81,62 @@ public class BlockPosDimension extends BlockPos {
                 this.getZ() + z,
                 getDimension(),
                 getFacing());
+    }
+
+    @Nonnull
+    public boolean isInsideBorders() {
+        World world = DimensionManager.getWorld(dimension, false);
+        if ( world == null )
+            return false;
+
+        WorldBorder border = world.getWorldBorder();
+        return border != null && border.contains(this);
+    }
+
+    @Nonnull
+    public BlockPosDimension clipToWorld() {
+        return clipToWorld(true);
+    }
+
+    @Nonnull
+    public BlockPosDimension clipToWorld(boolean includeBorders) {
+        World world = DimensionManager.getWorld(dimension, false);
+        if ( world == null )
+            return this;
+
+        int x = getX();
+        int y = getY();
+        int z = getZ();
+
+        if ( world.isOutsideBuildHeight(this) ) {
+            if ( y < 0 )
+                y = 0;
+            else if ( y >= world.getHeight() )
+                y = world.getHeight() - 1;
+        }
+
+        if ( includeBorders ) {
+            WorldBorder border = world.getWorldBorder();
+            if ( border != null && !border.contains(this) ) {
+                if ( x < border.minX() )
+                    x = (int) border.minX();
+                else if ( x > border.maxX() )
+                    x = (int) border.maxX();
+                if ( z < border.minZ() )
+                    z = (int) border.minZ();
+                else if ( z > border.maxZ() )
+                    z = (int) border.maxZ();
+            }
+        }
+
+        if ( x == getX() && y == getY() && z == getZ() )
+            return this;
+
+        return new BlockPosDimension(
+                x, y, z,
+                getDimension(),
+                getFacing()
+        );
     }
 
     @Nonnull

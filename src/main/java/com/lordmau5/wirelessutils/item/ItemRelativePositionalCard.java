@@ -28,6 +28,8 @@ import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.border.WorldBorder;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -81,21 +83,35 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard implement
     @Override
     public BlockPosDimension getTarget(@Nonnull ItemStack stack, @Nonnull BlockPosDimension origin) {
         NBTTagCompound tag = stack.getTagCompound();
-        if ( tag == null || !tag.hasKey("X") )
+        if ( !isCardConfigured(stack) )
             return null;
 
-        return new BlockPosDimension(
+        BlockPosDimension out = new BlockPosDimension(
                 origin.getX() + tag.getInteger("X"),
                 origin.getY() + tag.getInteger("Y"),
                 origin.getZ() + tag.getInteger("Z"),
                 origin.getDimension(),
                 tag.hasKey("Facing") ? EnumFacing.byIndex(tag.getByte("Facing")) : null
         );
+
+        if ( origin.isInsideBorders() ) {
+            World world = DimensionManager.getWorld(origin.getDimension(), false);
+            if ( world != null ) {
+                if ( world.isOutsideBuildHeight(out) )
+                    return null;
+
+                WorldBorder border = world.getWorldBorder();
+                if ( border != null && !border.contains(out) )
+                    return null;
+            }
+        }
+
+        return out;
     }
 
     public Vec3d getVector(@Nonnull ItemStack stack) {
         NBTTagCompound tag = stack.getTagCompound();
-        if ( tag == null )
+        if ( tag == null || !tag.hasKey("X") )
             return null;
 
         return new Vec3d(

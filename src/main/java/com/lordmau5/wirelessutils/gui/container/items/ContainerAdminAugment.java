@@ -52,7 +52,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
         wantNormalGui = want;
     }
 
-    void removeTag(String key) {
+    public void removeTag(String key) {
         if ( isLocked() )
             return;
 
@@ -68,7 +68,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
         setItemStack(stack);
     }
 
-    byte getByte(String key, byte def) {
+    public byte getByte(String key, byte def) {
         NBTTagCompound tag = stack.getTagCompound();
         if ( tag == null || !tag.hasKey(key, Constants.NBT.TAG_BYTE) )
             return def;
@@ -76,7 +76,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
         return tag.getByte(key);
     }
 
-    int getInteger(String key, int def) {
+    public int getInteger(String key, int def) {
         NBTTagCompound tag = stack.getTagCompound();
         if ( tag == null || !tag.hasKey(key, Constants.NBT.TAG_INT) )
             return def;
@@ -84,7 +84,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
         return tag.getInteger(key);
     }
 
-    double getDouble(String key, double def) {
+    public double getDouble(String key, double def) {
         NBTTagCompound tag = stack.getTagCompound();
         if ( tag == null || !tag.hasKey(key, Constants.NBT.TAG_DOUBLE) )
             return def;
@@ -92,7 +92,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
         return tag.getDouble(key);
     }
 
-    boolean getBoolean(String key, boolean def) {
+    public boolean getBoolean(String key, boolean def) {
         NBTTagCompound tag = stack.getTagCompound();
         if ( tag == null || !tag.hasKey(key, Constants.NBT.TAG_BYTE) )
             return def;
@@ -100,7 +100,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
         return tag.getBoolean(key);
     }
 
-    String getString(String key) {
+    public String getString(String key) {
         NBTTagCompound tag = stack.getTagCompound();
         if ( tag == null || !tag.hasKey(key, Constants.NBT.TAG_STRING) )
             return null;
@@ -108,7 +108,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
         return tag.getString(key);
     }
 
-    void setString(String key, String value) {
+    public void setString(String key, String value) {
         if ( isLocked() )
             return;
 
@@ -130,7 +130,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
         setItemStack(stack);
     }
 
-    void setByte(String key, byte value) {
+    public void setByte(String key, byte value) {
         if ( isLocked() )
             return;
 
@@ -143,7 +143,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
         setItemStack(stack);
     }
 
-    void setInteger(String key, int value) {
+    public void setInteger(String key, int value) {
         if ( isLocked() )
             return;
 
@@ -156,7 +156,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
         setItemStack(stack);
     }
 
-    void setDouble(String key, double value) {
+    public void setDouble(String key, double value) {
         if ( isLocked() )
             return;
 
@@ -169,7 +169,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
         setItemStack(stack);
     }
 
-    void setBoolean(String key, boolean value) {
+    public void setBoolean(String key, boolean value) {
         if ( isLocked() )
             return;
 
@@ -182,7 +182,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
         setItemStack(stack);
     }
 
-    private boolean hasTag(String key) {
+    public boolean hasTag(String key) {
         NBTTagCompound tag = stack.getTagCompound();
         return tag != null && tag.hasKey(key);
     }

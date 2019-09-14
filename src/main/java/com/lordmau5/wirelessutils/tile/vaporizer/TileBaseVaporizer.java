@@ -441,6 +441,27 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     /* Inventory */
 
+    @Override
+    public boolean canUpgrade(ItemStack upgrade) {
+        if ( upgrade.getItem() instanceof ItemModule )
+            return getModule().isEmpty() && isValidModule(upgrade);
+
+        return super.canUpgrade(upgrade);
+    }
+
+    @Override
+    public boolean installUpgrade(ItemStack upgrade) {
+        if ( upgrade.getItem() instanceof ItemModule ) {
+            if ( !getModule().isEmpty() || !isValidModule(upgrade) )
+                return false;
+
+            setModule(upgrade);
+            return true;
+        }
+
+        return super.installUpgrade(upgrade);
+    }
+
     @Nonnull
     public ItemStack insertOutputStack(@Nonnull ItemStack stack) {
         return insertOutputStack(stack, false);

@@ -9,7 +9,7 @@ import net.minecraft.inventory.Slot;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseContainer extends ContainerCore {
+public abstract class BaseContainer extends ContainerCore implements IVisibleSlotContainer {
 
     protected List<IVisibleSlot> visibleSlots;
 

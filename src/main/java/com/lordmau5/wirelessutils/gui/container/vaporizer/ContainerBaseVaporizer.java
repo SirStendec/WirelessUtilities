@@ -65,7 +65,7 @@ public class ContainerBaseVaporizer extends BaseContainerTile {
     public void addModuleSlots() {
         int slotIndex = vaporizer.getModuleOffset();
 
-        int xPos = 10;
+        int xPos = 12;
         int yPos = 8;
 
         for (int x = 0; x < 2; x++, slotIndex++)

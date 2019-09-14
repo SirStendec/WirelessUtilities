@@ -100,7 +100,12 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
         if ( !stack.hasTagCompound() )
             return null;
 
-        return BlockPosDimension.fromTag(stack.getTagCompound());
+        BlockPosDimension out = BlockPosDimension.fromTag(stack.getTagCompound());
+        World world = DimensionManager.getWorld(out.getDimension(), false);
+        if ( world != null && world.isOutsideBuildHeight(out) )
+            return null;
+
+        return out;
     }
 
     @Override

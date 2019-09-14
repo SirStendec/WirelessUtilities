@@ -16,7 +16,8 @@ public enum ModPermissions {
 
     COMMAND_FLUIDGEN,
     COMMAND_DEBUG,
-    COMMAND_EDIT_ITEM;
+    COMMAND_EDIT_ITEM,
+    COMMAND_VOIDGEN;
 
     public final String node;
     public final String desc;

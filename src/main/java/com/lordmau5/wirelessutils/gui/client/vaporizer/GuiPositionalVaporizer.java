@@ -49,7 +49,7 @@ public class GuiPositionalVaporizer extends GuiBaseVaporizer {
     protected void drawGuiContainerBackgroundLayer(float partialTick, int mouseX, int mouseY) {
         super.drawGuiContainerBackgroundLayer(partialTick, mouseX, mouseY);
 
-        if ( moduleTab )
+        if ( !isMainPage() )
             return;
 
         int xPos = guiLeft + 116;
@@ -95,7 +95,7 @@ public class GuiPositionalVaporizer extends GuiBaseVaporizer {
     protected void drawGuiContainerForegroundLayer(int x, int y) {
         super.drawGuiContainerForegroundLayer(x, y);
 
-        if ( moduleTab )
+        if ( !isMainPage() )
             return;
 
         String range = StringHelper.formatNumber(vaporizer.getRange());

@@ -72,6 +72,12 @@ public class ItemWorldAugment extends ItemAugment {
 
     @Override
     public boolean canApplyToDelegate(@Nonnull ItemStack stack, @Nonnull IAugmentable augmentable) {
+        if ( augmentable instanceof TileBaseDesublimator && !ModConfig.desublimators.allowWorldAugment )
+            return false;
+
+        if ( augmentable instanceof TileEntityBaseCondenser && !ModConfig.condensers.allowWorldAugment )
+            return false;
+
         if ( augmentable instanceof ICropAugmentable && ((ICropAugmentable) augmentable).isCropAugmented() )
             return false;
 

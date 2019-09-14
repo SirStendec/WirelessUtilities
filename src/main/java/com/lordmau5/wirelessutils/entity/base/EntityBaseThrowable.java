@@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
 import com.lordmau5.wirelessutils.block.slime.BlockAngledSlime;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.item.base.IEnhancedItem;
+import com.lordmau5.wirelessutils.utils.location.RayTracing;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -33,7 +34,6 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Map;
 
 public abstract class EntityBaseThrowable extends EntityThrowable {
@@ -210,29 +210,20 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         if ( predicate == null )
             return null;
 
-        RayTraceResult out = null;
-        List<Entity> list = this.world.getEntitiesInAABBexcluding(this, getEntityBoundingBox().expand(motionX, motionY, motionZ).grow(1D), predicate);
-        double closest = 0D;
+        Predicate<? super Entity> realPred = entity -> {
+            if ( entity == this )
+                return false;
 
-        for (Entity target : list) {
+            if ( !predicate.apply(entity) )
+                return false;
+
             if ( thrower != null && ticksExisted < 2 && ignoreEntity == null )
-                ignoreEntity = target;
+                ignoreEntity = entity;
 
-            else if ( target != this.ignoreEntity || ticksExisted >= 5 ) {
-                AxisAlignedBB bounds = target.getEntityBoundingBox().grow(0.30000001192092896D);
-                RayTraceResult result = bounds.calculateIntercept(start, end);
+            return entity != ignoreEntity || ticksExisted >= 5;
+        };
 
-                if ( result != null ) {
-                    double distance = start.squareDistanceTo(result.hitVec);
-                    if ( distance < closest || closest == 0D ) {
-                        out = new RayTraceResult(target, result.hitVec);
-                        closest = distance;
-                    }
-                }
-            }
-        }
-
-        return out;
+        return RayTracing.findEntityOnPath(world, start, end, realPred);
     }
 
     @Override

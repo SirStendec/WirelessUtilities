@@ -17,6 +17,7 @@ import com.lordmau5.wirelessutils.block.vaporizer.BlockPositionalVaporizer;
 import com.lordmau5.wirelessutils.commands.DebugCommand;
 import com.lordmau5.wirelessutils.commands.EditItemCommand;
 import com.lordmau5.wirelessutils.commands.FluidGenCommand;
+import com.lordmau5.wirelessutils.commands.VoidGenCommand;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.entity.pearl.EntityChargedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityCrystallizedVoidPearl;
@@ -170,6 +171,7 @@ public class CommonProxy {
         event.registerServerCommand(new DebugCommand());
         event.registerServerCommand(new FluidGenCommand());
         event.registerServerCommand(new EditItemCommand());
+        event.registerServerCommand(new VoidGenCommand());
     }
 
     public void handleIdMapping(FMLModIdMappingEvent event) {

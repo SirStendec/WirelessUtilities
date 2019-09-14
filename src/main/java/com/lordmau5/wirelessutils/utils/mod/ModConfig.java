@@ -197,6 +197,10 @@ public class ModConfig {
         @Config.Comment("A list of entities that cannot be placed within Void Pearls.")
         public String[] blacklist = {};
 
+        @Config.Name("Allow Capturing Bosses")
+        @Config.Comment("When enabled, entities marked as bosses can be captured within Void Pearls.")
+        public BossMode captureBosses = BossMode.DISABLED;
+
         @Config.Name("Enable Crystallization")
         @Config.Comment("Enable crafting Crystallized Void Pearls by throwing Void Pearls into an Ender Crystal.")
         public boolean enableCrystallization = true;
@@ -874,8 +878,14 @@ public class ModConfig {
         @Config.RangeInt(min = 0)
         public int maxTierDirectional = 5;
 
+        @Config.Name("Blocks per Tier - Directional")
+        @Config.Comment("Directional Machines will have their range increased by this many blocks in each direction. For example, a value of \"1\" results in a 3x3x3 area. One in each direction, including the origin block.")
+        @Config.RangeInt(min = 0)
+        // 3x3x3, 5x5x5, 7x7x7, 13x13x13, 25x25x25
+        public int[] directionalBlocks = {1, 2, 3, 6, 12};
+
         @Config.Name("Blocks Per Tier")
-        @Config.Comment("Each additional tier adds this many blocks to the range of the charger.")
+        @Config.Comment("Each additional tier adds this many blocks to the range of positional machines.")
         @Config.RangeInt(min = 1, max = 128)
         public int blocksPerTier = 16;
 
@@ -1377,6 +1387,10 @@ public class ModConfig {
         @Config.Comment("Whether or not the module should accept baby entities as entities to clone. If set to BABY_CLONES, all spawned entites will be babies.")
         public BabyCloningMode babyMode = BabyCloningMode.BABY_CLONES;
 
+        @Config.Name("Allow Cloning Bosses")
+        @Config.Comment("Whether or not the module should accept boss entities for cloning.")
+        public BossMode bossMode = BossMode.CREATIVE_ONLY;
+
         public enum BabyCloningMode {
             DISALLOW, ALLOW, BABY_CLONES;
         }
@@ -1428,6 +1442,11 @@ public class ModConfig {
         @Config.Comment("When enabled, players can be transported.")
         @Config.RequiresWorldRestart
         public boolean targetPlayers = true;
+
+        @Config.Name("Target Bosses")
+        @Config.Comment("When enabled, entities marked as bosses can be transported.")
+        @Config.RequiresWorldRestart
+        public boolean targetBosses = true;
 
         @Config.Name("Base Fuel")
         @Config.Comment("Teleporting an entity will use this much fuel, in addition to energy. The fuel value will be rounded up to the nearest integer.")
@@ -1826,6 +1845,12 @@ public class ModConfig {
         @Config.Name("Refined Storage")
         @Config.Comment("Configuration for the Refined Storage Plugin.")
         public RefinedStorage refinedStorage = new RefinedStorage();
+    }
+
+    public enum BossMode {
+        DISABLED,
+        ENABLED,
+        CREATIVE_ONLY;
     }
 
     @Mod.EventBusSubscriber(modid = WirelessUtils.MODID)
