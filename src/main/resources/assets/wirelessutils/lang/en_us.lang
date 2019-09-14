@@ -382,6 +382,8 @@ item.wirelessutils.transfer_augment.info.0=This augment greatly increases the
 item.wirelessutils.transfer_augment.info.1=rate at which a machine can transfer
 item.wirelessutils.transfer_augment.info.2=resources into its targets.
 
+item.wirelessutils.range_augment.tip.dir.volume=Directional Volume: %s Blocks
+item.wirelessutils.range_augment.tip.dir.max_side=Directional Max Range: %s
 item.wirelessutils.range_augment.tip.directional=Directional Range: %sx%sx%s
 item.wirelessutils.range_augment.tip.positional=Positional Range: %s
 item.wirelessutils.range_augment.tip.range_positional=%s Blocks
@@ -644,6 +646,8 @@ btn.wirelessutils.cost_fluid=%s (%s mB)
 btn.wirelessutils.offset.vertical=Vertical:
 btn.wirelessutils.offset.horizontal=Horizontal:
 
+btn.wirelessutils.range.volume=Volume:
+btn.wirelessutils.range.max_volume=Max Volume:
 btn.wirelessutils.range.height=Height:
 btn.wirelessutils.range.length=Length:
 btn.wirelessutils.range.width=Width:

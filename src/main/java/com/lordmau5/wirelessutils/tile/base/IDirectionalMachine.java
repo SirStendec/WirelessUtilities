@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.tile.base;
 
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -119,4 +120,176 @@ public interface IDirectionalMachine extends IFacing {
 
         return new Tuple<>(minPos, maxPos);
     }
+
+    static boolean isRangeValid(int range, int height, int length, int width) {
+        ModConfig.Common.DirectionalArea area = ModConfig.common.area;
+        if ( area == ModConfig.Common.DirectionalArea.SUM_OF_RANGES )
+            return height + length + width <= (3 * range);
+
+        else if ( area == ModConfig.Common.DirectionalArea.MAX_RANGE )
+            return length <= range && height <= range && width <= range;
+
+        else if ( area == ModConfig.Common.DirectionalArea.AREA ) {
+            range = 1 + (range * 2);
+            double blocks = Math.pow(range, 3);
+
+            height = 1 + (height * 2);
+            length = 1 + (length * 2);
+            width = 1 + (width * 2);
+
+            return ((double) height * length * width) <= blocks;
+
+        } else
+            return false;
+    }
+
+    static int getMaximumAllIncrease(int range, int height, int length, int width) {
+        ModConfig.Common.DirectionalArea area = ModConfig.common.area;
+        if ( area == ModConfig.Common.DirectionalArea.SUM_OF_RANGES ) {
+            int remaining = (range * 3) - (height + length + width);
+            if ( remaining <= 0 )
+                return 0;
+            return Math.floorDiv(remaining, 3);
+
+        } else if ( area == ModConfig.Common.DirectionalArea.MAX_RANGE ) {
+            return Math.min(range - height, Math.min(range - length, range - width));
+
+        } else if ( area == ModConfig.Common.DirectionalArea.AREA ) {
+            int maxValue = 1 + (range * 3);
+            if ( maxValue > Byte.MAX_VALUE )
+                maxValue = Byte.MAX_VALUE;
+
+            range = 1 + (range * 2);
+            double blocks = Math.pow(range, 3);
+            int added = 0;
+            int maxAdded = Math.min(maxValue - height, Math.min(maxValue - length, maxValue - width));
+
+            height = 1 + (height * 2) + 2;
+            length = 1 + (length * 2) + 2;
+            width = 1 + (width * 2) + 2;
+
+            while ( added < maxAdded && height * length * width <= blocks ) {
+                added++;
+                height += 2;
+                width += 2;
+                length += 2;
+            }
+
+            return added;
+
+        } else
+            return 0;
+    }
+
+    static int getMaximumHeightIncrease(int range, int height, int length, int width) {
+        ModConfig.Common.DirectionalArea area = ModConfig.common.area;
+        if ( area == ModConfig.Common.DirectionalArea.SUM_OF_RANGES ) {
+            int remaining = (range * 3) - (height + length + width);
+            if ( remaining <= 0 )
+                return 0;
+            return remaining;
+
+        } else if ( area == ModConfig.Common.DirectionalArea.MAX_RANGE ) {
+            return Math.max(0, range - height);
+
+        } else if ( area == ModConfig.Common.DirectionalArea.AREA ) {
+            int maxValue = 1 + (range * 3);
+            if ( maxValue > Byte.MAX_VALUE )
+                maxValue = Byte.MAX_VALUE;
+
+            range = 1 + (range * 2);
+            double blocks = Math.pow(range, 3);
+            int added = 0;
+
+            int maxAdded = maxValue - height;
+
+            height = 1 + (height * 2) + 2;
+            length = 1 + (length * 2);
+            width = 1 + (width * 2);
+
+            while ( added < maxAdded && height * length * width <= blocks ) {
+                added++;
+                height += 2;
+            }
+
+            return added;
+
+        } else
+            return 0;
+    }
+
+    static int getMaximumLengthIncrease(int range, int height, int length, int width) {
+        ModConfig.Common.DirectionalArea area = ModConfig.common.area;
+        if ( area == ModConfig.Common.DirectionalArea.SUM_OF_RANGES ) {
+            int remaining = (range * 3) - (height + length + width);
+            if ( remaining <= 0 )
+                return 0;
+            return remaining;
+
+        } else if ( area == ModConfig.Common.DirectionalArea.MAX_RANGE ) {
+            return Math.max(0, range - length);
+
+        } else if ( area == ModConfig.Common.DirectionalArea.AREA ) {
+            int maxValue = 1 + (range * 3);
+            if ( maxValue > Byte.MAX_VALUE )
+                maxValue = Byte.MAX_VALUE;
+
+            range = 1 + (range * 2);
+            double blocks = Math.pow(range, 3);
+            int added = 0;
+
+            int maxAdded = maxValue - length;
+
+            height = 1 + (height * 2);
+            length = 1 + (length * 2) + 2;
+            width = 1 + (width * 2);
+
+            while ( added < maxAdded && height * length * width <= blocks ) {
+                added++;
+                length += 2;
+            }
+
+            return added;
+
+        } else
+            return 0;
+    }
+
+    static int getMaximumWidthIncrease(int range, int height, int length, int width) {
+        ModConfig.Common.DirectionalArea area = ModConfig.common.area;
+        if ( area == ModConfig.Common.DirectionalArea.SUM_OF_RANGES ) {
+            int remaining = (range * 3) - (height + length + width);
+            if ( remaining <= 0 )
+                return 0;
+            return remaining;
+
+        } else if ( area == ModConfig.Common.DirectionalArea.MAX_RANGE ) {
+            return Math.max(0, range - width);
+
+        } else if ( area == ModConfig.Common.DirectionalArea.AREA ) {
+            int maxValue = 1 + (range * 3);
+            if ( maxValue > Byte.MAX_VALUE )
+                maxValue = Byte.MAX_VALUE;
+
+            range = 1 + (range * 2);
+            double blocks = Math.pow(range, 3);
+            int added = 0;
+
+            int maxAdded = maxValue - width;
+
+            height = 1 + (height * 2);
+            length = 1 + (length * 2);
+            width = 1 + (width * 2) + 2;
+
+            while ( added < maxAdded && height * length * width <= blocks ) {
+                added++;
+                width += 2;
+            }
+
+            return added;
+
+        } else
+            return 0;
+    }
+
 }

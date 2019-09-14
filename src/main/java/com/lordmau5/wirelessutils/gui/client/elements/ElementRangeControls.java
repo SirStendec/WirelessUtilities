@@ -5,6 +5,8 @@ import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -60,13 +62,34 @@ public class ElementRangeControls extends ElementContainer {
 
         IDirectionalMachine dir = (IDirectionalMachine) machine;
 
-        drawRange(dir.getRangeHeight(), posX - 22, posY + 4, 0);
-        drawRange(dir.getRangeLength(), posX - 22, posY + 20, 0);
-        drawRange(dir.getRangeWidth(), posX - 22, posY + 36, 0);
+        if ( GuiScreen.isAltKeyDown() ) {
+            FontRenderer fontRenderer = getFontRenderer();
 
-        gui.drawRightAlignedText(StringHelper.localize(INTL_KEY + "height"), posX - 28, posY + 4, 0x404040);
-        gui.drawRightAlignedText(StringHelper.localize(INTL_KEY + "length"), posX - 28, posY + 20, 0x404040);
-        gui.drawRightAlignedText(StringHelper.localize(INTL_KEY + "width"), posX - 28, posY + 36, 0x404040);
+            fontRenderer.drawString(StringHelper.localize(INTL_KEY + "volume"), posX - 70, posY + 4, 0x404040);
+            drawVolume(dir.getRangeHeight(), dir.getRangeLength(), dir.getRangeWidth(), posX - 62, posY + 14, 0);
+
+            if ( ModConfig.common.area == ModConfig.Common.DirectionalArea.AREA ) {
+                fontRenderer.drawString(StringHelper.localize(INTL_KEY + "max_volume"), posX - 70, posY + 28, 0x404040);
+                int range = dir.getRange();
+                drawVolume(range, range, range, posX - 62, posY + 38, 0);
+            }
+
+        } else {
+            drawRange(dir.getRangeHeight(), posX - 22, posY + 4, 0);
+            drawRange(dir.getRangeLength(), posX - 22, posY + 20, 0);
+            drawRange(dir.getRangeWidth(), posX - 22, posY + 36, 0);
+
+            gui.drawRightAlignedText(StringHelper.localize(INTL_KEY + "height"), posX - 28, posY + 4, 0x404040);
+            gui.drawRightAlignedText(StringHelper.localize(INTL_KEY + "length"), posX - 28, posY + 20, 0x404040);
+            gui.drawRightAlignedText(StringHelper.localize(INTL_KEY + "width"), posX - 28, posY + 36, 0x404040);
+        }
+    }
+
+    protected void drawVolume(int height, int length, int width, int x, int y, int color) {
+        height = 1 + (height * 2);
+        length = 1 + (length * 2);
+        width = 1 + (width * 2);
+        getFontRenderer().drawString(StringHelper.formatNumber(height * length * width), x, y, color);
     }
 
     protected void drawRange(int range, int x, int y, int color) {
@@ -86,7 +109,6 @@ public class ElementRangeControls extends ElementContainer {
         int rangeHeight = dir.getRangeHeight();
         int rangeLength = dir.getRangeLength();
         int rangeWidth = dir.getRangeWidth();
-        int remaining = range - (rangeHeight + rangeLength + rangeWidth);
 
         boolean isMulti = GuiScreen.isCtrlKeyDown();
         boolean isAll = GuiScreen.isShiftKeyDown();
@@ -95,10 +117,10 @@ public class ElementRangeControls extends ElementContainer {
             int minimum = Math.min(Math.min(rangeHeight, rangeLength), rangeWidth);
 
             boolean decEnabled = minimum > 0;
-            boolean incEnabled = remaining >= 3;
+            boolean incEnabled = IDirectionalMachine.isRangeValid(range, rangeHeight + 1, rangeLength + 1, rangeWidth + 1);
 
             String decTooltip = decEnabled ? generateTooltip(false, true, isMulti ? minimum : 1) : null;
-            String incTooltip = incEnabled ? generateTooltip(true, true, isMulti ? Math.floorDiv(remaining, 3) : 1) : null;
+            String incTooltip = incEnabled ? generateTooltip(true, true, isMulti ? IDirectionalMachine.getMaximumAllIncrease(range, rangeHeight, rangeLength, rangeWidth) : 1) : null;
 
             decHeight.setToolTipLocalized(decTooltip).setEnabled(decEnabled);
             decLength.setToolTipLocalized(decTooltip).setEnabled(decEnabled);
@@ -110,13 +132,13 @@ public class ElementRangeControls extends ElementContainer {
 
         } else {
             updateButton(decHeight, rangeHeight, false, isMulti);
-            updateButton(incHeight, remaining, true, isMulti);
+            updateButton(incHeight, IDirectionalMachine.getMaximumHeightIncrease(range, rangeHeight, rangeLength, rangeWidth), true, isMulti);
 
             updateButton(decLength, rangeLength, false, isMulti);
-            updateButton(incLength, remaining, true, isMulti);
+            updateButton(incLength, IDirectionalMachine.getMaximumLengthIncrease(range, rangeHeight, rangeLength, rangeWidth), true, isMulti);
 
             updateButton(decWidth, rangeWidth, false, isMulti);
-            updateButton(incWidth, remaining, true, isMulti);
+            updateButton(incWidth, IDirectionalMachine.getMaximumWidthIncrease(range, rangeHeight, rangeLength, rangeWidth), true, isMulti);
         }
     }
 
@@ -141,18 +163,14 @@ public class ElementRangeControls extends ElementContainer {
             return;
 
         IDirectionalMachine dir = (IDirectionalMachine) machine;
-        int amount = 1;
+
+        int range = dir.getRange();
+        int rangeHeight = dir.getRangeHeight();
+        int rangeLength = dir.getRangeLength();
+        int rangeWidth = dir.getRangeWidth();
 
         if ( GuiScreen.isShiftKeyDown() ) {
-            int rangeHeight = dir.getRangeHeight();
-            int rangeLength = dir.getRangeLength();
-            int rangeWidth = dir.getRangeWidth();
-            int remaining = dir.getRange() - (rangeHeight + rangeLength + rangeWidth);
-
-            if ( GuiScreen.isCtrlKeyDown() ) {
-                amount = Math.floorDiv(remaining, 3);
-            }
-
+            int amount;
             switch (buttonName) {
                 case "DecHeight":
                 case "DecLength":
@@ -160,41 +178,53 @@ public class ElementRangeControls extends ElementContainer {
                     amount = -1;
                     if ( GuiScreen.isCtrlKeyDown() )
                         amount = -(Math.min(Math.min(rangeHeight, rangeLength), rangeWidth));
+                    break;
 
                 case "IncHeight":
                 case "IncLength":
                 case "IncWidth":
-                    dir.setRanges(dir.getRangeHeight() + amount, dir.getRangeLength() + amount, dir.getRangeWidth() + amount);
+                    amount = 1;
+                    if ( GuiScreen.isCtrlKeyDown() )
+                        amount = IDirectionalMachine.getMaximumAllIncrease(range, rangeHeight, rangeLength, rangeWidth);
                     break;
+                default:
+                    amount = 0;
             }
 
+            dir.setRanges(rangeHeight + amount, rangeLength + amount, rangeWidth + amount);
+
         } else {
-            if ( GuiScreen.isCtrlKeyDown() )
-                amount = dir.getRange();
+            boolean max = GuiScreen.isCtrlKeyDown();
 
             switch (buttonName) {
                 case "DecHeight":
-                    dir.setRangeHeight(dir.getRangeHeight() - amount);
+                    dir.setRangeHeight(max ? 0 : rangeHeight - 1);
                     break;
 
                 case "IncHeight":
-                    dir.setRangeHeight(dir.getRangeHeight() + amount);
+                    dir.setRangeHeight(rangeHeight + (max ?
+                            IDirectionalMachine.getMaximumHeightIncrease(range, rangeHeight, rangeLength, rangeWidth) :
+                            1));
                     break;
 
                 case "DecLength":
-                    dir.setRangeLength(dir.getRangeLength() - amount);
+                    dir.setRangeLength(max ? 0 : rangeLength - 1);
                     break;
 
                 case "IncLength":
-                    dir.setRangeLength(dir.getRangeLength() + amount);
+                    dir.setRangeLength(rangeLength + (max ?
+                            IDirectionalMachine.getMaximumLengthIncrease(range, rangeHeight, rangeLength, rangeWidth) :
+                            1));
                     break;
 
                 case "DecWidth":
-                    dir.setRangeWidth(dir.getRangeWidth() - amount);
+                    dir.setRangeWidth(max ? 0 : rangeWidth - 1);
                     break;
 
                 case "IncWidth":
-                    dir.setRangeWidth(dir.getRangeWidth() + amount);
+                    dir.setRangeWidth(rangeWidth + (max ?
+                            IDirectionalMachine.getMaximumWidthIncrease(range, rangeHeight, rangeLength, rangeWidth) :
+                            1));
                     break;
             }
         }

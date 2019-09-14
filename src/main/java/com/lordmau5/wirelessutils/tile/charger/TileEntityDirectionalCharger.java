@@ -289,13 +289,16 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
     }
 
     public void setRangeHeight(int range) {
+        if ( range < 0 )
+            range = 0;
+
         if ( range == rangeHeight )
             return;
 
-        range = Math.max(0, range);
-
-        if ( range > rangeHeight && (range + rangeLength + rangeWidth) > this.range )
-            range = Math.max(0, this.range - (rangeLength + rangeWidth));
+        if ( range > rangeHeight ) {
+            while ( range > 0 && !IDirectionalMachine.isRangeValid(this.range, range, rangeLength, rangeWidth) )
+                range--;
+        }
 
         rangeHeight = range;
 
@@ -304,13 +307,16 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
     }
 
     public void setRangeLength(int range) {
+        if ( range < 0 )
+            range = 0;
+
         if ( range == rangeLength )
             return;
 
-        range = Math.max(0, range);
-
-        if ( range > rangeLength && (range + rangeHeight + rangeWidth) > this.range )
-            range = Math.max(0, this.range - (rangeHeight + rangeWidth));
+        if ( range > rangeLength ) {
+            while ( range > 0 && !IDirectionalMachine.isRangeValid(this.range, rangeHeight, range, rangeWidth) )
+                range--;
+        }
 
         rangeLength = range;
 
@@ -319,13 +325,16 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
     }
 
     public void setRangeWidth(int range) {
+        if ( range < 0 )
+            range = 0;
+
         if ( range == rangeWidth )
             return;
 
-        range = Math.max(0, range);
-
-        if ( range > rangeWidth && (range + rangeHeight + rangeLength) > this.range )
-            range = Math.max(0, this.range - (rangeHeight + rangeLength));
+        if ( range > rangeWidth ) {
+            while ( range > 0 && !IDirectionalMachine.isRangeValid(this.range, rangeHeight, rangeLength, range) )
+                range--;
+        }
 
         rangeWidth = range;
 
@@ -338,13 +347,16 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
         length = Math.max(0, length);
         width = Math.max(0, width);
 
-        while ( height + width + length > range ) {
+        while ( !IDirectionalMachine.isRangeValid(range, height, length, width) ) {
             if ( height > 0 )
                 height--;
             if ( width > 0 )
                 width--;
             if ( length > 0 )
                 length--;
+
+            if ( height == 0 && width == 0 && length == 0 )
+                break;
         }
 
         if ( height == rangeHeight && length == rangeLength && width == rangeWidth )

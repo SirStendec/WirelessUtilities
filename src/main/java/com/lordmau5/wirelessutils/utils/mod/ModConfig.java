@@ -68,6 +68,23 @@ public class ModConfig {
         public enum WorkBudgetGUIState {
             DISABLED, AUTO, ENABLED;
         }
+
+        @Config.Name("Directional Machines - Area Calculation")
+        @Config.Comment({
+                "Choose how the maximum area for a directional machine is calculated.",
+                "Sum of Ranges (LEGACY) means the sum of the Length, Width, and Height cannot exceed 3 times the maximum range.",
+                "So if you use a 7x7x7 Range Augment, for example, you could set the range to 1x1x19. 1+1+19 = 21 / 3 = 7",
+                "Max Range means the range cannot exceed the maximum range in any direction. For 7x7x7, no number can exceed 7.",
+                "Area means the maximum volume of blocks cannot exceed the volume indicated by the Range Augment, but the dimensions can differ. Additionally, the range in any direction cannot exceed three times the maximum range.",
+                "For example, for a 7x7x7 Range Augment, you could set 7x5x9, or 3x3x21, but not 1x1x343."
+        })
+        public DirectionalArea area = DirectionalArea.AREA;
+
+        public enum DirectionalArea {
+            SUM_OF_RANGES,
+            MAX_RANGE,
+            AREA;
+        }
     }
 
     public static class Items {
@@ -881,8 +898,8 @@ public class ModConfig {
         @Config.Name("Blocks per Tier - Directional")
         @Config.Comment("Directional Machines will have their range increased by this many blocks in each direction. For example, a value of \"1\" results in a 3x3x3 area. One in each direction, including the origin block.")
         @Config.RangeInt(min = 0)
-        // 3x3x3, 5x5x5, 7x7x7, 13x13x13, 25x25x25
-        public int[] directionalBlocks = {1, 2, 3, 6, 12};
+        // 3x3x3, 5x5x5, 7x7x7, 11x11x11, 17x17x17
+        public int[] directionalBlocks = {1, 2, 3, 5, 8};
 
         @Config.Name("Blocks Per Tier")
         @Config.Comment("Each additional tier adds this many blocks to the range of positional machines.")

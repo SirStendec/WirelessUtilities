@@ -148,7 +148,7 @@ public class ItemRangeAugment extends ItemAugment {
         if ( index >= range.length || index < 0 )
             index = range.length - 1;
 
-        return 3 * range[index];
+        return range[index];
     }
 
     public int getPositionalRange(@Nonnull ItemStack stack) {
@@ -204,12 +204,30 @@ public class ItemRangeAugment extends ItemAugment {
                             .setStyle(new Style().setColor(TextFormatting.RED)).getFormattedText());
 
         } else if ( !isInterdimensional && directionalRange > 0 ) {
-            directionalRange = 1 + (2 * Math.floorDiv(directionalRange, 3));
+            int range = 1 + (2 * directionalRange);
+            if ( ModConfig.common.area == ModConfig.Common.DirectionalArea.AREA ) {
+                tooltip.add(new TextComponentTranslation(
+                        name + ".tip.dir.volume",
+                        StringHelper.formatNumber(range * range * range)
+                ).getFormattedText());
 
-            tooltip.add(new TextComponentTranslation(
-                    name + ".tip.directional",
-                    directionalRange, directionalRange, directionalRange
-            ).getFormattedText());
+                tooltip.add(new TextComponentTranslation(
+                        name + ".tip.dir.max_side",
+                        StringHelper.formatNumber(range * 3)
+                ).getFormattedText());
+
+            } else {
+                tooltip.add(new TextComponentTranslation(
+                        name + ".tip.directional",
+                        range, range, range
+                ).getFormattedText());
+
+                if ( ModConfig.common.area == ModConfig.Common.DirectionalArea.SUM_OF_RANGES )
+                    tooltip.add(new TextComponentTranslation(
+                            name + ".tip.dir.max_side",
+                            StringHelper.formatNumber(1 + (directionalRange * 6))
+                    ).getFormattedText());
+            }
         }
 
         tooltip.add(new TextComponentTranslation(
