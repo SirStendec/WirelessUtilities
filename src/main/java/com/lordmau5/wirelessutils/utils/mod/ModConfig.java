@@ -1507,6 +1507,65 @@ public class ModConfig {
         public int costInterdimensional = 1000;
     }
 
+    public static class AnimalSlaughterModule {
+        @Config.Name("Enable Animal Slaughter Module")
+        @Config.Comment("Whether or not the item should be added to the game.")
+        @Config.RequiresMcRestart
+        public boolean enabled = true;
+
+        @Config.Name("Required Level")
+        @Config.Comment("Vaporizers must be at least this level in order to use this module.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
+        @Config.Name("Budget per Entity")
+        @Config.Comment("Use this much action budget for each entity attacked.")
+        @Config.RangeInt(min = 0)
+        public int budget = 25;
+
+        @Config.Name("Energy per Entity")
+        @Config.Comment("Use this much base energy for each entity attacked.")
+        @Config.RangeInt(min = 0)
+        public int energy = 1000;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for vaporizers using this module.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This module will drain this amount of RF/t from non-disabled vaporizers using them.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
+
+        @Config.Name("Pink Slime per HP - Animal")
+        @Config.Comment("This many mB of Pink Slime will be created per point of health damage dealt to animals.")
+        @Config.RangeDouble(min = 0)
+        public double animalSlime = 8;
+
+        @Config.Name("Pink Slime per HP - Other")
+        @Config.Comment("This many mB of Pink Slime will be created per point of health damage dealt to non-animals.")
+        @Config.RangeDouble(min = 0)
+        public double otherSlime = 1;
+
+        @Config.Name("Liquid Meat per HP - Animal")
+        @Config.Comment("This many mB of Liquid Meat will be created per point of health damage dealt to animals.")
+        @Config.RangeDouble(min = 0)
+        public double animalMeat = 5;
+
+        @Config.Name("Liquid Meat per HP - Other")
+        @Config.Comment("This many mB of Liquid Meat will be created per point of health damage dealt to non-animals.")
+        @Config.RangeDouble(min = 0)
+        public double otherMeat = 5;
+    }
+
     public static class SlaughterModule {
         @Config.Name("Required Level")
         @Config.Comment("Vaporizers must be at least this level in order to use this module.")
@@ -1862,6 +1921,16 @@ public class ModConfig {
         @Config.Name("Refined Storage")
         @Config.Comment("Configuration for the Refined Storage Plugin.")
         public RefinedStorage refinedStorage = new RefinedStorage();
+
+        @Config.Name("Industrial Foregoing")
+        @Config.Comment("Configuration for the Industrial Foregoing plugin.")
+        public IndustrialForegoing industrialForegoing = new IndustrialForegoing();
+    }
+
+    public static class IndustrialForegoing {
+        @Config.Name("Animal Slaughter Module")
+        @Config.Comment("Configuration for the Animal Slaughter Module for Vaporizers.")
+        public AnimalSlaughterModule animalSlaughterModule = new AnimalSlaughterModule();
     }
 
     public enum BossMode {

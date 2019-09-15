@@ -1,6 +1,8 @@
 package com.lordmau5.wirelessutils.plugins.IndustrialForegoing;
 
 import com.lordmau5.wirelessutils.plugins.IPlugin;
+import com.lordmau5.wirelessutils.plugins.IndustrialForegoing.items.ItemAnimalSlaughterModule;
+import com.lordmau5.wirelessutils.proxy.CommonProxy;
 import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.entity.Entity;
@@ -12,6 +14,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
@@ -20,8 +24,23 @@ import javax.annotation.Nullable;
 
 public class IFPlugin implements IPlugin {
 
+    @GameRegistry.ObjectHolder("wirelessutils:animal_slaughter_module")
+    public static ItemAnimalSlaughterModule itemAnimalSlaughterModule;
+
     @GameRegistry.ObjectHolder("industrialforegoing:mob_imprisonment_tool")
     public static Item itemMobImprisonmentTool;
+
+    @Override
+    public void registerItems(RegistryEvent.Register<Item> event) {
+        if ( ModConfig.plugins.industrialForegoing.animalSlaughterModule.enabled )
+            CommonProxy.registerItem(event, new ItemAnimalSlaughterModule());
+    }
+
+    @Override
+    public void registerModels(ModelRegistryEvent event) {
+        if ( ModConfig.plugins.industrialForegoing.animalSlaughterModule.enabled )
+            itemAnimalSlaughterModule.initModel();
+    }
 
     @Override
     public void init(FMLInitializationEvent event) {

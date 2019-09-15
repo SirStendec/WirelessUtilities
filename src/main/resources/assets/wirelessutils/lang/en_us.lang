@@ -161,6 +161,18 @@ item.wirelessutils.conversion_upgrade.name=Conversion Kit
 
 item.wirelessutils.base_module.name=Module Base
 
+item.wirelessutils.animal_slaughter_module.name=Animal Slaughter Module
+item.wirelessutils.animal_slaughter_module.info.0=This module will kill any living
+item.wirelessutils.animal_slaughter_module.info.1=creatures unfortunate enough to
+item.wirelessutils.animal_slaughter_module.info.2=wander into it. It produces meat
+item.wirelessutils.animal_slaughter_module.info.3=or pink slime, depending on its
+item.wirelessutils.animal_slaughter_module.info.4=configuration.
+
+item.wirelessutils.animal_slaughter_module.fluid_invalid=The Vaporizer fluid tank contains an invalid fluid.
+item.wirelessutils.animal_slaughter_module.fluid_full=The Vaporizer's fluid tank is full.
+
+item.wirelessutils.animal_slaughter_module.producing=Producing: %s
+
 item.wirelessutils.slaughter_module.name=Slaughter Module
 item.wirelessutils.slaughter_module.info.0=This module will kill any living
 item.wirelessutils.slaughter_module.info.1=creatures unfortunate enough to

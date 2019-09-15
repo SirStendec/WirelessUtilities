@@ -19,7 +19,7 @@ public class ElementFluidTankVaporizer extends ElementFluidTank {
 
     @Override
     public boolean onMousePressed(int mouseX, int mouseY, int mouseButton) throws IOException {
-        if ( !ModConfig.vaporizers.allowConversion )
+        if ( !ModConfig.vaporizers.allowConversion || vaporizer.hasSpecialFluid() )
             return super.onMousePressed(mouseX, mouseY, mouseButton);
 
         vaporizer.setFluidSwap((byte) (mouseButton == 1 ? -1 : 1));

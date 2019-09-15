@@ -300,11 +300,13 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
         if ( !(entity instanceof EntityLiving) || !entity.isEntityAlive() )
             return ItemStack.EMPTY;
 
-        if ( ModConfig.items.voidPearl.captureBosses == ModConfig.BossMode.DISABLED )
-            return ItemStack.EMPTY;
+        if ( !entity.isNonBoss() ) {
+            if ( ModConfig.items.voidPearl.captureBosses == ModConfig.BossMode.DISABLED )
+                return ItemStack.EMPTY;
 
-        if ( ModConfig.items.voidPearl.captureBosses == ModConfig.BossMode.CREATIVE_ONLY && (player == null || !player.isCreative()) )
-            return ItemStack.EMPTY;
+            if ( ModConfig.items.voidPearl.captureBosses == ModConfig.BossMode.CREATIVE_ONLY && (player == null || !player.isCreative()) )
+                return ItemStack.EMPTY;
+        }
 
         ResourceLocation key = EntityList.getKey(entity);
         if ( key == null || EntityUtilities.isBlacklisted(key) )

@@ -258,9 +258,6 @@ public class ItemSlaughterModule extends ItemFilteringModule {
         private boolean asPlayer = true;
         private boolean hasWeapon = false;
 
-        private long lastGhostTime = 0;
-        private ItemStack ghost = ItemStack.EMPTY;
-
         public SlaughterBehavior(@Nonnull TileBaseVaporizer vaporizer, @Nonnull ItemStack module) {
             super(vaporizer);
 

@@ -2,11 +2,14 @@ package com.lordmau5.wirelessutils.utils.constants;
 
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import net.minecraft.item.EnumRarity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -45,6 +48,20 @@ public class TextHelpers {
 
     public static ITextComponent getComponent(String value) {
         return new TextComponentString(value).setStyle(WHITE);
+    }
+
+    @Nullable
+    public static ITextComponent getComponent(FluidStack stack) {
+        if ( stack == null )
+            return null;
+
+        Fluid fluid = stack.getFluid();
+        if ( fluid == null )
+            return null;
+
+        EnumRarity rarity = fluid.getRarity(stack);
+        return new TextComponentString(stack.getLocalizedName())
+                .setStyle(TextHelpers.getStyle(rarity.color));
     }
 
     public static String formatRelative(long number) {
