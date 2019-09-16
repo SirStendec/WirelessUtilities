@@ -22,6 +22,7 @@ public class PageBase extends ElementContainer implements IPageTabProvider {
     private boolean tabNeedsSize = false;
     private int tabWidth = 0;
     private int tabHeight = 0;
+    private boolean tabVisible = true;
 
     public PageBase(BaseGuiContainer gui, int posX, int posY) {
         super(gui, posX, posY, gui.getXSize() - posX, gui.getYSize() - posY);
@@ -54,6 +55,15 @@ public class PageBase extends ElementContainer implements IPageTabProvider {
     }
 
     /* Tab Stuff */
+
+    public PageBase setPageTabVisible(boolean visible) {
+        tabVisible = visible;
+        return this;
+    }
+
+    public boolean isPageTabVisible() {
+        return tabVisible;
+    }
 
     public PageBase setTextColor(int color) {
         this.textColor = color;

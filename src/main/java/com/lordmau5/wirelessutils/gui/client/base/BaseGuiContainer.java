@@ -30,6 +30,7 @@ import org.lwjgl.input.Mouse;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -235,6 +236,39 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements IPage
         setCurrentPage(-1);
     }
 
+    @Nullable
+    public Rectangle getPageTabArea() {
+        final boolean drawMain = isPageTabVisible();
+        if ( !drawMain && pages == null )
+            return null;
+
+        int left = guiLeft + getPageHorizontalOffset();
+        int bottom = guiTop + getPageVerticalOffset();
+
+        int height = 0;
+        int width = 0;
+
+        if ( drawMain ) {
+            height = getPageTabHeight();
+            width = getPageTabWidth();
+        }
+
+        if ( pages != null ) {
+            for (PageBase page : pages) {
+                if ( !page.isEnabled() || !page.isVisible() || !page.isPageTabVisible() )
+                    continue;
+
+                width += page.getPageTabWidth();
+                height = Math.max(page.getPageTabHeight(), height);
+            }
+        }
+
+        if ( width == 0 && height == 0 )
+            return null;
+
+        return new Rectangle(left, bottom - height, width, height);
+    }
+
     /* Rendering Main Tab */
 
     public BaseGuiContainer setBackgroundColor(int color) {
@@ -306,7 +340,7 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements IPage
         }
     }
 
-    public boolean shouldDrawMainPage() {
+    public boolean isPageTabVisible() {
         return drawMainPage;
     }
 
@@ -529,7 +563,7 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements IPage
         if ( y >= 0 || x < 0 )
             return null;
 
-        if ( shouldDrawMainPage() ) {
+        if ( isPageTabVisible() ) {
             int width = getPageTabWidth();
             int height = getPageTabHeight();
 
@@ -543,6 +577,9 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements IPage
 
         if ( pages != null ) {
             for (PageBase page : pages) {
+                if ( !page.isEnabled() || !page.isVisible() || !page.isPageTabVisible() )
+                    continue;
+
                 int width = page.getPageTabWidth();
                 if ( page.getPageTabHeight() + y >= 0 && x < width )
                     return page;
@@ -616,7 +653,7 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements IPage
     }
 
     @Override
-    protected ElementBase getElementAtPosition(int mX, int mY) {
+    public ElementBase getElementAtPosition(int mX, int mY) {
         PageBase page = getCurrentPage();
         if ( page != null )
             return page.getElementAtPosition(mX, mY);
@@ -651,14 +688,14 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements IPage
         if ( mainPageNeedsSize )
             updateMainPageTabSize();
 
-        if ( shouldDrawMainPage() )
+        if ( isPageTabVisible() )
             x += drawPageTabForeground(x, y);
 
         if ( pages == null )
             return;
 
         for (PageBase page : pages) {
-            if ( !page.isVisible() || !page.isEnabled() )
+            if ( !page.isVisible() || !page.isEnabled() || !page.isPageTabVisible() )
                 continue;
 
             x += page.drawPageTabForeground(x, y);
@@ -713,14 +750,14 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements IPage
         if ( mainPageNeedsSize )
             updateMainPageTabSize();
 
-        if ( shouldDrawMainPage() )
+        if ( isPageTabVisible() )
             x += drawPageTabBackground(x, y);
 
         if ( pages == null )
             return;
 
         for (PageBase page : pages) {
-            if ( !page.isEnabled() || !page.isVisible() )
+            if ( !page.isEnabled() || !page.isVisible() || !page.isPageTabVisible() )
                 continue;
 
             x += page.drawPageTabBackground(x, y);

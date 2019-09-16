@@ -11,7 +11,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 
 ext.buildnumber = System.getenv("BUILD_NUMBER") ?: "dev"
 
-version = "1.7." + buildnumber
+version = "1.8." + buildnumber
 group = "com.lordmau5"
 archivesBaseName = "wirelessutils"
 

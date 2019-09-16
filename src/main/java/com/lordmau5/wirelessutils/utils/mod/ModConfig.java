@@ -1185,6 +1185,10 @@ public class ModConfig {
         @Config.Comment("Slaughter Modules will kill all living entities within the Vaporizer's working area.")
         public SlaughterModule slaughter = new SlaughterModule();
 
+        @Config.Name("Theoretical Slaughter Module")
+        @Config.Comment("The Theoretical Slaughter Module kills theoretical copies of an entity.")
+        public TheoreticalSlaughterModule theoreticalSlaughter = new TheoreticalSlaughterModule();
+
         @Config.Name("Teleportation Module")
         @Config.Comment("Teleportation Modules transport all entities within the Vaporizer's working area to a set location.")
         public TeleportModule teleport = new TeleportModule();
@@ -1710,6 +1714,104 @@ public class ModConfig {
         @Config.Name("Never Void Player Drops")
         @Config.Comment("When enabled, items dropped by killed players will never be voided by a Vaporizer.")
         public boolean neverVoidPlayers = true;
+    }
+
+    public static class TheoreticalSlaughterModule {
+        @Config.Name("Required Level")
+        @Config.Comment("Vaporizers must be at least this level in order to use this module.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
+        @Config.Name("Allow Looting")
+        @Config.Comment("Allow Theoretical Slaughter Modules to be enchanted with Looting. To be applied theoretically.")
+        @Config.RequiresWorldRestart
+        public boolean allowLooting = true;
+
+        @Config.Name("Require Crystallized Void Pearl")
+        @Config.Comment("When enabled, this module will only accept Crystallized Void Pearls as input to set the target entity.")
+        @Config.RequiresWorldRestart
+        public boolean requireCrystallizedVoidPearls = true;
+
+        @Config.Name("Budget per Entity")
+        @Config.Comment("Use this much action budget for each entity theoretically killed.")
+        @Config.RangeInt(min = 0)
+        public int budget = 50;
+
+        @Config.Name("Budget per Entity - Exact Copy")
+        @Config.Comment("Use this much additional action budget per entity when in Exact Copy mode.")
+        @Config.RangeInt(min = 0)
+        public int budgetExact = 50;
+
+        @Config.Name("Energy per Entity")
+        @Config.Comment("Use this much base energy for each entity theoretically killed.")
+        @Config.RangeInt(min = 0)
+        public int energy = 2000;
+
+        @Config.Name("Energy per Entity - Exact Copy")
+        @Config.Comment("Use this much additional energy per entity when in Exact Copy mode.")
+        @Config.RangeInt(min = 0)
+        public int energyExact = 1000;
+
+        @Config.Name("Exact Copy Factor")
+        @Config.Comment({
+                "When greater than zero, exact copies of mobs can be theoretically killed for an increased cost.",
+                "The formula will be Cost = Ceiling(Exact Copy Factor * (Base Experience * Experience Factor + Max Health * Health Factor))"
+        })
+        @Config.RangeDouble(min = 0)
+        public double exactFactor = 2;
+
+        @Config.Name("Exact Copy - Use Baby Multiplier")
+        @Config.Comment("When enabled, the baby experience multiplier is applied when theoretically killing exact copies of baby entities.")
+        @Config.RequiresWorldRestart
+        public boolean exactBaby = false;
+
+        @Config.Name("Experience Factor")
+        @Config.Comment("The cost to theoretically kill an entity is calculated as Cost = Ceiling(Base Experience * Experience Factor + Max Health * Health Factor)")
+        @Config.RangeDouble(min = 0)
+        public double expFactor = 2;
+
+        @Config.Name("Health Factor")
+        @Config.Comment("The cost to theoretically kill an entity is calculated as Cost = Ceiling(Base Experience * Experience Factor + Max Health * Health Factor)")
+        @Config.RangeDouble(min = 0)
+        public double healthFactor = 0;
+
+        @Config.Name("Allow Theoretically Killing Babies")
+        @Config.Comment("Whether or not the module should accept baby entities as entities to theoretically kill. If set to BABY_CLONES, all theoretically killed entites will be babies.")
+        public CloneModule.BabyCloningMode babyMode = CloneModule.BabyCloningMode.BABY_CLONES;
+
+        @Config.Name("Allow Theoretically Killing Bosses")
+        @Config.Comment("Whether or not the module should accept boss entities for theoretically killing.")
+        public BossMode bossMode = BossMode.CREATIVE_ONLY;
+
+        @Config.Name("Exact Copy - Energy Addition")
+        @Config.RequiresWorldRestart
+        public int exactEnergyAddition = 0;
+
+        @Config.Name("Exact Copy - Energy Drain per Tick")
+        @Config.RequiresWorldRestart
+        public int exactEnergyDrain = 0;
+
+        @Config.Name("Exact Copy - Energy Multiplier")
+        @Config.RequiresWorldRestart
+        @Config.RangeDouble(min = 0)
+        public double exactEnergyMultiplier = 1;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for vaporizers using this module.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This module will drain this amount of RF/t from non-disabled vaporizers using them.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
     }
 
     public static class Condensers {

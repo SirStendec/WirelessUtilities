@@ -69,7 +69,7 @@ public class GuiBaseVaporizer extends BaseGuiContainer {
     }
 
     @Override
-    public boolean shouldDrawMainPage() {
+    public boolean isPageTabVisible() {
         return true;
     }
 

@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.proxy;
 
 import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
+import com.lordmau5.wirelessutils.item.module.ItemTheoreticalSlaughterModule;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
 import net.minecraft.entity.Entity;
@@ -12,6 +13,7 @@ import net.minecraft.util.EntityDamageSource;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
+import net.minecraftforge.event.entity.living.LootingLevelEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -55,11 +57,20 @@ public class ServerProxy extends CommonProxy {
         DamageSource source = event.getSource();
         if ( source instanceof ItemSlaughterModule.VaporizerDamage )
             ((ItemSlaughterModule.VaporizerDamage) source).getVaporizer().onItemDrops(event);
+        else if ( source instanceof ItemTheoreticalSlaughterModule.TheoreticalDamage )
+            ((ItemTheoreticalSlaughterModule.TheoreticalDamage) source).getVaporizer().onItemDrops(event);
         else if ( source instanceof EntityDamageSource ) {
             Entity entity = source.getTrueSource();
             if ( entity instanceof TileBaseVaporizer.WUVaporizerPlayer )
                 ((TileBaseVaporizer.WUVaporizerPlayer) entity).getVaporizer().onItemDrops(event);
         }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onLootingLevel(LootingLevelEvent event) {
+        DamageSource source = event.getDamageSource();
+        if ( source instanceof ItemTheoreticalSlaughterModule.TheoreticalDamage )
+            event.setLootingLevel(((ItemTheoreticalSlaughterModule.TheoreticalDamage) source).getLooting());
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

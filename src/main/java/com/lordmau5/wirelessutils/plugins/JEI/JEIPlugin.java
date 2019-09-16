@@ -36,6 +36,7 @@ public class JEIPlugin implements IModPlugin {
         IJeiHelpers jeiHelpers = registry.getJeiHelpers();
         IGuiHelper guiHelper = jeiHelpers.getGuiHelper();
 
+        registry.addAdvancedGuiHandlers(new BaseGuiHandler());
         registry.addGhostIngredientHandler(BaseGuiContainer.class, new GhostIngredientHandler());
 
         for (Item item : CommonProxy.ITEMS) {

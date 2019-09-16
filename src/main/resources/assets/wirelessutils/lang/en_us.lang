@@ -186,6 +186,15 @@ item.wirelessutils.slaughter_module.as_player=Simulating Player
 item.wirelessutils.slaughter_module.drops=Drops: %s
 item.wirelessutils.slaughter_module.exp=Experience: %s
 
+item.wirelessutils.theoretical_slaughter_module.name=Theoretical Slaughter Module
+item.wirelessutils.theoretical_slaughter_module.info.0=This module will theoretically
+item.wirelessutils.theoretical_slaughter_module.info.1=kill theoretical duplicates of
+item.wirelessutils.theoretical_slaughter_module.info.2=a captured creature.
+
+item.wirelessutils.theoretical_slaughter_module.exact=Killing Exact Copies
+item.wirelessutils.theoretical_slaughter_module.exact.off=Do Not Kill Exact Copies
+item.wirelessutils.theoretical_slaughter_module.drops=Drops: %s
+
 item.wirelessutils.filtered_module.entry=- %s
 item.wirelessutils.filtered_module.info_list=%s Hold §e§oCtrl§r§7 for %s Items
 item.wirelessutils.filtered_module.age=Age: %s

@@ -25,6 +25,8 @@ public interface IPageTabProvider {
 
     }
 
+    boolean isPageTabVisible();
+
     int getPageTabWidth();
 
     int getPageTabHeight();

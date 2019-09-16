@@ -153,6 +153,14 @@
 		}
 	},
 	{
+		"name": "SHULKER_VOID_PEARL",
+		"ingredient": {
+			"type": "wirelessutils:void_pearl",
+			"entity": "minecraft:shulker",
+			"crystallized": true
+		}
+	},
+	{
 		"name": "ENDERMAN_VOID_PEARL",
 		"ingredient": {
 			"type": "wirelessutils:void_pearl",

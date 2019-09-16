@@ -416,7 +416,7 @@ public class ItemSlaughterModule extends ItemFilteringModule {
         @Nonnull
         @Override
         public ItemStack getInputGhost(int slot) {
-            if ( slot == 0 ) {
+            if ( slot == 0 && ModConfig.vaporizers.modules.slaughter.enableWeapon ) {
                 ItemStack ghost = ItemStack.EMPTY;
                 if ( ModConfig.vaporizers.modules.slaughter.weaponIsWhitelist )
                     ghost = pickGhost(weaponList.getGhosts());

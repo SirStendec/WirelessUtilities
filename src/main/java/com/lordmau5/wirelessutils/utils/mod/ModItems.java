@@ -32,6 +32,7 @@ import com.lordmau5.wirelessutils.item.module.ItemCloneModule;
 import com.lordmau5.wirelessutils.item.module.ItemLaunchModule;
 import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
+import com.lordmau5.wirelessutils.item.module.ItemTheoreticalSlaughterModule;
 import com.lordmau5.wirelessutils.item.pearl.ItemChargedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemCrystallizedVoidPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemFluxedPearl;
@@ -171,6 +172,9 @@ public class ModItems {
 
     @GameRegistry.ObjectHolder("wirelessutils:slaughter_module")
     public static ItemSlaughterModule itemSlaughterModule;
+
+    @GameRegistry.ObjectHolder("wirelessutils:theoretical_slaughter_module")
+    public static ItemTheoreticalSlaughterModule itemTheoreticalSlaughterModule;
 
     @GameRegistry.ObjectHolder("wirelessutils:teleport_module")
     public static ItemTeleportModule itemTeleportModule;
@@ -338,6 +342,7 @@ public class ModItems {
         itemCaptureModule.initModel();
         itemCloneModule.initModel();
         itemLaunchModule.initModel();
+        itemTheoreticalSlaughterModule.initModel();
     }
 
     @SideOnly(Side.CLIENT)

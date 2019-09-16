@@ -1624,6 +1624,17 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( lastRecipe != null && !didCraftingTicks )
             craftingTicks += level.craftingTPT;
 
+        // If we have a crafting fluid but we aren't crafting, try to fill it
+        // back into our main tank. We don't want to lose any fluid.
+        if ( craftingFluid != null && lastRecipe == null ) {
+            int amount = tank.fill(craftingFluid, true);
+            if ( amount > 0 ) {
+                craftingFluid.amount -= amount;
+                if ( craftingFluid.amount <= 0 )
+                    craftingFluid = null;
+            }
+        }
+
         if ( isCreative && inverted ) // Void Fluids
             tank.setFluid(null);
 

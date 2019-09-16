@@ -4,6 +4,7 @@ import cofh.core.gui.GuiContainerCore;
 import cofh.core.gui.element.ElementFluidTank;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityBaseCondenser;
+import net.minecraftforge.fluids.FluidStack;
 
 import java.util.List;
 
@@ -14,6 +15,10 @@ public class ElementFluidTankCondenser extends ElementFluidTank {
         super(gui, posX, posY, condenser.getTank());
 
         this.condenser = condenser;
+    }
+
+    public FluidStack getFluid() {
+        return condenser.getTankFluid();
     }
 
     @Override

@@ -359,13 +359,14 @@ public class Worker<T extends TargetInfo> {
         boolean didRemove = false;
         boolean didWork = false;
         boolean started = false;
+        boolean noAdvance = false;
 
         while ( steps > 0 ) {
             loops++;
             if ( loops > 1000000000 )
                 throw new IllegalStateException("Infinite loop in Worker.");
 
-            if ( !cacheInInventory ) {
+            if ( !cacheInInventory && !noAdvance ) {
                 if ( started ) {
                     incrementTarget(mode, didWork, didRemove);
 
@@ -376,6 +377,7 @@ public class Worker<T extends TargetInfo> {
                     started = true;
             }
 
+            noAdvance = false;
             didWork = false;
 
             T target = (isRandom ? randomList : cacheList).get(cachePosition);
@@ -433,7 +435,6 @@ public class Worker<T extends TargetInfo> {
             Entity entity = target.entity;
 
             keepWorking = true;
-            boolean noAdvance = false;
             boolean wasRemoved = false;
 
             if ( !cacheInInventory && target.processEntity && entity != null ) {
@@ -450,7 +451,8 @@ public class Worker<T extends TargetInfo> {
                 if ( !result.keepProcessing )
                     keepWorking = false;
 
-                noAdvance = result.noAdvance;
+                if ( result.noAdvance )
+                    noAdvance = true;
 
                 if ( result.remove ) {
                     wasRemoved = true;
@@ -472,7 +474,8 @@ public class Worker<T extends TargetInfo> {
                 if ( !result.keepProcessing )
                     keepWorking = false;
 
-                noAdvance = result.noAdvance;
+                if ( result.noAdvance )
+                    noAdvance = true;
 
                 if ( result.remove ) {
                     wasRemoved = true;
@@ -494,7 +497,8 @@ public class Worker<T extends TargetInfo> {
                 if ( !result.keepProcessing )
                     keepWorking = false;
 
-                noAdvance = result.noAdvance;
+                if ( result.noAdvance )
+                    noAdvance = true;
 
                 if ( result.remove ) {
                     wasRemoved = true;
@@ -502,7 +506,7 @@ public class Worker<T extends TargetInfo> {
                 }
             }
 
-            if ( target.processInventory && (tile != null || entity != null) ) {
+            if ( (cacheInInventory || !noAdvance) && target.processInventory && (tile != null || entity != null) ) {
                 if ( steps <= 0 || !keepWorking ) {
                     cacheInInventory = true;
                     return worked;

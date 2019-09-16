@@ -5,6 +5,7 @@ import cofh.core.gui.element.ElementFluidTank;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
+import net.minecraftforge.fluids.FluidStack;
 
 import java.io.IOException;
 
@@ -15,6 +16,10 @@ public class ElementFluidTankVaporizer extends ElementFluidTank {
     public ElementFluidTankVaporizer(GuiContainerCore gui, int posX, int posY, TileBaseVaporizer vaporizer) {
         super(gui, posX, posY, vaporizer.getTank());
         this.vaporizer = vaporizer;
+    }
+
+    public FluidStack getFluid() {
+        return vaporizer.getTankFluid();
     }
 
     @Override

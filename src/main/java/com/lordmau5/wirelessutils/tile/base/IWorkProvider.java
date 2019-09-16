@@ -281,6 +281,11 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
          */
         FAILURE_STOP_IN_PLACE(1, false, false, false, true),
 
+        /**
+         * Work was a success. We should continue working. We should process this target again, immediately.
+         */
+        SUCCESS_REPEAT(1, true, true, false, true),
+
         SUCCESS_STOP_REMOVE(1, true, false, true, false),
         FAILURE_STOP_REMOVE(1, false, false, true, false);
 

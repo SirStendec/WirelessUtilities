@@ -1303,6 +1303,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         boolean noAdvance = result.noAdvance;
 
         if ( result.success ) {
+            activeTargetsPerTick++;
+            remainingPerTick--;
+
             stored = getEnergyStored();
             remainingBudget -= actionCost;
             if ( stored < fullCost || remainingBudget < actionCost || remainingPerTick <= 0 ) {
@@ -1311,11 +1314,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             }
         }
 
-        if ( !result.remove ) {
+        if ( !result.remove )
             validTargetsPerTick++;
-            if ( worked )
-                activeTargetsPerTick++;
-        }
 
         if ( !didFullEntities && !stop ) {
             Class<? extends Entity> klass = behavior.getEntityClass();
@@ -1395,6 +1395,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
             if ( noAdvance && stop )
                 return WorkResult.SUCCESS_STOP_IN_PLACE;
+
+            else if ( noAdvance )
+                return WorkResult.SUCCESS_REPEAT;
 
             return stop ? WorkResult.SUCCESS_STOP : WorkResult.SUCCESS_CONTINUE;
         }
