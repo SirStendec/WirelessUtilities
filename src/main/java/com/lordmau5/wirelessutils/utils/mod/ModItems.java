@@ -1,7 +1,9 @@
 package com.lordmau5.wirelessutils.utils.mod;
 
 import cofh.api.util.ThermalExpansionHelper;
+import cofh.core.util.helpers.RecipeHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.block.base.BlockBaseMachine;
 import com.lordmau5.wirelessutils.item.ItemAbsolutePositionalCard;
 import com.lordmau5.wirelessutils.item.ItemEnderCoil;
 import com.lordmau5.wirelessutils.item.ItemGlasses;
@@ -39,9 +41,13 @@ import com.lordmau5.wirelessutils.item.pearl.ItemStabilizedEnderPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemVoidPearl;
 import com.lordmau5.wirelessutils.item.upgrade.ItemConversionUpgrade;
 import com.lordmau5.wirelessutils.item.upgrade.ItemLevelUpgrade;
+import com.lordmau5.wirelessutils.proxy.CommonProxy;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
 import com.lordmau5.wirelessutils.utils.ColorHandler;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
+import com.lordmau5.wirelessutils.utils.Level;
+import com.lordmau5.wirelessutils.utils.crafting.CopyNBTShapelessRecipeFactory;
+import net.minecraft.block.Block;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -49,6 +55,7 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.common.util.EnumHelper;
@@ -58,6 +65,8 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
+import net.minecraftforge.registries.GameData;
 
 public class ModItems {
 
@@ -179,6 +188,11 @@ public class ModItems {
     }
 
     public static void initRecipes() {
+        // Upgrades for Machines
+        if (ModConfig.upgrades.allowCrafting) {
+            generateUpgradeRecipes();
+        }
+
         int cost = ModConfig.items.fluxedPearl.chargeEnergy;
 
         // Charged Pearls
@@ -231,6 +245,53 @@ public class ModItems {
         // Sponge
         CondenserRecipeManager.addRecipe(water, new ItemStack(Blocks.SPONGE, 1, 0), new ItemStack(Blocks.SPONGE, 1, 1), 400);
 
+    }
+
+    public static void generateUpgradeRecipes() {
+        Level[] levels = Level.values();
+        if ( levels.length > 1 ) {
+            for (Block block : CommonProxy.BLOCKS) {
+                if ( block instanceof BlockBaseMachine ) {
+                    ResourceLocation baseLocation = block.getRegistryName();
+                    if ( baseLocation == null ) {
+                        continue;
+                    }
+
+                    for (int i = 1; i < levels.length; i++) {
+                        Level level = levels[i];
+
+                        // Upgrade Kit
+                        ResourceLocation upgradeLocation = new ResourceLocation(WirelessUtils.MODID, baseLocation.getPath() + "_upgrade_kit_" + i);
+                        ShapelessOreRecipe upgradeRecipe = new CopyNBTShapelessRecipeFactory.CopyNBTShapelessRecipe(upgradeLocation, RecipeHelper.buildInput(new Object[]{
+                                new ItemStack(itemLevelUpgrade, 1, i),
+                                new ItemStack(block, 1, i - 1)
+                        }), new ItemStack(block, 1, i));
+
+                        upgradeRecipe.setRegistryName(upgradeLocation);
+                        GameData.register_impl(upgradeRecipe);
+
+                        if ( i == 1 ) {
+                            continue;
+                        }
+
+                        // Conversion Kit
+                        ItemStack[] itemStacks = new ItemStack[i];
+                        for (int j = 0; j < itemStacks.length; j++) {
+                            itemStacks[j] = new ItemStack(block, 1, j);
+                        }
+
+                        ResourceLocation conversionLocation = new ResourceLocation(WirelessUtils.MODID, baseLocation.getPath() + "_conversion_kit_" + i);
+                        ShapelessOreRecipe conversionRecipe = new CopyNBTShapelessRecipeFactory.CopyNBTShapelessRecipe(conversionLocation, RecipeHelper.buildInput(new Object[]{
+                                new ItemStack(itemConversionUpgrade, 1, i),
+                                Ingredient.fromStacks(itemStacks)
+                        }), new ItemStack(block, 1, i));
+
+                        conversionRecipe.setRegistryName(conversionLocation);
+                        GameData.register_impl(conversionRecipe);
+                    }
+                }
+            }
+        }
     }
 
     @SideOnly(Side.CLIENT)
