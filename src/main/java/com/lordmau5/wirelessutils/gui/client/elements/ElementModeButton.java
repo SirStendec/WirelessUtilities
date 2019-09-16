@@ -17,6 +17,8 @@ public class ElementModeButton extends ElementDynamicButton {
     public ElementModeButton(GuiContainerCore gui, IWorkProvider provider, int posX, int posY) {
         super(gui, posX, posY, 16, 16);
         this.provider = provider;
+
+        update();
     }
 
     @Override

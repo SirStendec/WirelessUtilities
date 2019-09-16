@@ -65,6 +65,8 @@ public class TabSideControl extends TabBase implements IContainsButtons {
 
         for (int i = 0; i < 6; i++)
             addElement(buttons[i]);
+
+        updateElements();
     }
 
     public GuiContainerCore getGui() {

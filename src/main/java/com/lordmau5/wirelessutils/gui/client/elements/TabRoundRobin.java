@@ -94,6 +94,8 @@ public class TabRoundRobin extends TabBase implements IContainsButtons {
         addElement(editButton.setToolTip("btn." + WirelessUtils.MODID + ".edit"));
         addElement(saveButton.setToolTip("btn." + WirelessUtils.MODID + ".save"));
         addElement(editor);
+
+        updateElements();
     }
 
     public GuiContainerCore getGui() {
