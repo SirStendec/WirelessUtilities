@@ -132,6 +132,7 @@ import java.util.Set;
 @Mod.EventBusSubscriber
 public class CommonProxy {
 
+    public static final List<Block> BLOCKS = new ArrayList<>();
     public static final List<Item> ITEMS = new ArrayList<>();
     public static final List<Class<? extends TileEntity>> MACHINES = new ArrayList<>();
 
@@ -307,44 +308,49 @@ public class CommonProxy {
     @SuppressWarnings("unused")
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) {
-        event.getRegistry().register(new BlockDirectionalCharger());
-        event.getRegistry().register(new BlockPositionalCharger());
-        //event.getRegistry().register(new BlockChunkCharger());
+        registerBlock(event, new BlockDirectionalCharger());
+        registerBlock(event, new BlockPositionalCharger());
+        //registerBlock(event, new BlockChunkCharger());
 
-        event.getRegistry().register(new BlockDirectionalCondenser());
-        event.getRegistry().register(new BlockPositionalCondenser());
+        registerBlock(event, new BlockDirectionalCondenser());
+        registerBlock(event, new BlockPositionalCondenser());
 
-        event.getRegistry().register(new BlockDirectionalDesublimator());
-        event.getRegistry().register(new BlockPositionalDesublimator());
+        registerBlock(event, new BlockDirectionalDesublimator());
+        registerBlock(event, new BlockPositionalDesublimator());
 
-        event.getRegistry().register(new BlockDirectionalVaporizer());
-        event.getRegistry().register(new BlockPositionalVaporizer());
+        registerBlock(event, new BlockDirectionalVaporizer());
+        registerBlock(event, new BlockPositionalVaporizer());
 
-        event.getRegistry().register(new BlockPoweredAir());
-        event.getRegistry().register(new BlockPoweredRedstoneWire());
-        event.getRegistry().register(new BlockDirectionalAir());
+        registerBlock(event, new BlockPoweredAir());
+        registerBlock(event, new BlockPoweredRedstoneWire());
+        registerBlock(event, new BlockDirectionalAir());
 
-        event.getRegistry().register(new BlockAngledSlime());
+        registerBlock(event, new BlockAngledSlime());
 
         GameRegistry.registerTileEntity(TileAngledSlime.class, new ResourceLocation(WirelessUtils.MODID, "tile_angled_slime"));
 
-        registerTile(TileEntityDirectionalCharger.class);
-        registerTile(TileEntityPositionalCharger.class);
+        registerMachineTile(TileEntityDirectionalCharger.class);
+        registerMachineTile(TileEntityPositionalCharger.class);
         //registerTile(TileEntityChunkCharger.class);
 
-        registerTile(TileEntityDirectionalCondenser.class);
-        registerTile(TileEntityPositionalCondenser.class);
+        registerMachineTile(TileEntityDirectionalCondenser.class);
+        registerMachineTile(TileEntityPositionalCondenser.class);
 
-        registerTile(TileDirectionalDesublimator.class);
-        registerTile(TilePositionalDesublimator.class);
+        registerMachineTile(TileDirectionalDesublimator.class);
+        registerMachineTile(TilePositionalDesublimator.class);
 
-        registerTile(TileDirectionalVaporizer.class);
-        registerTile(TilePositionalVaporizer.class);
+        registerMachineTile(TileDirectionalVaporizer.class);
+        registerMachineTile(TilePositionalVaporizer.class);
 
         PluginRegistry.registerBlocks(event);
     }
 
-    public static void registerTile(Class<? extends TileEntity> klass) {
+    public static void registerBlock(RegistryEvent.Register<Block> event, Block block) {
+        BLOCKS.add(block);
+        event.getRegistry().register(block);
+    }
+
+    public static void registerMachineTile(Class<? extends TileEntity> klass) {
         Machine machine = klass.getAnnotation(Machine.class);
         if ( machine == null )
             return;
