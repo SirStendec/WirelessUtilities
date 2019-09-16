@@ -11,7 +11,7 @@
 			"item": "#CHARGED_PEARL"
 		},
 		"C": {
-			"item": "wirelessutils:level_upgrade",
+			"item": "wirelessutils:conversion_upgrade",
 			"data": 3
 		},
 		"E": {
