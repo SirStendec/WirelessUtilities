@@ -33,11 +33,6 @@ public class ElementAreaButton extends ElementButtonManaged {
     }
 
     @Override
-    public boolean isVisible() {
-        return super.isVisible();
-    }
-
-    @Override
     public void addTooltip(List<String> list) {
         list.add(new TextComponentTranslation("btn." + WirelessUtils.MODID + (isActive ? ".hide_area" : ".show_area")).getFormattedText());
         if ( isActive && tile.usesDefaultColor() )

@@ -17,7 +17,7 @@ public class ElementWorkBudget extends ElementBase {
     public static final ResourceLocation DEFAULT_TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/work_budget.png");
     public static final int DEFAULT_SCALE = 42;
 
-    protected IBudgetInfoProvider provider;
+    protected final IBudgetInfoProvider provider;
 
     // Always show 1 pixel if the value is non-zero.
     protected boolean alwaysShowMinimum = false;

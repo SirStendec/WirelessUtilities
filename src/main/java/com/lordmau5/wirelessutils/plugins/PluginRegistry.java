@@ -14,6 +14,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.Item;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
@@ -93,8 +94,8 @@ public class PluginRegistry {
         plugins.values().forEach(plugin -> plugin.registerItems(event));
     }
 
-    public static void registerRecipes() {
-        plugins.values().forEach(plugin -> plugin.registerRecipes());
+    public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
+        plugins.values().forEach(plugin -> plugin.registerRecipes(event));
     }
 
     @SideOnly(Side.CLIENT)

@@ -14,9 +14,9 @@ import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public class AppliedEnergistics2Plugin implements IPlugin {
@@ -32,11 +32,6 @@ public class AppliedEnergistics2Plugin implements IPlugin {
 
     @GameRegistry.ObjectHolder("appliedenergistics2:material")
     public static Item itemMaterial;
-
-    @Override
-    public void postInit(FMLPostInitializationEvent event) {
-
-    }
 
     @Override
     public void registerBlocks(RegistryEvent.Register<Block> event) {
@@ -57,7 +52,7 @@ public class AppliedEnergistics2Plugin implements IPlugin {
     }
 
     @Override
-    public void registerRecipes() {
+    public void registerRecipes(RegistryEvent.Register<IRecipe> event) {
         if ( itemQuartzOre != null && itemChargedQuartzOre != null )
             ChargerRecipeManager.addRecipe(itemQuartzOre, itemChargedQuartzOre, 8000);
 

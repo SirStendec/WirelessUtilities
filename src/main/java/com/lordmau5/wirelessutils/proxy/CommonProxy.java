@@ -166,6 +166,9 @@ public class CommonProxy {
 
     public void postInit(FMLPostInitializationEvent e) {
         PluginRegistry.postInit(e);
+
+        ModItems.itemVoidPearl.addValidEntities();
+        ModItems.itemCrystallizedVoidPearl.addValidEntities();
     }
 
     public void serverLoad(FMLServerStartingEvent event) {
@@ -362,8 +365,8 @@ public class CommonProxy {
     @SuppressWarnings("unused")
     @SubscribeEvent
     public static void registerRecipes(RegistryEvent.Register<IRecipe> event) {
-        ModItems.initRecipes();
-        PluginRegistry.registerRecipes();
+        ModItems.initRecipes(event);
+        PluginRegistry.registerRecipes(event);
     }
 
     @SuppressWarnings("unused")

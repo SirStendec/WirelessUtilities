@@ -25,7 +25,7 @@ import java.util.Set;
 
 public class TreeBehavior implements IHarvestBehavior {
 
-    private Map<Integer, Map<BlockPosDimension, TreeCache>> trees = new Int2ObjectOpenHashMap<>();
+    private final Map<Integer, Map<BlockPosDimension, TreeCache>> trees = new Int2ObjectOpenHashMap<>();
 
     private final ItemStack SHEARS = new ItemStack(Items.SHEARS);
 

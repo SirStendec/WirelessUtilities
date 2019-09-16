@@ -60,12 +60,14 @@ public abstract class ItemFilteringModule extends ItemModule {
                     StringHelper.localize("btn." + WirelessUtils.MODID + ".mode." + mode)
             ).getFormattedText());
 
-        mode = getPlayerMode(stack);
-        if ( mode != 0 )
-            tooltip.add(new TextComponentTranslation(
-                    name + ".player",
-                    StringHelper.localize("btn." + WirelessUtils.MODID + ".mode." + mode)
-            ).getFormattedText());
+        if ( allowPlayerMode() ) {
+            mode = getPlayerMode(stack);
+            if ( mode != 0 )
+                tooltip.add(new TextComponentTranslation(
+                        name + ".player",
+                        StringHelper.localize("btn." + WirelessUtils.MODID + ".mode." + mode)
+                ).getFormattedText());
+        }
 
         mode = getSneakMode(stack);
         if ( mode != 0 )
@@ -91,6 +93,10 @@ public abstract class ItemFilteringModule extends ItemModule {
                         blacklist.length
                 ).getFormattedText());
         }
+    }
+
+    public boolean allowPlayerMode() {
+        return true;
     }
 
     @Nullable
@@ -194,6 +200,9 @@ public abstract class ItemFilteringModule extends ItemModule {
     }
 
     public int getPlayerMode(@Nonnull ItemStack stack) {
+        if ( !allowPlayerMode() )
+            return 1;
+
         if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
             NBTTagCompound tag = stack.getTagCompound();
             if ( tag != null && tag.hasKey("PlayerMode") )

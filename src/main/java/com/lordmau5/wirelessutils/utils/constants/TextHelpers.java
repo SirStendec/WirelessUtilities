@@ -2,7 +2,12 @@ package com.lordmau5.wirelessutils.utils.constants;
 
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.utils.Level;
+import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.EnumRarity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
@@ -42,26 +47,40 @@ public class TextHelpers {
         return getStyle(color, obfuscated, italic).setBold(bold);
     }
 
+    public static ITextComponent getComponent(Object object) {
+        if ( object instanceof Entity )
+            return ((Entity) object).getDisplayName();
+        else if ( object instanceof ItemStack )
+            return ((ItemStack) object).getTextComponent();
+        else if ( object instanceof FluidStack ) {
+            FluidStack stack = (FluidStack) object;
+            Fluid fluid = stack.getFluid();
+            if ( fluid != null ) {
+                EnumRarity rarity = fluid.getRarity(stack);
+                return new TextComponentString(stack.getLocalizedName()).setStyle(getStyle(rarity.color));
+            }
+        } else if ( object instanceof Item )
+            return new ItemStack((Item) object).getTextComponent();
+        else if ( object instanceof Block )
+            return new ItemStack((Block) object).getTextComponent();
+        else if ( object instanceof Level )
+            return ((Level) object).getTextComponent();
+        else if ( object instanceof Integer )
+            return new TextComponentString(StringHelper.formatNumber((Integer) object));
+        else if ( object instanceof Long )
+            return new TextComponentString(StringHelper.formatNumber((Long) object));
+        else if ( object instanceof String )
+            return new TextComponentString((String) object);
+
+        return new TextComponentString(String.valueOf(object));
+    }
+
     public static ITextComponent getComponent(int value) {
         return getComponent(StringHelper.formatNumber(value));
     }
 
     public static ITextComponent getComponent(String value) {
         return new TextComponentString(value).setStyle(WHITE);
-    }
-
-    @Nullable
-    public static ITextComponent getComponent(FluidStack stack) {
-        if ( stack == null )
-            return null;
-
-        Fluid fluid = stack.getFluid();
-        if ( fluid == null )
-            return null;
-
-        EnumRarity rarity = fluid.getRarity(stack);
-        return new TextComponentString(stack.getLocalizedName())
-                .setStyle(TextHelpers.getStyle(rarity.color));
     }
 
     public static String formatRelative(long number) {

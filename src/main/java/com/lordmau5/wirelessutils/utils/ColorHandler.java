@@ -17,6 +17,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -28,7 +29,7 @@ import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRangeAugment;
 
 public class ColorHandler {
 
-    public static Map<String, Integer> fluidColorMap = new Object2IntOpenHashMap<>();
+    public static final Map<String, Integer> fluidColorMap = new Object2IntOpenHashMap<>();
 
     static {
         fluidColorMap.put("water", 0x3043D9);
@@ -108,6 +109,10 @@ public class ColorHandler {
 
     public static class Augment {
         public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("WUTint:" + tintIndex, Constants.NBT.TAG_INT) )
+                return tag.getInteger("WUTint:" + tintIndex);
+
             if ( tintIndex == 0 || tintIndex == 1 )
                 return 0xFFFFFF;
 
@@ -116,10 +121,13 @@ public class ColorHandler {
 
         public static class FluidGen {
             public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
+                NBTTagCompound tag = stack.getTagCompound();
+                if ( tag != null && tag.hasKey("WUTint:" + tintIndex, Constants.NBT.TAG_INT) )
+                    return tag.getInteger("WUTint:" + tintIndex);
+
                 if ( tintIndex == 0 || tintIndex == 1 )
                     return 0xFFFFFF;
 
-                NBTTagCompound tag = stack.getTagCompound();
                 if ( tag != null && tag.hasKey("Color") )
                     return tag.getInteger("Color");
 
@@ -130,6 +138,10 @@ public class ColorHandler {
 
         public static class Range {
             public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
+                NBTTagCompound tag = stack.getTagCompound();
+                if ( tag != null && tag.hasKey("WUTint:" + tintIndex, Constants.NBT.TAG_INT) )
+                    return tag.getInteger("WUTint:" + tintIndex);
+
                 if ( tintIndex == 0 ) {
                     if ( itemRangeAugment.isInterdimensional(stack) )
                         return 0x4DA34D;
@@ -172,6 +184,10 @@ public class ColorHandler {
 
     public static class LevelUpgrade {
         public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("WUTint:" + tintIndex, Constants.NBT.TAG_INT) )
+                return tag.getInteger("WUTint:" + tintIndex);
+
             if ( tintIndex == 0 )
                 return 0xFFFFFF;
 

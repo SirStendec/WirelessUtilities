@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 
 public class SlotFilter extends SlotFalseCopy {
 
-    private static IInventory emptyInventory = new InventoryBasic("[Null]", true, 0);
+    private static final IInventory emptyInventory = new InventoryBasic("[Null]", true, 0);
     private final IFilterHost host;
     private final int index;
 

@@ -15,6 +15,8 @@ import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
+import com.lordmau5.wirelessutils.utils.crafting.IWUCraftingMachine;
+import com.lordmau5.wirelessutils.utils.crafting.IWURecipe;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.location.TargetInfo;
 import net.minecraft.block.state.IBlockState;
@@ -43,7 +45,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy implements
-        IChunkLoadAugmentable, IInvertAugmentable, IRoundRobinMachine, ICapacityAugmentable,
+        IChunkLoadAugmentable, IInvertAugmentable, IRoundRobinMachine, ICapacityAugmentable, IWUCraftingMachine,
         ITransferAugmentable, IInventoryAugmentable, ISidedTransfer, ITickable, ISidedTransferAugmentable,
         IWorkProvider<TileEntityBaseCharger.ChargerTarget> {
 
@@ -60,6 +62,9 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     protected IterationMode iterationMode = IterationMode.ROUND_ROBIN;
     protected long roundRobin = -1;
 
+    private boolean didCraftingTicks = false;
+    private ChargerRecipeManager.ChargerRecipe lastRecipe = null;
+    private int craftingSlot = -1;
     private int craftingEnergy = 0;
     private int craftingTicks = 0;
     private long remainingPerTick;
@@ -67,9 +72,9 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     protected int validTargetsPerTick;
 
     protected boolean sideTransferAugment = false;
-    private Mode[] sideTransfer;
-    private boolean[] sideIsCached;
-    private TileEntity[] sideCache;
+    private final Mode[] sideTransfer;
+    private final boolean[] sideIsCached;
+    private final TileEntity[] sideCache;
 
     private boolean processItems = false;
 
@@ -104,6 +109,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         System.out.println("     Max Extract: " + getEnergyStorage().getFullMaxExtract());
 
         System.out.println("   Process Items: " + processItems);
+        System.out.println(" Crafting Recipe: " + lastRecipe);
         System.out.println("  Crafting Ticks: " + craftingTicks);
         System.out.println(" Crafting Energy: " + craftingEnergy);
 
@@ -383,6 +389,25 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
     /* Charger Crafting */
 
+    @Nullable
+    public IWURecipe getCurrentRecipe() {
+        return lastRecipe;
+    }
+
+    public float getCraftingProgress() {
+        if ( lastRecipe == null )
+            return 0;
+
+        return Math.min(
+                (float) craftingTicks / lastRecipe.ticks,
+                (float) craftingEnergy / lastRecipe.cost
+        );
+    }
+
+    public boolean canCraft() {
+        return processItems && !ChargerRecipeManager.getAllRecipes().isEmpty();
+    }
+
     public int getInsertSlot(IItemHandler handler, ItemStack stack) {
         if ( handler == null || stack.isEmpty() )
             return -1;
@@ -427,6 +452,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         }
 
         validTargetsPerTick = 0;
+        craftingSlot = -1;
+        lastRecipe = null;
         return validTargets;
     }
 
@@ -435,6 +462,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         super.onInactive();
         worker.clearTargetCache();
         validTargets = null;
+        lastRecipe = null;
+        craftingSlot = -1;
     }
 
     public boolean shouldProcessBlocks() {
@@ -532,19 +561,45 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
     @Nonnull
     public WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory, @Nonnull ChargerTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile, @Nullable Entity entity) {
-        if ( stack.isEmpty() )
+        if ( stack.isEmpty() ) {
+            if ( slot == craftingSlot ) {
+                lastRecipe = null;
+                craftingSlot = -1;
+            }
+
             return WorkResult.FAILURE_REMOVE;
+        }
 
         IEnergyStorage storage = stack.getCapability(CapabilityEnergy.ENERGY, null);
-        if ( storage != null )
-            return chargeStorage(storage, target.cost);
+        if ( storage != null ) {
+            if ( slot == craftingSlot ) {
+                lastRecipe = null;
+                craftingSlot = -1;
+            }
 
-        if ( !target.canCharge || inverted )
+            return chargeStorage(storage, target.cost);
+        }
+
+        if ( lastRecipe != null && slot != craftingSlot )
+            return WorkResult.FAILURE_CONTINUE;
+
+        if ( !target.canCharge || inverted ) {
+            if ( slot == craftingSlot ) {
+                lastRecipe = null;
+                craftingSlot = -1;
+            }
+
             return WorkResult.FAILURE_REMOVE;
+        }
 
         ChargerRecipeManager.ChargerRecipe recipe = ChargerRecipeManager.getRecipe(stack);
-        if ( recipe == null )
+        lastRecipe = recipe;
+        if ( recipe == null ) {
+            craftingSlot = -1;
             return WorkResult.FAILURE_REMOVE;
+        }
+
+        craftingSlot = slot;
 
         int cost = (int) (recipe.cost * augmentMultiplier);
         if ( craftingEnergy < cost && craftingEnergy + getEnergyStored() >= cost ) {
@@ -563,21 +618,34 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
             }
         }
 
+        if ( craftingTicks < recipe.ticks && !didCraftingTicks ) {
+            didCraftingTicks = true;
+            craftingTicks += level.craftingTPT;
+        }
+
         if ( craftingTicks < recipe.ticks || remainingPerTick < target.cost )
             return WorkResult.FAILURE_CONTINUE;
 
-        if ( inventory.extractItem(slot, 1, true).isEmpty() )
+        if ( inventory.extractItem(slot, 1, true).isEmpty() ) {
+            lastRecipe = null;
+            craftingSlot = -1;
             return WorkResult.FAILURE_REMOVE;
+        }
 
         IItemHandler destination = (target.useSingleChest && tile instanceof TileEntityChest) ?
                 tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, target.pos.getFacing()) :
                 inventory;
-        if ( destination == null )
+        if ( destination == null ) {
+            lastRecipe = null;
+            craftingSlot = -1;
             return WorkResult.FAILURE_REMOVE;
+        }
 
         ItemStack outStack = recipe.output.copy();
         int destSlot = getInsertSlot(destination, outStack);
         if ( destSlot == -1 ) {
+            lastRecipe = null;
+            craftingSlot = -1;
             target.canCharge = false;
             return WorkResult.FAILURE_REMOVE;
         }
@@ -587,6 +655,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         remainingPerTick -= getEnergyStorage().extractEnergy(target.cost, false);
         craftingEnergy -= cost;
         craftingTicks = 0;
+        lastRecipe = null;
+        craftingSlot = -1;
         activeTargetsPerTick++;
 
         if ( stack.getCount() == 0 )
@@ -782,10 +852,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         }
 
         tickActive();
-
-        craftingTicks += level.craftingTPT;
-        if ( craftingTicks < 0 )
-            craftingTicks = 0;
+        didCraftingTicks = false;
 
         long total;
 
@@ -797,9 +864,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
         } else {
             total = getMaxExtract();
-            long stored = energy;
-            if ( stored < total )
-                total = stored;
+            if ( energy < total )
+                total = energy;
         }
 
         remainingPerTick = total;
@@ -809,6 +875,11 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
             remainingPerTick -= extractEnergy(augmentDrain, false);
 
         setActive(worker.performWork());
+
+        // While crafting, we always want to advance the ticks, even if we
+        // didn't hit a crafting target this loop.
+        if ( lastRecipe != null && !didCraftingTicks )
+            craftingTicks += level.craftingTPT;
 
         if ( inverted && augmentDrain > 0 )
             extractEnergy(augmentDrain, false);
@@ -896,6 +967,9 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         payload.addLong(roundRobin);
         payload.addInt(validTargetsPerTick);
         payload.addInt(activeTargetsPerTick);
+        payload.addInt(craftingTicks);
+        payload.addInt(craftingEnergy);
+        payload.addItemStack(lastRecipe == null ? ItemStack.EMPTY : lastRecipe.input);
 
         return payload;
     }
@@ -909,6 +983,10 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         setRoundRobin(payload.getLong());
         validTargetsPerTick = payload.getInt();
         activeTargetsPerTick = payload.getInt();
+        craftingTicks = payload.getInt();
+        craftingEnergy = payload.getInt();
+        ItemStack recipe = payload.getItemStack();
+        lastRecipe = recipe.isEmpty() ? null : ChargerRecipeManager.getRecipe(recipe);
     }
 
     @Override

@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class CropBehavior implements IHarvestBehavior {
 
-    public Set<Block> targets;
+    public final Set<Block> targets;
     public int priority = 0;
 
     public CropBehavior(Block... targets) {

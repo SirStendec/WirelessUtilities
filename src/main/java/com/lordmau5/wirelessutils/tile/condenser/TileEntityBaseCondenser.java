@@ -25,6 +25,8 @@ import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
 import com.lordmau5.wirelessutils.utils.FluidTank;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import com.lordmau5.wirelessutils.utils.crafting.IWUCraftingMachine;
+import com.lordmau5.wirelessutils.utils.crafting.IWURecipe;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.location.TargetInfo;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
@@ -72,7 +74,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy implements
-        IConfigurableWorldTickRate,
+        IConfigurableWorldTickRate, IWUCraftingMachine,
         IChunkLoadAugmentable, IRoundRobinMachine, IWorldAugmentable, ITransferAugmentable,
         ICapacityAugmentable, IInventoryAugmentable, IInvertAugmentable, ITickable,
         IFluidGenAugmentable, ISidedTransfer, ISidedTransferAugmentable,
@@ -102,6 +104,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     protected IterationMode iterationMode = IterationMode.ROUND_ROBIN;
     private int roundRobin = -1;
 
+    private boolean didCraftingTicks = false;
+    private CondenserRecipeManager.CondenserRecipe lastRecipe = null;
+    private int craftingSlot = -1;
     private FluidStack craftingFluid = null;
     private int craftingTicks = 0;
     private byte gatherTick = 0;
@@ -121,9 +126,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     private int fluidGenCost = 0;
 
     private boolean sideTransferAugment = false;
-    private Mode[] sideTransfer;
-    private boolean[] sideIsCached;
-    private TileEntity[] sideCache;
+    private final Mode[] sideTransfer;
+    private final boolean[] sideIsCached;
+    private final TileEntity[] sideCache;
 
 
     public TileEntityBaseCondenser() {
@@ -394,6 +399,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         System.out.println("   Burst Amount: " + burstAmount);
         System.out.println(" Crafting Ticks: " + craftingTicks);
         System.out.println(" Crafting Fluid: " + debugPrintStack(craftingFluid));
+        System.out.println("Crafting Recipe: " + lastRecipe);
+        System.out.println("  Crafting Slot: " + craftingSlot);
         System.out.println("       Capacity: " + tank.getCapacity());
         System.out.println("       Contents: " + debugPrintStack(tank.getFluid()));
         System.out.println("    Light Level: " + lightValue);
@@ -737,6 +744,25 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     /* Condenser Crafting */
 
+    @Nullable
+    public IWURecipe getCurrentRecipe() {
+        return lastRecipe;
+    }
+
+    public float getCraftingProgress() {
+        if ( lastRecipe == null )
+            return 0;
+
+        return Math.min(
+                (float) craftingTicks / lastRecipe.ticks,
+                craftingFluid == null ? 0 : ((float) craftingFluid.amount / lastRecipe.fluid.amount)
+        );
+    }
+
+    public boolean canCraft() {
+        return processItems && !CondenserRecipeManager.getAllRecipes().isEmpty();
+    }
+
     public int getInsertSlot(IItemHandler handler, ItemStack stack) {
         if ( handler == null || stack.isEmpty() )
             return -1;
@@ -811,6 +837,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( world == null || !world.isRemote ) {
             validTargetsPerTick = 0;
             maxEnergyPerTick = 0;
+            lastRecipe = null;
+            craftingSlot = -1;
         }
 
         return validTargets;
@@ -821,6 +849,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         super.onInactive();
         worker.clearTargetCache();
         validTargets = null;
+        lastRecipe = null;
+        craftingSlot = -1;
     }
 
     public boolean shouldProcessBlocks() {
@@ -1163,8 +1193,14 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     public WorkResult performWorkItem(@Nonnull ItemStack stack, int slot, @Nonnull IItemHandler inventory,
                                       @Nonnull CondenserTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile,
                                       @Nullable Entity entity) {
-        if ( stack.isEmpty() )
+        if ( stack.isEmpty() ) {
+            if ( slot == craftingSlot ) {
+                lastRecipe = null;
+                craftingSlot = -1;
+            }
+
             return WorkResult.FAILURE_REMOVE;
+        }
 
         if ( getEnergyStored() < baseEnergy )
             return WorkResult.FAILURE_STOP_IN_PLACE;
@@ -1177,6 +1213,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         IFluidHandlerItem handler = stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
         if ( handler != null ) {
+            if ( slot == craftingSlot ) {
+                lastRecipe = null;
+                craftingSlot = -1;
+            }
+
             if ( burstAmount < Fluid.BUCKET_VOLUME ) {
                 if ( !burstTick ) {
                     burstAmount = burstAmount == -1 ? remainingPerTick : burstAmount + remainingPerTick;
@@ -1215,12 +1256,26 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                 return WorkResult.FAILURE_CONTINUE;
         }
 
-        if ( !target.canCraft || inverted )
+        if ( lastRecipe != null && slot != craftingSlot )
+            return WorkResult.FAILURE_CONTINUE;
+
+        if ( !target.canCraft || inverted ) {
+            if ( slot == craftingSlot ) {
+                lastRecipe = null;
+                craftingSlot = -1;
+            }
+
             return WorkResult.FAILURE_REMOVE;
+        }
 
         CondenserRecipeManager.CondenserRecipe recipe = CondenserRecipeManager.getRecipe(fluid, stack);
-        if ( recipe == null )
+        lastRecipe = recipe;
+        if ( recipe == null ) {
+            craftingSlot = -1;
             return WorkResult.FAILURE_REMOVE;
+        }
+
+        craftingSlot = slot;
 
         if ( craftingFluid == null || !craftingFluid.isFluidEqual(fluid) )
             craftingFluid = new FluidStack(fluid.getFluid(), 0);
@@ -1232,10 +1287,21 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             remainingPerTick -= added;
         }
 
+        if ( craftingTicks < recipe.ticks && !didCraftingTicks ) {
+            didCraftingTicks = true;
+            craftingTicks += level.craftingTPT;
+        }
+
         int totalCost = (int) (recipe.cost * augmentMultiplier) + baseEnergy + target.cost;
         if ( craftingTicks < recipe.ticks || craftingFluid.amount < recipe.fluid.amount || fluid.amount < craftingFluid.amount || getEnergyStored() < totalCost ) {
-            if ( totalCost > getMaxEnergyStored() )
+            if ( totalCost > getMaxEnergyStored() ) {
+                if ( slot == craftingSlot ) {
+                    lastRecipe = null;
+                    craftingSlot = -1;
+                }
+
                 return WorkResult.FAILURE_REMOVE;
+            }
 
             if ( added > 0 ) {
                 activeTargetsPerTick++;
@@ -1244,18 +1310,35 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             return WorkResult.FAILURE_STOP_IN_PLACE;
         }
 
-        if ( inventory.extractItem(slot, 1, true).isEmpty() )
+        if ( inventory.extractItem(slot, 1, true).isEmpty() ) {
+            if ( slot == craftingSlot ) {
+                lastRecipe = null;
+                craftingSlot = -1;
+            }
+
             return WorkResult.FAILURE_REMOVE;
+        }
 
         IItemHandler destination = (target.useSingleChest && tile instanceof TileEntityChest) ?
                 tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, target.pos.getFacing()) :
                 inventory;
-        if ( destination == null )
+        if ( destination == null ) {
+            if ( slot == craftingSlot ) {
+                lastRecipe = null;
+                craftingSlot = -1;
+            }
+
             return WorkResult.FAILURE_REMOVE;
+        }
 
         ItemStack outStack = recipe.output.copy();
         int destSlot = getInsertSlot(destination, outStack);
         if ( destSlot == -1 ) {
+            if ( slot == craftingSlot ) {
+                lastRecipe = null;
+                craftingSlot = -1;
+            }
+
             target.canCraft = false;
             return WorkResult.FAILURE_REMOVE;
         }
@@ -1267,6 +1350,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         craftingFluid.amount -= recipe.fluid.amount;
         activeTargetsPerTick++;
         craftingTicks = 0;
+        lastRecipe = null;
+        craftingSlot = -1;
 
         if ( stack.getCount() == 0 )
             return remainingPerTick <= 0 ? WorkResult.SUCCESS_STOP_REMOVE : WorkResult.SUCCESS_REMOVE;
@@ -1524,7 +1609,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         }
 
         tickActive();
-        craftingTicks += level.craftingTPT;
+        didCraftingTicks = false;
 
         int total = inverted ? tank.getCapacity() : tank.getFluidAmount();
         if ( total > fluidMaxRate )
@@ -1533,6 +1618,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         remainingPerTick = total;
         setActive(worker.performWork());
         fluidPerTick = total - remainingPerTick;
+
+        // While crafting, we always want to advance the ticks, even if we
+        // didn't hit a crafting target this loop.
+        if ( lastRecipe != null && !didCraftingTicks )
+            craftingTicks += level.craftingTPT;
 
         if ( isCreative && inverted ) // Void Fluids
             tank.setFluid(null);
@@ -1659,6 +1749,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         payload.addInt(fluidPerTick);
         payload.addBool(locked);
         payload.addFluidStack(lockStack);
+
+        payload.addInt(craftingTicks);
+        payload.addFluidStack(craftingFluid);
+        payload.addItemStack(lastRecipe == null ? ItemStack.EMPTY : lastRecipe.input);
+
         return payload;
     }
 
@@ -1681,6 +1776,14 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             setLocked(locked);
         else
             setLocked(lockStack);
+
+        craftingTicks = payload.getInt();
+        craftingFluid = payload.getFluidStack();
+        ItemStack recipe = payload.getItemStack();
+        if ( recipe.isEmpty() )
+            lastRecipe = null;
+        else
+            lastRecipe = CondenserRecipeManager.getRecipe(craftingFluid == null ? getTankFluid() : craftingFluid, recipe);
     }
 
     @Override

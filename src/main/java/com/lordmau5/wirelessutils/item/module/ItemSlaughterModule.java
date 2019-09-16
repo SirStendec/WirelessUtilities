@@ -37,7 +37,7 @@ import java.util.List;
 
 public class ItemSlaughterModule extends ItemFilteringModule {
 
-    public static CachedItemList weaponList = new CachedItemList();
+    public static final CachedItemList weaponList = new CachedItemList();
 
     static {
         weaponList.addInput(ModConfig.vaporizers.modules.slaughter.weaponList);
@@ -47,6 +47,11 @@ public class ItemSlaughterModule extends ItemFilteringModule {
     public ItemSlaughterModule() {
         super();
         setName("slaughter_module");
+    }
+
+    @Override
+    public boolean allowPlayerMode() {
+        return ModConfig.vaporizers.modules.slaughter.targetPlayers;
     }
 
     public boolean canApplyToDelegate(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
@@ -249,7 +254,7 @@ public class ItemSlaughterModule extends ItemFilteringModule {
 
     public static class SlaughterBehavior extends FilteredBehavior {
 
-        private static ItemStack DIAMOND_GHOST = new ItemStack(Items.DIAMOND_SWORD);
+        private static final ItemStack DIAMOND_GHOST = new ItemStack(Items.DIAMOND_SWORD);
 
         private int cost = 0;
 

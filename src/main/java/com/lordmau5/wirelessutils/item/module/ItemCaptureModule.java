@@ -31,6 +31,11 @@ public class ItemCaptureModule extends ItemFilteringModule {
         return true;
     }
 
+    @Override
+    public boolean allowPlayerMode() {
+        return false;
+    }
+
     @Nullable
     @Override
     public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {

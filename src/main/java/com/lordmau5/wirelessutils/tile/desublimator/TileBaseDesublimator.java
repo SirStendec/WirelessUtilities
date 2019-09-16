@@ -159,9 +159,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     private ItemStack pickaxe = ItemStack.EMPTY;
 
     private boolean sideTransferAugment = false;
-    private Mode[] sideTransfer;
-    private boolean[] sideIsCached;
-    private TileEntity[] sideCache;
+    private final Mode[] sideTransfer;
+    private final boolean[] sideIsCached;
+    private final TileEntity[] sideCache;
 
     private Predicate<ItemStack> itemFilter;
     private boolean voidingItems = false;

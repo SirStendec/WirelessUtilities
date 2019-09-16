@@ -92,8 +92,7 @@ public class TabWorkInfo extends TabBase {
         int mouseX = gui.getMouseX() - posX();
         int mouseY = gui.getMouseY() - posY;
 
-        for (int i = 0; i < this.elements.size(); i++) {
-            ElementBase c = elements.get(i);
+        for (ElementBase c : elements) {
             if ( !c.isVisible() || !c.isEnabled() || !c.intersectsWith(mouseX, mouseY) )
                 continue;
 

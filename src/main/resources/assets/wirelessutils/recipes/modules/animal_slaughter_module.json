@@ -1,6 +1,12 @@
 {
 	"type": "minecraft:crafting_shaped",
 	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "industrialforegoing"
+		}
+	],
 	"pattern": [
 		" P ",
 		"SAS",

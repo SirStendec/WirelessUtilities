@@ -52,6 +52,11 @@ public class ItemAnimalSlaughterModule extends ItemFilteringModule {
         ).getFormattedText());
     }
 
+    @Override
+    public boolean allowPlayerMode() {
+        return false;
+    }
+
     public boolean canApplyToDelegate(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
         return true;
     }

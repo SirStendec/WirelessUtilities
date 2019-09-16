@@ -64,6 +64,15 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements IAdminEdita
         ModelLoader.setCustomMeshDefinition(this, stack -> new ModelResourceLocation(stack.getItem().getRegistryName(), "inventory"));
     }
 
+    @Override
+    public boolean hasEffect(ItemStack stack) {
+        NBTTagCompound tag = stack.getTagCompound();
+        if ( tag != null && tag.hasKey("ForceEffect", Constants.NBT.TAG_BYTE) )
+            return tag.getBoolean("ForceEffect");
+
+        return super.hasEffect(stack);
+    }
+
     @Nonnull
     public Level getRequiredLevel(@Nonnull ItemStack stack) {
         if ( stack.isEmpty() || stack.getItem() != this )

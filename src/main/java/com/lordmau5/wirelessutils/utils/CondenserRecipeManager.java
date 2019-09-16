@@ -2,15 +2,23 @@ package com.lordmau5.wirelessutils.utils;
 
 import cofh.core.inventory.ComparableItemStackValidated;
 import cofh.core.util.helpers.FluidHelper;
+import cofh.core.util.helpers.StringHelper;
 import com.google.common.base.MoreObjects;
+import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import com.lordmau5.wirelessutils.utils.crafting.IWUCraftingMachine;
+import com.lordmau5.wirelessutils.utils.crafting.IWURecipe;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -256,7 +264,7 @@ public class CondenserRecipeManager {
         }
     }
 
-    public static class CondenserRecipe {
+    public static class CondenserRecipe implements IWURecipe {
         public final CondenserRecipeInput recipeInput;
         public final FluidStack fluid;
         public final ItemStack input;
@@ -271,6 +279,32 @@ public class CondenserRecipeManager {
             this.output = output;
             this.cost = cost;
             this.ticks = ticks;
+        }
+
+        @Override
+        public void addTooltip(List<String> list, IWUCraftingMachine machine) {
+            list.add(new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".crafting.output",
+                    output.getTextComponent()
+            ).setStyle(TextHelpers.GRAY).getFormattedText());
+
+            list.add("");
+
+            list.add(new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".crafting.input",
+                    input.getTextComponent()
+            ).setStyle(TextHelpers.GRAY).getFormattedText());
+
+            list.add(new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".crafting.fluid",
+                    new TextComponentString(StringHelper.formatNumber(fluid.amount)).setStyle(TextHelpers.WHITE),
+                    TextHelpers.getComponent(fluid)
+            ).setStyle(TextHelpers.GRAY).getFormattedText());
+
+            list.add(new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".crafting.power",
+                    TextHelpers.getComponent(cost).setStyle(TextHelpers.WHITE)
+            ).setStyle(TextHelpers.GRAY).getFormattedText());
         }
 
         public String toString() {

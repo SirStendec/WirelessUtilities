@@ -65,8 +65,12 @@ public class ModConfig {
         @Config.Comment("Whether or not to display the Work Budget GUI elements for machines that use budget. When set to AUTO, machines will only display a Work Budget GUI when their maximum budget and budget gained per tick are not equal.")
         public WorkBudgetGUIState workBudgetGUI = WorkBudgetGUIState.AUTO;
 
+        @Config.Name("Display Crafting Progress GUI")
+        @Config.Comment("Whether or not to display the Inventory Crafting GUI elements for machines that do inventory crafting.")
+        public boolean craftingGUI = true;
+
         public enum WorkBudgetGUIState {
-            DISABLED, AUTO, ENABLED;
+            DISABLED, AUTO, ENABLED
         }
 
         @Config.Name("Directional Machines - Area Calculation")
@@ -83,7 +87,7 @@ public class ModConfig {
         public enum DirectionalArea {
             SUM_OF_RANGES,
             MAX_RANGE,
-            AREA;
+            AREA
         }
     }
 
@@ -221,12 +225,22 @@ public class ModConfig {
         @Config.Name("Enable Crystallization")
         @Config.Comment("Enable crafting Crystallized Void Pearls by throwing Void Pearls into an Ender Crystal.")
         public boolean enableCrystallization = true;
+
+        @Config.Name("Display Filled Void Pearls in Creative")
+        @Config.Comment("When enabled, Void Pearls will be listed in Creative's Misc. tab for all valid entities.")
+        public boolean displayFilled = true;
     }
 
     public static class Upgrades {
-        @Config.Name("Allow Upgrade Crafting")
-        @Config.Comment("When enabled, machines can be upgraded by crafting them together with an upgrade kit or conversion kit.")
-        public boolean allowCrafting = true;
+        @Config.Name("Enable High-Tier Crafting Recipes")
+        @Config.Comment("When enabled, the default unique recipes for crafting higher tiered machines will be loaded.")
+        @Config.RequiresMcRestart
+        public boolean enableHighTier = true;
+
+        @Config.Name("Enable Upgrade Crafting Recipes")
+        @Config.Comment("When enabled, recipes will be generated for crafting machines together with Upgrade Kits and Conversion Kits.")
+        @Config.RequiresMcRestart
+        public boolean enableCrafting = true;
 
         @Config.Name("Allow In-World Upgrading")
         @Config.Comment("When enabled, machines can be upgraded by using an upgrade kit or conversion kit on them in the world with right-click.")
@@ -248,8 +262,8 @@ public class ModConfig {
         @Config.Comment("Sided I/O Control Augments allow machines to automatically import or export via their sides.")
         public final SidedTransferAugments sidedTransfer = new SidedTransferAugments();
 
-        @Config.Name("Phantom Face Augments")
-        @Config.Comment("Phantom Face Augments allow directional machines to target different sides of their targets.")
+        @Config.Name("Remote Side Augments")
+        @Config.Comment("Remote Side Augments allow directional machines to target different sides of their targets.")
         public final FacingAugments facing = new FacingAugments();
 
         @Config.Name("Capacity Augments")
@@ -1409,7 +1423,7 @@ public class ModConfig {
         public BossMode bossMode = BossMode.CREATIVE_ONLY;
 
         public enum BabyCloningMode {
-            DISALLOW, ALLOW, BABY_CLONES;
+            DISALLOW, ALLOW, BABY_CLONES
         }
     }
 
@@ -1936,7 +1950,7 @@ public class ModConfig {
     public enum BossMode {
         DISABLED,
         ENABLED,
-        CREATIVE_ONLY;
+        CREATIVE_ONLY
     }
 
     @Mod.EventBusSubscriber(modid = WirelessUtils.MODID)

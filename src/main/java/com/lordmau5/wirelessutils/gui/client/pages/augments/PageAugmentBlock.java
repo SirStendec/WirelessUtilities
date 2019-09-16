@@ -15,8 +15,8 @@ public class PageAugmentBlock extends PageBase {
     private final ContainerAdminAugment container;
     private final BaseGuiContainer gui;
 
-    private ElementDynamicContainedButton btnSilkTouch;
-    private ElementTextField txtFortune;
+    private final ElementDynamicContainedButton btnSilkTouch;
+    private final ElementTextField txtFortune;
 
     public PageAugmentBlock(GuiAdminAugment gui) {
         super(gui);

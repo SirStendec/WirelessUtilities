@@ -8,15 +8,13 @@ import net.minecraft.item.ItemStack;
 
 public class ElementModuleBase extends PageBase {
 
-    private static String name = "btn." + WirelessUtils.MODID + ".module";
-
     protected final GuiBaseVaporizer gui;
 
     public ElementModuleBase(GuiBaseVaporizer gui) {
         super(gui, 0, 20);
         this.gui = gui;
 
-        setLabel(name);
+        setLabel("btn." + WirelessUtils.MODID + ".module");
     }
 
     public boolean isLocked() {

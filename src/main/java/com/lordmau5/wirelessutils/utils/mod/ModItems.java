@@ -55,10 +55,12 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.common.util.EnumHelper;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -66,7 +68,6 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
-import net.minecraftforge.registries.GameData;
 
 public class ModItems {
 
@@ -187,11 +188,10 @@ public class ModItems {
         LootTableList.register(new ResourceLocation(WirelessUtils.MODID, "charged_pearl_drops"));
     }
 
-    public static void initRecipes() {
+    public static void initRecipes(RegistryEvent.Register<IRecipe> event) {
         // Upgrades for Machines
-        if (ModConfig.upgrades.allowCrafting) {
-            generateUpgradeRecipes();
-        }
+        if ( ModConfig.upgrades.enableCrafting )
+            generateUpgradeRecipes(event);
 
         int cost = ModConfig.items.fluxedPearl.chargeEnergy;
 
@@ -247,49 +247,49 @@ public class ModItems {
 
     }
 
-    public static void generateUpgradeRecipes() {
+    public static void generateUpgradeRecipes(RegistryEvent.Register<IRecipe> event) {
         Level[] levels = Level.values();
-        if ( levels.length > 1 ) {
-            for (Block block : CommonProxy.BLOCKS) {
-                if ( block instanceof BlockBaseMachine ) {
-                    ResourceLocation baseLocation = block.getRegistryName();
-                    if ( baseLocation == null ) {
-                        continue;
-                    }
+        // We need at least 2 levels to be able to upgrade things.
+        if ( levels.length <= 1 )
+            return;
 
-                    for (int i = 1; i < levels.length; i++) {
-                        Level level = levels[i];
+        for (Block block : CommonProxy.BLOCKS) {
+            if ( !(block instanceof BlockBaseMachine) )
+                continue;
 
-                        // Upgrade Kit
-                        ResourceLocation upgradeLocation = new ResourceLocation(WirelessUtils.MODID, baseLocation.getPath() + "_upgrade_kit_" + i);
-                        ShapelessOreRecipe upgradeRecipe = new CopyNBTShapelessRecipeFactory.CopyNBTShapelessRecipe(upgradeLocation, RecipeHelper.buildInput(new Object[]{
-                                new ItemStack(itemLevelUpgrade, 1, i),
-                                new ItemStack(block, 1, i - 1)
-                        }), new ItemStack(block, 1, i));
+            ResourceLocation baseLocation = block.getRegistryName();
+            if ( baseLocation == null )
+                continue;
 
-                        upgradeRecipe.setRegistryName(upgradeLocation);
-                        GameData.register_impl(upgradeRecipe);
+            for (int i = 1; i < levels.length; i++) {
+                // Upgrade Kit
+                ResourceLocation upgradeLocation = new ResourceLocation(WirelessUtils.MODID, baseLocation.getPath() + "_upgrade_kit_" + i);
+                ShapelessOreRecipe upgradeRecipe = new CopyNBTShapelessRecipeFactory.CopyNBTShapelessRecipe(upgradeLocation, RecipeHelper.buildInput(new Object[]{
+                        new ItemStack(itemLevelUpgrade, 1, i),
+                        new ItemStack(block, 1, i - 1)
+                }), new ItemStack(block, 1, i));
 
-                        if ( i == 1 ) {
-                            continue;
-                        }
+                upgradeRecipe.setRegistryName(upgradeLocation);
+                event.getRegistry().register(upgradeRecipe);
 
-                        // Conversion Kit
-                        ItemStack[] itemStacks = new ItemStack[i];
-                        for (int j = 0; j < itemStacks.length; j++) {
-                            itemStacks[j] = new ItemStack(block, 1, j);
-                        }
+                // Conversion kits don't exist until the third level.
+                if ( i == 1 )
+                    continue;
 
-                        ResourceLocation conversionLocation = new ResourceLocation(WirelessUtils.MODID, baseLocation.getPath() + "_conversion_kit_" + i);
-                        ShapelessOreRecipe conversionRecipe = new CopyNBTShapelessRecipeFactory.CopyNBTShapelessRecipe(conversionLocation, RecipeHelper.buildInput(new Object[]{
-                                new ItemStack(itemConversionUpgrade, 1, i),
-                                Ingredient.fromStacks(itemStacks)
-                        }), new ItemStack(block, 1, i));
-
-                        conversionRecipe.setRegistryName(conversionLocation);
-                        GameData.register_impl(conversionRecipe);
-                    }
+                // Conversion Kit
+                ItemStack[] stacks = new ItemStack[i];
+                for (int j = 0; j < stacks.length; j++) {
+                    stacks[j] = new ItemStack(block, 1, j);
                 }
+
+                ResourceLocation conversionLocation = new ResourceLocation(WirelessUtils.MODID, baseLocation.getPath() + "_conversion_kit_" + i);
+                ShapelessOreRecipe conversionRecipe = new CopyNBTShapelessRecipeFactory.CopyNBTShapelessRecipe(conversionLocation, RecipeHelper.buildInput(new Object[]{
+                        new ItemStack(itemConversionUpgrade, 1, i),
+                        Ingredient.fromStacks(stacks)
+                }), new ItemStack(block, 1, i));
+
+                conversionRecipe.setRegistryName(conversionLocation);
+                event.getRegistry().register(conversionRecipe);
             }
         }
     }
@@ -310,18 +310,17 @@ public class ModItems {
 
         itemGlasses.initModel();
         itemEnderCoil.initModel();
+        itemMachinePanel.initModel();
 
         itemLevelUpgrade.initModel();
         itemConversionUpgrade.initModel();
 
+        itemBaseAugment.initModel();
         itemRangeAugment.initModel();
         itemSlotAugment.initModel();
         itemInventoryAugment.initModel();
-        itemBaseAugment.initModel();
         itemCapacityAugment.initModel();
         itemTransferAugment.initModel();
-
-        itemMachinePanel.initModel();
         itemWorldAugment.initModel();
         itemInvertAugment.initModel();
         itemBlockAugment.initModel();
@@ -345,14 +344,24 @@ public class ModItems {
     public static void initColors(ItemColors itemColors) {
         itemColors.registerItemColorHandler(ColorHandler.LevelUpgrade.handleItemColor, itemLevelUpgrade);
         itemColors.registerItemColorHandler(ColorHandler.LevelUpgrade.handleItemColor, itemConversionUpgrade);
+
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemBaseAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.Range.handleItemColor, itemRangeAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemSlotAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemInventoryAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemCapacityAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemTransferAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemWorldAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemInvertAugment);
-        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemFilterAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemBlockAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemCropAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemChunkLoadAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.FluidGen.handleItemColor, itemFluidGenAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemFacingAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemSidedTransferAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemDispenserAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemFilterAugment);
+
         itemColors.registerItemColorHandler(ColorHandler.VoidPearl.handleItemColor, itemVoidPearl);
         itemColors.registerItemColorHandler(ColorHandler.VoidPearl.handleItemColor, itemCrystallizedVoidPearl);
 

@@ -1,6 +1,11 @@
 {
 	"type": "wirelessutils:copy_nbt",
 	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "wirelessutils:high_tier_enabled"
+		}
+	],
 	"pattern": [
 		"HEH",
 		"PCP",

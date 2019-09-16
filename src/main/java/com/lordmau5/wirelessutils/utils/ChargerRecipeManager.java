@@ -2,14 +2,20 @@ package com.lordmau5.wirelessutils.utils;
 
 import cofh.core.inventory.ComparableItemStackValidated;
 import com.google.common.base.MoreObjects;
+import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import com.lordmau5.wirelessutils.utils.crafting.IWUCraftingMachine;
+import com.lordmau5.wirelessutils.utils.crafting.IWURecipe;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -225,7 +231,7 @@ public class ChargerRecipeManager {
         allRecipes = newAll;
     }
 
-    public static class ChargerRecipe {
+    public static class ChargerRecipe implements IWURecipe {
         public final ItemStack input;
         public final ItemStack output;
         public final int cost;
@@ -236,6 +242,26 @@ public class ChargerRecipeManager {
             this.output = output;
             this.cost = cost;
             this.ticks = ticks;
+        }
+
+        @Override
+        public void addTooltip(List<String> list, IWUCraftingMachine machine) {
+            list.add(new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".crafting.output",
+                    output.getTextComponent()
+            ).setStyle(TextHelpers.GRAY).getFormattedText());
+
+            list.add("");
+
+            list.add(new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".crafting.input",
+                    input.getTextComponent()
+            ).setStyle(TextHelpers.GRAY).getFormattedText());
+
+            list.add(new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".crafting.power",
+                    TextHelpers.getComponent(cost).setStyle(TextHelpers.WHITE)
+            ).setStyle(TextHelpers.GRAY).getFormattedText());
         }
 
         @Override

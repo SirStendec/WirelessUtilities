@@ -8,6 +8,7 @@ import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.SharedState;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementAreaButton;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementCraftingProgress;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementDynamicContainedButton;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementModeButton;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementOffsetControls;
@@ -21,6 +22,7 @@ import com.lordmau5.wirelessutils.gui.client.elements.TabWorldTickRate;
 import com.lordmau5.wirelessutils.gui.container.charger.ContainerDirectionalCharger;
 import com.lordmau5.wirelessutils.tile.charger.TileEntityDirectionalCharger;
 import com.lordmau5.wirelessutils.utils.Textures;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
 
@@ -48,6 +50,9 @@ public class GuiDirectionalCharger extends BaseGuiContainer {
         super.initGui();
 
         addElement(new ElementEnergyStored(this, 17, 20, charger.getEnergyStorage()).setInfinite(charger.isCreative()));
+        if ( ModConfig.common.craftingGUI )
+            addElement(new ElementCraftingProgress(this, 33, 20, charger));
+
         addElement(new ElementAreaButton(this, charger, 152, 69));
         addElement(new ElementModeButton(this, charger, 134, 69));
 

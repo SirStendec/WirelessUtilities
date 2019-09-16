@@ -33,15 +33,13 @@ public class CachedItemList {
     public void refresh() {
         if ( stacks != null ) {
             final Set<ItemStack> newStacks = new ObjectOpenHashSet<>();
-            for (ItemStack stack : stacks)
-                newStacks.add(stack);
+            newStacks.addAll(stacks);
             stacks = newStacks;
         }
 
         if ( items != null ) {
             final Set<Item> newItems = new ObjectOpenHashSet<>();
-            for (Item item : items)
-                newItems.add(item);
+            newItems.addAll(items);
             items = newItems;
         }
     }
@@ -54,8 +52,7 @@ public class CachedItemList {
         Set<ItemStack> out = new HashSet<>();
 
         if ( stacks != null ) {
-            for (ItemStack stack : stacks)
-                out.add(stack);
+            out.addAll(stacks);
         }
 
         if ( items != null ) {
@@ -135,7 +132,7 @@ public class CachedItemList {
             return;
         }
 
-        int metadata = 0;
+        int metadata;
         try {
             metadata = Integer.parseInt(path.substring(idx + 1));
         } catch (NumberFormatException ex) {

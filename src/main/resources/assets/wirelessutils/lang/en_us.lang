@@ -347,7 +347,7 @@ item.wirelessutils.filter_augment.match_mod=Matching Mod Items
 item.wirelessutils.filter_augment.entry=- %s
 item.wirelessutils.filter_augment.info_list=%s Hold §e§oAlt§r§7 for %s Items
 
-item.wirelessutils.facing_augment.name=Phantom Face Augment
+item.wirelessutils.facing_augment.name=Remote Side Augment
 item.wirelessutils.facing_augment.info.0=This augment allows Directional
 item.wirelessutils.facing_augment.info.1=Machines to target different sides
 item.wirelessutils.facing_augment.info.2=of blocks than the sides facing
@@ -663,6 +663,13 @@ btn.wirelessutils.range.max_volume=Max Volume:
 btn.wirelessutils.range.height=Height:
 btn.wirelessutils.range.length=Length:
 btn.wirelessutils.range.width=Width:
+
+info.wirelessutils.crafting=Inventory Crafting
+info.wirelessutils.crafting.none=Not Active
+info.wirelessutils.crafting.input=Input: %s
+info.wirelessutils.crafting.fluid=Using: %s mB of %s
+info.wirelessutils.crafting.power=Using: %s RF
+info.wirelessutils.crafting.output=Output: %s
 
 info.wirelessutils.work_budget=Work Buffer
 info.wirelessutils.work_budget.per_tick=+%s/tick

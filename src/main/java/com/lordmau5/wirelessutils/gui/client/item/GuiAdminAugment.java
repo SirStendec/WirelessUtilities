@@ -8,6 +8,7 @@ import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiItem;
 import com.lordmau5.wirelessutils.gui.client.elements.TabLock;
 import com.lordmau5.wirelessutils.gui.client.elements.TabOpenGui;
+import com.lordmau5.wirelessutils.gui.client.pages.PageItemColor;
 import com.lordmau5.wirelessutils.gui.client.pages.base.PageBase;
 import com.lordmau5.wirelessutils.gui.container.items.ContainerAdminAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemAugment;
@@ -30,6 +31,7 @@ public class GuiAdminAugment extends BaseGuiItem {
 
     public final static String INT_CHARACTERS = "-1234567890";
     public final static String DOUBLE_CHARACTERS = ",." + INT_CHARACTERS;
+    public final static String HEX_CHARACTERS = "ABCDEFabcdef" + INT_CHARACTERS;
 
     private final ContainerAdminAugment container;
 
@@ -68,6 +70,8 @@ public class GuiAdminAugment extends BaseGuiItem {
         super.initGui();
 
         setMainPageTabLabel("btn." + WirelessUtils.MODID + ".main");
+
+        addPage(new PageItemColor(this));
 
         ItemStack stack = container.getItemStack();
         Item item = stack.getItem();

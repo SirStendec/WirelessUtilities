@@ -1,0 +1,21 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		" E ",
+		"EAE",
+		" E "
+	],
+	"key": {
+		"A": {
+			"item": "wirelessutils:base_augment"
+		},
+		"E": {
+			"item": "#ENDER_PEARL"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:facing_augment",
+		"count": 1
+	}
+}

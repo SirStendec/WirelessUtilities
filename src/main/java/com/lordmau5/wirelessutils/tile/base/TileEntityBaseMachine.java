@@ -50,8 +50,8 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
 
     /* Security */
     protected GameProfile owner = CoreProps.DEFAULT_OWNER;
-    private Map<Integer, Tuple<Integer, ChunkPos>> loadedChunks = new Int2ObjectOpenHashMap<>();
-    private Map<BlockPosDimension, Integer> loadedByPos = new Object2IntOpenHashMap<>();
+    private final Map<Integer, Tuple<Integer, ChunkPos>> loadedChunks = new Int2ObjectOpenHashMap<>();
+    private final Map<BlockPosDimension, Integer> loadedByPos = new Object2IntOpenHashMap<>();
 
     /* Inventory */
     protected ItemStackHandler itemStackHandler;
@@ -401,8 +401,8 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     public void dropContents() {
         ItemStack[] augments = getAugmentSlots();
         if ( augments != null ) {
-            for (int i = 0; i < augments.length; i++)
-                CoreUtils.dropItemStackIntoWorldWithVelocity(augments[i], world, pos);
+            for (ItemStack augment : augments)
+                CoreUtils.dropItemStackIntoWorldWithVelocity(augment, world, pos);
         }
 
         if ( itemStackHandler != null ) {

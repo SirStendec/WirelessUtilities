@@ -36,6 +36,11 @@ public class ItemLaunchModule extends ItemFilteringModule {
     }
 
     @Override
+    public boolean allowPlayerMode() {
+        return ModConfig.vaporizers.modules.launch.targetPlayers;
+    }
+
+    @Override
     public boolean canApplyToDelegate(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
         return true;
     }

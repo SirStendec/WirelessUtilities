@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class ChunkManager {
 
-    private static Map<Integer, Map<ChunkPos, ChunkRequests>> loadedChunks = new Int2ObjectOpenHashMap<>();
+    private static final Map<Integer, Map<ChunkPos, ChunkRequests>> loadedChunks = new Int2ObjectOpenHashMap<>();
 
     public static ChunkRequests getChunk(Tuple<Integer, ChunkPos> posTuple) {
         return getChunk(posTuple.getFirst(), posTuple.getSecond());

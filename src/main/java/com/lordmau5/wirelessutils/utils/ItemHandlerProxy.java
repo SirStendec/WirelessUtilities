@@ -8,8 +8,8 @@ import javax.annotation.Nonnull;
 public class ItemHandlerProxy implements IItemHandler {
 
     public final ItemStackHandler handler;
-    public int offset;
-    public int slots;
+    public final int offset;
+    public final int slots;
 
     public boolean allowInsert = false;
     public boolean allowExtract = false;

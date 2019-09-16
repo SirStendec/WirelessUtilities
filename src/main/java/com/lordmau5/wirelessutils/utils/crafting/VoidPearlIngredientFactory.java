@@ -33,7 +33,7 @@ public class VoidPearlIngredientFactory implements IIngredientFactory {
     enum PearlType {
         BOTH,
         VOID,
-        CRYSTALLIZED;
+        CRYSTALLIZED
     }
 
     @Nonnull

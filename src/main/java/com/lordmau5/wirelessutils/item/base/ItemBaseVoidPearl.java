@@ -38,9 +38,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPreservingIngredient, IDimensionallyStableItem, EntityUtilities.IEntityBall {
+
+    public ArrayList<ItemStack> entityPearls = new ArrayList<>();
 
     private static final String I18N_KEY = "item." + WirelessUtils.MODID + ".void_pearl";
 
@@ -93,11 +96,43 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
     }
 
     @Override
-    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
-        if ( !isInCreativeTab(tab) )
-            return;
+    public CreativeTabs[] getCreativeTabs() {
+        return new CreativeTabs[]{
+                getCreativeTab(),
+                CreativeTabs.MISC
+        };
+    }
 
-        items.add(new ItemStack(this, 1, 0));
+    @Override
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
+        if ( tab == getCreativeTab() )
+            items.add(new ItemStack(this, 1, 0));
+
+        if ( ModConfig.items.voidPearl.displayFilled && tab == CreativeTabs.MISC )
+            items.addAll(entityPearls);
+    }
+
+    public void addValidEntities() {
+        for (ResourceLocation key : EntityList.getEntityNameList()) {
+            Class<? extends Entity> klass = EntityList.getClass(key);
+            if ( klass == null || !EntityLiving.class.isAssignableFrom(klass) )
+                continue;
+
+            if ( EntityUtilities.isBlacklisted(key) || !EntityList.ENTITY_EGGS.containsKey(key) )
+                continue;
+
+            addEntity(key);
+        }
+    }
+
+    @Nonnull
+    public ItemStack addEntity(@Nonnull ResourceLocation key) {
+        ItemStack stack = new ItemStack(this);
+        NBTTagCompound tag = new NBTTagCompound();
+        tag.setString("EntityID", key.toString());
+        stack.setTagCompound(tag);
+        entityPearls.add(stack);
+        return stack;
     }
 
     @Override
@@ -125,7 +160,7 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
                         health
                 ).getFormattedText());
 
-            int exp = getBaseExperience(stack);
+            int exp = EntityUtilities.getBaseExperience(stack, worldIn);
             if ( isBabyEntity(stack) )
                 exp = (int) Math.floor(exp * ModConfig.vaporizers.babyMultiplier);
 

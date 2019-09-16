@@ -128,9 +128,9 @@ public class EntityFluxedPearl extends EntityBaseThrowable {
                     if ( heightMap == null )
                         continue;
 
-                    for (int z = 0; z < heightMap.length; z++) {
-                        if ( heightMap[z] > maxHeight )
-                            maxHeight = heightMap[z];
+                    for (int value : heightMap) {
+                        if ( value > maxHeight )
+                            maxHeight = value;
                     }
                 }
             }

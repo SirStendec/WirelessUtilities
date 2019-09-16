@@ -20,16 +20,16 @@ public class TabEnergyHistory extends TabBase {
 
     public static final String INTL_KEY = "info." + WirelessUtils.MODID + ".work_info";
 
-    public static int defaultSide = 0;
-    public static int defaultHeaderColor = 0xe1c92f;
-    public static int defaultSubHeaderColor = 0xaaafb8;
-    public static int defaultTextColor = 0x000000;
-    public static int defaultBackgroundColorOut = 0xd0650b;
-    public static int defaultBackgroundColorIn = 0x0a76d0;
+    public static final int defaultSide = 0;
+    public static final int defaultHeaderColor = 0xe1c92f;
+    public static final int defaultSubHeaderColor = 0xaaafb8;
+    public static final int defaultTextColor = 0x000000;
+    public static final int defaultBackgroundColorOut = 0xd0650b;
+    public static final int defaultBackgroundColorIn = 0x0a76d0;
 
-    private IEnergyInfo energyInfo;
-    private IEnergyHistory energyHistory;
-    private IWorkInfoProvider workInfo;
+    private final IEnergyInfo energyInfo;
+    private final IEnergyHistory energyHistory;
+    private final IWorkInfoProvider workInfo;
 
     private boolean isProducer;
     private boolean displayGraph = true;

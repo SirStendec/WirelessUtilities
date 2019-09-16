@@ -8,6 +8,7 @@ import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiPositional;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementAreaButton;
+import com.lordmau5.wirelessutils.gui.client.elements.ElementCraftingProgress;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementFluidLock;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementFluidTankCondenser;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementModeButton;
@@ -19,6 +20,7 @@ import com.lordmau5.wirelessutils.gui.client.elements.TabWorkInfo;
 import com.lordmau5.wirelessutils.gui.client.elements.TabWorldTickRate;
 import com.lordmau5.wirelessutils.gui.container.condenser.ContainerPositionalCondenser;
 import com.lordmau5.wirelessutils.tile.condenser.TileEntityPositionalCondenser;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -50,7 +52,12 @@ public class GuiPositionalCondenser extends BaseGuiPositional {
     public void initGui() {
         super.initGui();
 
-        addElement(new ElementEnergyStored(this, 10, 26, condenser.getEnergyStorage()).setInfinite(condenser.isCreative()));
+        if ( ModConfig.common.craftingGUI ) {
+            addElement(new ElementEnergyStored(this, 5, 26, condenser.getEnergyStorage()).setInfinite(condenser.isCreative()));
+            addElement(new ElementCraftingProgress(this, 23, 26, condenser));
+        } else
+            addElement(new ElementEnergyStored(this, 10, 26, condenser.getEnergyStorage()).setInfinite(condenser.isCreative()));
+
         addElement(new ElementAreaButton(this, condenser, 152, 74));
         addElement(new ElementModeButton(this, condenser, 134, 74));
 

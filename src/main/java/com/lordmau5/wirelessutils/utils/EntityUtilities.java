@@ -23,8 +23,8 @@ import java.util.Set;
 
 public class EntityUtilities {
 
-    private static Map<String, Integer> baseExperience = new HashMap<>();
-    private static Map<Item, IEntityBall> entityBallMap = new Object2ObjectOpenHashMap<>();
+    private static final Map<String, Integer> baseExperience = new HashMap<>();
+    private static final Map<Item, IEntityBall> entityBallMap = new Object2ObjectOpenHashMap<>();
 
     public static Set<Item> getValidItems() {
         return entityBallMap.keySet();
@@ -419,7 +419,7 @@ public class EntityUtilities {
         boolean isBabyEntity(@Nonnull ItemStack stack);
     }
 
-    public static String[] BAD_TAGS = {
+    public static final String[] BAD_TAGS = {
             "UUIDMost", "UUIDLeast",
             "Rotation", "Pos", "Motion",
             "FallDistance", "OnGround", "Air",

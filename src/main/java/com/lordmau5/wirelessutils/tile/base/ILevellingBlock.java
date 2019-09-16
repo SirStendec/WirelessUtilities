@@ -64,8 +64,7 @@ public interface ILevellingBlock extends IAugmentableTwoElectricBoogaloo {
         Level required = Level.fromInt(level.toInt() - 1);
         ItemStack[] augments = getAugmentSlots();
 
-        for (int i = 0; i < augments.length; i++) {
-            ItemStack slotted = augments[i];
+        for (ItemStack slotted : augments) {
             if ( slotted.isEmpty() || slotted.getItem() != augmentItem )
                 continue;
 
@@ -89,8 +88,7 @@ public interface ILevellingBlock extends IAugmentableTwoElectricBoogaloo {
         int levelInt = level.toInt();
         ItemStack[] augments = getAugmentSlots();
 
-        for (int i = 0; i < augments.length; i++) {
-            ItemStack slotted = augments[i];
+        for (ItemStack slotted : augments) {
             if ( slotted.isEmpty() || slotted.getItem() != augmentItem || !item.shouldRequireLowerTier(slotted) )
                 continue;
 

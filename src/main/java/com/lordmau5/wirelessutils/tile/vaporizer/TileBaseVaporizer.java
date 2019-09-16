@@ -85,11 +85,11 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         IWorkProvider<TileBaseVaporizer.VaporizerTarget> {
 
     protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
-    protected final Worker worker;
-    private Map<Integer, WUVaporizerPlayer> fakePlayerMap = new Int2ObjectOpenHashMap<>();
+    protected final Worker<VaporizerTarget> worker;
+    private final Map<Integer, WUVaporizerPlayer> fakePlayerMap = new Int2ObjectOpenHashMap<>();
 
-    protected IFluidHandler fluidHandler;
-    protected FluidTank tank;
+    protected final IFluidHandler fluidHandler;
+    protected final FluidTank tank;
     protected Fluid lastFluid;
     private final boolean hasFluid;
 
@@ -143,9 +143,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     private byte fluidSwap = 0;
 
     private boolean sideTransferAugment = false;
-    private ISidedTransfer.Mode[] sideTransfer;
-    private boolean[] sideIsCached;
-    private TileEntity[] sideCache;
+    private final ISidedTransfer.Mode[] sideTransfer;
+    private final boolean[] sideIsCached;
+    private final TileEntity[] sideCache;
 
     private boolean temporarilyAllowInsertion = false;
     private boolean didFullEntities = false;
@@ -633,12 +633,11 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     @Override
     public boolean updateBaseEnergy() {
-        boolean changed = false;
         int newAddition = augmentEnergy + moduleEnergy;
         int newDrain = augmentDrain + moduleDrain;
         double newMultiplier = augmentMultiplier + moduleMultiplier;
 
-        changed = newAddition != energyAddition || newDrain != energyDrain || newMultiplier != energyMultiplier;
+        boolean changed = newAddition != energyAddition || newDrain != energyDrain || newMultiplier != energyMultiplier;
 
         energyAddition = newAddition;
         energyMultiplier = newMultiplier;

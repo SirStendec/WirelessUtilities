@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class ContainerFilterAugment extends BaseContainerItem implements IFilterHost {
 
-    private ItemStack[] list;
+    private final ItemStack[] list;
 
     public ContainerFilterAugment(@Nonnull ItemStack augment, int slot, InventoryPlayer inventory) {
         super(augment, slot, inventory);

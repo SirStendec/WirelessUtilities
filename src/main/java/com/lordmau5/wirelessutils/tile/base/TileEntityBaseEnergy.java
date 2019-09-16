@@ -20,7 +20,7 @@ public abstract class TileEntityBaseEnergy extends TileEntityBaseMachine impleme
     public static final byte PKT_HISTORY_REQUEST = 100;
     public static final byte PKT_HISTORY_SYNC = 101;
 
-    protected long energyHistory[] = new long[40];
+    protected final long[] energyHistory = new long[40];
     protected byte energyHistoryPos = -1;
     protected boolean energyHistoryRequested = false;
 
@@ -111,7 +111,6 @@ public abstract class TileEntityBaseEnergy extends TileEntityBaseMachine impleme
     public void handleTileInfoPackageDelegate(byte type, PacketBase payload, boolean isServer, EntityPlayer thePlayer) {
         if ( type == PKT_HISTORY_REQUEST ) {
             handleEnergyHistoryRequestPacket(payload, thePlayer);
-            return;
         } else if ( type == PKT_HISTORY_SYNC ) {
             handleEnergyHistorySyncPacket(payload);
         }

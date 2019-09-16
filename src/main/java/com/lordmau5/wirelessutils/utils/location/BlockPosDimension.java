@@ -83,7 +83,6 @@ public class BlockPosDimension extends BlockPos {
                 getFacing());
     }
 
-    @Nonnull
     public boolean isInsideBorders() {
         World world = DimensionManager.getWorld(dimension, false);
         if ( world == null )
@@ -91,6 +90,18 @@ public class BlockPosDimension extends BlockPos {
 
         WorldBorder border = world.getWorldBorder();
         return border != null && border.contains(this);
+    }
+
+    public boolean isInsideWorld() {
+        World world = DimensionManager.getWorld(dimension, false);
+        if ( world == null )
+            return false;
+
+        if ( world.isOutsideBuildHeight(this) )
+            return false;
+
+        WorldBorder border = world.getWorldBorder();
+        return border == null || border.contains(this);
     }
 
     @Nonnull

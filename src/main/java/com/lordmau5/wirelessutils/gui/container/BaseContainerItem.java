@@ -28,8 +28,8 @@ public class BaseContainerItem extends BaseContainer {
     };
 
     protected ItemStack stack;
-    protected EntityPlayer player;
-    protected int slot;
+    protected final EntityPlayer player;
+    protected final int slot;
 
     final private boolean admin;
     protected boolean suppressUpdates = false;

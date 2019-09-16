@@ -261,8 +261,7 @@ public class TabWorldTickRate extends TabBase implements IContainsButtons {
         int mouseX = gui.getMouseX() - posX();
         int mouseY = gui.getMouseY() - posY;
 
-        for (int i = 0; i < this.elements.size(); i++) {
-            ElementBase c = elements.get(i);
+        for (ElementBase c : elements) {
             if ( !c.isVisible() || !c.isEnabled() || !c.intersectsWith(mouseX, mouseY) )
                 continue;
 

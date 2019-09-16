@@ -113,7 +113,7 @@ public interface IDirectionalMachine extends IFacing {
         BlockPosDimension minPos = offset.add(-rangeX, -rangeY, -rangeZ);
         BlockPosDimension maxPos = offset.add(rangeX, rangeY, rangeZ);
 
-        if ( origin.isInsideBorders() ) {
+        if ( origin.isInsideWorld() ) {
             minPos = minPos.clipToWorld();
             maxPos = maxPos.clipToWorld();
         }

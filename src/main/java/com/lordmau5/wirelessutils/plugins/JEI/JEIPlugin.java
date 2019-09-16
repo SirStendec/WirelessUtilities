@@ -51,13 +51,13 @@ public class JEIPlugin implements IModPlugin {
         registry.addRecipes(ChargerRecipeCategory.getRecipes(guiHelper), ChargerRecipeCategory.UID);
         registry.addRecipes(CondenserRecipeCategory.getRecipes(guiHelper), CondenserRecipeCategory.UID);
 
-        for (Level level : Level.values()) {
-            int meta = level.toInt();
-            registry.addRecipeCatalyst(new ItemStack(ModBlocks.blockDirectionalCharger, 1, meta), ChargerRecipeCategory.UID);
-            registry.addRecipeCatalyst(new ItemStack(ModBlocks.blockPositionalCharger, 1, meta), ChargerRecipeCategory.UID);
+        Level[] levels = Level.values();
+        for (int i = 0; i < levels.length; i++) {
+            registry.addRecipeCatalyst(new ItemStack(ModBlocks.blockDirectionalCharger, 1, i), ChargerRecipeCategory.UID);
+            registry.addRecipeCatalyst(new ItemStack(ModBlocks.blockPositionalCharger, 1, i), ChargerRecipeCategory.UID);
 
-            registry.addRecipeCatalyst(new ItemStack(ModBlocks.blockDirectionalCondenser, 1, meta), CondenserRecipeCategory.UID);
-            registry.addRecipeCatalyst(new ItemStack(ModBlocks.blockPositionalCondenser, 1, meta), CondenserRecipeCategory.UID);
+            registry.addRecipeCatalyst(new ItemStack(ModBlocks.blockDirectionalCondenser, 1, i), CondenserRecipeCategory.UID);
+            registry.addRecipeCatalyst(new ItemStack(ModBlocks.blockPositionalCondenser, 1, i), CondenserRecipeCategory.UID);
         }
     }
 }

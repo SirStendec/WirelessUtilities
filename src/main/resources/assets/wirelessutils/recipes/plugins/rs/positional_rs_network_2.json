@@ -3,6 +3,9 @@
 	"group": "wirelessutils",
 	"conditions": [
 		{
+			"type": "wirelessutils:high_tier_enabled"
+		},
+		{
 			"type": "forge:mod_loaded",
 			"modid": "refinedstorage"
 		}

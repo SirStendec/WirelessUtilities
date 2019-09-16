@@ -32,11 +32,11 @@ public interface IHarvestBehavior {
         HUGE_SUCCESS, // It's hard to overstate my satisfaction.
         SUCCESS,
         PROGRESS,
-        FAILED;
+        FAILED
     }
 
-    public final static Tuple<HarvestResult, Integer> SUCCESS_ONE = new Tuple<>(HarvestResult.SUCCESS, 1);
-    public final static Tuple<HarvestResult, Integer> FAILURE = new Tuple<>(HarvestResult.FAILED, 0);
+    Tuple<HarvestResult, Integer> SUCCESS_ONE = new Tuple<>(HarvestResult.SUCCESS, 1);
+    Tuple<HarvestResult, Integer> FAILURE = new Tuple<>(HarvestResult.FAILED, 0);
 
     default int getPriority() {
         return 0;
