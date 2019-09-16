@@ -43,11 +43,11 @@ public class AppliedEnergistics2Plugin implements IPlugin {
         blockDirectionalAENetwork = new BlockDirectionalAENetwork();
         blockPositionalAENetwork = new BlockPositionalAENetwork();
 
-        event.getRegistry().register(blockDirectionalAENetwork);
-        event.getRegistry().register(blockPositionalAENetwork);
+        CommonProxy.registerBlock(event, blockDirectionalAENetwork);
+        CommonProxy.registerBlock(event, blockPositionalAENetwork);
 
-        CommonProxy.registerTile(TileDirectionalAENetwork.class);
-        CommonProxy.registerTile(TilePositionalAENetwork.class);
+        CommonProxy.registerMachineTile(TileDirectionalAENetwork.class);
+        CommonProxy.registerMachineTile(TilePositionalAENetwork.class);
     }
 
     @Override
