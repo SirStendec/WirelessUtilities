@@ -317,27 +317,39 @@ public class ItemCloneModule extends ItemModule {
         }
 
         public boolean isValidModifier(@Nonnull ItemStack stack) {
-            if ( !isValidBall(stack) )
+            if ( !EntityUtilities.isFilledEntityBall(stack) )
                 return false;
 
             if ( ModConfig.vaporizers.modules.clone.requireCrystallizedVoidPearls && stack.getItem() != ModItems.itemCrystallizedVoidPearl )
                 return false;
 
+            World world = vaporizer.getWorld();
+            if ( world == null )
+                return false;
+
+            Entity entity = EntityUtilities.getEntity(stack, world, exactCopies, null);
+            if ( entity == null || !(entity instanceof EntityLivingBase) )
+                return false;
+
+            final EntityLivingBase living = (EntityLivingBase) entity;
+            final boolean isBoss = !entity.isNonBoss();
             final ModConfig.BossMode bossMode = ModConfig.vaporizers.modules.clone.bossMode;
-            if ( bossMode == ModConfig.BossMode.DISABLED || (bossMode == ModConfig.BossMode.CREATIVE_ONLY && !vaporizer.isCreative()) ) {
-                final World world = vaporizer.getWorld();
-                if ( world != null ) {
-                    final Entity entity = EntityUtilities.getEntity(stack, world, false, null);
-                    if ( entity != null && !entity.isNonBoss() )
-                        return false;
-                }
+            if ( isBoss && (bossMode == ModConfig.BossMode.DISABLED || (bossMode == ModConfig.BossMode.CREATIVE_ONLY && !vaporizer.isCreative())) )
+                return false;
+
+            final boolean isBaby = EntityUtilities.isBaby(entity);
+            if ( isBaby && ModConfig.vaporizers.modules.clone.babyMode == ModConfig.CloneModule.BabyCloningMode.DISALLOW )
+                return false;
+
+            final int expCost = EntityUtilities.getBaseFromEntity(entity);
+            double rawCost = (ModConfig.vaporizers.modules.clone.expFactor * expCost) + (ModConfig.vaporizers.modules.clone.healthFactor * living.getMaxHealth());
+            if ( exactCopies ) {
+                rawCost *= ModConfig.vaporizers.modules.clone.exactFactor;
+                if ( isBaby && ModConfig.vaporizers.modules.clone.exactBaby )
+                    rawCost *= ModConfig.vaporizers.babyMultiplier;
             }
 
-            final boolean isBaby = EntityUtilities.containsBabyEntity(stack);
-            if ( !isBaby )
-                return true;
-
-            return ModConfig.vaporizers.modules.clone.babyMode != ModConfig.CloneModule.BabyCloningMode.DISALLOW;
+            return rawCost > 0;
         }
 
         public void updateModifier(@Nonnull ItemStack stack) {
@@ -356,14 +368,15 @@ public class ItemCloneModule extends ItemModule {
                 Entity entity = EntityUtilities.getEntity(stack, world, exactCopies, null);
                 if ( entity != null ) {
                     entityLoaded = true;
-                    entityCost = EntityUtilities.getBaseExperience(entity);
-                    entityBaby = EntityUtilities.containsBabyEntity(stack);
-                    entityBoss = !entity.isNonBoss();
-
-                    if ( entity instanceof EntityLivingBase )
+                    if ( entity instanceof EntityLivingBase ) {
+                        entityCost = EntityUtilities.getBaseFromEntity(entity);
+                        entityBaby = EntityUtilities.isBaby(entity);
+                        entityBoss = !entity.isNonBoss();
                         entityHealth = ((EntityLivingBase) entity).getMaxHealth();
-                    else
+                    } else {
+                        entityCost = 0;
                         entityHealth = 0;
+                    }
                 }
             }
 
@@ -542,7 +555,7 @@ public class ItemCloneModule extends ItemModule {
             double posY = target.pos.getY() + offsetY;
             double posZ = target.pos.getZ() + offsetZ;
 
-            if ( (entity instanceof EntityLiving) && ForgeEventFactory.canEntitySpawn((EntityLiving) entity, world, (float) posX, (float) posY, (float) posZ, true) == Event.Result.DENY ) {
+            if ( ModConfig.vaporizers.modules.clone.useCheckSpawn && (entity instanceof EntityLiving) && ForgeEventFactory.canEntitySpawn((EntityLiving) entity, world, (float) posX, (float) posY, (float) posZ, true) == Event.Result.DENY ) {
                 vaporizer.addFuel(removed);
                 return IWorkProvider.WorkResult.FAILURE_CONTINUE;
             }

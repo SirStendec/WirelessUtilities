@@ -1316,6 +1316,10 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public boolean requireCrystallizedVoidPearls = false;
 
+        @Config.Name("Use CheckSpawn Event")
+        @Config.Comment("When enabled, we call ForgeEventFactory.canEntitySpawn before actually spawning an entity to make sure no other mods want to stop us.")
+        public boolean useCheckSpawn = true;
+
         @Config.Name("Required Level")
         @Config.Comment("Vaporizers must be at least this level in order to use this module.")
         @Config.RangeInt(min = 0)

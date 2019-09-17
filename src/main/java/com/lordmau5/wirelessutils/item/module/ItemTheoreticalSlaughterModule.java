@@ -403,27 +403,39 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
         }
 
         public boolean isValidModifier(@Nonnull ItemStack stack) {
-            if ( !isValidBall(stack) )
+            if ( !EntityUtilities.isFilledEntityBall(stack) )
                 return false;
 
             if ( ModConfig.vaporizers.modules.theoreticalSlaughter.requireCrystallizedVoidPearls && stack.getItem() != ModItems.itemCrystallizedVoidPearl )
                 return false;
 
+            World world = vaporizer.getWorld();
+            if ( world == null )
+                return false;
+
+            Entity entity = EntityUtilities.getEntity(stack, world, exactCopies, null);
+            if ( entity == null || !(entity instanceof EntityLivingBase) )
+                return false;
+
+            final EntityLivingBase living = (EntityLivingBase) entity;
+            final boolean isBoss = !entity.isNonBoss();
             final ModConfig.BossMode bossMode = ModConfig.vaporizers.modules.theoreticalSlaughter.bossMode;
-            if ( bossMode == ModConfig.BossMode.DISABLED || (bossMode == ModConfig.BossMode.CREATIVE_ONLY && !vaporizer.isCreative()) ) {
-                final World world = vaporizer.getWorld();
-                if ( world != null ) {
-                    final Entity entity = EntityUtilities.getEntity(stack, world, false, null);
-                    if ( entity != null && !entity.isNonBoss() )
-                        return false;
-                }
+            if ( isBoss && (bossMode == ModConfig.BossMode.DISABLED || (bossMode == ModConfig.BossMode.CREATIVE_ONLY && !vaporizer.isCreative())) )
+                return false;
+
+            final boolean isBaby = EntityUtilities.isBaby(entity);
+            if ( isBaby && ModConfig.vaporizers.modules.theoreticalSlaughter.babyMode == ModConfig.CloneModule.BabyCloningMode.DISALLOW )
+                return false;
+
+            final int expCost = EntityUtilities.getBaseFromEntity(entity);
+            double rawCost = (ModConfig.vaporizers.modules.theoreticalSlaughter.expFactor * expCost) + (ModConfig.vaporizers.modules.theoreticalSlaughter.healthFactor * living.getMaxHealth());
+            if ( exactCopies ) {
+                rawCost *= ModConfig.vaporizers.modules.theoreticalSlaughter.exactFactor;
+                if ( isBaby && ModConfig.vaporizers.modules.theoreticalSlaughter.exactBaby )
+                    rawCost *= ModConfig.vaporizers.babyMultiplier;
             }
 
-            final boolean isBaby = EntityUtilities.containsBabyEntity(stack);
-            if ( !isBaby )
-                return true;
-
-            return ModConfig.vaporizers.modules.theoreticalSlaughter.babyMode != ModConfig.CloneModule.BabyCloningMode.DISALLOW;
+            return rawCost > 0;
         }
 
         public void updateModifier(@Nonnull ItemStack stack) {
@@ -440,23 +452,17 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
             // No, world isn't always non-null you idiot.
             if ( world != null ) {
                 Entity entity = EntityUtilities.getEntity(stack, world, exactCopies, null);
-                if ( !(entity instanceof EntityLivingBase) ) {
-                    entityLoaded = true;
-                    entityCost = 0;
-                    finalCost = 0;
-                    return;
-                }
-
                 if ( entity != null ) {
                     entityLoaded = true;
-                    entityCost = EntityUtilities.getBaseExperience(entity);
-                    entityBaby = EntityUtilities.containsBabyEntity(stack);
-                    entityBoss = !entity.isNonBoss();
-
-                    if ( entity instanceof EntityLivingBase )
+                    if ( entity instanceof EntityLivingBase ) {
+                        entityCost = EntityUtilities.getBaseFromEntity(entity);
+                        entityBaby = EntityUtilities.isBaby(entity);
+                        entityBoss = !entity.isNonBoss();
                         entityHealth = ((EntityLivingBase) entity).getMaxHealth();
-                    else
+                    } else {
+                        entityCost = 0;
                         entityHealth = 0;
+                    }
                 }
             }
 

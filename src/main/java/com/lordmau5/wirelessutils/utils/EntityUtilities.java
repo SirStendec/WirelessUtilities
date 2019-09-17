@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
@@ -185,6 +186,12 @@ public class EntityUtilities {
         if ( handler != null )
             return handler.isFilledBall(stack);
 
+        return false;
+    }
+
+    public static boolean isBaby(@Nonnull Entity entity) {
+        if ( entity instanceof EntityLivingBase )
+            return ((EntityLivingBase) entity).isChild();
         return false;
     }
 
