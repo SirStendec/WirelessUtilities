@@ -15,6 +15,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -105,10 +106,10 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
 
     @Override
     public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
-        if ( tab == getCreativeTab() )
+        if ( tab == getCreativeTab() || tab == CreativeTabs.SEARCH )
             items.add(new ItemStack(this, 1, 0));
 
-        if ( ModConfig.items.voidPearl.displayFilled && tab == CreativeTabs.MISC )
+        if ( ModConfig.items.voidPearl.displayFilled && (tab == CreativeTabs.MISC || tab == CreativeTabs.SEARCH) )
             items.addAll(entityPearls);
     }
 
@@ -265,14 +266,6 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
         return out;
     }
 
-    public int getBaseExperience(@Nonnull ItemStack stack) {
-        ResourceLocation name = getEntityId(stack);
-        if ( name == null )
-            return 0;
-
-        return EntityUtilities.getBaseExperience(name, (World) null);
-    }
-
     /* IEntityBall */
 
     public boolean isValidBall(@Nonnull ItemStack stack) {
@@ -292,6 +285,9 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
             return false;
 
         NBTTagCompound tag = stack.getTagCompound();
+        if ( tag.hasKey("EntityBaby", Constants.NBT.TAG_BYTE) )
+            return tag.getBoolean("EntityBaby");
+
         NBTTagCompound entity = tag.getCompoundTag("EntityData");
         return entity != null && (entity.getBoolean("IsBaby") || entity.getInteger("Age") < 0);
     }
@@ -332,7 +328,7 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
         if ( !isValidBall(stack) || isFilledBall(stack) )
             return ItemStack.EMPTY;
 
-        if ( !(entity instanceof EntityLiving) || !entity.isEntityAlive() )
+        if ( !(entity instanceof EntityLivingBase) || !entity.isEntityAlive() )
             return ItemStack.EMPTY;
 
         if ( !entity.isNonBoss() ) {
@@ -363,6 +359,7 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
 
         tag.setString("EntityID", key.toString());
         tag.setTag("EntityData", entityTag);
+        tag.setBoolean("EntityBaby", ((EntityLivingBase) entity).isChild());
 
         out.setItemDamage(EntityList.getID(entity.getClass()));
         out.setTagCompound(tag);
@@ -380,6 +377,7 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
         if ( tag != null ) {
             tag.removeTag("EntityID");
             tag.removeTag("EntityData");
+            tag.removeTag("EntityBaby");
 
             if ( tag.isEmpty() )
                 tag = null;
