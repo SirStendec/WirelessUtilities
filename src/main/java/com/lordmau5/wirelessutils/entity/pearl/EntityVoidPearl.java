@@ -140,7 +140,7 @@ public class EntityVoidPearl extends EntityBaseThrowable {
 
                 if ( world instanceof WorldServer ) {
                     WorldServer ws = (WorldServer) world;
-                    AxisAlignedBB box = result.entityHit.getRenderBoundingBox();
+                    AxisAlignedBB box = result.entityHit.getEntityBoundingBox();
 
                     double sizeX = (box.maxX - box.minX) / 2;
                     double sizeY = (box.maxY - box.minY) / 2;

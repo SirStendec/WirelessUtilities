@@ -56,7 +56,7 @@ public class ItemVoidPearl extends ItemBaseVoidPearl {
         if ( entity.world instanceof WorldServer ) {
             WorldServer ws = (WorldServer) entity.world;
             ws.playSound(null, entity.getPosition(), SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.NEUTRAL, .2F, .2F);
-            AxisAlignedBB box = entity.getRenderBoundingBox();
+            AxisAlignedBB box = entity.getEntityBoundingBox();
 
             double centerX = entity.posX + (box.maxX - box.minX) / 2;
             double centerY = entity.posY + (box.maxY - box.minY) / 2;
