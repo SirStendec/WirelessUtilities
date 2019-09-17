@@ -11,9 +11,14 @@ import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -219,6 +224,18 @@ public class ItemCaptureModule extends ItemFilteringModule {
 
             if ( !vaporizer.insertOutputStack(result).isEmpty() )
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
+
+            if ( entity.world instanceof WorldServer ) {
+                WorldServer ws = (WorldServer) entity.world;
+                ws.playSound(null, entity.getPosition(), SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.BLOCKS, .2F, .2F);
+                AxisAlignedBB box = entity.getEntityBoundingBox();
+
+                double centerX = entity.posX + (box.maxX - box.minX) / 2;
+                double centerY = entity.posY + (box.maxY - box.minY) / 2;
+                double centerZ = entity.posZ + (box.maxZ - box.minZ) / 2;
+
+                ws.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, centerX, centerY, centerZ, 3, .2D, .2D, .2D, 0D);
+            }
 
             entity.setDead();
             input.extractItem(slot, 1, false);
