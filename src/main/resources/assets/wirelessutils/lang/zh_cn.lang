@@ -109,10 +109,10 @@ item.wirelessutils.positional_card.invalid.range=目标位置不在范围内。
 item.wirelessutils.positional_card.invalid.unset=没有已设置的目标。
 
 item.wirelessutils.relative_positional_card.name=相对位置卡
-item.wirelessutils.relative_positional_card.info.0=潜行右击一个方块来
-item.wirelessutils.relative_positional_card.info.1=设置起始方块，再潜
-item.wirelessutils.relative_positional_card.info.2=行右击一个方块来存
-item.wirelessutils.relative_positional_card.info.3=储相对位置。
+item.wirelessutils.relative_positional_card.info.0=你可以潜行右击一个
+item.wirelessutils.relative_positional_card.info.1=方块来设置起始方块，
+item.wirelessutils.relative_positional_card.info.2=再潜行右击一个方块
+item.wirelessutils.relative_positional_card.info.3=来存储相对位置。
 item.wirelessutils.relative_positional_card.highlight=%s (%s)
 item.wirelessutils.relative_positional_card.distance=距离：%s
 item.wirelessutils.relative_positional_card.invalid.range=目标位置不在范围内。
@@ -136,8 +136,12 @@ item.wirelessutils.charged_pearl.jei.1=有传言说充能珍珠首次发现于�
 item.wirelessutils.quenched_pearl.name=淬火珍珠
 item.wirelessutils.scorched_pearl.name=焦黑珍珠
 
+item.wirelessutils.crystallized_void_pearl.name=结晶末影珍珠
+item.wirelessutils.crystallized_void_pearl.jei.0=把一个虚空珍珠扔到到末影水晶上不知为何会使虚空珍珠本身结晶。
+item.wirelessutils.crystallized_void_pearl.jei.1=这种状态下的虚空珍珠会变得非常稳定，它们再也不能用来捕捉生物了。然而，任何先前被困在里面的生物都变得更容易使用。
+
 item.wirelessutils.void_pearl.name=虚空珍珠
-item.wirelessutils.void_pearl.contains=含有：
+item.wirelessutils.void_pearl.contains=含有：%s
 item.wirelessutils.void_pearl.baby=幼年%s
 item.wirelessutils.void_pearl.health=生命：%s
 item.wirelessutils.void_pearl.value=值：%s
@@ -157,18 +161,42 @@ item.wirelessutils.conversion_upgrade.name=转换套件
 
 item.wirelessutils.base_module.name=模块基座
 
+item.wirelessutils.animal_slaughter_module.name=动物屠宰模块
+item.wirelessutils.animal_slaughter_module.info.0=该模块会杀掉任何发现
+item.wirelessutils.animal_slaughter_module.info.1=自己不幸正位于蒸馏器
+item.wirelessutils.animal_slaughter_module.info.2=工作区域内的生物。模
+item.wirelessutils.animal_slaughter_module.info.3=块会产生肉或粉红史莱
+item.wirelessutils.animal_slaughter_module.info.4=姆，取决于其配置。
+
+item.wirelessutils.animal_slaughter_module.fluid_invalid=蒸馏器流体储罐含有无效流体。
+item.wirelessutils.animal_slaughter_module.fluid_full=蒸馏器流体储罐已满。
+
+item.wirelessutils.animal_slaughter_module.producing=Producing: %s
+
 item.wirelessutils.slaughter_module.name=屠宰模块
 item.wirelessutils.slaughter_module.info.0=该模块会杀掉任何发现
 item.wirelessutils.slaughter_module.info.1=自己不幸正位于蒸馏器
 item.wirelessutils.slaughter_module.info.2=工作区域内的生物。
 item.wirelessutils.slaughter_module.info.3=
 
-item.wirelessutils.slaughter_module.as_player=使用武器
+item.wirelessutils.slaughter_module.weapon.valid=这是个有效的武器。
+item.wirelessutils.slaughter_module.weapon.invalid=这不是个有效的武器
+
+item.wirelessutils.slaughter_module.as_player=模拟玩家
 item.wirelessutils.slaughter_module.drops=掉落：%s
 item.wirelessutils.slaughter_module.exp=经验：%s
 
+item.wirelessutils.theoretical_slaughter_module.name=理论上的屠宰模块
+item.wirelessutils.theoretical_slaughter_module.info.0=该模块理论上地杀掉
+item.wirelessutils.theoretical_slaughter_module.info.1=被捕获生物的一个理
+item.wirelessutils.theoretical_slaughter_module.info.2=论上的复制。
+
+item.wirelessutils.theoretical_slaughter_module.exact=杀死精确复制
+item.wirelessutils.theoretical_slaughter_module.exact.off=不要杀死精确复制
+item.wirelessutils.theoretical_slaughter_module.drops=掉落：%s
+
 item.wirelessutils.filtered_module.entry=- %s
-item.wirelessutils.filtered_module.info_list=%s %s 物品
+item.wirelessutils.filtered_module.info_list=%s按住§e§oCtrl§r§7查看%s物品
 item.wirelessutils.filtered_module.age=年龄：%s
 item.wirelessutils.filtered_module.age_info.0=基于是否成年来过滤
 item.wirelessutils.filtered_module.age_info.1=生物。
@@ -213,6 +241,11 @@ item.wirelessutils.clone_module.name=复制模块
 item.wirelessutils.clone_module.info.0=该模块使用经验和已
 item.wirelessutils.clone_module.info.1=捕获生物来创造该生
 item.wirelessutils.clone_module.info.2=物的复制品。
+item.wirelessutils.clone_module.limit=生成限制：%s
+item.wirelessutils.clone_module.limit.info.0=蒸馏器只会在%s格区
+item.wirelessutils.clone_module.limit.info.1=域内存在小于该数量
+item.wirelessutils.clone_module.limit.info.2=这种生物时生成复制
+item.wirelessutils.clone_module.limit.info.3=品。
 item.wirelessutils.clone_module.exact=生成精确复制
 item.wirelessutils.clone_module.exact.info.0=该模块能生成生物的精
 item.wirelessutils.clone_module.exact.info.1=确复制，但会额外消耗
@@ -308,16 +341,46 @@ item.wirelessutils.range_augment.lock.0=当存在需要该升级才能
 item.wirelessutils.range_augment.lock.1=触及的目标时，不能移
 item.wirelessutils.range_augment.lock.2=除该升级。
 
+item.wirelessutils.filter_augment.name=过滤器升级
+item.wirelessutils.filter_augment.info.0=该升级能防止匹配的
+item.wirelessutils.filter_augment.info.1=物品被插入机器的内
+item.wirelessutils.filter_augment.info.2=部存储。
+item.wirelessutils.filter_augment.info.3=
+
+item.wirelessutils.filter_augment.voiding=湮灭物品
+item.wirelessutils.filter_augment.nbt=忽略NBT
+item.wirelessutils.filter_augment.meta=忽略元数据
+item.wirelessutils.filter_augment.ore=使用矿辞
+item.wirelessutils.filter_augment.match_mod=匹配模组物品
+
+item.wirelessutils.filter_augment.entry=- %s
+item.wirelessutils.filter_augment.info_list=%s按住§e§oAlt§r§7查看%s物品
+
+item.wirelessutils.facing_augment.name=远面升级
+item.wirelessutils.facing_augment.info.0=该升级允许定向机器
+item.wirelessutils.facing_augment.info.1=瞄准方块的其他面，
+item.wirelessutils.facing_augment.info.2=而不是面对定向机器
+item.wirelessutils.facing_augment.info.3=的那一面。
+
 item.wirelessutils.disabled=该物品已在配置中停用。
 
 item.wirelessutils.augment.min_level=需要机器等级：%s
 item.wirelessutils.augment.energy=能量消耗：
-item.wirelessutils.augment.energy.entry=- %s
-item.wirelessutils.augment.energy.action=%sx + %s RF/动作
+
+info.wirelessutils.modifier.multiplier=%sx
+info.wirelessutils.modifier.addition=+ %s
+info.wirelessutils.modifier.subtraction=- %s
+info.wirelessutils.modifier.entry=- %s
+info.wirelessutils.modifier.combiner=%s %s
+info.wirelessutils.modifier.energy=RF/动作
+info.wirelessutils.modifier.budget=每次动作
 
 item.wirelessutils.augment.budget=工作缓存使用：
-item.wirelessutils.augment.budget.entry=- %s
-item.wirelessutils.augment.budget.action=%sx + %s RF/动作
+
+item.wirelessutils.machine_ctrl.inactive=按住§e§oCtrl§r§7查看可用升级
+item.wirelessutils.machine_ctrl.active=可用升级：
+item.wirelessutils.machine_ctrl.entry=- %s
+item.wirelessutils.machine_ctrl.none=无
 
 item.wirelessutils.augment_ctrl.inactive=按§e§oCtrl§r§7查看可用机器
 item.wirelessutils.augment_ctrl.active=可用机器：
@@ -340,6 +403,8 @@ item.wirelessutils.transfer_augment.info.0=大幅提升机器向目标传
 item.wirelessutils.transfer_augment.info.1=输资源的速度。
 item.wirelessutils.transfer_augment.info.2=
 
+item.wirelessutils.range_augment.tip.dir.volume=定向体积：%s个方块
+item.wirelessutils.range_augment.tip.dir.max_side=定向最大距离：%s
 item.wirelessutils.range_augment.tip.directional=定向工作范围：%sx%sx%s
 item.wirelessutils.range_augment.tip.positional=定位工作范围：%s
 item.wirelessutils.range_augment.tip.range_positional=%s方块内
@@ -428,14 +493,26 @@ tab.wirelessutils.auto_transfer.side.BOTTOM=底面
 tab.wirelessutils.auto_transfer.side.FRONT=正面
 tab.wirelessutils.auto_transfer.side.BACK=背面
 
-btn.wirelessutils.dec_area.one=减少%s格
-btn.wirelessutils.dec_area.all=全部减少%s格
-btn.wirelessutils.inc_area.one=增加%s格
-btn.wirelessutils.inc_area.all=全部增加%s格
+tab.wirelessutils.open_gui.0=打开该物品的标准GUI。
+
+tab.wirelessutils.lock.locked.0=单击此处解锁。
+tab.wirelessutils.lock.locked.1=该物品当前已对
+tab.wirelessutils.lock.locked.2=所有变更锁定。
+
+tab.wirelessutils.lock.unlocked.0=单击此处锁定
+tab.wirelessutils.lock.unlocked.1=该物品并未锁定，
+tab.wirelessutils.lock.unlocked.2=可被任何人修改。
+
+btn.wirelessutils.dec_area.one=减少%s
+btn.wirelessutils.dec_area.all=全部减少%s
+btn.wirelessutils.inc_area.one=增加%s
+btn.wirelessutils.inc_area.all=全部增加%s
 
 info.wirelessutils.x=X:
 info.wirelessutils.y=Y:
 info.wirelessutils.z=Z:
+
+info.wirelessutils.energy_at_tick=以Tick显示能量
 
 info.wirelessutils.owner=所有者：%s
 info.wirelessutils.no_owner=(未设置)
@@ -474,6 +551,7 @@ info.wirelessutils.vaporizer.missing_modifier.0=请安装一个有效的修饰�
 info.wirelessutils.vaporizer.bad_config.0=请配置模块。
 info.wirelessutils.vaporizer.empty_whitelist.0=目标白名单为空。
 info.wirelessutils.vaporizer.insufficient_budget.0=被配置的模块无法在此机器上运行。
+info.wirelessutils.vaporizer.missing_weapon.0=请放入武器以供屠宰模块使用。
 
 info.wirelessutils.item_rate.second=个物品/s
 info.wirelessutils.item_rate.tick=个物品/t
@@ -500,6 +578,41 @@ btn.wirelessutils.drop.exp=经验：
 btn.wirelessutils.blacklist=黑名单：
 btn.wirelessutils.whitelist=白名单：
 
+btn.wirelessutils.ignore_meta=忽略元数据：%s
+btn.wirelessutils.ignore_meta.info.0=当此选项被启用，过
+btn.wirelessutils.ignore_meta.info.1=滤物品时会忽略其上
+btn.wirelessutils.ignore_meta.info.2=的元数据，例如伤害。
+
+btn.wirelessutils.ignore_nbt=忽略NBT：%s
+btn.wirelessutils.ignore_nbt.info.0=当此选项被启用，过
+btn.wirelessutils.ignore_nbt.info.1=滤物品时会忽略物品
+btn.wirelessutils.ignore_nbt.info.2=上的NBT数据。
+
+btn.wirelessutils.use_ore=使用矿物辞典：%s
+btn.wirelessutils.use_ore.info.0=当此选项被启用，过
+btn.wirelessutils.use_ore.info.1=滤物品时会对照矿物
+btn.wirelessutils.use_ore.info.2=辞典。矿辞上等价的
+btn.wirelessutils.use_ore.info.3=物品会同等对待。
+
+btn.wirelessutils.use_ore.list=匹配矿物：
+
+btn.wirelessutils.voiding=物品湮灭：%s
+btn.wirelessutils.voiding.info.0=当此选项被启用，安
+btn.wirelessutils.voiding.info.1=装此升级的机器会接
+btn.wirelessutils.voiding.info.2=收不通过过滤器的物
+btn.wirelessutils.voiding.info.3=品，这些物品会被直
+btn.wirelessutils.voiding.info.4=接散入虚空。
+
+btn.wirelessutils.match_mod=匹配模组：%s
+btn.wirelessutils.match_mod.info.0=当选项被启用，只要
+btn.wirelessutils.match_mod.info.1=物品与过滤器物品之
+btn.wirelessutils.match_mod.info.2=一属于相同的模组，
+btn.wirelessutils.match_mod.info.3=前者就会被匹配。
+btn.wirelessutils.match_mod.info.4=该选项与其他过滤模
+btn.wirelessutils.match_mod.info.5=式不兼容。
+
+btn.wirelessutils.match_mod.disabled=该选项与匹配模组不兼容。
+
 btn.wirelessutils.fall_protect=掉落保护：
 btn.wirelessutils.fall_protect.0=禁用
 btn.wirelessutils.fall_protect.1=启用
@@ -523,6 +636,9 @@ btn.wirelessutils.drop_mode.3=全部销毁
 
 btn.wirelessutils.edit=编辑
 btn.wirelessutils.save=保存
+
+btn.wirelessutils.clear=清空
+btn.wirelessutils.clear.info.0=Ctrl单击这个按钮来清空这张卡。
 
 btn.wirelessutils.slot_locks.lock=锁定物品种类
 btn.wirelessutils.slot_locks.unlock=解除锁定
@@ -551,9 +667,18 @@ btn.wirelessutils.cost_fluid=%s (%s mB)
 btn.wirelessutils.offset.vertical=垂直：
 btn.wirelessutils.offset.horizontal=水平：
 
+btn.wirelessutils.range.volume=体积：
+btn.wirelessutils.range.max_volume=最大体积：
 btn.wirelessutils.range.height=高：
 btn.wirelessutils.range.length=长：
 btn.wirelessutils.range.width=宽：
+
+info.wirelessutils.crafting=物品栏合成
+info.wirelessutils.crafting.none=未激活
+info.wirelessutils.crafting.input=输入：%s
+info.wirelessutils.crafting.fluid=使用：%2s的%1smB
+info.wirelessutils.crafting.power=使用：%s RF
+info.wirelessutils.crafting.output=输出：%s
 
 info.wirelessutils.work_budget=工作缓存
 info.wirelessutils.work_budget.per_tick=+%s/tick
@@ -571,6 +696,8 @@ info.wirelessutils.blockpos.dimension.simple=维度：%s
 info.wirelessutils.blockpos.dimension.named=维度：%s (%s)
 
 info.wirelessutils.configured=%s (已配置)
+info.wirelessutils.locked=%s (已锁定)
+info.wirelessutils.locked.tip=该物品已被锁定，无法再配置。
 
 info.wirelessutils.tiered.name=%s (%s)
 info.wirelessutils.tiered.tier=等级%s
@@ -597,15 +724,24 @@ info.wirelessutils.ae2.channels=频道：%d/%d
 chat.wirelessutils.upgrade.success=将%s安装到%s。
 chat.wirelessutils.upgrade.failed=不能将%s安装到%s。
 
+commands.wirelessutils.voidgen.usage=/wu_voidgen <entity-id> [crystallized:true/false] [entityTag]
+commands.wirelessutils.voidgen.tag_error=实体标签解析失败：%s
+commands.wirelessutils.voidgen.invalid_entity=没有这个实体：%s
+commands.wirelessutils.voidgen.success=生成虚空珍珠：%s
+
 commands.wirelessutils.fluidgen.usage=/wu_fluidgen <held OR fluid-name> <mB/t> <energy> [color OR -] [fluidTag]
 commands.wirelessutils.fluidgen.tag_error=流体标签解析失败：%s
 commands.wirelessutils.fluidgen.not_holding=手持物品不含可供复制的流体。
 commands.wirelessutils.fluidgen.no_such_fluid=没有名为%s的流体
 commands.wirelessutils.fluidgen.success=已创造升级：%s
 
+commands.wirelessutils.edit_item.not_holding=未持有可编辑的物品。
+
 commands.wirelessutils.debug.success=已创造物品：%s
 
-stat.wirelessutils.captured_mobs=虚空珍珠捕获
+stat.wirelessutils.CapturedEntities=虚空珍珠已捕获
+stat.wirelessutils.ThrownPearls=已投掷珍珠
+stat.wirelessutils.CrystallizedPearls=虚空珍珠已结晶
 
 advancements.wirelessutils.root.title=无线设备
 advancements.wirelessutils.root.description=因为线缆只会碍事。
