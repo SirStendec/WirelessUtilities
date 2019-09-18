@@ -191,7 +191,7 @@ public class Worker<T extends TargetInfo> {
                 if ( target == oldPos )
                     passedOldPos = true;
 
-                World world = DimensionManager.getWorld(target.getDimension());
+                World world = DimensionManager.getWorld(target.getDimension(), false);
                 if ( world == null || !world.isBlockLoaded(target) )
                     continue;
 
@@ -407,7 +407,7 @@ public class Worker<T extends TargetInfo> {
 
             World world = target.entity != null ? target.entity.getEntityWorld() :
                     target.tile != null ? target.tile.getWorld() :
-                            target.pos != null ? DimensionManager.getWorld(target.pos.getDimension()) : null;
+                            target.pos != null ? DimensionManager.getWorld(target.pos.getDimension(), false) : null;
 
             if ( world == null || (target.pos != null && !world.isBlockLoaded(target.pos)) ) {
                 target.processBlock = false;

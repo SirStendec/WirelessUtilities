@@ -552,6 +552,9 @@ info.wirelessutils.vaporizer.bad_config.0=Please configure the installed module.
 info.wirelessutils.vaporizer.empty_whitelist.0=The target whitelist is empty.
 info.wirelessutils.vaporizer.insufficient_budget.0=The configured module cannot run in this machine.
 info.wirelessutils.vaporizer.missing_weapon.0=Please insert a weapon for the Slaughter Module to use.
+info.wirelessutils.vaporizer.too_many_entities.0=There are too many entities nearby to spawn more.
+info.wirelessutils.vaporizer.no_input.0=Please insert items into the input buffer.
+info.wirelessutils.vaporizer.no_empty_output.0=Please remove items from the output buffer.
 
 info.wirelessutils.item_rate.second=Items/s
 info.wirelessutils.item_rate.tick=Items/t

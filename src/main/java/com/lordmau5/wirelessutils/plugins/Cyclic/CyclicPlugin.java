@@ -69,7 +69,7 @@ public class CyclicPlugin implements IPlugin {
                     return ItemStack.EMPTY;
 
                 ResourceLocation key = EntityList.getKey(entity);
-                if ( EntityUtilities.isBlacklisted(key) )
+                if ( key == null || EntityUtilities.isBlacklisted(key) )
                     return ItemStack.EMPTY;
 
                 ItemStack out = new ItemStack(stack.getItem(), 1);

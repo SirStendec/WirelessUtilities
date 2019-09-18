@@ -690,14 +690,14 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             int blockCost = target.cost + baseEnergy;
             int entityCost = 0;
 
-            if ( behavior != null ) {
+            if ( behavior != null && target.pos != null ) {
                 BlockPosDimension pos = target.pos;
                 int dim = pos.getDimension();
                 World world;
                 if ( dim == dimension )
                     world = this.world;
                 else
-                    world = DimensionManager.getWorld(dim);
+                    world = DimensionManager.getWorld(dim, false);
 
                 if ( world != null )
                     blockCost += (int) (behavior.getBlockEnergyCost(target, world) * energyMultiplier);

@@ -173,12 +173,16 @@ public class ItemCloneModule extends ItemModule {
         private boolean exactCopies = false;
 
         private ItemStack entityBall = ItemStack.EMPTY;
+        private boolean canSpawn = false;
         private boolean entityLoaded = false;
         private boolean entityBaby = false;
         private boolean entityBoss = false;
         private float entityHealth = 0;
         private int entityCost = 0;
-        private int finalCost = 0;
+
+        private int budgetCost = 0;
+        private int fuelCost = 0;
+        private int energyCost = 0;
         private int entityLimit = 0;
 
         private int entities = 0;
@@ -205,7 +209,7 @@ public class ItemCloneModule extends ItemModule {
         }
 
         public int getCost() {
-            return finalCost;
+            return fuelCost;
         }
 
         public double getEnergyMultiplier() {
@@ -254,7 +258,7 @@ public class ItemCloneModule extends ItemModule {
         }
 
         public boolean canExact() {
-            return ModConfig.vaporizers.modules.clone.exactFactor > 0;
+            return ModConfig.vaporizers.modules.clone.allowExact;
         }
 
         public Class<? extends Entity> getEntityClass() {
@@ -327,7 +331,7 @@ public class ItemCloneModule extends ItemModule {
             if ( world == null )
                 return false;
 
-            Entity entity = EntityUtilities.getEntity(stack, world, exactCopies, null);
+            Entity entity = EntityUtilities.getEntity(stack, world, true, null);
             if ( entity == null || !(entity instanceof EntityLivingBase) )
                 return false;
 
@@ -338,34 +342,46 @@ public class ItemCloneModule extends ItemModule {
                 return false;
 
             final boolean isBaby = EntityUtilities.isBaby(entity);
-            if ( isBaby && ModConfig.vaporizers.modules.clone.babyMode == ModConfig.CloneModule.BabyCloningMode.DISALLOW )
+            if ( isBaby && ModConfig.vaporizers.modules.clone.babyMode == ModConfig.BabyCloningMode.DISALLOW )
                 return false;
 
-            final int expCost = EntityUtilities.getBaseFromEntity(entity);
-            double rawCost = (ModConfig.vaporizers.modules.clone.expFactor * expCost) + (ModConfig.vaporizers.modules.clone.healthFactor * living.getMaxHealth());
+            int expCost = EntityUtilities.getBaseFromEntity(entity);
+            if ( isBaby && ModConfig.vaporizers.modules.clone.exactBaby )
+                expCost *= ModConfig.vaporizers.babyMultiplier;
+
+            final float health = living.getMaxHealth();
+            double rawFuel = (ModConfig.vaporizers.modules.clone.fuelPerExp * expCost) + (ModConfig.vaporizers.modules.clone.fuelPerHealth * health);
+            double rawEnergy = (ModConfig.vaporizers.modules.clone.energyPerExp * expCost) + (ModConfig.vaporizers.modules.clone.energyPerHealth * health);
             if ( exactCopies ) {
-                rawCost *= ModConfig.vaporizers.modules.clone.exactFactor;
+                if ( ModConfig.vaporizers.modules.clone.fuelExactFactor != 0 )
+                    rawFuel *= ModConfig.vaporizers.modules.clone.fuelExactFactor;
+
+                if ( ModConfig.vaporizers.modules.clone.energyExactFactor != 0 )
+                    rawEnergy *= ModConfig.vaporizers.modules.clone.energyExactFactor;
+
                 if ( isBaby && ModConfig.vaporizers.modules.clone.exactBaby )
-                    rawCost *= ModConfig.vaporizers.babyMultiplier;
+                    rawFuel *= ModConfig.vaporizers.babyMultiplier;
             }
 
-            return rawCost > 0;
+            return rawFuel > 0 || (!ModConfig.vaporizers.modules.clone.requireFuel && rawEnergy > 0);
         }
 
         public void updateModifier(@Nonnull ItemStack stack) {
             if ( !isValidModifier(stack) ) {
                 entityBall = ItemStack.EMPTY;
                 entityLoaded = false;
+                canSpawn = false;
                 return;
             }
 
             entityBall = stack;
             entityLoaded = false;
+            canSpawn = false;
 
             World world = vaporizer.getWorld();
             // No, world isn't always non-null you idiot.
             if ( world != null ) {
-                Entity entity = EntityUtilities.getEntity(stack, world, exactCopies, null);
+                Entity entity = EntityUtilities.getEntity(stack, world, true, null);
                 if ( entity != null ) {
                     entityLoaded = true;
                     if ( entity instanceof EntityLivingBase ) {
@@ -385,24 +401,57 @@ public class ItemCloneModule extends ItemModule {
 
         public void recalculateCost() {
             if ( !entityLoaded ) {
-                finalCost = 0;
+                fuelCost = 0;
+                energyCost = 0;
+                budgetCost = 0;
+                canSpawn = false;
                 return;
             }
 
             ModConfig.BossMode bossMode = ModConfig.vaporizers.modules.clone.bossMode;
             if ( entityBoss && (bossMode == ModConfig.BossMode.DISABLED || (bossMode == ModConfig.BossMode.CREATIVE_ONLY && !vaporizer.isCreative())) ) {
-                finalCost = 0;
+                fuelCost = 0;
+                energyCost = 0;
+                budgetCost = 0;
+                canSpawn = false;
                 return;
             }
 
-            double rawCost = (ModConfig.vaporizers.modules.clone.expFactor * entityCost) + (ModConfig.vaporizers.modules.clone.healthFactor * entityHealth);
+            int cost = entityCost;
+            if ( entityBaby && ModConfig.vaporizers.modules.clone.exactBaby )
+                cost *= ModConfig.vaporizers.babyMultiplier;
+
+            double rawFuel = (ModConfig.vaporizers.modules.clone.fuelPerExp * cost) + (ModConfig.vaporizers.modules.clone.fuelPerHealth * entityHealth);
+            double rawEnergy = (ModConfig.vaporizers.modules.clone.energyPerExp * cost) + (ModConfig.vaporizers.modules.clone.energyPerHealth * entityHealth);
+            double rawBudget = (ModConfig.vaporizers.modules.clone.budgetPerExp * cost) + (ModConfig.vaporizers.modules.clone.budgetPerHealth * entityHealth);
+
             if ( exactCopies ) {
-                rawCost *= ModConfig.vaporizers.modules.clone.exactFactor;
-                if ( entityBaby && ModConfig.vaporizers.modules.clone.exactBaby )
-                    rawCost *= ModConfig.vaporizers.babyMultiplier;
+                if ( ModConfig.vaporizers.modules.clone.fuelExactFactor != 0 )
+                    rawFuel *= ModConfig.vaporizers.modules.clone.fuelExactFactor;
+
+                if ( ModConfig.vaporizers.modules.clone.energyExactFactor != 0 )
+                    rawEnergy *= ModConfig.vaporizers.modules.clone.energyExactFactor;
+
+                if ( ModConfig.vaporizers.modules.clone.budgetExactFactor != 0 )
+                    rawBudget *= ModConfig.vaporizers.modules.clone.budgetExactFactor;
             }
 
-            finalCost = (int) Math.ceil(rawCost);
+            fuelCost = (int) Math.ceil(rawFuel);
+            energyCost = (int) Math.ceil(rawEnergy);
+            budgetCost = (int) Math.ceil(rawBudget);
+
+            canSpawn = fuelCost > 0 || (!ModConfig.vaporizers.modules.clone.requireFuel && energyCost > 0);
+
+            // Now that we've determined if we can spawn, add the base values.
+            fuelCost += ModConfig.vaporizers.modules.clone.fuelBase;
+            energyCost += ModConfig.vaporizers.modules.clone.energyBase;
+            budgetCost += ModConfig.vaporizers.modules.clone.budgetBase;
+
+            if ( exactCopies ) {
+                fuelCost += ModConfig.vaporizers.modules.clone.fuelExact;
+                energyCost += ModConfig.vaporizers.modules.clone.energyExact;
+                budgetCost += ModConfig.vaporizers.modules.clone.budgetExact;
+            }
         }
 
         public int getExperienceMode() {
@@ -430,12 +479,12 @@ public class ItemCloneModule extends ItemModule {
             if ( !entityLoaded && !entityBall.isEmpty() )
                 updateModifier(entityBall);
 
-            if ( finalCost == 0 )
+            if ( !canSpawn )
                 return false;
 
             // If we operate on entities in a single continuous
             // block, then do our entity check here.
-            if ( !ignorePower && vaporizer.hasWorld() && vaporizer.canGetFullEntities() ) {
+            if ( vaporizer.hasWorld() && vaporizer.canGetFullEntities() ) {
                 Class<? extends Entity> klass = EntityUtilities.getEntityClass(vaporizer.getModifier());
                 if ( klass == null )
                     klass = EntityLivingBase.class;
@@ -447,7 +496,7 @@ public class ItemCloneModule extends ItemModule {
                     return false;
             }
 
-            return true;
+            return ignorePower || vaporizer.getEnergyStored() >= energyCost;
         }
 
         @Nullable
@@ -456,17 +505,17 @@ public class ItemCloneModule extends ItemModule {
             if ( entityBall.isEmpty() )
                 return "info." + WirelessUtils.MODID + ".vaporizer.missing_entity";
 
-            if ( finalCost == 0 )
+            if ( !canSpawn )
                 return "info." + WirelessUtils.MODID + ".vaporizer.cannot_spawn";
+
+            if ( entities >= entityLimit )
+                return "info." + WirelessUtils.MODID + ".vaporizer.too_many_entities";
 
             return null;
         }
 
         public int getBlockEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
-            if ( exactCopies )
-                return ModConfig.vaporizers.modules.clone.entityExactEnergy;
-
-            return ModConfig.vaporizers.modules.clone.entityEnergy;
+            return energyCost;
         }
 
         public int getEntityEnergyCost(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget target) {
@@ -478,10 +527,7 @@ public class ItemCloneModule extends ItemModule {
         }
 
         public int getActionCost() {
-            if ( exactCopies )
-                return ModConfig.vaporizers.modules.clone.budgetExact;
-
-            return ModConfig.vaporizers.modules.clone.budget;
+            return budgetCost;
         }
 
         @Override
@@ -498,11 +544,11 @@ public class ItemCloneModule extends ItemModule {
         @SuppressWarnings("deprecation")
         public IWorkProvider.WorkResult processBlock(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
             ItemStack modifier = vaporizer.getModifier();
-            if ( finalCost == 0 )
+            if ( fuelCost == 0 )
                 return IWorkProvider.WorkResult.FAILURE_STOP;
 
-            int removed = vaporizer.removeFuel(finalCost);
-            if ( removed < finalCost ) {
+            int removed = vaporizer.removeFuel(fuelCost);
+            if ( removed < fuelCost ) {
                 if ( removed > 0 )
                     vaporizer.addFuel(removed);
                 return IWorkProvider.WorkResult.FAILURE_STOP;
@@ -533,7 +579,7 @@ public class ItemCloneModule extends ItemModule {
             if ( exactCopies )
                 entity.setUniqueId(UUID.randomUUID());
 
-            else if ( entityBaby && ModConfig.vaporizers.modules.clone.babyMode == ModConfig.CloneModule.BabyCloningMode.BABY_CLONES ) {
+            else if ( entityBaby && ModConfig.vaporizers.modules.clone.babyMode == ModConfig.BabyCloningMode.BABY_CLONES ) {
                 if ( entity instanceof EntityAgeable )
                     ((EntityAgeable) entity).setGrowingAge(-24000);
                 else if ( entity instanceof EntityZombie )
@@ -577,8 +623,8 @@ public class ItemCloneModule extends ItemModule {
                     living.spawnExplosionParticle();
             }
 
-            if ( removed > finalCost )
-                vaporizer.addFuel(removed - finalCost);
+            if ( removed > fuelCost )
+                vaporizer.addFuel(removed - fuelCost);
 
             if ( vaporizer.canGetFullEntities() ) {
                 entities++;

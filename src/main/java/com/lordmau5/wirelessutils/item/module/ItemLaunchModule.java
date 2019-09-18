@@ -324,7 +324,19 @@ public class ItemLaunchModule extends ItemFilteringModule {
             if ( !super.canRun(ignorePower) )
                 return false;
 
-            return canRun;
+            if ( !canRun )
+                return false;
+
+            if ( ignorePower )
+                return true;
+
+            // Rudimentary cost calculation since we don't know what entities we'll be
+            // working on.
+            int cost = ModConfig.vaporizers.modules.launch.energy;
+            if ( fallProtect && ModConfig.vaporizers.modules.launch.allowFallProtect )
+                cost += ModConfig.vaporizers.modules.launch.fallProtectEnergy;
+
+            return vaporizer.getEnergyStored() >= cost;
         }
 
         @Nullable

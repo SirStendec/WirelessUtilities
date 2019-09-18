@@ -204,16 +204,18 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
         private final ItemStack[] ghosts;
 
         private ItemStack entityBall = ItemStack.EMPTY;
+        private boolean canSpawn = false;
         private boolean entityLoaded = false;
         private boolean entityBaby = false;
         private boolean entityBoss = false;
         private float entityHealth = 0;
         private int entityCost = 0;
-        private int finalCost = 0;
+
+        private int budgetCost = 0;
+        private int fuelCost = 0;
+        private int energyCost = 0;
 
         private IEntityLivingData entityLivingData;
-
-        private int cost = 0;
 
         private boolean exactCopies = false;
 
@@ -236,7 +238,7 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
         /* GUI Stuff */
 
         public int getEntityCost() {
-            return finalCost;
+            return fuelCost;
         }
 
         public boolean hasEntity() {
@@ -244,7 +246,7 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
         }
 
         public boolean canExact() {
-            return ModConfig.vaporizers.modules.theoreticalSlaughter.exactFactor > 0;
+            return ModConfig.vaporizers.modules.theoreticalSlaughter.allowExact;
         }
 
         public boolean isExact() {
@@ -262,30 +264,58 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
         /* Other Stuff */
 
         public void updateCost() {
-            cost = ModConfig.vaporizers.modules.theoreticalSlaughter.energy;
-
-            if ( exactCopies )
-                cost += ModConfig.vaporizers.modules.theoreticalSlaughter.energyExact;
-
             if ( !entityLoaded ) {
-                finalCost = 0;
+                fuelCost = 0;
+                energyCost = 0;
+                budgetCost = 0;
+                canSpawn = false;
                 return;
             }
 
             ModConfig.BossMode bossMode = ModConfig.vaporizers.modules.theoreticalSlaughter.bossMode;
             if ( entityBoss && (bossMode == ModConfig.BossMode.DISABLED || (bossMode == ModConfig.BossMode.CREATIVE_ONLY && !vaporizer.isCreative())) ) {
-                finalCost = 0;
+                fuelCost = 0;
+                energyCost = 0;
+                budgetCost = 0;
+                canSpawn = false;
                 return;
             }
 
-            double rawCost = (ModConfig.vaporizers.modules.theoreticalSlaughter.expFactor * entityCost) + (ModConfig.vaporizers.modules.theoreticalSlaughter.healthFactor * entityHealth);
+            int cost = entityCost;
+            if ( entityBaby && ModConfig.vaporizers.modules.theoreticalSlaughter.exactBaby )
+                cost *= ModConfig.vaporizers.babyMultiplier;
+
+            double rawFuel = (ModConfig.vaporizers.modules.theoreticalSlaughter.fuelPerExp * cost) + (ModConfig.vaporizers.modules.theoreticalSlaughter.fuelPerHealth * entityHealth);
+            double rawEnergy = (ModConfig.vaporizers.modules.theoreticalSlaughter.energyPerExp * cost) + (ModConfig.vaporizers.modules.theoreticalSlaughter.energyPerHealth * entityHealth);
+            double rawBudget = (ModConfig.vaporizers.modules.theoreticalSlaughter.budgetPerExp * cost) + (ModConfig.vaporizers.modules.theoreticalSlaughter.budgetPerHealth * entityHealth);
+
             if ( exactCopies ) {
-                rawCost *= ModConfig.vaporizers.modules.theoreticalSlaughter.exactFactor;
-                if ( entityBaby && ModConfig.vaporizers.modules.theoreticalSlaughter.exactBaby )
-                    rawCost *= ModConfig.vaporizers.babyMultiplier;
+                if ( ModConfig.vaporizers.modules.theoreticalSlaughter.fuelExactFactor != 0 )
+                    rawFuel *= ModConfig.vaporizers.modules.theoreticalSlaughter.fuelExactFactor;
+
+                if ( ModConfig.vaporizers.modules.theoreticalSlaughter.energyExactFactor != 0 )
+                    rawEnergy *= ModConfig.vaporizers.modules.theoreticalSlaughter.energyExactFactor;
+
+                if ( ModConfig.vaporizers.modules.theoreticalSlaughter.budgetExactFactor != 0 )
+                    rawBudget *= ModConfig.vaporizers.modules.theoreticalSlaughter.budgetExactFactor;
             }
 
-            finalCost = (int) Math.ceil(rawCost);
+            fuelCost = (int) Math.ceil(rawFuel);
+            energyCost = (int) Math.ceil(rawEnergy);
+            budgetCost = (int) Math.ceil(rawBudget);
+
+            canSpawn = fuelCost > 0 || (!ModConfig.vaporizers.modules.theoreticalSlaughter.requireFuel && energyCost > 0);
+
+            // Now that we've determined if we can spawn, add the base values.
+            fuelCost += ModConfig.vaporizers.modules.theoreticalSlaughter.fuelBase;
+            energyCost += ModConfig.vaporizers.modules.theoreticalSlaughter.energyBase;
+            budgetCost += ModConfig.vaporizers.modules.theoreticalSlaughter.budgetBase;
+
+            if ( exactCopies ) {
+                fuelCost += ModConfig.vaporizers.modules.theoreticalSlaughter.fuelExact;
+                energyCost += ModConfig.vaporizers.modules.theoreticalSlaughter.energyExact;
+                budgetCost += ModConfig.vaporizers.modules.theoreticalSlaughter.budgetExact;
+            }
         }
 
         public boolean isValidBall(@Nonnull ItemStack stack) {
@@ -413,7 +443,7 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
             if ( world == null )
                 return false;
 
-            Entity entity = EntityUtilities.getEntity(stack, world, exactCopies, null);
+            Entity entity = EntityUtilities.getEntity(stack, world, true, null);
             if ( entity == null || !(entity instanceof EntityLivingBase) )
                 return false;
 
@@ -424,34 +454,44 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
                 return false;
 
             final boolean isBaby = EntityUtilities.isBaby(entity);
-            if ( isBaby && ModConfig.vaporizers.modules.theoreticalSlaughter.babyMode == ModConfig.CloneModule.BabyCloningMode.DISALLOW )
+            if ( isBaby && ModConfig.vaporizers.modules.theoreticalSlaughter.babyMode == ModConfig.BabyCloningMode.DISALLOW )
                 return false;
 
-            final int expCost = EntityUtilities.getBaseFromEntity(entity);
-            double rawCost = (ModConfig.vaporizers.modules.theoreticalSlaughter.expFactor * expCost) + (ModConfig.vaporizers.modules.theoreticalSlaughter.healthFactor * living.getMaxHealth());
+            int expCost = EntityUtilities.getBaseFromEntity(entity);
+            if ( isBaby && ModConfig.vaporizers.modules.theoreticalSlaughter.exactBaby )
+                expCost *= ModConfig.vaporizers.babyMultiplier;
+
+            final float health = living.getMaxHealth();
+            double rawFuel = (ModConfig.vaporizers.modules.theoreticalSlaughter.fuelPerExp * expCost) + (ModConfig.vaporizers.modules.theoreticalSlaughter.fuelPerHealth * health);
+            double rawEnergy = (ModConfig.vaporizers.modules.theoreticalSlaughter.energyPerExp * expCost) + (ModConfig.vaporizers.modules.theoreticalSlaughter.energyPerHealth * health);
+
             if ( exactCopies ) {
-                rawCost *= ModConfig.vaporizers.modules.theoreticalSlaughter.exactFactor;
-                if ( isBaby && ModConfig.vaporizers.modules.theoreticalSlaughter.exactBaby )
-                    rawCost *= ModConfig.vaporizers.babyMultiplier;
+                if ( ModConfig.vaporizers.modules.theoreticalSlaughter.fuelExactFactor != 0 )
+                    rawFuel *= ModConfig.vaporizers.modules.theoreticalSlaughter.fuelExactFactor;
+
+                if ( ModConfig.vaporizers.modules.theoreticalSlaughter.energyExactFactor != 0 )
+                    rawEnergy *= ModConfig.vaporizers.modules.theoreticalSlaughter.energyExactFactor;
             }
 
-            return rawCost > 0;
+            return rawFuel > 0 || (!ModConfig.vaporizers.modules.clone.requireFuel && rawEnergy > 0);
         }
 
         public void updateModifier(@Nonnull ItemStack stack) {
             if ( !isValidModifier(stack) ) {
                 entityBall = ItemStack.EMPTY;
                 entityLoaded = false;
+                canSpawn = false;
                 return;
             }
 
             entityBall = stack;
             entityLoaded = false;
+            canSpawn = false;
 
             World world = vaporizer.getWorld();
             // No, world isn't always non-null you idiot.
             if ( world != null ) {
-                Entity entity = EntityUtilities.getEntity(stack, world, exactCopies, null);
+                Entity entity = EntityUtilities.getEntity(stack, world, true, null);
                 if ( entity != null ) {
                     entityLoaded = true;
                     if ( entity instanceof EntityLivingBase ) {
@@ -470,7 +510,7 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
         }
 
         public int getBlockEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
-            return cost;
+            return energyCost;
         }
 
         public int getEntityEnergyCost(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget target) {
@@ -482,12 +522,7 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
         }
 
         public int getActionCost() {
-            int cost = ModConfig.vaporizers.modules.theoreticalSlaughter.budget;
-
-            if ( exactCopies )
-                cost += ModConfig.vaporizers.modules.theoreticalSlaughter.budgetExact;
-
-            return cost;
+            return budgetCost;
         }
 
         public Class<? extends Entity> getEntityClass() {
@@ -503,16 +538,13 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
             if ( !entityLoaded )
                 updateModifier(vaporizer.getModifier());
 
-            if ( finalCost == 0 )
+            if ( !canSpawn )
                 return false;
 
             if ( !vaporizer.hasEmptyOutput() )
                 return false;
 
-            if ( !ignorePower && vaporizer.getEnergyStored() < cost )
-                return false;
-
-            return true;
+            return ignorePower || vaporizer.getEnergyStored() >= energyCost;
         }
 
         @Nullable
@@ -521,8 +553,11 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
             if ( entityBall.isEmpty() )
                 return "info." + WirelessUtils.MODID + ".vaporizer.missing_entity";
 
-            if ( finalCost == 0 )
+            if ( !canSpawn )
                 return "info." + WirelessUtils.MODID + ".vaporizer.cannot_spawn";
+
+            if ( !vaporizer.hasEmptyOutput() )
+                return "info." + WirelessUtils.MODID + ".vaporizer.no_empty_output";
 
             return null;
         }
@@ -534,15 +569,15 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
 
         @Nonnull
         public IWorkProvider.WorkResult processBlock(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
-            if ( finalCost == 0 || entityBall.isEmpty() )
+            if ( fuelCost == 0 || entityBall.isEmpty() )
                 return IWorkProvider.WorkResult.FAILURE_STOP_IN_PLACE;
 
             TileBaseVaporizer.WUVaporizerPlayer player = vaporizer.getFakePlayer(world);
             if ( player == null )
                 return IWorkProvider.WorkResult.FAILURE_STOP;
 
-            int removed = vaporizer.removeFuel(finalCost);
-            if ( removed < finalCost ) {
+            int removed = vaporizer.removeFuel(fuelCost);
+            if ( removed < fuelCost ) {
                 if ( removed > 0 )
                     vaporizer.addFuel(removed);
                 return IWorkProvider.WorkResult.FAILURE_STOP;
@@ -563,7 +598,7 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
                 if ( entity instanceof EntityLiving )
                     entityLivingData = ((EntityLiving) entity).onInitialSpawn(world.getDifficultyForLocation(target.pos), entityLivingData);
 
-                if ( entityBaby && ModConfig.vaporizers.modules.theoreticalSlaughter.babyMode == ModConfig.CloneModule.BabyCloningMode.BABY_CLONES ) {
+                if ( entityBaby && ModConfig.vaporizers.modules.theoreticalSlaughter.babyMode == ModConfig.BabyCloningMode.BABY_CLONES ) {
                     if ( entity instanceof EntityAgeable )
                         ((EntityAgeable) entity).setGrowingAge(-24000);
                     else if ( entity instanceof EntityZombie )
@@ -579,8 +614,8 @@ public class ItemTheoreticalSlaughterModule extends ItemModule {
             // It's theoretically dead.
             entity.setDead();
 
-            if ( removed > finalCost )
-                vaporizer.addFuel(removed - finalCost);
+            if ( removed > fuelCost )
+                vaporizer.addFuel(removed - fuelCost);
 
             return IWorkProvider.WorkResult.SUCCESS_REPEAT;
         }

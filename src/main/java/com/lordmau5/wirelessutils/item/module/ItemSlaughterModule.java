@@ -468,13 +468,13 @@ public class ItemSlaughterModule extends ItemFilteringModule {
 
         @Override
         public boolean canRun(boolean ignorePower) {
+            if ( !super.canRun(ignorePower) )
+                return false;
+
             if ( ModConfig.vaporizers.modules.slaughter.requireWeapon && !hasWeapon )
                 return false;
 
-            if ( !ignorePower && vaporizer.getEnergyStored() < cost )
-                return false;
-
-            return super.canRun(ignorePower);
+            return ignorePower || vaporizer.getEnergyStored() >= cost;
         }
 
         @Nullable

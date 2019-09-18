@@ -505,7 +505,7 @@ public class ItemTeleportModule extends ItemFilteringModule {
                 if ( world.provider.getDimension() == target.getDimension() )
                     targetWorld = world;
                 else
-                    targetWorld = DimensionManager.getWorld(target.getDimension());
+                    targetWorld = DimensionManager.getWorld(target.getDimension(), false);
 
                 if ( targetWorld != null ) {
                     AxisAlignedBB entityBox = entity.getEntityBoundingBox();

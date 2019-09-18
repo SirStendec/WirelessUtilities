@@ -1311,6 +1311,12 @@ public class ModConfig {
     }
 
     public static class CloneModule {
+        @Config.Name("Required Level")
+        @Config.Comment("Vaporizers must be at least this level in order to use this module.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
         @Config.Name("Require Crystallized Void Pearl")
         @Config.Comment("When enabled, this module will only accept Crystallized Void Pearls as input to set the target entity.")
         @Config.RequiresWorldRestart
@@ -1320,31 +1326,10 @@ public class ModConfig {
         @Config.Comment("When enabled, we call ForgeEventFactory.canEntitySpawn before actually spawning an entity to make sure no other mods want to stop us.")
         public boolean useCheckSpawn = true;
 
-        @Config.Name("Required Level")
-        @Config.Comment("Vaporizers must be at least this level in order to use this module.")
-        @Config.RangeInt(min = 0)
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for vaporizers using this module.")
         @Config.RequiresWorldRestart
-        public int requiredLevel = 0;
-
-        @Config.Name("Budget per Clone")
-        @Config.Comment("Use this much action budget to clone an entity.")
-        @Config.RangeInt(min = 0)
-        public int budget = 20;
-
-        @Config.Name("Budget per Exact Copy")
-        @Config.Comment("Use this much action budget to clone an entity in Exact Copy mode.")
-        @Config.RangeInt(min = 0)
-        public int budgetExact = 60;
-
-        @Config.Name("Energy per Entity")
-        @Config.Comment("Consume this amount of base energy per entity spawned.")
-        @Config.RangeInt(min = 0)
-        public int entityEnergy = 1000;
-
-        @Config.Name("Energy per Exact Copy")
-        @Config.Comment("Config this amount of base energy per exact copy spawned.")
-        @Config.RangeInt(min = 0)
-        public int entityExactEnergy = 2000;
+        public int energyAddition = 0;
 
         @Config.Name("Energy Multiplier")
         @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
@@ -1352,36 +1337,122 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public double energyMultiplier = 1;
 
-        @Config.Name("Energy Addition")
-        @Config.Comment("Add this to the base cost per target for vaporizers using this module.")
-        @Config.RequiresWorldRestart
-        public int energyAddition = 0;
-
         @Config.Name("Energy Drain per Tick")
         @Config.Comment("This module will drain this amount of RF/t from non-disabled vaporizers using them.")
         @Config.RequiresWorldRestart
         public int energyDrain = 0;
 
-        @Config.Name("Exact Copy Factor")
-        @Config.Comment({
-                "When greater than zero, exact copies of mobs can be spawned for an increased cost.",
-                "The formula will be Cost = Ceiling(Exact Copy Factor * (Base Experience * Experience Factor + Max Health * Health Factor))"
-        })
-        @Config.RangeDouble(min = 0)
-        public double exactFactor = 2;
-
         @Config.Name("Exact Copy - Energy Addition")
+        @Config.Comment("Add this to the base cost per target for vaporizers using this module when Exact Copies is enabled.")
         @Config.RequiresWorldRestart
         public int exactEnergyAddition = 0;
 
         @Config.Name("Exact Copy - Energy Drain per Tick")
+        @Config.Comment("This module will drain this amount of RF/t from non-disabled vaporizers using them when Exact Copies is enabled.")
         @Config.RequiresWorldRestart
         public int exactEnergyDrain = 0;
 
         @Config.Name("Exact Copy - Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module when Exact Copies is enabled.")
         @Config.RequiresWorldRestart
         @Config.RangeDouble(min = 0)
         public double exactEnergyMultiplier = 1;
+
+        @Config.Name("Exact Copy - Enable")
+        @Config.Comment("When enabled, exact copies of entities can be spawned.")
+        @Config.RequiresWorldRestart
+        public boolean allowExact = true;
+
+        // Entity - Budget
+
+        @Config.Name("Budget - Base per Entity")
+        @Config.Comment("Use this much action budget to clone an entity.")
+        @Config.RangeInt(min = 0)
+        public int budgetBase = 20;
+
+        @Config.Name("Budget - Exact Copy - Additional")
+        @Config.Comment("Use this much additional action budget per entity when in Exact Copy mode.")
+        @Config.RangeInt(min = 0)
+        public int budgetExact = 40;
+
+        @Config.Name("Budget - Exact Copy - Multiplier")
+        @Config.Comment("Budget = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double budgetExactFactor = 0;
+
+        @Config.Name("Budget - Experience Factor")
+        @Config.Comment("Budget = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double budgetPerExp = 0;
+
+        @Config.Name("Budget - Health Factor")
+        @Config.Comment("Budget = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double budgetPerHealth = 0;
+
+        // Entity - Energy
+
+        @Config.Name("Energy - Base per Entity")
+        @Config.Comment("Consume this amount of base energy per entity spawned.")
+        @Config.RangeInt(min = 0)
+        public int energyBase = 1000;
+
+        @Config.Name("Energy - Exact Copy - Additional")
+        @Config.Comment("Consume this amount of additional energy per entity when in Exact Copy mode.")
+        @Config.RangeInt(min = 0)
+        public int energyExact = 1000;
+
+        @Config.Name("Energy - Exact Copy - Multiplier")
+        @Config.Comment("Energy = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double energyExactFactor = 0;
+
+        @Config.Name("Energy - Experience Factor")
+        @Config.Comment("Energy = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double energyPerExp = 0;
+
+        @Config.Name("Energy - Health Factor")
+        @Config.Comment("Energy = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double energyPerHealth = 0;
+
+        // Entity - Fuel
+
+        @Config.Name("Require Fuel Cost")
+        @Config.Comment({
+                "When enabled, entities cannot be cloned if their fuel cost is calculated to zero, even if they have an energy cost as well.",
+                "This does not include the base fuel per entity when considering if an entity can be spawned. Only the health and experience based value."
+        })
+        @Config.RequiresWorldRestart
+        public boolean requireFuel = false;
+
+        @Config.Name("Fuel - Base per Entity")
+        @Config.Comment("Consume this amount of base fuel per entity spawned.")
+        @Config.RangeInt(min = 0)
+        public int fuelBase = 0;
+
+        @Config.Name("Fuel - Exact Copy - Additional")
+        @Config.Comment("Consume this amount of additional fuel per entity when in Exact Copy mode.")
+        @Config.RangeInt(min = 0)
+        public int fuelExact = 0;
+
+        @Config.Name("Fuel - Exact Copy - Multiplier")
+        @Config.Comment("Fuel = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double fuelExactFactor = 2;
+
+        @Config.Name("Fuel - Experience Factor")
+        @Config.Comment("Fuel = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double fuelPerExp = 2;
+
+        @Config.Name("Fuel - Health Factor")
+        @Config.Comment("Fuel = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double fuelPerHealth = 0;
+
+        // Experience Values
 
         @Config.Name("Animal Base Experience")
         @Config.Comment("Animal entities do not expose experience in a standard way. Because of that, each one will be worth this number of experience points to spawn.")
@@ -1394,15 +1465,7 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public boolean exactBaby = false;
 
-        @Config.Name("Experience Factor")
-        @Config.Comment("The cost to spawn an entity is calculated as Cost = Ceiling(Base Experience * Experience Factor + Max Health * Health Factor)")
-        @Config.RangeDouble(min = 0)
-        public double expFactor = 2;
-
-        @Config.Name("Health Factor")
-        @Config.Comment("The cost to spawn an entity is calculated as Cost = Ceiling(Base Experience * Experience Factor + Max Health * Health Factor)")
-        @Config.RangeDouble(min = 0)
-        public double healthFactor = 0;
+        // Spawning
 
         @Config.Name("Maximum Entity - Count")
         @Config.Comment("No more than this number of the target entity should exist in the immediate area. If they do, temporarily stop spawning.")
@@ -1429,10 +1492,6 @@ public class ModConfig {
         @Config.Name("Allow Cloning Bosses")
         @Config.Comment("Whether or not the module should accept boss entities for cloning.")
         public BossMode bossMode = BossMode.CREATIVE_ONLY;
-
-        public enum BabyCloningMode {
-            DISALLOW, ALLOW, BABY_CLONES
-        }
     }
 
     public static class TeleportModule {
@@ -1727,79 +1786,20 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public int requiredLevel = 0;
 
-        @Config.Name("Allow Looting")
-        @Config.Comment("Allow Theoretical Slaughter Modules to be enchanted with Looting. To be applied theoretically.")
-        @Config.RequiresWorldRestart
-        public boolean allowLooting = true;
-
         @Config.Name("Require Crystallized Void Pearl")
         @Config.Comment("When enabled, this module will only accept Crystallized Void Pearls as input to set the target entity.")
         @Config.RequiresWorldRestart
         public boolean requireCrystallizedVoidPearls = true;
 
-        @Config.Name("Budget per Entity")
-        @Config.Comment("Use this much action budget for each entity theoretically killed.")
-        @Config.RangeInt(min = 0)
-        public int budget = 50;
-
-        @Config.Name("Budget per Entity - Exact Copy")
-        @Config.Comment("Use this much additional action budget per entity when in Exact Copy mode.")
-        @Config.RangeInt(min = 0)
-        public int budgetExact = 50;
-
-        @Config.Name("Energy per Entity")
-        @Config.Comment("Use this much base energy for each entity theoretically killed.")
-        @Config.RangeInt(min = 0)
-        public int energy = 2000;
-
-        @Config.Name("Energy per Entity - Exact Copy")
-        @Config.Comment("Use this much additional energy per entity when in Exact Copy mode.")
-        @Config.RangeInt(min = 0)
-        public int energyExact = 1000;
-
-        @Config.Name("Exact Copy Factor")
-        @Config.Comment({
-                "When greater than zero, exact copies of mobs can be theoretically killed for an increased cost.",
-                "The formula will be Cost = Ceiling(Exact Copy Factor * (Base Experience * Experience Factor + Max Health * Health Factor))"
-        })
-        @Config.RangeDouble(min = 0)
-        public double exactFactor = 2;
-
-        @Config.Name("Exact Copy - Use Baby Multiplier")
-        @Config.Comment("When enabled, the baby experience multiplier is applied when theoretically killing exact copies of baby entities.")
+        @Config.Name("Allow Looting")
+        @Config.Comment("Allow Theoretical Slaughter Modules to be enchanted with Looting. To be applied theoretically.")
         @Config.RequiresWorldRestart
-        public boolean exactBaby = false;
+        public boolean allowLooting = true;
 
-        @Config.Name("Experience Factor")
-        @Config.Comment("The cost to theoretically kill an entity is calculated as Cost = Ceiling(Base Experience * Experience Factor + Max Health * Health Factor)")
-        @Config.RangeDouble(min = 0)
-        public double expFactor = 2;
-
-        @Config.Name("Health Factor")
-        @Config.Comment("The cost to theoretically kill an entity is calculated as Cost = Ceiling(Base Experience * Experience Factor + Max Health * Health Factor)")
-        @Config.RangeDouble(min = 0)
-        public double healthFactor = 0;
-
-        @Config.Name("Allow Theoretically Killing Babies")
-        @Config.Comment("Whether or not the module should accept baby entities as entities to theoretically kill. If set to BABY_CLONES, all theoretically killed entites will be babies.")
-        public CloneModule.BabyCloningMode babyMode = CloneModule.BabyCloningMode.BABY_CLONES;
-
-        @Config.Name("Allow Theoretically Killing Bosses")
-        @Config.Comment("Whether or not the module should accept boss entities for theoretically killing.")
-        public BossMode bossMode = BossMode.CREATIVE_ONLY;
-
-        @Config.Name("Exact Copy - Energy Addition")
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for vaporizers using this module.")
         @Config.RequiresWorldRestart
-        public int exactEnergyAddition = 0;
-
-        @Config.Name("Exact Copy - Energy Drain per Tick")
-        @Config.RequiresWorldRestart
-        public int exactEnergyDrain = 0;
-
-        @Config.Name("Exact Copy - Energy Multiplier")
-        @Config.RequiresWorldRestart
-        @Config.RangeDouble(min = 0)
-        public double exactEnergyMultiplier = 1;
+        public int energyAddition = 0;
 
         @Config.Name("Energy Multiplier")
         @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
@@ -1807,15 +1807,137 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public double energyMultiplier = 1;
 
-        @Config.Name("Energy Addition")
-        @Config.Comment("Add this to the base cost per target for vaporizers using this module.")
-        @Config.RequiresWorldRestart
-        public int energyAddition = 0;
-
         @Config.Name("Energy Drain per Tick")
         @Config.Comment("This module will drain this amount of RF/t from non-disabled vaporizers using them.")
         @Config.RequiresWorldRestart
         public int energyDrain = 0;
+
+        @Config.Name("Exact Copy - Energy Addition")
+        @Config.Comment("Add this to the base cost per target for vaporizers using this module when Exact Copies is enabled.")
+        @Config.RequiresWorldRestart
+        public int exactEnergyAddition = 0;
+
+        @Config.Name("Exact Copy - Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module when Exact Copies is enabled.")
+        @Config.RequiresWorldRestart
+        @Config.RangeDouble(min = 0)
+        public double exactEnergyMultiplier = 1;
+
+        @Config.Name("Exact Copy - Energy Drain per Tick")
+        @Config.Comment("This module will drain this amount of RF/t from non-disabled vaporizers using them when Exact Copies is enabled.")
+        @Config.RequiresWorldRestart
+        public int exactEnergyDrain = 0;
+
+        @Config.Name("Exact Copy - Enable")
+        @Config.Comment("When enabled, exact copies of entities can be spawned.")
+        @Config.RequiresWorldRestart
+        public boolean allowExact = true;
+
+        // Entity - Budget
+
+        @Config.Name("Budget - Base per Entity")
+        @Config.Comment("Use this much action budget for each entity theoretically killed.")
+        @Config.RangeInt(min = 0)
+        public int budgetBase = 50;
+
+        @Config.Name("Budget - Exact Copy - Additional")
+        @Config.Comment("Use this much additional action budget per entity when in Exact Copy mode.")
+        @Config.RangeInt(min = 0)
+        public int budgetExact = 50;
+
+        @Config.Name("Budget - Exact Copy - Multiplier")
+        @Config.Comment("Budget = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double budgetExactFactor = 0;
+
+        @Config.Name("Budget - Experience Factor")
+        @Config.Comment("Budget = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double budgetPerExp = 0;
+
+        @Config.Name("Budget - Health Factor")
+        @Config.Comment("Budget = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double budgetPerHealth = 0;
+
+        // Entity - Energy
+
+        @Config.Name("Energy - Base per Entity")
+        @Config.Comment("Use this much base energy for each entity theoretically killed.")
+        @Config.RangeInt(min = 0)
+        public int energyBase = 2000;
+
+        @Config.Name("Energy - Exact Copy - Additional")
+        @Config.Comment("Use this much additional energy per entity when in Exact Copy mode.")
+        @Config.RangeInt(min = 0)
+        public int energyExact = 1000;
+
+        @Config.Name("Energy - Exact Copy - Multiplier")
+        @Config.Comment("Energy = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double energyExactFactor = 0;
+
+        @Config.Name("Energy - Experience Factor")
+        @Config.Comment("Energy = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double energyPerExp = 0;
+
+        @Config.Name("Energy - Health Factor")
+        @Config.Comment("Energy = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double energyPerHealth = 0;
+
+        // Entity - Fuel
+
+        @Config.Name("Require Fuel Cost")
+        @Config.Comment({
+                "When enabled, entities cannot be theoretically killed if their fuel cost is calculated to zero, even if they have an energy cost as well.",
+                "This does not include the base fuel per entity when considering if an entity can be theoretically killed. Only the health and experience based value."
+        })
+        @Config.RequiresWorldRestart
+        public boolean requireFuel = false;
+
+        @Config.Name("Fuel - Base per Entity")
+        @Config.Comment("Consume this amount of base fuel per entity spawned.")
+        @Config.RangeInt(min = 0)
+        public int fuelBase = 0;
+
+        @Config.Name("Fuel - Exact Copy - Additional")
+        @Config.Comment("Consume this amount of additional fuel per entity when in Exact Copy mode.")
+        @Config.RangeInt(min = 0)
+        public int fuelExact = 0;
+
+        @Config.Name("Fuel - Exact Copy - Multiplier")
+        @Config.Comment("Fuel = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double fuelExactFactor = 2;
+
+        @Config.Name("Fuel - Experience Factor")
+        @Config.Comment("Fuel = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double fuelPerExp = 2;
+
+        @Config.Name("Fuel - Health Factor")
+        @Config.Comment("Fuel = Base + Exact Addition + Ceiling(Exact Multiplier * (Base Experience * Experience Factor + Max Health * Health Factor))")
+        @Config.RangeDouble(min = 0)
+        public double fuelPerHealth = 0;
+
+        // Experience Values
+
+        @Config.Name("Exact Copy - Use Baby Multiplier")
+        @Config.Comment("When enabled, the baby experience multiplier is applied when theoretically killing exact copies of baby entities.")
+        @Config.RequiresWorldRestart
+        public boolean exactBaby = false;
+
+        // Other
+
+        @Config.Name("Allow Theoretically Killing Babies")
+        @Config.Comment("Whether or not the module should accept baby entities as entities to theoretically kill. If set to BABY_CLONES, all theoretically killed entites will be babies.")
+        public BabyCloningMode babyMode = BabyCloningMode.BABY_CLONES;
+
+        @Config.Name("Allow Theoretically Killing Bosses")
+        @Config.Comment("Whether or not the module should accept boss entities for theoretically killing.")
+        public BossMode bossMode = BossMode.CREATIVE_ONLY;
     }
 
     public static class Condensers {
@@ -1887,7 +2009,10 @@ public class ModConfig {
         public boolean allowWorldAugment = true;
 
         @Config.Name("Block Blacklist")
-        @Config.Comment("Desublimators should not interact with blocks in this list.")
+        @Config.Comment({
+                "Desublimators should not interact with blocks in this list. Example: minecraft:wool",
+                "Entire mods can be blacklisted by using an asterisk. Example: refinedstorage:*"
+        })
         public String[] blockBlacklist = {};
     }
 
@@ -2059,6 +2184,10 @@ public class ModConfig {
         @Config.Name("Animal Slaughter Module")
         @Config.Comment("Configuration for the Animal Slaughter Module for Vaporizers.")
         public AnimalSlaughterModule animalSlaughterModule = new AnimalSlaughterModule();
+    }
+
+    public enum BabyCloningMode {
+        DISALLOW, ALLOW, BABY_CLONES
     }
 
     public enum BossMode {

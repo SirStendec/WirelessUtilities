@@ -97,10 +97,13 @@ public class TeleportUtils {
         entity.writeToNBT(tag);
         tag.removeTag("Dimension");
 
+        Entity newEntity = EntityList.newEntity(entity.getClass(), world);
+        if ( newEntity == null )
+            return entity;
+
         world.removeEntity(entity);
         entity.setDead();
 
-        Entity newEntity = EntityList.newEntity(entity.getClass(), world);
         newEntity.readFromNBT(tag);
         newEntity.setPosition(x, y, z);
 

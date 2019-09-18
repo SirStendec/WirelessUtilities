@@ -96,10 +96,7 @@ public class IFPlugin implements IPlugin {
                         return ItemStack.EMPTY;
 
                     ResourceLocation key = EntityList.getKey(entity);
-                    if ( key == null )
-                        return ItemStack.EMPTY;
-
-                    if ( EntityUtilities.isBlacklisted(key) )
+                    if ( key == null || EntityUtilities.isBlacklisted(key) )
                         return ItemStack.EMPTY;
 
                     ItemStack out = stack.copy();

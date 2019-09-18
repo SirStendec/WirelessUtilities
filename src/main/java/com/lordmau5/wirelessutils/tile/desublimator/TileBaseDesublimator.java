@@ -2095,13 +2095,18 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             return false;
 
         Block block = state.getBlock();
+        ResourceLocation key = block.getRegistryName();
+        if ( key == null )
+            return false;
+
         int metadata = block.getMetaFromState(state);
 
-        String name = block.getRegistryName().toString().toLowerCase();
+        String ns = key.getNamespace() + ":*";
+        String name = key.toString().toLowerCase();
         String name_meta = name + "@" + metadata;
 
-        for (String key : ModConfig.desublimators.blockBlacklist)
-            if ( key.equals(name) || key.equals(name_meta) )
+        for (String entry : ModConfig.desublimators.blockBlacklist)
+            if ( entry.equals(ns) || entry.equals(name) || entry.equals(name_meta) )
                 return true;
 
         return false;
@@ -2121,6 +2126,41 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                     .add("cost", cost)
                     .toString();
         }
+    }
+
+    /* Block Behaviors */
+
+    public interface IDesublimatorBlockBehavior {
+        default void onInactive() {
+
+        }
+
+        default void onDestroy() {
+
+        }
+
+        default void onRemove() {
+
+        }
+
+        default void onRenderAreasEnabled() {
+
+        }
+
+        default void onRenderAreasDisabled() {
+
+        }
+
+        default void onRenderAreasCleared() {
+
+        }
+
+        default void debugPrint() {
+
+        }
+
+        @Nonnull
+        WorkResult processBlock(@Nonnull DesublimatorTarget target, @Nonnull World world, @Nullable IBlockState state, @Nullable TileEntity tile);
     }
 
 }

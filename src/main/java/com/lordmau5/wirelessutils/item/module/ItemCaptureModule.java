@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.item.module;
 
+import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.modules.ElementCaptureModule;
 import com.lordmau5.wirelessutils.gui.client.modules.base.ElementModuleBase;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
@@ -182,7 +183,22 @@ public class ItemCaptureModule extends ItemFilteringModule {
             if ( !super.canRun(ignorePower) )
                 return false;
 
-            return ignorePower || (vaporizer.hasInput() && vaporizer.hasEmptyOutput());
+            if ( !vaporizer.hasInput() || !vaporizer.hasEmptyOutput() )
+                return false;
+
+            return ignorePower || vaporizer.getEnergyStored() >= ModConfig.vaporizers.modules.capture.entityEnergy;
+        }
+
+        @Nullable
+        @Override
+        public String getUnconfiguredExplanation() {
+            if ( !vaporizer.hasInput() )
+                return "info." + WirelessUtils.MODID + ".vaporizer.no_input";
+
+            if ( !vaporizer.hasEmptyOutput() )
+                return "info." + WirelessUtils.MODID + ".vaporizer.no_empty_output";
+
+            return super.getUnconfiguredExplanation();
         }
 
         public int getBlockEnergyCost(@Nonnull TileBaseVaporizer.VaporizerTarget target, @Nonnull World world) {
@@ -217,6 +233,9 @@ public class ItemCaptureModule extends ItemFilteringModule {
                     break;
                 }
             }
+
+            if ( stack == null || stack.isEmpty() )
+                return IWorkProvider.WorkResult.FAILURE_REMOVE;
 
             ItemStack result = EntityUtilities.saveEntity(stack, entity, null);
             if ( result.isEmpty() )
