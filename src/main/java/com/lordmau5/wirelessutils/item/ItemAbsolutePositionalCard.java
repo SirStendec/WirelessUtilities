@@ -101,8 +101,11 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
             return null;
 
         BlockPosDimension out = BlockPosDimension.fromTag(stack.getTagCompound());
+        if ( out == null )
+            return null;
+
         World world = DimensionManager.getWorld(out.getDimension(), false);
-        if ( world != null && world.isOutsideBuildHeight(out) )
+        if ( world != null && !world.isValid(out) )
             return null;
 
         return out;
