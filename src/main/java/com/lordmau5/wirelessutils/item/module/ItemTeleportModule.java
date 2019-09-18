@@ -5,11 +5,14 @@ import com.lordmau5.wirelessutils.gui.client.modules.base.ElementModuleBase;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiBaseVaporizer;
 import com.lordmau5.wirelessutils.item.augment.ItemAugment;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
+import com.lordmau5.wirelessutils.render.RenderManager;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import com.lordmau5.wirelessutils.utils.EntityUtilities;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.TeleportUtils;
+import com.lordmau5.wirelessutils.utils.constants.NiceColors;
+import com.lordmau5.wirelessutils.utils.location.BlockArea;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
@@ -84,6 +87,9 @@ public class ItemTeleportModule extends ItemFilteringModule {
         private int range = 0;
         private int cost = 0;
         private int fuel = 0;
+
+        private int renderIndex = -1;
+        private BlockArea renderArea = null;
 
         private double energyMultiplier = 1;
         private int energyDrain = 0;
@@ -184,6 +190,42 @@ public class ItemTeleportModule extends ItemFilteringModule {
             range = ModItems.itemRangeAugment.getPositionalRange(stack);
         }
 
+        private void removeRenderArea() {
+            if ( renderIndex != -1 ) {
+                RenderManager.INSTANCE.removeArea(renderIndex);
+                renderIndex = -1;
+            }
+        }
+
+        private void addRenderArea() {
+            if ( renderArea == null )
+                return;
+
+            BlockPosDimension origin = vaporizer.getPosition();
+            if ( target.getDimension() != origin.getDimension() )
+                return;
+
+            if ( renderIndex != -1 )
+                RenderManager.INSTANCE.removeArea(renderIndex);
+
+            renderIndex = RenderManager.INSTANCE.addArea(renderArea, false);
+        }
+
+        @Override
+        public void onRenderAreasEnabled() {
+            addRenderArea();
+        }
+
+        @Override
+        public void onRenderAreasDisabled() {
+            removeRenderArea();
+        }
+
+        @Override
+        public void onRemove() {
+            removeRenderArea();
+        }
+
         public void updateModifier(@Nonnull ItemStack stack) {
             // We don't want to have a target if we don't have our own position.
             BlockPosDimension pos = vaporizer.getPosition();
@@ -197,9 +239,20 @@ public class ItemTeleportModule extends ItemFilteringModule {
                     target = pos.offset(vaporizer.getEnumFacing().getOpposite(), 1);
             }
 
+            removeRenderArea();
+
             double fuel = ModConfig.vaporizers.modules.teleport.fuelInterdimensional;
             cost = ModConfig.vaporizers.modules.teleport.costInterdimensional;
             if ( target != null && target.getDimension() == pos.getDimension() ) {
+                renderArea = new BlockArea(
+                        target, NiceColors.HANDY_COLORS[1],
+                        stack.hasDisplayName() ? stack.getDisplayName() : null,
+                        stack.getItem() == ModItems.itemRelativePositionalCard ? ModItems.itemRelativePositionalCard.getVector(stack) : null
+                );
+
+                if ( vaporizer.shouldRenderAreas() )
+                    addRenderArea();
+
                 int dimCost = 0;
                 double fuelCost = 0;
                 double distance = pos.distanceSq(target);

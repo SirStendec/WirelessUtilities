@@ -56,6 +56,18 @@ public abstract class TileEntityBaseArea extends TileEntityBase implements IArea
         defaultColor = color;
     }
 
+    public void onRenderAreasEnabled() {
+
+    }
+
+    public void onRenderAreasDisabled() {
+
+    }
+
+    public void onRenderAreasCleared() {
+
+    }
+
     private void enableRendering() {
         if ( isLive )
             return;
@@ -66,6 +78,8 @@ public abstract class TileEntityBaseArea extends TileEntityBase implements IArea
         setWatchUnload();
         isLive = true;
         //lastTouch = Minecraft.getSystemTime();
+
+        onRenderAreasEnabled();
 
         if ( renderedAreas == null || renderedAreas.isEmpty() )
             return;
@@ -78,6 +92,8 @@ public abstract class TileEntityBaseArea extends TileEntityBase implements IArea
 
     private void disableRendering() {
         isLive = false;
+
+        onRenderAreasDisabled();
 
         if ( liveAreas == null || liveAreas.isEmpty() ) {
             liveAreas = null;
@@ -200,5 +216,7 @@ public abstract class TileEntityBaseArea extends TileEntityBase implements IArea
         if ( renderedAreas != null ) {
             renderedAreas.clear();
         }
+
+        onRenderAreasCleared();
     }
 }

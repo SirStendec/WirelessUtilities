@@ -2,9 +2,11 @@ package com.lordmau5.wirelessutils.item;
 
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.base.IExplainableItem;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
@@ -25,6 +27,22 @@ public class ItemGlasses extends ItemArmor implements IExplainableItem {
         setTranslationKey(WirelessUtils.MODID + ".glasses");
         setRegistryName("glasses");
         setCreativeTab(WirelessUtils.creativeTabCU);
+    }
+
+    public boolean isPlayerWearing(EntityPlayer player) {
+        ItemStack stack = player.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
+        if ( !stack.isEmpty() && stack.getItem() == this )
+            return true;
+
+        if ( !ModConfig.rendering.allowHoldingGlasses )
+            return false;
+
+        stack = player.getHeldItemMainhand();
+        if ( !stack.isEmpty() && stack.getItem() == this )
+            return true;
+
+        stack = player.getHeldItemOffhand();
+        return !stack.isEmpty() && stack.getItem() == this;
     }
 
     @SideOnly(Side.CLIENT)

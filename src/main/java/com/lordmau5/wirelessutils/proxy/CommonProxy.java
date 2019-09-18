@@ -71,6 +71,7 @@ import com.lordmau5.wirelessutils.item.pearl.ItemStabilizedEnderPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemVoidPearl;
 import com.lordmau5.wirelessutils.item.upgrade.ItemConversionUpgrade;
 import com.lordmau5.wirelessutils.item.upgrade.ItemLevelUpgrade;
+import com.lordmau5.wirelessutils.packet.PacketCustomParticle;
 import com.lordmau5.wirelessutils.packet.PacketParticleLine;
 import com.lordmau5.wirelessutils.packet.PacketUpdateItem;
 import com.lordmau5.wirelessutils.plugins.PluginRegistry;
@@ -147,6 +148,7 @@ public class CommonProxy {
         NetworkRegistry.INSTANCE.registerGuiHandler(WirelessUtils.instance, new GuiHandler());
 
         PacketParticleLine.initialize();
+        PacketCustomParticle.initialize();
         PacketUpdateItem.initialize();
 
         if ( ModItems.itemStabilizedEnderPearl != null )

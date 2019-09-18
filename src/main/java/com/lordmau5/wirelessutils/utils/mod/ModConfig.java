@@ -2031,6 +2031,14 @@ public class ModConfig {
         @Config.Comment("Work Areas and Positional Card targets are displayed with a render event listener. This setting disables the event listener.")
         @Config.RequiresMcRestart
         public boolean enableAreaRenderer = true;
+
+        @Config.Name("Allow Holding Work Glasses")
+        @Config.Comment("When enabled, merely holding Work Glasses is enough for them to take effect. When disabled, Work Glasses must be equipped.")
+        public boolean allowHoldingGlasses = true;
+
+        @Config.Name("Enable Work Particles")
+        @Config.Comment("When enabled, active machines will draw particles connecting them to their targets. These particles are only visible while wearing Work Glasses.")
+        public boolean enableWorkParticles = true;
     }
 
     public static class Plugins {

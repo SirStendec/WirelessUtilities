@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.tile.charger;
 import cofh.core.network.PacketBase;
 import cofh.core.util.helpers.MathHelper;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
+import com.lordmau5.wirelessutils.packet.PacketParticleLine;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
@@ -19,6 +20,7 @@ import com.lordmau5.wirelessutils.utils.crafting.IWUCraftingMachine;
 import com.lordmau5.wirelessutils.utils.crafting.IWURecipe;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.location.TargetInfo;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
@@ -27,9 +29,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -683,48 +685,29 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         }
     }
 
-    @Nullable
-    abstract BlockPos getEffectOrigin();
-
     @Override
     public void performEffect(@Nonnull ChargerTarget target, @Nonnull World world, boolean isEntity) {
-        /*if ( world.isRemote || world != this.world )
+        if ( world.isRemote || world != this.world || pos == null || !ModConfig.rendering.enableWorkParticles )
             return;
 
-        BlockPos origin = getEffectOrigin();
-        if ( origin == null )
+        PacketParticleLine packet;
+        if ( isEntity && target.entity != null )
+            packet = PacketParticleLine.betweenPoints(
+                    EnumParticleTypes.REDSTONE, true,
+                    pos, getEnumFacing(), target.entity,
+                    3, 0, 0, 0
+            );
+        else if ( target.pos != null )
+            packet = PacketParticleLine.betweenPoints(
+                    EnumParticleTypes.REDSTONE, true,
+                    pos, getEnumFacing(), target.pos, target.pos.getFacing(),
+                    3, 0, 0, 0
+            );
+        else
             return;
 
-        float x = origin.getX() + 0.5F;
-        float y = origin.getY() + 0.5F;
-        float z = origin.getZ() + 0.5F;
-
-        double x2, y2, z2;
-
-        if ( isEntity && target.entity != null ) {
-            x2 = target.entity.posX;
-            y2 = target.entity.posY + (target.entity.height / 2);
-            z2 = target.entity.posZ;
-
-        } else if ( target.pos != null ) {
-            x2 = target.pos.getX() + 0.5;
-            y2 = target.pos.getY() + 0.5;
-            z2 = target.pos.getZ() + 0.5;
-        } else
-            return;
-
-        int distance = (int) Math.floor(Math.sqrt(Math.pow(x2 - x, 2) + Math.pow(y2 - y, 2) + Math.pow(z2 - z, 2))) * 2;
-        if ( distance == 0 )
-            return;
-
-        float deltaX = (float) ((x2 - x) / distance);
-        float deltaY = (float) ((y2 - y) / distance);
-        float deltaZ = (float) ((z2 - z) / distance);
-
-        PacketHandler.sendToAllAround(
-                new PacketParticleLine(EnumParticleTypes.REDSTONE, false, x, y, z, deltaX, deltaY, deltaZ, distance, 0, 0, 0),
-                this
-        );*/
+        if ( packet != null )
+            packet.sendToNearbyWorkers(this);
     }
 
     /* Sided Transfer */

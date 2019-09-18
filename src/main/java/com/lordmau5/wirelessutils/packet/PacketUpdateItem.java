@@ -1,6 +1,5 @@
 package com.lordmau5.wirelessutils.packet;
 
-import cofh.core.network.PacketBase;
 import cofh.core.network.PacketHandler;
 import com.lordmau5.wirelessutils.item.base.IAdminEditableItem;
 import com.lordmau5.wirelessutils.item.base.IUpdateableItem;
@@ -10,7 +9,7 @@ import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nonnull;
 
-public class PacketUpdateItem extends PacketBase {
+public class PacketUpdateItem extends BasePacket {
 
     public static void initialize() {
         PacketHandler.INSTANCE.registerPacket(PacketUpdateItem.class);

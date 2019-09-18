@@ -24,11 +24,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,14 +106,6 @@ public class TileEntityPositionalCharger extends TileEntityBaseCharger implement
     @Override
     public boolean allowYAxisFacing() {
         return false;
-    }
-
-    @Nullable
-    BlockPos getEffectOrigin() {
-        if ( pos == null )
-            return null;
-
-        return pos.offset(EnumFacing.UP);
     }
 
     /* Energy */

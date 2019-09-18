@@ -125,14 +125,6 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
         return true;
     }
 
-    @Nullable
-    BlockPos getEffectOrigin() {
-        if ( pos == null )
-            return null;
-
-        return pos.offset(facing);
-    }
-
     /* Energy */
 
     @Override

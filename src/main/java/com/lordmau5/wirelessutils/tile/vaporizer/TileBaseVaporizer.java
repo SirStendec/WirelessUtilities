@@ -716,6 +716,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     public void updateModule() {
         ItemStack stack = itemStackHandler.getStackInSlot(getModuleOffset());
         if ( stack.isEmpty() || !isValidModule(stack) ) {
+            if ( behavior != null )
+                behavior.onRemove();
+
             behavior = null;
             previousModule = null;
             return;
@@ -725,8 +728,12 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         if ( module == previousModule && behavior != null ) {
             behavior.updateModule(stack);
-        } else
+        } else {
+            if ( behavior != null )
+                behavior.onRemove();
+
             behavior = module.getBehavior(stack, this);
+        }
 
         if ( behavior != null ) {
             moduleEnergy = behavior.getEnergyAddition();
@@ -1423,6 +1430,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         return WorkResult.FAILURE_REMOVE;
     }
 
+    /* Effects */
+
+    @Override
     public void performEffect(@Nonnull VaporizerTarget target, @Nonnull World world, boolean isEntity) {
 
     }
@@ -2090,10 +2100,68 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         }
     }
 
+    @Override
+    public void onRenderAreasCleared() {
+        super.onRenderAreasCleared();
+        if ( behavior != null )
+            behavior.onRenderAreasCleared();
+    }
+
+    @Override
+    public void onRenderAreasEnabled() {
+        super.onRenderAreasEnabled();
+        if ( behavior != null )
+            behavior.onRenderAreasEnabled();
+    }
+
+    @Override
+    public void onRenderAreasDisabled() {
+        super.onRenderAreasDisabled();
+        if ( behavior != null )
+            behavior.onRenderAreasDisabled();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if ( behavior != null )
+            behavior.onDestroy();
+    }
+
+    @Override
+    public void onInactive() {
+        super.onInactive();
+        if ( behavior != null )
+            behavior.onInactive();
+    }
 
     /* Behaviors */
 
     public interface IVaporizerBehavior {
+
+        default void onInactive() {
+
+        }
+
+        default void onDestroy() {
+
+        }
+
+        default void onRemove() {
+
+        }
+
+        default void onRenderAreasEnabled() {
+
+        }
+
+        default void onRenderAreasDisabled() {
+
+        }
+
+        default void onRenderAreasCleared() {
+
+        }
 
         @Nonnull
         default ItemStack pickGhost(ItemStack[] ghosts) {

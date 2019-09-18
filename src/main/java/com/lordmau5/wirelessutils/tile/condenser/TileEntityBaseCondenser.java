@@ -8,6 +8,7 @@ import cofh.core.util.helpers.InventoryHelper;
 import cofh.core.util.helpers.MathHelper;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
+import com.lordmau5.wirelessutils.packet.PacketParticleLine;
 import com.lordmau5.wirelessutils.tile.base.IConfigurableWorldTickRate;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
@@ -22,6 +23,7 @@ import com.lordmau5.wirelessutils.tile.base.augmentable.IInvertAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ISidedTransferAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ITransferAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IWorldAugmentable;
+import com.lordmau5.wirelessutils.utils.ColorHandler;
 import com.lordmau5.wirelessutils.utils.CondenserRecipeManager;
 import com.lordmau5.wirelessutils.utils.FluidTank;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
@@ -44,6 +46,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
@@ -1381,6 +1384,41 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             return WorkResult.FAILURE_CONTINUE;
 
         return WorkResult.FAILURE_STOP;
+    }
+
+    /* Effects */
+
+    @Override
+    public void performEffect(@Nonnull CondenserTarget target, @Nonnull World world, boolean isEntity) {
+        if ( world.isRemote || world != this.world || pos == null || !ModConfig.rendering.enableWorkParticles )
+            return;
+
+        int color = ColorHandler.getFluidColor(getTankFluid());
+        float colorR = (color >> 16 & 255) / 255.0F;
+        float colorG = (color >> 8 & 255) / 255.0F;
+        float colorB = (color & 255) / 255.0F;
+
+        if ( colorR == 0 )
+            colorR = 0.000001F;
+
+        PacketParticleLine packet;
+        if ( isEntity && target.entity != null )
+            packet = PacketParticleLine.betweenPoints(
+                    EnumParticleTypes.REDSTONE, true,
+                    pos, getEnumFacing(), target.entity,
+                    3, colorR, colorG, colorB
+            );
+        else if ( target.pos != null )
+            packet = PacketParticleLine.betweenPoints(
+                    EnumParticleTypes.REDSTONE, true,
+                    pos, getEnumFacing(), target.pos, target.pos.getFacing(),
+                    3, colorR, colorG, colorB
+            );
+        else
+            return;
+
+        if ( packet != null )
+            packet.sendToNearbyWorkers(this);
     }
 
     /* ITickable */

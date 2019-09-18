@@ -13,7 +13,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -264,7 +263,7 @@ public class RenderManager {
         if ( dimensionAreas == null || areas.isEmpty() )
             return;
 
-        boolean disableDepth = player.getItemStackFromSlot(EntityEquipmentSlot.HEAD).getItem() == ModItems.itemGlasses;
+        boolean disableDepth = ModItems.itemGlasses.isPlayerWearing(player);
 
         long now = Minecraft.getSystemTime();
         if ( now - lastClean > 5000 )

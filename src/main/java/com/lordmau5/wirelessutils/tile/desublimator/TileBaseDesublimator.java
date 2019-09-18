@@ -10,6 +10,7 @@ import com.google.common.base.Predicate;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.block.BlockDirectionalAir;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
+import com.lordmau5.wirelessutils.packet.PacketParticleLine;
 import com.lordmau5.wirelessutils.tile.base.IConfigurableWorldTickRate;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
@@ -70,6 +71,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
@@ -1534,6 +1536,41 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         int inserted = StackHelper.insertAll(capabilityHandler, items);
         itemsPerTick += inserted;
         remainingBudget -= (inserted * costPerItem);
+    }
+
+    /* Effects */
+
+    @Override
+    public void performEffect(@Nonnull DesublimatorTarget target, @Nonnull World world, boolean isEntity) {
+        if ( world.isRemote || world != this.world || pos == null || !ModConfig.rendering.enableWorkParticles )
+            return;
+
+        int color = 0x2c6886;
+        float colorR = (color >> 16 & 255) / 255.0F;
+        float colorG = (color >> 8 & 255) / 255.0F;
+        float colorB = (color & 255) / 255.0F;
+
+        if ( colorR == 0 )
+            colorR = 0.000001F;
+
+        PacketParticleLine packet;
+        if ( isEntity && target.entity != null )
+            packet = PacketParticleLine.betweenPoints(
+                    EnumParticleTypes.REDSTONE, true,
+                    pos, getEnumFacing(), target.entity,
+                    3, colorR, colorG, colorB
+            );
+        else if ( target.pos != null )
+            packet = PacketParticleLine.betweenPoints(
+                    EnumParticleTypes.REDSTONE, true,
+                    pos, getEnumFacing(), target.pos, target.pos.getFacing(),
+                    3, colorR, colorG, colorB
+            );
+        else
+            return;
+
+        if ( packet != null )
+            packet.sendToNearbyWorkers(this);
     }
 
     /* Energy */
