@@ -15,6 +15,7 @@ import com.lordmau5.wirelessutils.item.base.ISlotContextTooltip;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBase;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
@@ -859,6 +860,15 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements IPage
                 drawSizedTexturedModalRect(x + i, y + j, u, v, drawWidth, drawHeight, texW, texH);
             }
         }
+    }
+
+    public void drawTooltipHoveringText(List<String> list, int x, int y) {
+        super.drawTooltipHoveringText(list, x, y, fontRenderer);
+    }
+
+    @Override
+    public void drawTooltipHoveringText(List<String> list, int x, int y, FontRenderer font) {
+        super.drawTooltipHoveringText(list, x, y, font);
     }
 
     public static boolean shouldDisplayWorkBudget(boolean hasSustained) {

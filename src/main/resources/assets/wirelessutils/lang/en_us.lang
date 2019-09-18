@@ -346,6 +346,10 @@ item.wirelessutils.filter_augment.info.0=This augment prevents
 item.wirelessutils.filter_augment.info.1=matching items from being
 item.wirelessutils.filter_augment.info.2=inserted into the inventory
 item.wirelessutils.filter_augment.info.3=of machines.
+item.wirelessutils.filter_augment.held_info.0=When held in your off-hand,
+item.wirelessutils.filter_augment.held_info.1=this augment will stop you
+item.wirelessutils.filter_augment.held_info.2=from picking up items that
+item.wirelessutils.filter_augment.held_info.3=match its filters.
 
 item.wirelessutils.filter_augment.voiding=Voiding Items
 item.wirelessutils.filter_augment.nbt=Ignoring NBT
@@ -600,11 +604,9 @@ btn.wirelessutils.use_ore.info.3=be treated equally.
 btn.wirelessutils.use_ore.list=Matching Ores:
 
 btn.wirelessutils.voiding=Voiding Items: %s
-btn.wirelessutils.voiding.info.0=When this is enabled, machines with
-btn.wirelessutils.voiding.info.1=this augment will accept items that
-btn.wirelessutils.voiding.info.2=don't pass these filters, but the items
-btn.wirelessutils.voiding.info.3=will be scattered to the void straight
-btn.wirelessutils.voiding.info.4=away rather than being stored.
+btn.wirelessutils.voiding.info.0=When this is enabled, items that
+btn.wirelessutils.voiding.info.1=don't match this filter will be
+btn.wirelessutils.voiding.info.2=immediately deleted.
 
 btn.wirelessutils.match_mod=Match Mod: %s
 btn.wirelessutils.match_mod.info.0=When this is enabled, items will

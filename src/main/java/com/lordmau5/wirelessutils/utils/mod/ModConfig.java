@@ -884,6 +884,19 @@ public class ModConfig {
         @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
         @Config.RequiresWorldRestart
         public int[] budgetAddition = {0, 0, 0};
+
+        @Config.Name("Off-Hand Filtering - Enabled")
+        @Config.Comment("When this is enabled and you hold a filter in your off-hand, the filter will apply to items you pick up.")
+        public boolean enableOffHand = true;
+
+        @Config.Name("Off-Hand Filtering - Void Particle")
+        @Config.Comment("When this is enabled and an item is voided due to a player holding a filter, a particle effect will appear where the item was.")
+        public boolean offhandParticles = true;
+
+        @Config.Name("Off-Hand Filtering - Void Sound Volume")
+        @Config.Comment("When an item is voided due to a player holding a filter, a sound effect will play. Set to zero to disable. This is a server-side setting.")
+        @Config.RangeDouble(min = 0)
+        public double offhandVolume = 0D;
     }
 
     public static class RangeAugments {

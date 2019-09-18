@@ -3,7 +3,7 @@
 	"group": "wirelessutils",
 	"pattern": [
 		" V ",
-		"EAE",
+		"VAV",
 		" P "
 	],
 	"key": {
@@ -15,9 +15,6 @@
 		},
 		"A": {
 			"item": "wirelessutils:base_augment"
-		},
-		"E": {
-			"item": "#ENDER_PEARL"
 		}
 	},
 	"result": {

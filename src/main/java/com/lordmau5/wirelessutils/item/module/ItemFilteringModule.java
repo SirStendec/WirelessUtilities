@@ -470,6 +470,8 @@ public abstract class ItemFilteringModule extends ItemModule {
                     return false;
 
                 // We *sometimes* want players.
+                String name;
+
                 if ( entity instanceof EntityPlayer ) {
                     if ( !allowPlayers || playerMode == 1 )
                         return false;
@@ -481,8 +483,12 @@ public abstract class ItemFilteringModule extends ItemModule {
                     if ( !allowCreative && player.capabilities.isCreativeMode )
                         return false;
 
+                    name = player.getName();
+
                 } else if ( playerMode == 2 )
                     return false;
+                else
+                    name = entity.getCustomNameTag();
 
                 if ( entity instanceof EntityLivingBase ) {
                     EntityLivingBase living = (EntityLivingBase) entity;
@@ -508,22 +514,33 @@ public abstract class ItemFilteringModule extends ItemModule {
                         return false;
                 }
 
-                if ( namedMode != 0 && entity.getCustomNameTag().isEmpty() != (namedMode == 1) )
+                if ( namedMode != 0 && name.isEmpty() != (namedMode == 1) )
                     return false;
 
                 if ( blacklist != null ) {
-                    ResourceLocation name = EntityList.getKey(entity);
-                    if ( name != null ) {
-                        String ns = name.getNamespace() + ":*";
-                        String key = name.toString();
-                        for (String word : blacklist)
-                            if ( key.equals(word) || ns.equals(word) ) {
-                                if ( whitelist )
-                                    break;
-                                else
+                    ResourceLocation location = EntityList.getKey(entity);
+                    String ns = null, key = null, nameKey = null;
+                    if ( location != null ) {
+                        ns = location.getNamespace() + ":*";
+                        key = location.toString();
+                    }
+                    if ( !name.isEmpty() )
+                        nameKey = "name:" + name;
+
+                    boolean matched = false;
+
+                    if ( location != null || nameKey != null ) {
+                        for (String word : blacklist) {
+                            if ( word.equals(key) || word.equals(ns) || word.equalsIgnoreCase(nameKey) ) {
+                                if ( whitelist ) {
+                                    matched = true;
+                                } else
                                     return false;
                             }
-                    } else if ( whitelist )
+                        }
+                    }
+
+                    if ( whitelist && !matched )
                         return false;
 
                 } else if ( whitelist )

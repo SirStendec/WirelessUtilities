@@ -16,6 +16,7 @@ import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.crafting.INBTPreservingIngredient;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.client.util.ITooltipFlag;
@@ -30,6 +31,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
@@ -46,6 +48,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class ItemFilterAugment extends ItemAugment implements IGuiItem, IUpdateableItem, INBTPreservingIngredient {
+
+    private static Map<EntityPlayer, Tuple<ItemStack, Predicate<ItemStack>>> heldFilters = new Object2ObjectOpenHashMap<>();
 
     public ItemFilterAugment() {
         super();
@@ -242,6 +246,20 @@ public class ItemFilterAugment extends ItemAugment implements IGuiItem, IUpdatea
             tier = options.length - 1;
 
         return options[tier];
+    }
+
+    @Override
+    public void addExplanation(@Nonnull List<String> tooltip, @Nonnull String name, Object... args) {
+        String path = name + ".0";
+        if ( StringHelper.canLocalize(path) ) {
+            if ( StringHelper.isShiftKeyDown() )
+                addLocalizedLines(tooltip, name, args);
+            else
+                tooltip.add(StringHelper.shiftForDetails());
+        }
+
+        if ( ModConfig.augments.filter.enableOffHand && StringHelper.isShiftKeyDown() )
+            addLocalizedLines(tooltip, "item." + WirelessUtils.MODID + ".filter_augment.held_info");
     }
 
     @Override
@@ -639,6 +657,23 @@ public class ItemFilterAugment extends ItemAugment implements IGuiItem, IUpdatea
 
     private static String getMode(boolean mode) {
         return StringHelper.localize("btn." + WirelessUtils.MODID + ".mode." + (mode ? 2 : 1));
+    }
+
+    @Nullable
+    public Predicate<ItemStack> getHeldFilter(@Nonnull EntityPlayer player) {
+        ItemStack held = player.getHeldItemOffhand();
+        if ( held.isEmpty() || held.getItem() != this ) {
+            heldFilters.remove(player);
+            return null;
+        }
+
+        Tuple<ItemStack, Predicate<ItemStack>> tuple = heldFilters.get(player);
+        if ( tuple != null && ItemStack.areItemStacksEqual(held, tuple.getFirst()) )
+            return tuple.getSecond();
+
+        Predicate<ItemStack> out = getItemFilter(held);
+        heldFilters.put(player, new Tuple<>(held.copy(), out));
+        return out;
     }
 
     @Nullable

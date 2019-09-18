@@ -211,7 +211,7 @@ public class GuiFilterAugment extends BaseGuiItem {
         btnWhitelist.setItem(whitelist ? WHITELIST : BLACKLIST);
         btnWhitelist.setToolTip(new TextComponentTranslation(
                 "btn." + WirelessUtils.MODID + "." + (whitelist ? "whitelist" : "blacklist")
-        ).getFormattedText() + " " + getMode(true));
+        ).getFormattedText());
 
         btnVoiding.setItem(voiding ? VOID_ON : VOID_OFF);
         btnVoiding.setToolTip(new TextComponentTranslation(

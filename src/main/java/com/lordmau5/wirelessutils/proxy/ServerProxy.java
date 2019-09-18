@@ -4,21 +4,32 @@ import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import com.lordmau5.wirelessutils.item.module.ItemTheoreticalSlaughterModule;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
+import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LootingLevelEvent;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
+import java.util.function.Predicate;
 
 @SuppressWarnings("unused")
 @Mod.EventBusSubscriber
@@ -50,6 +61,32 @@ public class ServerProxy extends CommonProxy {
         if ( event.getWorld().isRemote )
             return;
         EventDispatcher.CHUNK_UNLOAD.dispatchEvent(event);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onPlayerPickup(EntityItemPickupEvent event) {
+        if ( !ModConfig.augments.filter.enableOffHand )
+            return;
+
+        EntityPlayer player = event.getEntityPlayer();
+        EntityItem entity = event.getItem();
+        Predicate<ItemStack> predicate = ModItems.itemFilterAugment.getHeldFilter(player);
+
+        if ( predicate != null && !predicate.test(entity.getItem()) ) {
+            event.setCanceled(true);
+            if ( ModItems.itemFilterAugment.isVoiding(player.getHeldItemOffhand()) ) {
+                entity.setDead();
+
+                if ( entity.world instanceof WorldServer ) {
+                    WorldServer ws = (WorldServer) entity.world;
+                    if ( ModConfig.augments.filter.offhandParticles )
+                        ws.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, false, entity.posX, entity.posY + (entity.height / 3), entity.posZ, 1, 0D, 0D, 0D, 0D);
+
+                    if ( ModConfig.augments.filter.offhandVolume != 0 )
+                        ws.playSound(null, entity.posX, entity.posY, entity.posZ, SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE, SoundCategory.PLAYERS, (float) ModConfig.augments.filter.offhandVolume, 1F);
+                }
+            }
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
