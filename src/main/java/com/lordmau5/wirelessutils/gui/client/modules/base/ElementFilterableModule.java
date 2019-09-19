@@ -47,20 +47,44 @@ public abstract class ElementFilterableModule extends ElementModuleBase {
         btnListMode.setToolTipLines(name + ".list_info");
 
         txtList = new ElementTextField(gui, 9, 114, 158, 51, Short.MAX_VALUE) {
+            boolean changed = false;
+
+            public void updateValue() {
+                if ( !changed )
+                    return;
+
+                changed = false;
+                TileBaseVaporizer vaporizer = behavior.vaporizer;
+                ItemStack stack = vaporizer.getModule();
+                ItemFilteringModule item = (ItemFilteringModule) stack.getItem();
+
+                if ( !item.setBlacklist(stack, getText()).isEmpty() ) {
+                    vaporizer.setModule(stack);
+                    vaporizer.sendModePacket();
+                }
+            }
+
+            @Override
+            protected void onCharacterEntered(boolean success) {
+                super.onCharacterEntered(success);
+
+                if ( success && isFocused() )
+                    changed = true;
+            }
+
             @Override
             public ElementTextField setFocused(boolean focused) {
-                if ( isFocused() && !focused ) {
-                    TileBaseVaporizer vaporizer = behavior.vaporizer;
-                    ItemStack stack = vaporizer.getModule();
-                    ItemFilteringModule item = (ItemFilteringModule) stack.getItem();
+                super.setFocused(focused);
+                if ( !isFocused() && changed )
+                    updateValue();
+                return this;
+            }
 
-                    if ( !item.setBlacklist(stack, getText()).isEmpty() ) {
-                        vaporizer.setModule(stack);
-                        vaporizer.sendModePacket();
-                    }
-                }
-
-                return super.setFocused(focused);
+            @Override
+            protected void onFocusLost() {
+                super.onFocusLost();
+                if ( changed )
+                    updateValue();
             }
         };
 
@@ -77,6 +101,20 @@ public abstract class ElementFilterableModule extends ElementModuleBase {
 
         addElement(btnListMode);
         addElement(txtList);
+    }
+
+    @Override
+    public void onGuiClosed() {
+        super.onGuiClosed();
+
+        txtList.setFocused(false);
+    }
+
+    @Override
+    public void onPageFocusLost() {
+        super.onPageFocusLost();
+
+        txtList.setFocused(false);
     }
 
     public abstract int getContentHeight();

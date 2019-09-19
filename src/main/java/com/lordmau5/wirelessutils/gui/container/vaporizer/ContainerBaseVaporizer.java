@@ -1,15 +1,11 @@
 package com.lordmau5.wirelessutils.gui.container.vaporizer;
 
 import com.lordmau5.wirelessutils.gui.container.BaseContainerTile;
-import com.lordmau5.wirelessutils.gui.slot.IVisibleSlot;
 import com.lordmau5.wirelessutils.gui.slot.SlotUnlockableItemHandler;
 import com.lordmau5.wirelessutils.gui.slot.SlotVisible;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Slot;
 import net.minecraftforge.items.IItemHandler;
-
-import java.util.ArrayList;
 
 public class ContainerBaseVaporizer extends BaseContainerTile {
 
@@ -19,8 +15,6 @@ public class ContainerBaseVaporizer extends BaseContainerTile {
     public final int moduleOffset;
     public final int inputOffset;
     public final int outputOffset;
-
-    protected ArrayList<IVisibleSlot> slots;
 
     public ContainerBaseVaporizer(InventoryPlayer inventory, TileBaseVaporizer vaporizer) {
         super(inventory, vaporizer, true, true);
@@ -36,25 +30,6 @@ public class ContainerBaseVaporizer extends BaseContainerTile {
 
         moduleOffset = inventorySlots.size();
         addModuleSlots();
-    }
-
-    @Override
-    protected Slot addSlotToContainer(Slot slotIn) {
-        if ( slotIn instanceof IVisibleSlot ) {
-            // We have to create the array here, otherwise it's not accessible
-            // when this overridden method is called by super constructors.
-            if ( slots == null )
-                slots = new ArrayList<>();
-            slots.add((IVisibleSlot) slotIn);
-        }
-
-        return super.addSlotToContainer(slotIn);
-    }
-
-    public void setSlotsVisible(boolean visible) {
-        if ( slots != null )
-            for (IVisibleSlot slot : slots)
-                slot.setVisible(visible);
     }
 
     @Override

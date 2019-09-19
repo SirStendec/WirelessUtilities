@@ -17,13 +17,17 @@ import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 
 import javax.annotation.Nonnull;
@@ -487,6 +491,9 @@ public class ItemTeleportModule extends ItemFilteringModule {
 
         @Nonnull
         public IWorkProvider.WorkResult processEntity(@Nonnull Entity entity, @Nonnull TileBaseVaporizer.VaporizerTarget vaporizerTarget) {
+            if ( entity instanceof EntityHanging || entity instanceof EntityEnderCrystal )
+                return IWorkProvider.WorkResult.FAILURE_REMOVE;
+
             World world = entity.world;
             if ( world == null || entity.timeUntilPortal > 0 || target == null )
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
@@ -518,11 +525,27 @@ public class ItemTeleportModule extends ItemFilteringModule {
                 }
             }
 
+            double x = entity.posX;
+            double y = entity.posY;
+            double z = entity.posZ;
+            AxisAlignedBB box = entity.getEntityBoundingBox();
+            World oldWorld = entity.world;
+
             Entity newEntity = TeleportUtils.teleportEntity(entity, target.getDimension(), currentTarget.getX() + 0.5, currentTarget.getY() + 0.5, currentTarget.getZ() + 0.5);
             if ( newEntity == null ) {
                 if ( removed > 0 )
                     vaporizer.addFuel(removed);
                 return IWorkProvider.WorkResult.FAILURE_REMOVE;
+            }
+
+            if ( oldWorld instanceof WorldServer ) {
+                WorldServer ws = (WorldServer) oldWorld;
+
+                x += (box.maxX - box.minX) / 2;
+                y += (box.maxY - box.minY) / 2;
+                z += (box.maxZ - box.minZ) / 2;
+
+                ws.spawnParticle(EnumParticleTypes.PORTAL, false, x, y, z, 32, 0D, 0.5D, 0D, 0.5F);
             }
 
             if ( removed > fuel )

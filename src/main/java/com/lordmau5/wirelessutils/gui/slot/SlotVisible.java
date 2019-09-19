@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.gui.slot;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 
@@ -33,5 +34,13 @@ public class SlotVisible extends Slot implements IVisibleSlot {
             return false;
 
         return super.isEnabled();
+    }
+
+    @Override
+    public boolean canTakeStack(EntityPlayer playerIn) {
+        if ( !visible )
+            return false;
+
+        return super.canTakeStack(playerIn);
     }
 }

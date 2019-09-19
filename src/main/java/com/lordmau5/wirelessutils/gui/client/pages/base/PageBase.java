@@ -54,6 +54,10 @@ public class PageBase extends ElementContainer implements IPageTabProvider {
 
     }
 
+    public void onGuiClosed() {
+
+    }
+
     /* Tab Stuff */
 
     public PageBase setPageTabVisible(boolean visible) {

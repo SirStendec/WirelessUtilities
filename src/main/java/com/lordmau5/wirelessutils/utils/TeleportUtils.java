@@ -88,8 +88,8 @@ public class TeleportUtils {
 
         // If we aren't changing worlds, just update the position.
         if ( oldWorld == world ) {
+            entity.fallDistance = 0;
             entity.setPositionAndUpdate(x, y, z);
-            world.updateEntityWithOptionalForce(entity, false);
             return entity;
         }
 
@@ -107,6 +107,7 @@ public class TeleportUtils {
         newEntity.readFromNBT(tag);
         newEntity.setPosition(x, y, z);
 
+        newEntity.fallDistance = 0;
         newEntity.forceSpawn = true;
         world.spawnEntity(newEntity);
         newEntity.forceSpawn = false;

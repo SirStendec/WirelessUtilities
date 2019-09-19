@@ -1266,7 +1266,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     }
 
     public boolean canWorkBlock(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nullable TileEntity tile) {
-        return world.isAirBlock(target);
+        return !block.getMaterial().blocksMovement();
     }
 
     public boolean canWorkTile(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {

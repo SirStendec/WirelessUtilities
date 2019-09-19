@@ -60,6 +60,9 @@ public class SlotUnlockableItemHandler extends SlotItemHandler implements IVisib
 
     @Override
     public boolean canTakeStack(EntityPlayer playerIn) {
+        if ( !visible )
+            return false;
+
         return tile.isSlotUnlocked(getSlotIndex()) && super.canTakeStack(playerIn);
     }
 }

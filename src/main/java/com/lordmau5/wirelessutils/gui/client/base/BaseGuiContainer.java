@@ -109,6 +109,15 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements IPage
         ySize = 176;
     }
 
+    @Override
+    public void onGuiClosed() {
+        super.onGuiClosed();
+
+        if ( pages != null )
+            for (PageBase page : pages)
+                page.onGuiClosed();
+    }
+
     /* Pages */
 
     @Nullable
