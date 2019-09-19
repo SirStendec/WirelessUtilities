@@ -1,7 +1,9 @@
 {
 	"homepage": "https://minecraft.curseforge.com/projects/wireless-utilities",
 	"1.12.2": {
-		"1.7": "Added: Dispenser Augment\nAdded: Void Pearl\nAdded: A ton of configuration.\nMany changes and bugfixes.\n\nFor full changes, see GitHub or CurseForge.",
+		"1.9": "Added: Particle effects for working machines.\nAdded: Filter Augments now filter items you pick up if held in your off-hand.\nFixed: Four potential crashes.\n\nFor full changes, see GitHub or CurseForge.",
+		"1.8.126": "Added: Filter Augment\nAdded: Remote Side Augment\nAdded: Vaporizer and Modules\n\nWay too many changes to list here. For full changes, see GitHub or CurseForge.",
+		"1.7.76": "Added: Dispenser Augment\nAdded: Void Pearl\nAdded: A ton of configuration.\nMany changes and bugfixes.\n\nFor full changes, see GitHub or CurseForge.",
 		"1.6.51": "Changed: Updated Russian language files.\nFixed: Excessive memory usage.",
 		"1.6.48": "Added: Player Positional Card\nAdded: Sided I/O Control\nChanged: Positional Machines no longer connect via their fronts/tops by default. Configurable.\nFixed: Do not display AE2 Channel Count when AE2 Channels are disabled.\nFixed: Issue with AE2 machines not connecting to secured networks.\n\nFor full changes, see GitHub or CurseForge.",
 		"1.5.40": "Added: Auxiliary Condenser Augment\nAdded: /wu_fluidgen Command\nAdded: Russian Language Support.\nChanged: Positional Machines now face a direction.\nFixed: Recipe for Chunk Load Augment.\n\nFor full changes, see GitHub or CurseForge.",
@@ -11,7 +13,7 @@
 		"1.1.11": "See GitHub commits for changelog"
 	},
 	"promos": {
-		"1.12.2-latest": "1.7",
-		"1.12.2-recommended": "1.7"
+		"1.12.2-latest": "1.9",
+		"1.12.2-recommended": "1.9"
 	}
 }
