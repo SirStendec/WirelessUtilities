@@ -22,7 +22,7 @@ public class GuiFacingAugment extends BaseGuiItem {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-        container.sendUpdate();
+        container.sendUpdateIfChanged();
     }
 
     @Override
@@ -59,7 +59,7 @@ public class GuiFacingAugment extends BaseGuiItem {
                 int index = facing == null ? -1 : facing.ordinal();
                 index += amount;
 
-                if ( container.allowNull() ) {
+                if ( container.allowNullFacing() ) {
                     if ( index < -1 )
                         index = EnumFacing.VALUES.length - 1;
                     else if ( index >= EnumFacing.VALUES.length )

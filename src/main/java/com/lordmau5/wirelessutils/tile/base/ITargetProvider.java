@@ -14,6 +14,12 @@ import java.util.Map;
 public interface ITargetProvider {
 
     /**
+     * Method to be called by the Worker before it starts to
+     * re-build the target cache. Used for resetting state.
+     */
+    void onTargetCacheRebuild();
+
+    /**
      * Method to be called when the state has changed and
      * any internally cached target list should be rebuilt.
      */

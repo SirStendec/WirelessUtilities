@@ -1,0 +1,122 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "wirelessutils:item/area_card"
+	},
+	"overrides": [
+		{
+			"predicate": {
+				"angle": 0.0000000000
+			},
+			"model": "wirelessutils:item/area_card/n"
+		},
+		{
+			"predicate": {
+				"angle": 0.0277777778
+			},
+			"model": "wirelessutils:item/area_card/n_ne"
+		},
+		{
+			"predicate": {
+				"angle": 0.0833333333
+			},
+			"model": "wirelessutils:item/area_card/ne_n"
+		},
+		{
+			"predicate": {
+				"angle": 0.1388888889
+			},
+			"model": "wirelessutils:item/area_card/ne"
+		},
+		{
+			"predicate": {
+				"angle": 0.1944444444
+			},
+			"model": "wirelessutils:item/area_card/ne_se"
+		},
+		{
+			"predicate": {
+				"angle": 0.2500000000
+			},
+			"model": "wirelessutils:item/area_card/se_ne"
+		},
+		{
+			"predicate": {
+				"angle": 0.3055555556
+			},
+			"model": "wirelessutils:item/area_card/se"
+		},
+		{
+			"predicate": {
+				"angle": 0.3611111111
+			},
+			"model": "wirelessutils:item/area_card/se_s"
+		},
+		{
+			"predicate": {
+				"angle": 0.4166666667
+			},
+			"model": "wirelessutils:item/area_card/s_se"
+		},
+		{
+			"predicate": {
+				"angle": 0.4722222222
+			},
+			"model": "wirelessutils:item/area_card/s"
+		},
+		{
+			"predicate": {
+				"angle": 0.5277777778
+			},
+			"model": "wirelessutils:item/area_card/s_sw"
+		},
+		{
+			"predicate": {
+				"angle": 0.5833333333
+			},
+			"model": "wirelessutils:item/area_card/sw_s"
+		},
+		{
+			"predicate": {
+				"angle": 0.6388888889
+			},
+			"model": "wirelessutils:item/area_card/sw"
+		},
+		{
+			"predicate": {
+				"angle": 0.6944444444
+			},
+			"model": "wirelessutils:item/area_card/sw_nw"
+		},
+		{
+			"predicate": {
+				"angle": 0.7500000000
+			},
+			"model": "wirelessutils:item/area_card/nw_sw"
+		},
+		{
+			"predicate": {
+				"angle": 0.8055555556
+			},
+			"model": "wirelessutils:item/area_card/nw"
+		},
+		{
+			"predicate": {
+				"angle": 0.8611111111
+			},
+			"model": "wirelessutils:item/area_card/nw_n"
+		},
+		{
+			"predicate": {
+				"angle": 0.9166666667
+			},
+			"model": "wirelessutils:item/area_card/n_nw"
+		},
+		{
+			"predicate": {
+				"angle": 0.9722222222
+			},
+			"model": "wirelessutils:item/area_card/n"
+		}
+	]
+}

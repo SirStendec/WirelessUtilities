@@ -4,12 +4,9 @@ import cofh.api.util.ThermalExpansionHelper;
 import cofh.core.util.helpers.RecipeHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.block.base.BlockBaseMachine;
-import com.lordmau5.wirelessutils.item.ItemAbsolutePositionalCard;
 import com.lordmau5.wirelessutils.item.ItemEnderCoil;
 import com.lordmau5.wirelessutils.item.ItemGlasses;
 import com.lordmau5.wirelessutils.item.ItemMachinePanel;
-import com.lordmau5.wirelessutils.item.ItemPlayerPositionalCard;
-import com.lordmau5.wirelessutils.item.ItemRelativePositionalCard;
 import com.lordmau5.wirelessutils.item.augment.ItemBaseAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemBlockAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemCapacityAugment;
@@ -26,6 +23,12 @@ import com.lordmau5.wirelessutils.item.augment.ItemSidedTransferAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemSlotAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemTransferAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemWorldAugment;
+import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
+import com.lordmau5.wirelessutils.item.cards.ItemAbsoluteAreaCard;
+import com.lordmau5.wirelessutils.item.cards.ItemAbsolutePositionalCard;
+import com.lordmau5.wirelessutils.item.cards.ItemPlayerPositionalCard;
+import com.lordmau5.wirelessutils.item.cards.ItemRelativeAreaCard;
+import com.lordmau5.wirelessutils.item.cards.ItemRelativePositionalCard;
 import com.lordmau5.wirelessutils.item.module.ItemBaseModule;
 import com.lordmau5.wirelessutils.item.module.ItemCaptureModule;
 import com.lordmau5.wirelessutils.item.module.ItemCloneModule;
@@ -58,8 +61,10 @@ import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootTableList;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fluids.Fluid;
@@ -82,6 +87,12 @@ public class ModItems {
 
     @GameRegistry.ObjectHolder("wirelessutils:player_positional_card")
     public static ItemPlayerPositionalCard itemPlayerPositionalCard;
+
+    @GameRegistry.ObjectHolder("wirelessutils:area_card")
+    public static ItemAbsoluteAreaCard itemAbsoluteAreaCard;
+
+    @GameRegistry.ObjectHolder("wirelessutils:relative_area_card")
+    public static ItemRelativeAreaCard itemRelativeAreaCard;
 
     @GameRegistry.ObjectHolder("wirelessutils:fluxed_pearl")
     public static ItemFluxedPearl itemFluxedPearl;
@@ -197,6 +208,9 @@ public class ModItems {
         if ( ModConfig.upgrades.enableCrafting )
             generateUpgradeRecipes(event);
 
+        // Convenience Recipes for Positional Cards
+        generateCardRecipes(event);
+
         int cost = ModConfig.items.fluxedPearl.chargeEnergy;
 
         // Charged Pearls
@@ -249,6 +263,43 @@ public class ModItems {
         // Sponge
         CondenserRecipeManager.addRecipe(water, new ItemStack(Blocks.SPONGE, 1, 0), new ItemStack(Blocks.SPONGE, 1, 1), 400);
 
+    }
+
+    public static void generateCardRecipes(RegistryEvent.Register<IRecipe> event) {
+        for (Item item : CommonProxy.ITEMS) {
+            if ( item instanceof ItemBasePositionalCard ) {
+                final ResourceLocation registryName = item.getRegistryName();
+                if ( registryName == null )
+                    continue;
+
+                NonNullList<ItemStack> stacks = NonNullList.create();
+                if ( item.getCreativeTab() == null || !item.getHasSubtypes() )
+                    stacks.add(new ItemStack(item));
+                else
+                    item.getSubItems(item.getCreativeTab(), stacks);
+
+                final ResourceLocation group = new ResourceLocation(WirelessUtils.MODID, "card_convenience");
+
+                for (ItemStack stack : stacks) {
+                    final String location = registryName.getPath() + "_" + stack.getMetadata();
+
+                    // Clear Item
+                    GameRegistry.addShapelessRecipe(
+                            new ResourceLocation(WirelessUtils.MODID, location + "_clear"),
+                            group,
+                            stack,
+                            CraftingHelper.getIngredient(stack)
+                    );
+
+                    // Copy NBT
+                    ItemStack copyOut = stack.copy();
+                    copyOut.setCount(2);
+                    ShapelessOreRecipe recipe = new CopyNBTShapelessRecipeFactory.CopyNBTShapelessRecipe(group, RecipeHelper.buildInput(new Object[]{stack, stack}), copyOut);
+                    recipe.setRegistryName(new ResourceLocation(WirelessUtils.MODID, location + "_clone"));
+                    event.getRegistry().register(recipe);
+                }
+            }
+        }
     }
 
     public static void generateUpgradeRecipes(RegistryEvent.Register<IRecipe> event) {
@@ -311,6 +362,8 @@ public class ModItems {
         itemAbsolutePositionalCard.initModel();
         itemRelativePositionalCard.initModel();
         itemPlayerPositionalCard.initModel();
+        itemAbsoluteAreaCard.initModel();
+        itemRelativeAreaCard.initModel();
 
         itemGlasses.initModel();
         itemEnderCoil.initModel();
@@ -349,6 +402,9 @@ public class ModItems {
     public static void initColors(ItemColors itemColors) {
         itemColors.registerItemColorHandler(ColorHandler.LevelUpgrade.handleItemColor, itemLevelUpgrade);
         itemColors.registerItemColorHandler(ColorHandler.LevelUpgrade.handleItemColor, itemConversionUpgrade);
+
+        itemColors.registerItemColorHandler(ColorHandler.AreaCard.handleItemColor, itemAbsoluteAreaCard);
+        itemColors.registerItemColorHandler(ColorHandler.AreaCard.handleItemColor, itemRelativeAreaCard);
 
         itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemBaseAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.Range.handleItemColor, itemRangeAugment);

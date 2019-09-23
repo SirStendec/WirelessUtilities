@@ -20,7 +20,7 @@ public class ContainerFacingAugment extends BaseContainerItem {
         player = inventory.player;
     }
 
-    public boolean allowNull() {
+    public boolean allowNullFacing() {
         if ( ModConfig.augments.facing.allowNull )
             return true;
 

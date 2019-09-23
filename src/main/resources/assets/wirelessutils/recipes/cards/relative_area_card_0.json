@@ -1,0 +1,28 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		" R ",
+		"ICI",
+		" P "
+	],
+	"key": {
+		"P": {
+			"item": "minecraft:piston"
+		},
+		"I": {
+			"item": "#IRON_INGOT"
+		},
+		"C": {
+			"item": "wirelessutils:relative_positional_card"
+		},
+		"R": {
+			"item": "#REDSTONE_BLOCK"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:relative_area_card",
+		"data": 0,
+		"count": 1
+	}
+}

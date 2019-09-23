@@ -106,6 +106,13 @@ public class ModConfig {
         })
         public final FluxedPearl fluxedPearl = new FluxedPearl();
 
+        @Config.Name("Quenched Pearl")
+        @Config.Comment({
+                "Quenched Pearls can be thrown like Ender Pearls.",
+                "Upon hitting a surface, they extinquish fires and quench lava."
+        })
+        public final QuenchedPearl quenchedPearl = new QuenchedPearl();
+
         @Config.Name("Scorched Pearl")
         @Config.Comment({
                 "Scorched Pearls can be thrown like Ender Pearls.",
@@ -126,6 +133,34 @@ public class ModConfig {
                 "Upon hitting a living entity, they trap it inside. They can be thrown to release the entity, or used in special machines."
         })
         public final VoidPearl voidPearl = new VoidPearl();
+
+        @Config.Name("Positional Area Cards")
+        @Config.Comment("Positional Area Cards can be installed into Positional Machines, and target an area of blocks rather than just one.")
+        public final PositionalAreaCards positionalAreaCards = new PositionalAreaCards();
+
+        @Config.Name("Relative Cards")
+        @Config.Comment("Relative Cards can be installed into Positional Machines, and target a block or area at a certain position relative to the machine.")
+        public final RelativeCards relativeCards = new RelativeCards();
+    }
+
+    public static class RelativeCards {
+        @Config.Name("Allow Null Facing")
+        @Config.Comment("When enabled, the \"null\" face will be one of the selectable faces.")
+        public boolean allowNullFacing = false;
+    }
+
+    public static class PositionalAreaCards {
+        @Config.Name("Available Tiers")
+        @Config.Comment("Positional Area Cards are available in this many tiers.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresMcRestart
+        public int availableTiers = 2;
+
+        @Config.Name("Blocks per Tier")
+        @Config.Comment("Positional Area Cards will be able to target this many blocks, per tier, in each direction. For example, a value of \"1\" results in a 3x3x3 area. One in each direction, including the origin block.")
+        @Config.RangeInt(min = 0)
+        // 3x3x3, 5x5x5, 7x7x7, 11x11x11, 17x17x17
+        public int[] blocks = {1, 2};
     }
 
     public static class FluxedPearl {
@@ -190,6 +225,38 @@ public class ModConfig {
         @Config.Name("Enable Scorching")
         @Config.Comment("Enable crafting Scorched Pearls by throwing Charged Pearls into lava source blocks.")
         public boolean enableScorching = true;
+    }
+
+    public static class QuenchedPearl {
+        @Config.Name("Throwing consumes Pearl")
+        @Config.Comment("When enabled, Quenched Pearls are always consumed on impact, whether they extinquish anything or not.")
+        public boolean alwaysConsumed = false;
+
+        @Config.Name("Extinguish Fire on Impact")
+        @Config.Comment("When greater than zero, extinguish fire in an x block radius when thrown at a block.")
+        @Config.RangeInt(min = 0)
+        public int extinguishFire = 8;
+
+        @Config.Name("Extinguishing Fire consumes Pearl")
+        @Config.Comment("When enabled, extinguishing a fire block will consume the Quenched Pearl.")
+        public boolean fireConsumes = false;
+
+        @Config.Name("Quench Lava on Impact")
+        @Config.Comment("When greater than zero, quench exposed lava in an x block radius when thrown at a block.")
+        @Config.RangeInt(min = 0)
+        public int quenchLava = 8;
+
+        @Config.Name("Quenching Lava consumes Pearl")
+        @Config.Comment("When enabled, quenching exposed lava will consume the Quenched Pearl.")
+        public boolean lavaConsumes = true;
+
+        @Config.Name("Protect Wielders from Burning")
+        @Config.Comment("When enabled, entities holding a Quenched Pearl will not take fire damage. Players will also not remain lit on fire.")
+        public boolean douseEntities = true;
+
+        @Config.Name("Protect Wielders from Lava")
+        @Config.Comment("When enabled, entities holding a Quenched Pearl will additionally not take damage from lava. Requires Protect Wielders from Burning")
+        public boolean douseEntityLava = false;
     }
 
     public static class ScorchedPearl {
@@ -2174,9 +2241,24 @@ public class ModConfig {
         @Config.Comment("When enabled, merely holding Work Glasses is enough for them to take effect. When disabled, Work Glasses must be equipped.")
         public boolean allowHoldingGlasses = true;
 
-        @Config.Name("Enable Work Particles")
+        @Config.Name("Work Particles - Enabled")
         @Config.Comment("When enabled, active machines will draw particles connecting them to their targets. These particles are only visible while wearing Work Glasses.")
-        public boolean enableWorkParticles = true;
+        public boolean particlesEnabled = true;
+
+        @Config.Name("Work Particles - Cost")
+        @Config.Comment("Rendering a work effect costs this much budget.")
+        @Config.RangeInt(min = 1)
+        public int particlesCost = 5;
+
+        @Config.Name("Work Particles - Maximum Budget")
+        @Config.Comment("Machines can store up to this much budget for work effects.")
+        @Config.RangeInt(min = 0)
+        public int particlesMax = 100;
+
+        @Config.Name("Work Particles - Budget Per Tick")
+        @Config.Comment("Machines will generate this much budget per tick for work effects.")
+        @Config.RangeInt(min = 0)
+        public int particlePerTick = 1;
     }
 
     public static class Plugins {

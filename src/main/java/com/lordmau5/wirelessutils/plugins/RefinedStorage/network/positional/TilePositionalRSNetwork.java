@@ -1,10 +1,12 @@
 package com.lordmau5.wirelessutils.plugins.RefinedStorage.network.positional;
 
 import cofh.core.network.PacketBase;
+import com.lordmau5.wirelessutils.item.base.ItemBaseAreaCard;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.base.TileRSNetworkBase;
 import com.lordmau5.wirelessutils.tile.base.IFacing;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
+import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ISlotAugmentable;
@@ -19,6 +21,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -210,6 +213,8 @@ public class TilePositionalRSNetwork extends TileRSNetworkBase<NetworkNodePositi
             validTargets.clear();
 
         clearRenderAreas();
+        EventDispatcher.BREAK_BLOCK.removeListener(this);
+        EventDispatcher.PLACE_BLOCK.removeListener(this);
 
         setEnergyCost(0);
 
@@ -240,33 +245,71 @@ public class TilePositionalRSNetwork extends TileRSNetworkBase<NetworkNodePositi
             if ( target == null || (!isTargetInRange(target) && !card.shouldIgnoreDistance(slotted)) )
                 continue;
 
-            boolean sameDimension = target.getDimension() == dimension;
+            final boolean sameDimension = target.getDimension() == dimension;
+
+            if ( card instanceof ItemBaseAreaCard ) {
+                ItemBaseAreaCard areaCard = (ItemBaseAreaCard) card;
+                Iterable<Tuple<BlockPosDimension, ItemStack>> iterable = areaCard.getTargetArea(slotted, origin);
+                if ( iterable == null )
+                    continue;
+
+                for (Tuple<BlockPosDimension, ItemStack> pair : iterable) {
+                    BlockPosDimension areaTarget = pair.getFirst();
+                    if ( areaTarget != null )
+                        cost += addNode(slotted, card, areaTarget.facing(null), origin);
+                }
+
+                if ( sameDimension ) {
+                    Tuple<BlockPosDimension, BlockPosDimension> corners = areaCard.getCorners(slotted, target);
+                    if ( corners != null ) {
+                        addRenderArea(
+                                corners.getFirst(), corners.getSecond(),
+                                NiceColors.COLORS[i],
+                                slotted.hasDisplayName() ? slotted.getDisplayName() : null,
+                                null
+                        );
+                    }
+                }
+
+                continue;
+            }
+
             if ( sameDimension )
                 addRenderArea(
-                        target,
+                        target.toImmutable(),
                         NiceColors.COLORS[i],
                         slotted.hasDisplayName() ? slotted.getDisplayName() : null,
                         card == itemRelativePositionalCard ? itemRelativePositionalCard.getVector(slotted) : null
                 );
 
-            validTargets.add(target);
-
-            if ( !world.isRemote ) {
-                if ( isNodeValid(target) ) {
-                    double distance = origin.getDistance(target.getX(), target.getY(), target.getZ()) - 1;
-                    int targetCost = card.getCost(slotted);
-                    if ( targetCost == -1 )
-                        targetCost = calculateEnergyCost(distance, !sameDimension);
-
-                    cost += targetCost;
-                }
-
-                EventDispatcher.PLACE_BLOCK.addListener(target, this);
-                EventDispatcher.BREAK_BLOCK.addListener(target, this);
-            }
+            cost += addNode(slotted, card, target.facing(null), origin);
         }
 
         setEnergyCost(cost);
+    }
+
+    private int addNode(ItemStack stack, ItemBasePositionalCard card, BlockPosDimension target, BlockPosDimension origin) {
+        if ( target == null || validTargets.contains(target) )
+            return 0;
+
+        validTargets.add(target);
+        int cost = 0;
+
+        if ( !world.isRemote ) {
+            if ( isNodeValid(target) ) {
+                cost = card.getCost(stack);
+                if ( cost == -1 )
+                    cost = calculateEnergyCost(
+                            ITargetProvider.calculateDistance(origin, target),
+                            target.getDimension() != origin.getDimension()
+                    );
+            }
+
+            EventDispatcher.PLACE_BLOCK.addListener(target, this);
+            EventDispatcher.BREAK_BLOCK.addListener(target, this);
+        }
+
+        return cost;
     }
 
     /* Range */

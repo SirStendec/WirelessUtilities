@@ -1,4 +1,4 @@
-package com.lordmau5.wirelessutils.item;
+package com.lordmau5.wirelessutils.item.cards;
 
 import cofh.core.util.CoreUtils;
 import com.lordmau5.wirelessutils.gui.client.item.GuiPlayerCard;

@@ -1,10 +1,15 @@
 package com.lordmau5.wirelessutils.tile.base;
 
+import com.google.common.collect.AbstractIterator;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.AxisAlignedBB;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface IDirectionalMachine extends IFacing {
 
@@ -12,30 +17,6 @@ public interface IDirectionalMachine extends IFacing {
     default boolean allowYAxisFacing() {
         return true;
     }
-
-    int getRange();
-
-    int getRangeLength();
-
-    int getRangeWidth();
-
-    int getRangeHeight();
-
-    void setRangeLength(int length);
-
-    void setRangeWidth(int width);
-
-    void setRangeHeight(int height);
-
-    void setRanges(int height, int length, int width);
-
-    int getOffsetHorizontal();
-
-    int getOffsetVertical();
-
-    void setOffsetHorizontal(int offset);
-
-    void setOffsetVertical(int offset);
 
     default AxisAlignedBB getTargetBoundingBox(BlockPosDimension origin) {
         Tuple<BlockPosDimension, BlockPosDimension> corners = calculateTargetCorners(origin);
@@ -77,37 +58,72 @@ public interface IDirectionalMachine extends IFacing {
     }
 
     default Tuple<BlockPosDimension, BlockPosDimension> calculateTargetCorners(BlockPosDimension origin) {
-        EnumFacing facing = getEnumFacing();
-        EnumFacing.Axis axis = facing.getAxis();
+        int rangeWidth, rangeLength, rangeHeight, offsetHorizontal, offsetVertical;
 
-        BlockPosDimension offset;
+        if ( this instanceof IConfigurableRange ) {
+            IConfigurableRange config = (IConfigurableRange) this;
+            rangeHeight = config.getRangeHeight();
+            rangeLength = config.getRangeLength();
+            rangeWidth = config.getRangeWidth();
+            offsetHorizontal = config.getOffsetHorizontal();
+            offsetVertical = config.getOffsetVertical();
 
-        int rangeY = getRangeHeight();
+        } else {
+            rangeHeight = 0;
+            rangeLength = 0;
+            rangeWidth = 0;
+            offsetHorizontal = 0;
+            offsetVertical = 0;
+        }
+
+        return calculateCorners(
+                origin,
+                getEnumFacing(),
+                rangeWidth, rangeLength, rangeHeight,
+                offsetHorizontal, offsetVertical, getRotationX(), true
+        );
+    }
+
+    static Tuple<BlockPosDimension, BlockPosDimension> calculateCorners(
+            @Nonnull BlockPosDimension origin, @Nullable EnumFacing facing,
+            int rangeWidth, int rangeLength, int rangeHeight,
+            int offsetHorizontal, int offsetVertical, boolean rotationX, boolean doOffset
+    ) {
+        EnumFacing.Axis axis = facing == null ? EnumFacing.Axis.X : facing.getAxis();
+        BlockPosDimension offset = origin;
+
+        int rangeY = rangeHeight;
         int rangeX;
         int rangeZ;
 
         if ( axis == EnumFacing.Axis.X ) {
-            rangeX = getRangeLength();
-            rangeZ = getRangeWidth();
-            offset = origin.offset(facing, rangeX + 1);
-            offset = offset.add(0, getOffsetVertical(), getOffsetHorizontal() * facing.getAxisDirection().getOffset());
+            rangeX = rangeLength;
+            rangeZ = rangeWidth;
+            if ( doOffset )
+                offset = origin.offset(facing, rangeX + 1);
+            if ( facing != null )
+                offset = offset.add(0, offsetVertical, offsetHorizontal * facing.getAxisDirection().getOffset());
 
         } else if ( axis == EnumFacing.Axis.Y ) {
-            offset = origin.offset(facing, rangeY + 1);
-            if ( getRotationX() ) {
-                offset = offset.add(getOffsetVertical(), 0, getOffsetHorizontal());
-                rangeX = getRangeLength();
-                rangeZ = getRangeWidth();
+            if ( doOffset )
+                offset = origin.offset(facing, rangeY + 1);
+
+            if ( rotationX ) {
+                offset = offset.add(offsetVertical, 0, offsetHorizontal);
+                rangeX = rangeLength;
+                rangeZ = rangeWidth;
             } else {
-                offset = offset.add(getOffsetHorizontal(), 0, getOffsetVertical());
-                rangeX = getRangeWidth();
-                rangeZ = getRangeLength();
+                offset = offset.add(offsetHorizontal, 0, offsetVertical);
+                rangeX = rangeWidth;
+                rangeZ = rangeLength;
             }
         } else {
-            rangeX = getRangeWidth();
-            rangeZ = getRangeLength();
-            offset = origin.offset(facing, rangeZ + 1);
-            offset = offset.add(getOffsetHorizontal() * -facing.getAxisDirection().getOffset(), getOffsetVertical(), 0);
+            rangeX = rangeWidth;
+            rangeZ = rangeLength;
+            if ( doOffset )
+                offset = origin.offset(facing, rangeZ + 1);
+            if ( facing != null )
+                offset = offset.add(offsetHorizontal * -facing.getAxisDirection().getOffset(), offsetVertical, 0);
         }
 
         BlockPosDimension minPos = offset.add(-rangeX, -rangeY, -rangeZ);
@@ -290,6 +306,57 @@ public interface IDirectionalMachine extends IFacing {
 
         } else
             return 0;
+    }
+
+    @Nonnull
+    static Iterable<Tuple<BlockPosDimension, ItemStack>> iterateTargets(@Nonnull final IDirectionalMachine machine, @Nonnull final BlockPosDimension origin, @Nullable final EnumFacing facing) {
+        return iterateTargets(machine, origin, facing, ItemStack.EMPTY);
+    }
+
+    @Nonnull
+    static Iterable<Tuple<BlockPosDimension, ItemStack>> iterateTargets(@Nonnull final IDirectionalMachine machine, @Nonnull final BlockPosDimension origin, @Nullable final EnumFacing facing, @Nonnull final ItemStack stack) {
+        final Tuple<BlockPosDimension, BlockPosDimension> corners = machine.calculateTargetCorners(origin);
+        return iterateTargets(corners.getFirst(), corners.getSecond(), facing, stack);
+    }
+
+    static Iterable<Tuple<BlockPosDimension, ItemStack>> iterateTargets(@Nonnull BlockPosDimension start, @Nonnull BlockPosDimension end, @Nullable EnumFacing facing, @Nonnull ItemStack stack) {
+        final int x1 = start.getX();
+        final int y1 = start.getY();
+        final int z1 = start.getZ();
+
+        final int x2 = end.getX();
+        final int y2 = end.getY();
+        final int z2 = end.getZ();
+
+        final int dimension = start.getDimension();
+
+        return () -> new AbstractIterator<Tuple<BlockPosDimension, ItemStack>>() {
+            private BlockPosDimension.MutableBPD pos;
+            private Tuple<BlockPosDimension, ItemStack> out;
+
+            @Override
+            protected Tuple<BlockPosDimension, ItemStack> computeNext() {
+                if ( pos == null ) {
+                    pos = new BlockPosDimension.MutableBPD(x1, y1, z1, dimension, facing);
+                    out = new Tuple<>(pos, stack);
+                    return out;
+                } else if ( pos.getX() == x2 && pos.getY() == y2 && pos.getZ() == z2 )
+                    return endOfData();
+
+                if ( pos.getX() < x2 )
+                    pos.incrementX();
+                else if ( pos.getY() < y2 ) {
+                    pos.setX(x1);
+                    pos.incrementY();
+                } else if ( pos.getZ() < z2 ) {
+                    pos.setX(x1);
+                    pos.setY(y1);
+                    pos.incrementZ();
+                }
+
+                return out;
+            }
+        };
     }
 
 }

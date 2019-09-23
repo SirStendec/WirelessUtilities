@@ -1,11 +1,15 @@
-package com.lordmau5.wirelessutils.item;
+package com.lordmau5.wirelessutils.item.cards;
 
 import cofh.core.util.CoreUtils;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.item.base.IClearableItem;
+import com.lordmau5.wirelessutils.item.base.IUpdateableItem;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import com.lordmau5.wirelessutils.utils.location.BlockArea;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
+import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
@@ -13,8 +17,11 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.IItemPropertyGetter;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
@@ -37,7 +44,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
+public class ItemAbsolutePositionalCard extends ItemBasePositionalCard implements IClearableItem {
 
     public ItemAbsolutePositionalCard() {
         setName("positional_card");
@@ -56,8 +63,7 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
                 if ( world == null )
                     world = entity.world;
 
-                BlockPosDimension origin = new BlockPosDimension(entity.getPosition(), world.provider.getDimension());
-                BlockPosDimension target = getTarget(stack, origin);
+                BlockPosDimension target = getTarget(stack);
                 if ( target == null )
                     return -1F;
 
@@ -90,6 +96,70 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
         });
     }
 
+    /* INBTPreservingIngredient */
+
+    @Override
+    public boolean isValidForCraft(@Nonnull IRecipe recipe, @Nonnull InventoryCrafting craft, @Nonnull ItemStack stack, @Nonnull ItemStack output) {
+        if ( isLocked(stack) )
+            return false;
+
+        final Item item = output.getItem();
+        return item == ModItems.itemAbsoluteAreaCard || item == ModItems.itemAbsolutePositionalCard;
+    }
+
+    @Nullable
+    @Override
+    public NBTTagCompound getNBTTagForCraft(@Nonnull IRecipe recipe, @Nonnull InventoryCrafting craft, @Nonnull ItemStack stack, @Nonnull ItemStack output) {
+        if ( isLocked(stack) )
+            return null;
+
+        Item item = output.getItem();
+        if ( item == ModItems.itemAbsolutePositionalCard )
+            return stack.getTagCompound();
+        else if ( item != ModItems.itemAbsoluteAreaCard )
+            return null;
+
+        final NBTTagCompound tag = new NBTTagCompound();
+
+        IUpdateableItem.copyOrRemoveNBTKeys(
+                stack.getTagCompound(), tag, true,
+                "display"
+        );
+
+        final BlockPosDimension target = getTarget(stack);
+        if ( target != null )
+            target.writeToTag(tag);
+
+        return tag.isEmpty() ? null : tag;
+    }
+
+
+    /* IClearableItem */
+
+    public boolean canClearItem(@Nonnull ItemStack stack, @Nullable EntityPlayer player) {
+        return stack.getItem() == this && !isLocked(stack);
+    }
+
+    @Nonnull
+    public ItemStack clearItem(@Nonnull ItemStack stack, @Nullable EntityPlayer player) {
+        if ( stack.getItem() != this || !stack.hasTagCompound() || isLocked(stack) )
+            return ItemStack.EMPTY;
+
+        stack = stack.copy();
+        final NBTTagCompound tag = stack.getTagCompound();
+        if ( tag == null )
+            return ItemStack.EMPTY;
+
+        BlockPosDimension.removeFromTag(tag);
+
+        if ( tag.isEmpty() )
+            stack.setTagCompound(null);
+
+        return stack;
+    }
+
+    /* Positional Card */
+
     @Override
     public boolean isCardConfigured(@Nonnull ItemStack stack) {
         return stack.hasTagCompound() && BlockPosDimension.fromTag(stack.getTagCompound()) != null;
@@ -97,6 +167,11 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
 
     @Override
     public BlockPosDimension getTarget(@Nonnull ItemStack stack, @Nonnull BlockPosDimension origin) {
+        return getTarget(stack);
+    }
+
+    @Nullable
+    public BlockPosDimension getTarget(@Nonnull ItemStack stack) {
         if ( !stack.hasTagCompound() )
             return null;
 
@@ -104,11 +179,24 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
         if ( out == null )
             return null;
 
-        World world = DimensionManager.getWorld(out.getDimension(), false);
-        if ( world != null && !world.isValid(out) )
+        if ( !out.isInsideWorld() )
             return null;
 
         return out;
+    }
+
+    @Nullable
+    public BlockArea getHandRenderArea(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, @Nullable EnumHand hand, int color) {
+        BlockPosDimension target = getTarget(stack);
+        if ( target != null )
+            return new BlockArea(
+                    target,
+                    color,
+                    stack.hasDisplayName() ? stack.getDisplayName() : null,
+                    null
+            );
+
+        return null;
     }
 
     @Override
@@ -185,26 +273,18 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
             if ( ray != null && ray.typeOfHit == RayTraceResult.Type.BLOCK )
                 return new ActionResult<>(EnumActionResult.PASS, stack);
 
-            NBTTagCompound tag = stack.getTagCompound();
-            if ( tag == null || tag.getBoolean("Locked") )
-                return new ActionResult<>(EnumActionResult.PASS, stack);
-            else if ( stack.getCount() > 1 )
-                tag = tag.copy();
+            ItemStack cleared = clearItem(stack, player);
+            if ( cleared.isEmpty() )
+                return new ActionResult<>(EnumActionResult.FAIL, stack);
 
-            BlockPosDimension.removeFromTag(tag);
+            if ( stack.getCount() == 1 )
+                return new ActionResult<>(EnumActionResult.PASS, cleared);
 
-            if ( tag.isEmpty() )
-                tag = null;
+            stack.shrink(1);
+            cleared.setCount(1);
 
-            if ( stack.getCount() == 1 ) {
-                stack.setTagCompound(tag);
-            } else {
-                ItemStack newStack = new ItemStack(this, 1);
-                newStack.setTagCompound(tag);
-                stack.shrink(1);
-                if ( !player.addItemStackToInventory(newStack) )
-                    CoreUtils.dropItemStackIntoWorldWithVelocity(newStack, world, player.getPositionVector());
-            }
+            if ( !player.addItemStackToInventory(cleared) )
+                CoreUtils.dropItemStackIntoWorldWithVelocity(cleared, world, player.getPositionVector());
 
             return new ActionResult<>(EnumActionResult.SUCCESS, stack);
         }
@@ -217,31 +297,31 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard {
     public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand) {
         if ( !world.isRemote && player.isSneaking() && hand == EnumHand.MAIN_HAND ) {
             ItemStack stack = player.getHeldItemMainhand();
-            BlockPosDimension target = new BlockPosDimension(pos, world.provider.getDimension(), side);
-            NBTTagCompound tag = stack.getTagCompound();
-            if ( tag == null )
-                tag = new NBTTagCompound();
-            else if ( tag.getBoolean("Locked") )
-                return EnumActionResult.PASS;
-            else if ( stack.getCount() > 1 )
-                tag = tag.copy();
+            if ( !isLocked(stack) ) {
+                BlockPosDimension target = new BlockPosDimension(pos, world.provider.getDimension(), side);
+                NBTTagCompound tag = stack.getTagCompound();
+                if ( tag == null )
+                    tag = new NBTTagCompound();
+                else if ( stack.getCount() > 1 )
+                    tag = tag.copy();
 
-            target.writeToTag(tag);
+                target.writeToTag(tag);
 
-            if ( stack.getCount() == 1 ) {
-                stack.setTagCompound(tag);
-            } else {
-                ItemStack newStack = new ItemStack(this, 1);
-                newStack.setTagCompound(tag);
-                stack.shrink(1);
-                if ( !player.addItemStackToInventory(newStack) )
-                    CoreUtils.dropItemStackIntoWorldWithVelocity(newStack, world, player.getPositionVector());
+                if ( stack.getCount() == 1 ) {
+                    stack.setTagCompound(tag);
+                } else {
+                    ItemStack newStack = new ItemStack(this, 1);
+                    newStack.setTagCompound(tag);
+                    stack.shrink(1);
+                    if ( !player.addItemStackToInventory(newStack) )
+                        CoreUtils.dropItemStackIntoWorldWithVelocity(newStack, world, player.getPositionVector());
+                }
+
+                if ( player instanceof EntityPlayerMP )
+                    ModAdvancements.SET_POSITIONAL_CARD.trigger((EntityPlayerMP) player);
+
+                return EnumActionResult.SUCCESS;
             }
-
-            if ( player instanceof EntityPlayerMP )
-                ModAdvancements.SET_POSITIONAL_CARD.trigger((EntityPlayerMP) player);
-
-            return EnumActionResult.SUCCESS;
         }
 
         return super.onItemUseFirst(player, world, pos, side, hitX, hitY, hitZ, hand);

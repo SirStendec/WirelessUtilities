@@ -2,13 +2,24 @@ package com.lordmau5.wirelessutils.entity.pearl;
 
 import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
 import com.lordmau5.wirelessutils.render.RenderPearl;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockFire;
+import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
@@ -42,6 +53,11 @@ public class EntityQuenchedPearl extends EntityBaseThrowable {
     }
 
     @Override
+    public boolean shouldHitLiquids() {
+        return true;
+    }
+
+    @Override
     public void onUpdate() {
         super.onUpdate();
 
@@ -51,8 +67,100 @@ public class EntityQuenchedPearl extends EntityBaseThrowable {
 
     @Override
     protected void onImpact(RayTraceResult result) {
-        if ( !world.isRemote ) {
-            dropItemWithMeta(ModItems.itemQuenchedPearl, 1);
+        final int maxRange = Math.max(ModConfig.items.quenchedPearl.extinguishFire, ModConfig.items.quenchedPearl.quenchLava);
+        Iterable<BlockPos.MutableBlockPos> positions = maxRange == 0 ? null : BlockPos.getAllInBoxMutable(
+                (int) result.hitVec.x - maxRange, (int) result.hitVec.y - maxRange, (int) result.hitVec.z - maxRange,
+                (int) result.hitVec.x + maxRange, (int) result.hitVec.y + maxRange, (int) result.hitVec.z + maxRange
+        );
+
+        if ( world.isRemote && positions != null ) {
+            final int hitX = (int) result.hitVec.x;
+            final int hitY = (int) result.hitVec.y;
+            final int hitZ = (int) result.hitVec.z;
+
+            playSound(SoundEvents.ENTITY_GENERIC_SPLASH, 0.4F, 2.0F + world.rand.nextFloat() * 0.4F);
+
+            for (BlockPos.MutableBlockPos pos : positions) {
+                if ( pos.distanceSq(result.hitVec.x, result.hitVec.y, result.hitVec.z) <= 64D ) {
+                    final int x = pos.getX();
+                    final int y = pos.getY();
+                    final int z = pos.getZ();
+
+                    world.spawnParticle(
+                            EnumParticleTypes.WATER_SPLASH,
+                            x, y, z,
+                            x > hitX ? 10F : x == hitX ? 0F : -10F,
+                            y > hitY ? 10F : y == hitY ? 0F : -10F,
+                            z > hitZ ? 10F : z == hitZ ? 0F : -10F
+                    );
+                }
+            }
+        } else if ( !world.isRemote ) {
+            boolean consumed = ModConfig.items.quenchedPearl.alwaysConsumed;
+
+            if ( positions != null ) {
+                final double fireRange = Math.pow(ModConfig.items.quenchedPearl.extinguishFire, 2);
+                final double lavaRange = Math.pow(ModConfig.items.quenchedPearl.quenchLava, 2);
+                final double maxDistance = Math.max(fireRange, lavaRange);
+
+                for (BlockPos.MutableBlockPos pos : positions) {
+                    if ( !world.isBlockLoaded(pos) )
+                        continue;
+
+                    final double distance = pos.distanceSq(result.hitVec.x, result.hitVec.y, result.hitVec.z);
+                    if ( distance > maxDistance )
+                        continue;
+
+                    IBlockState state = world.getBlockState(pos);
+                    Block block = state.getBlock();
+
+                    boolean sound = false;
+
+                    if ( distance <= fireRange && block instanceof BlockFire ) {
+                        // Extinguish Fire
+                        world.setBlockToAir(pos);
+                        sound = true;
+
+                        if ( ModConfig.items.quenchedPearl.fireConsumes )
+                            consumed = true;
+
+                    } else if ( distance <= lavaRange && block instanceof BlockLiquid && state.getMaterial() == Material.LAVA ) {
+                        // Quench Lava
+                        boolean exposed = false;
+
+                        BlockPos.PooledMutableBlockPos facing = BlockPos.PooledMutableBlockPos.retain();
+                        for (EnumFacing face : EnumFacing.VALUES) {
+                            facing.setPos(pos).move(face);
+                            if ( !world.getBlockState(facing).getMaterial().blocksMovement() ) {
+                                exposed = true;
+                                break;
+                            }
+                        }
+                        facing.release();
+
+                        if ( exposed ) {
+                            final int level = state.getValue(BlockLiquid.LEVEL);
+                            if ( level == 0 )
+                                world.setBlockState(pos, Blocks.OBSIDIAN.getDefaultState());
+                            else if ( level < 4 )
+                                world.setBlockState(pos, Blocks.COBBLESTONE.getDefaultState());
+                            else
+                                world.setBlockToAir(pos);
+
+                            sound = true;
+                            if ( ModConfig.items.quenchedPearl.lavaConsumes )
+                                consumed = true;
+                        }
+                    }
+
+                    if ( sound )
+                        world.playSound(null, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
+                }
+            }
+
+            if ( !consumed )
+                dropItemWithMeta(ModItems.itemQuenchedPearl, 1);
+
             setDead();
         }
     }

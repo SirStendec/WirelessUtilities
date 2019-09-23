@@ -47,6 +47,14 @@ public class ItemBase extends Item implements IExplainableItem {
         return tag != null && tag.getBoolean("Locked");
     }
 
+    @Nullable
+    public String getCustomDisplayName(@Nonnull ItemStack stack) {
+        if ( stack.hasDisplayName() )
+            return stack.getDisplayName();
+
+        return null;
+    }
+
     @Override
     public String getItemStackDisplayName(@Nonnull ItemStack stack) {
         String out = super.getItemStackDisplayName(stack);

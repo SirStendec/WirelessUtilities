@@ -21,6 +21,7 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 
@@ -105,6 +106,19 @@ public class ColorHandler {
     public static class RedstoneWire {
         public static final IBlockColor handleBlockColor = (IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex) ->
                 BlockRedstoneWire.colorMultiplier(state.getValue(BlockRedstoneWire.POWER));
+    }
+
+    public static class AreaCard {
+        public static final IItemColor handleItemColor = (@Nonnull ItemStack stack, int tintIndex) -> {
+            final NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("WUTint:" + tintIndex, Constants.NBT.TAG_INT) )
+                return tag.getInteger("WUTint:" + tintIndex);
+
+            if ( tintIndex == 0 || tintIndex == 1 )
+                return 0xFFFFFF;
+
+            return Level.fromItemStack(stack).color;
+        };
     }
 
     public static class Augment {

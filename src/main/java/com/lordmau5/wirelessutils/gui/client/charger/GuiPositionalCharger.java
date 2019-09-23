@@ -41,7 +41,7 @@ public class GuiPositionalCharger extends BaseGuiPositional {
 
         addElement(new ElementEnergyStored(this, 17, 23, charger.getEnergyStorage()).setInfinite(charger.isCreative()));
         if ( ModConfig.common.craftingGUI )
-            addElement(new ElementCraftingProgress(this, 33, 20, charger));
+            addElement(new ElementCraftingProgress(this, 33, 23, charger));
 
         addElement(new ElementAreaButton(this, charger, 152, 74));
         addElement(new ElementModeButton(this, charger, 134, 74));

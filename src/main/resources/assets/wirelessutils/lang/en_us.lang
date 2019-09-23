@@ -111,12 +111,36 @@ item.wirelessutils.positional_card.invalid.unset=No target has been set.
 item.wirelessutils.relative_positional_card.name=Relative Positional Card
 item.wirelessutils.relative_positional_card.info.0=You can Sneak-Use this item on a block
 item.wirelessutils.relative_positional_card.info.1=to set an origin, and then Sneak-Use
-item.wirelessutils.relative_positional_card.info.2=this item on another block to store
-item.wirelessutils.relative_positional_card.info.3=the relative position.
+item.wirelessutils.relative_positional_card.info.2=it on another block to store the
+item.wirelessutils.relative_positional_card.info.3=relative position, or just Use it to
+item.wirelessutils.relative_positional_card.info.4=open its GUI to enter numbers directly.
 item.wirelessutils.relative_positional_card.highlight=%s (%s)
 item.wirelessutils.relative_positional_card.distance=Distance: %s
 item.wirelessutils.relative_positional_card.invalid.range=The target location is not within range.
 item.wirelessutils.relative_positional_card.invalid.unset=No target has been set.
+
+item.wirelessutils.area_card.name=Absolute Area Card
+item.wirelessutils.area_card.info.0=Sneak-Use this item on a block to
+item.wirelessutils.area_card.info.1=store its anchor position and side,
+item.wirelessutils.area_card.info.2=then use it to open a GUI to set
+item.wirelessutils.area_card.info.3=its range.
+item.wirelessutils.area_card.highlight=%s (%s)
+item.wirelessutils.area_card.distance=Distance: %s
+item.wirelessutils.area_card.area=Area: %sh x %sw x %sl
+item.wirelessutils.area_card.invalid.range=The target location is not within range.
+item.wirelessutils.area_card.invalid.unset=No target has been set.
+
+item.wirelessutils.relative_area_card.name=Relative Area Card
+item.wirelessutils.relative_area_card.info.0=You can Sneak-Use this item on a block
+item.wirelessutils.relative_area_card.info.1=to set an origin, and then Sneak-Use
+item.wirelessutils.relative_area_card.info.2=it on another block to store the
+item.wirelessutils.relative_area_card.info.3=relative position, or just Use it to
+item.wirelessutils.relative_area_card.info.4=open its GUI to enter numbers directly.
+item.wirelessutils.relative_area_card.highlight=%s (%s)
+item.wirelessutils.relative_area_card.distance=Distance: %s
+item.wirelessutils.relative_area_card.area=Area: %sh x %sw x %sl
+item.wirelessutils.relative_area_card.invalid.range=The target location is not within range.
+item.wirelessutils.relative_area_card.invalid.unset=No target has been set.
 
 item.wirelessutils.fluxed_pearl.name=Fluxed Pearl
 item.wirelessutils.fluxed_pearl.weather.0=The pearl seems to be reacting
@@ -728,6 +752,12 @@ info.wirelessutils.ae2.channels=%d of %d Channels
 
 chat.wirelessutils.upgrade.success=Installed %s into %s.
 chat.wirelessutils.upgrade.failed=Could not install %s into %s.
+
+commands.wirelessutils.profile.usage=/wu_profile <start/stop>
+commands.wirelessutils.profile.already_started=The Wireless Utilities profiler is already running.
+commands.wirelessutils.profile.start=Started the Wireless Utilities profiler.
+commands.wirelessutils.profile.not_started=The Wireless Utilities profiler is not running.
+commands.wirelessutils.profile.stop=Stopped the Wireless Utilities profiler after %s seconds (%s ticks).
 
 commands.wirelessutils.voidgen.usage=/wu_voidgen <entity-id> [crystallized:true/false] [entityTag]
 commands.wirelessutils.voidgen.tag_error=Entity tag parsing failed: %s

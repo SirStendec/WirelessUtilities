@@ -80,6 +80,9 @@ public class TextHelpers {
     }
 
     public static ITextComponent getComponent(String value) {
+        if ( value == null )
+            value = "null";
+
         return new TextComponentString(value).setStyle(WHITE);
     }
 

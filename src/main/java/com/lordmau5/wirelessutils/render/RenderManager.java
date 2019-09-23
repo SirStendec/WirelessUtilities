@@ -3,7 +3,6 @@ package com.lordmau5.wirelessutils.render;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.utils.constants.NiceColors;
 import com.lordmau5.wirelessutils.utils.location.BlockArea;
-import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.Minecraft;
@@ -15,12 +14,9 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -83,12 +79,15 @@ public class RenderManager {
     }
 
     public void cleanAreas() {
-        long now = Minecraft.getSystemTime();
+        final long now = Minecraft.getSystemTime();
+        if ( now - lastClean < 5000 )
+            return;
+
         lastClean = now;
         if ( areaTouch == null || areaTouch.isEmpty() || minecraft.isGamePaused() )
             return;
 
-        Set<Map.Entry<Integer, Long>> entries = new HashSet<>(areaTouch.entrySet());
+        final Set<Map.Entry<Integer, Long>> entries = new HashSet<>(areaTouch.entrySet());
         for (Map.Entry<Integer, Long> entry : entries) {
             if ( now - entry.getValue() > 5000 )
                 removeArea(entry.getKey());
@@ -204,7 +203,8 @@ public class RenderManager {
         if ( !heldAreas )
             return;
 
-        int idx = event.getHand() == EnumHand.MAIN_HAND ? 0 : 1;
+        final EnumHand hand = event.getHand();
+        int idx = hand == EnumHand.MAIN_HAND ? 0 : 1;
 
         ItemStack newStack = event.getItemStack();
         if ( newStack == heldItemStack[idx] )
@@ -221,32 +221,11 @@ public class RenderManager {
 
         Item item = newStack.getItem();
         if ( item instanceof ItemBasePositionalCard && newStack.hasTagCompound() ) {
-            NBTTagCompound tag = newStack.getTagCompound();
-            if ( tag == null )
+            BlockArea area = ((ItemBasePositionalCard) item).getHandRenderArea(newStack, minecraft.player, hand, NiceColors.HANDY_COLORS[idx]);
+            if ( area == null )
                 return;
 
-            if ( item == ModItems.itemAbsolutePositionalCard ) {
-                BlockPosDimension target = BlockPosDimension.fromTag(tag);
-                if ( target != null )
-                    heldID[idx] = addArea(new BlockArea(target, NiceColors.HANDY_COLORS[idx], newStack.hasDisplayName() ? newStack.getDisplayName() : null), false);
-
-            } else if ( item == ModItems.itemRelativePositionalCard ) {
-                byte stage = tag.getByte("Stage");
-                BlockPosDimension origin = new BlockPosDimension(
-                        BlockPos.fromLong(tag.getLong("Origin")),
-                        tag.getInteger("Dimension")
-                );
-                if ( origin != null ) {
-                    if ( stage == 1 ) {
-                        heldID[idx] = addArea(new BlockArea(origin, NiceColors.HANDY_COLORS[idx], newStack.hasDisplayName() ? newStack.getDisplayName() : null), false);
-                    } else if ( stage == 2 ) {
-                        Vec3d offset = ModItems.itemRelativePositionalCard.getVector(newStack);
-                        BlockPosDimension target = ModItems.itemRelativePositionalCard.getTarget(newStack, origin);
-                        if ( target != null )
-                            heldID[idx] = addArea(new BlockArea(target, NiceColors.HANDY_COLORS[idx], newStack.hasDisplayName() ? newStack.getDisplayName() : null, offset), false);
-                    }
-                }
-            }
+            heldID[idx] = addArea(area, false);
         }
     }
 
@@ -256,29 +235,25 @@ public class RenderManager {
         if ( areas == null || areas.isEmpty() )
             return;
 
-        EntityPlayer player = minecraft.player;
-        int dimension = player.world.provider.getDimension();
+        cleanAreas();
 
-        Set<BlockArea> dimensionAreas = areas.get(dimension);
+        final EntityPlayer player = minecraft.player;
+        final int dimension = player.world.provider.getDimension();
+        final Set<BlockArea> dimensionAreas = areas.get(dimension);
         if ( dimensionAreas == null || areas.isEmpty() )
             return;
 
-        boolean disableDepth = ModItems.itemGlasses.isPlayerWearing(player);
-
-        long now = Minecraft.getSystemTime();
-        if ( now - lastClean > 5000 )
-            cleanAreas();
-
-        float ticks = event.getPartialTicks();
+        final boolean disableDepth = ModItems.itemGlasses.isPlayerWearing(player);
+        final float ticks = event.getPartialTicks();
 
         GlStateManager.pushMatrix();
         GlStateManager.pushAttrib();
 
         // Calculate the player's exact position so that we can negate it with a transform.
         // This isn't as precise as we'd like, but it's what everyone does, so
-        double x = player.lastTickPosX + (player.posX - player.lastTickPosX) * ticks;
-        double y = player.lastTickPosY + (player.posY - player.lastTickPosY) * ticks;
-        double z = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * ticks;
+        final double x = player.lastTickPosX + (player.posX - player.lastTickPosX) * ticks;
+        final double y = player.lastTickPosY + (player.posY - player.lastTickPosY) * ticks;
+        final double z = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * ticks;
 
         //GlStateManager.translate(-x, -y, -z);
 

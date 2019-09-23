@@ -7,14 +7,15 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface IUpdateableItem {
 
     void handleUpdatePacket(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, int slot, @Nonnull ItemStack newStack, @Nonnull PacketUpdateItem packet);
 
-    static void copyOrRemoveNBTKeys(@Nonnull NBTTagCompound source, @Nonnull NBTTagCompound dest, boolean copyTags, String... keys) {
+    static void copyOrRemoveNBTKeys(@Nullable NBTTagCompound source, @Nonnull NBTTagCompound dest, boolean copyTags, String... keys) {
         for (String key : keys) {
-            if ( source.hasKey(key) ) {
+            if ( source != null && source.hasKey(key) ) {
                 NBTBase tag = source.getTag(key);
                 if ( copyTags )
                     tag = tag.copy();

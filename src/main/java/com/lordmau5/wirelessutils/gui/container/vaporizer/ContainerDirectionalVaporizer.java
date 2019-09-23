@@ -9,4 +9,5 @@ public class ContainerDirectionalVaporizer extends ContainerBaseVaporizer {
         super(inventory, vaporizer);
     }
 
+
 }

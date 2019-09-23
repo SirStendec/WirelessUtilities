@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.tile.base;
 
+import com.lordmau5.wirelessutils.WirelessUtils;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.MathHelper;
 
@@ -221,9 +222,11 @@ public interface ISidedTransfer {
     void transferSide(TransferSide side);
 
     default void executeSidedTransfer() {
+        WirelessUtils.profiler.startSection("sided_transfer");
         for (TransferSide side : TransferSide.VALUES) {
             if ( getSideTransferMode(side).active )
                 transferSide(side);
         }
+        WirelessUtils.profiler.endSection();
     }
 }

@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.direction
 import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics2Plugin;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.TileAENetworkBase;
+import com.lordmau5.wirelessutils.tile.base.IConfigurableRange;
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
 import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
@@ -30,7 +31,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Machine(name = "directional_ae_network")
-public class TileDirectionalAENetwork extends TileAENetworkBase implements IDirectionalMachine {
+public class TileDirectionalAENetwork extends TileAENetworkBase implements
+        IConfigurableRange, IDirectionalMachine {
 
     private Tuple<BlockPosDimension, BlockPosDimension> corners;
 
@@ -185,6 +187,8 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements IDire
             return;
 
         clearRenderAreas();
+        EventDispatcher.BREAK_BLOCK.removeListener(this);
+        EventDispatcher.PLACE_BLOCK.removeListener(this);
 
         if ( validTargets == null )
             validTargets = new ArrayList<>();
@@ -211,18 +215,17 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements IDire
 
         setEnergyCost(IDLE_ENERGY_COST);
 
-        for (BlockPos target : BlockPos.getAllInBox(corners.getFirst(), corners.getSecond())) {
-            if ( target.equals(pos) )
+        for (BlockPosDimension target : BlockPosDimension.getAllInBox(corners.getFirst(), corners.getSecond(), dimension, null)) {
+            if ( target.equalsIgnoreFacing(pos) )
                 continue;
 
-            BlockPosDimension targetPos = new BlockPosDimension(target, dimension, facing);
-            validTargets.add(targetPos);
+            validTargets.add(target);
 
             if ( !world.isRemote ) {
-                cachePlacedPosition(targetPos);
+                cachePlacedPosition(target);
 
-                EventDispatcher.PLACE_BLOCK.addListener(targetPos, this);
-                EventDispatcher.BREAK_BLOCK.addListener(targetPos, this);
+                EventDispatcher.PLACE_BLOCK.addListener(target, this);
+                EventDispatcher.BREAK_BLOCK.addListener(target, this);
             }
         }
 
@@ -285,6 +288,15 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements IDire
     }
 
     /* Range */
+
+    public boolean isFacingY() {
+        return getEnumFacing().getAxis() == EnumFacing.Axis.Y;
+    }
+
+    public void saveRanges() {
+        if ( world != null && world.isRemote )
+            sendModePacket();
+    }
 
     public int getRangeHeight() {
         return rangeHeight;

@@ -111,7 +111,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         IUnlockableSlots, IRoundRobinMachine, ITickable, ISidedTransfer, ISidedTransferAugmentable,
         IWorkProvider<TileBaseDesublimator.DesublimatorTarget> {
 
-    protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
+    //protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
     protected ItemHandlerProxy capabilityHandler;
 
@@ -823,25 +823,16 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     public abstract int getEnergyCost(double distance, boolean interdimensional);
 
-    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
-        if ( validTargets == null ) {
-            tickActive();
-            calculateTargets();
-        }
-
-        if ( world == null || !world.isRemote ) {
-            validTargetsPerTick = 0;
-            maxEnergyPerTick = 0;
-        }
-
-        return validTargets;
+    public void onTargetCacheRebuild() {
+        validTargetsPerTick = 0;
+        maxEnergyPerTick = 0;
     }
 
     @Override
     public void onInactive() {
         super.onInactive();
+        onTargetCacheRebuild();
         worker.clearTargetCache();
-        validTargets = null;
     }
 
     public boolean shouldProcessBlocks() {
@@ -1541,9 +1532,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     /* Effects */
 
     @Override
-    public void performEffect(@Nonnull DesublimatorTarget target, @Nonnull World world, boolean isEntity) {
-        if ( world.isRemote || world != this.world || pos == null || !ModConfig.rendering.enableWorkParticles )
-            return;
+    public boolean performEffect(@Nonnull DesublimatorTarget target, @Nonnull World world, boolean isEntity) {
+        if ( world.isRemote || world != this.world || pos == null || !ModConfig.rendering.particlesEnabled )
+            return false;
 
         int color = 0x2c6886;
         float colorR = (color >> 16 & 255) / 255.0F;
@@ -1567,10 +1558,13 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                     3, colorR, colorG, colorB
             );
         else
-            return;
+            return false;
 
-        if ( packet != null )
-            packet.sendToNearbyWorkers(this);
+        if ( packet == null )
+            return false;
+
+        packet.sendToNearbyWorkers(this);
+        return true;
     }
 
     /* Energy */
@@ -1769,6 +1763,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     @Override
     public void update() {
+        WirelessUtils.profiler.startSection("desublimator:update"); // 1 - update
         super.update();
 
         worker.tickDown();
@@ -1778,6 +1773,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             if ( remainingBudget < 0 )
                 remainingBudget = 0;
             remainingBudget += budgetPerTick;
+            if ( remainingBudget < 0 )
+                remainingBudget = Integer.MAX_VALUE;
         }
 
         if ( gatherTick > 0 )
@@ -1812,6 +1809,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             setActive(false);
             updateTrackers();
             saveEnergyHistory(energyPerTick);
+            WirelessUtils.profiler.endSection(); // 1 - update
             return;
         }
 
@@ -1823,6 +1821,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
         updateTrackers();
         saveEnergyHistory(energyPerTick);
+        WirelessUtils.profiler.endSection(); // 1 - update
     }
 
     /* Capabilities */
@@ -2091,7 +2090,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     /* Target Info */
 
     public static boolean isBlacklisted(IBlockState state) {
-        if ( state == null )
+        if ( state == null || ModConfig.desublimators.blockBlacklist.length == 0 )
             return false;
 
         Block block = state.getBlock();

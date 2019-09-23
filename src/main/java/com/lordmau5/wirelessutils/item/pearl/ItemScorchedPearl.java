@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.item.pearl;
 
+import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.entity.pearl.EntityScorchedPearl;
 import com.lordmau5.wirelessutils.item.base.IDimensionallyStableItem;
 import com.lordmau5.wirelessutils.item.base.ItemBasePearl;
@@ -31,9 +32,12 @@ public class ItemScorchedPearl extends ItemBasePearl implements IDimensionallySt
     }
 
     @Override
-    public boolean onEntityItemUpdate(EntityItem entityItem) {
-        if ( !entityItem.isInWater() )
-            entityItem.setFire(1);
+    public boolean onEntityItemUpdate(EntityItem entity) {
+        if ( entity instanceof EntityItemEnhanced )
+            ((EntityItemEnhanced) entity).setBurnWhenImmune(false);
+
+        if ( !entity.isInWater() )
+            entity.setFire(1);
         return false;
     }
 

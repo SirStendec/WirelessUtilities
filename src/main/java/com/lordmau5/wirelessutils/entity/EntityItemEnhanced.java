@@ -15,9 +15,12 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ITeleporter;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class EntityItemEnhanced extends EntityItem {
+    protected boolean burnWhenImmune = false;
+
     public EntityItemEnhanced(World world) {
         super(world);
         isImmuneToFire = true;
@@ -31,6 +34,29 @@ public class EntityItemEnhanced extends EntityItem {
     public EntityItemEnhanced(EntityItem toConvert) {
         this(toConvert.getEntityWorld());
         readFromNBT(toConvert.writeToNBT(new NBTTagCompound()));
+    }
+
+    @Nonnull
+    public EntityItemEnhanced setBurnWhenImmune(boolean burn) {
+        burnWhenImmune = burn;
+        return this;
+    }
+
+    public boolean getBurnWhenImmune() {
+        return burnWhenImmune;
+    }
+
+    @Override
+    public boolean isBurning() {
+        if ( burnWhenImmune ) {
+            final boolean immune = isImmuneToFire;
+            isImmuneToFire = false;
+            final boolean out = super.isBurning();
+            isImmuneToFire = immune;
+            return out;
+        }
+
+        return super.isBurning();
     }
 
     @Override

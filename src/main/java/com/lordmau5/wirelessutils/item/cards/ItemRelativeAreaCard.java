@@ -1,17 +1,18 @@
-package com.lordmau5.wirelessutils.item;
+package com.lordmau5.wirelessutils.item.cards;
 
 import cofh.core.util.CoreUtils;
 import com.lordmau5.wirelessutils.WirelessUtils;
-import com.lordmau5.wirelessutils.gui.client.item.GuiRelativePositionalCard;
-import com.lordmau5.wirelessutils.gui.container.items.ContainerRelativePositionalCard;
+import com.lordmau5.wirelessutils.gui.client.item.GuiRelativeAreaCard;
+import com.lordmau5.wirelessutils.gui.container.items.ContainerRelativeAreaCard;
 import com.lordmau5.wirelessutils.item.base.IGuiItem;
 import com.lordmau5.wirelessutils.item.base.IUpdateableItem;
-import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
+import com.lordmau5.wirelessutils.item.base.ItemBaseAreaCard;
 import com.lordmau5.wirelessutils.packet.PacketUpdateItem;
-import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
+import com.lordmau5.wirelessutils.utils.location.BlockArea;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -22,12 +23,14 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -35,58 +38,70 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemRelativePositionalCard extends ItemBasePositionalCard implements IUpdateableItem, IGuiItem {
+public class ItemRelativeAreaCard extends ItemBaseAreaCard implements IGuiItem {
 
-    public ItemRelativePositionalCard() {
-        setName("relative_positional_card");
+    public ItemRelativeAreaCard() {
+        super();
+        setName("relative_area_card");
     }
 
-    public void handleUpdatePacket(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, int slot, @Nonnull ItemStack newStack, @Nonnull PacketUpdateItem packet) {
-        if ( stack.isEmpty() || newStack.isEmpty() || stack.getItem() != newStack.getItem() )
-            return;
-
+    @Nonnull
+    @Override
+    public ItemStack handleUpdatePacketDelegate(@Nonnull final ItemStack stack, @Nonnull final EntityPlayer player, final int slot, @Nonnull final ItemStack newStack, @Nonnull final PacketUpdateItem packet) {
         NBTTagCompound tag = stack.getTagCompound();
         if ( tag == null )
             tag = new NBTTagCompound();
-        else if ( tag.getBoolean("Locked") )
-            return;
 
-        NBTTagCompound newTag = newStack.getTagCompound();
-        if ( newTag != null )
-            IUpdateableItem.copyOrRemoveNBTKeys(
-                    newTag, tag, false,
-                    "Origin", "Dimension",
-                    "X", "Y", "Z", "Facing",
-                    "Stage", "Range"
-            );
+        final NBTTagCompound newTag = newStack.getTagCompound();
+        IUpdateableItem.copyOrRemoveNBTKeys(
+                newTag, tag, false,
+                "Origin", "Dimension",
+                "X", "Y", "Z", "Facing",
+                "Stage"
+        );
 
         if ( tag.getSize() == 0 )
             tag = null;
+
         stack.setTagCompound(tag);
-        player.inventory.setInventorySlotContents(slot, stack);
+        return stack;
     }
 
-    @Override
     public boolean isCardConfigured(@Nonnull ItemStack stack) {
-        NBTTagCompound tag = stack.getTagCompound();
+        final NBTTagCompound tag = stack.getTagCompound();
         if ( tag == null )
             return false;
 
         return tag.getInteger("X") != 0 || tag.getInteger("Y") != 0 || tag.getInteger("Z") != 0;
     }
 
-    @Override
+    @Nullable
+    public EnumFacing getFacing(@Nonnull ItemStack stack) {
+        EnumFacing facing = null;
+        if ( stack.getItem() == this ) {
+            final NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("Facing", Constants.NBT.TAG_BYTE) )
+                facing = EnumFacing.byIndex(tag.getByte("Facing"));
+        }
+
+        if ( facing == null && !ModConfig.items.relativeCards.allowNullFacing )
+            return EnumFacing.NORTH;
+
+        return facing;
+    }
+
+    @Nullable
     public BlockPosDimension getTarget(@Nonnull ItemStack stack, @Nonnull BlockPosDimension origin) {
         if ( !isCardConfigured(stack) )
             return null;
 
-        NBTTagCompound tag = stack.getTagCompound();
-        BlockPosDimension out = new BlockPosDimension(
+        final NBTTagCompound tag = stack.getTagCompound();
+        final BlockPosDimension out = new BlockPosDimension(
                 origin.getX() + tag.getInteger("X"),
                 origin.getY() + tag.getInteger("Y"),
                 origin.getZ() + tag.getInteger("Z"),
                 origin.getDimension(),
-                tag.hasKey("Facing") ? EnumFacing.byIndex(tag.getByte("Facing")) : null
+                getFacing(stack)
         );
 
         if ( origin.isInsideWorld() && !out.isInsideWorld() )
@@ -95,15 +110,51 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard implement
         return out;
     }
 
+    @Nullable
     public Vec3d getVector(@Nonnull ItemStack stack) {
         if ( !isCardConfigured(stack) )
             return null;
 
-        NBTTagCompound tag = stack.getTagCompound();
+        final NBTTagCompound tag = stack.getTagCompound();
         return new Vec3d(
                 -tag.getInteger("X"),
                 -tag.getInteger("Y"),
                 -tag.getInteger("Z")
+        );
+    }
+
+    @Nullable
+    public BlockArea getHandRenderArea(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, @Nullable EnumHand hand, int color) {
+        final NBTTagCompound tag = stack.getTagCompound();
+        if ( tag == null || !tag.hasKey("Origin", Constants.NBT.TAG_LONG) )
+            return null;
+
+        final BlockPosDimension origin = new BlockPosDimension(
+                BlockPos.fromLong(tag.getLong("Origin")),
+                tag.getInteger("Dimension")
+        );
+
+        final byte stage = tag.getByte("Stage");
+        if ( stage == 1 )
+            return new BlockArea(origin, color, getCustomDisplayName(stack), null);
+
+        if ( stage != 2 )
+            return null;
+
+        final Vec3d vector = getVector(stack);
+        final BlockPosDimension target = getTarget(stack, origin);
+        if ( target == null )
+            return null;
+
+        Tuple<BlockPosDimension, BlockPosDimension> corners = getCorners(stack, target);
+        if ( corners == null )
+            return null;
+
+        return new BlockArea(
+                corners.getFirst(), corners.getSecond(),
+                color,
+                getCustomDisplayName(stack),
+                vector
         );
     }
 
@@ -112,37 +163,38 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard implement
         if ( stack.getItem() != this || container == null )
             return false;
 
-        NBTTagCompound tag = stack.getTagCompound();
+        final NBTTagCompound tag = stack.getTagCompound();
         if ( tag == null )
             return false;
 
-        BlockPos pos = container.getPos();
-        World world = container.getWorld();
+        final BlockPos pos = container.getPos();
+        final World world = container.getWorld();
         if ( world == null || pos == null )
             return false;
 
         boolean updated = false;
+        final int dimension = world.provider.getDimension();
+        final long origin = pos.toLong();
 
-        int dimension = world.provider.getDimension();
         if ( dimension != tag.getInteger("Dimension") ) {
             tag.setInteger("Dimension", dimension);
             updated = true;
         }
 
-        long origin = pos.toLong();
         if ( origin != tag.getLong("Origin") ) {
             tag.setLong("Origin", origin);
             updated = true;
         }
 
-        return updated;
+        return super.updateCard(stack, container) || updated;
     }
 
     @Override
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
-        if ( isCardConfigured(stack) ) {
-            NBTTagCompound tag = stack.getTagCompound();
+        super.addInformation(stack, worldIn, tooltip, flagIn);
 
+        if ( isCardConfigured(stack) ) {
+            final NBTTagCompound tag = stack.getTagCompound();
             tooltip.add(new TextComponentTranslation(
                     "info." + WirelessUtils.MODID + ".blockpos.basic",
                     TextHelpers.formatRelative(tag.getInteger("X")),
@@ -150,14 +202,14 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard implement
                     TextHelpers.formatRelative(tag.getInteger("Z"))
             ).setStyle(TextHelpers.GRAY).getFormattedText());
 
-            if ( tag.hasKey("Facing") )
-                tooltip.add(new TextComponentTranslation(
-                        "info." + WirelessUtils.MODID + ".blockpos.side",
-                        TextHelpers.getComponent(EnumFacing.byIndex(tag.getByte("Facing")).getName())
-                ).setStyle(TextHelpers.GRAY).getFormattedText());
+            EnumFacing facing = getFacing(stack);
+            tooltip.add(new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".blockpos.side",
+                    TextHelpers.getComponent(facing == null ? null : facing.getName())
+            ).setStyle(TextHelpers.GRAY).getFormattedText());
         }
 
-        super.addInformation(stack, worldIn, tooltip, flagIn);
+        addTooltipRangeInformation(stack, worldIn, tooltip, flagIn);
     }
 
     @Override
@@ -194,11 +246,11 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard implement
     }
 
     public Object getClientGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
-        return new GuiRelativePositionalCard(new ContainerRelativePositionalCard(stack, slot, player.inventory));
+        return new GuiRelativeAreaCard(new ContainerRelativeAreaCard(stack, slot, player.inventory));
     }
 
     public Object getServerGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
-        return new ContainerRelativePositionalCard(stack, slot, player.inventory);
+        return new ContainerRelativeAreaCard(stack, slot, player.inventory);
     }
 
     @Override
@@ -218,13 +270,6 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard implement
             if ( stage == 0 ) {
                 tag.setLong("Origin", target.toLong());
                 tag.setInteger("Dimension", target.getDimension());
-
-                TileEntity tile = world.getTileEntity(pos);
-                if ( tile instanceof IPositionalMachine ) {
-                    IPositionalMachine machine = (IPositionalMachine) tile;
-                    if ( !machine.isInterdimensional() )
-                        tag.setInteger("Range", machine.getRange());
-                }
 
                 tag.setByte("Stage", (byte) 1);
                 tag.removeTag("X");
@@ -265,5 +310,33 @@ public class ItemRelativePositionalCard extends ItemBasePositionalCard implement
         }
 
         return super.onItemUseFirst(player, world, pos, side, hitX, hitY, hitZ, hand);
+    }
+
+    @Nonnull
+    @Override
+    public ItemStack clearItem(@Nonnull ItemStack stack, @Nullable EntityPlayer player) {
+        // The super method already creates a clone for us, so we don't have to worry
+        // about that.
+        stack = super.clearItem(stack, player);
+        if ( stack.isEmpty() )
+            return stack;
+
+        final NBTTagCompound tag = stack.getTagCompound();
+        if ( tag == null )
+            return stack;
+
+        tag.removeTag("Origin");
+        tag.removeTag("Dimension");
+        tag.removeTag("X");
+        tag.removeTag("Y");
+        tag.removeTag("Z");
+        tag.removeTag("Stage");
+        tag.removeTag("Facing");
+        tag.removeTag("Range");
+
+        if ( tag.isEmpty() )
+            stack.setTagCompound(null);
+
+        return stack;
     }
 }

@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.utils;
 
 import com.google.common.collect.MapMaker;
+import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -149,14 +150,18 @@ public class EventDispatcher<T extends Event> {
         if ( allListeners.isEmpty() || event == null )
             return;
 
+        WirelessUtils.profiler.startSection("event:" + event.getClass().getSimpleName());
+
         int dimension;
         long chunk;
 
         if ( event instanceof BlockEvent ) {
             BlockEvent be = (BlockEvent) event;
             World world = be.getWorld();
-            if ( world == null || world.provider == null )
+            if ( world == null || world.provider == null ) {
+                WirelessUtils.profiler.endSection();
                 return;
+            }
 
             dimension = world.provider.getDimension();
             BlockPos pos = be.getPos();
@@ -165,8 +170,10 @@ public class EventDispatcher<T extends Event> {
         } else if ( event instanceof ChunkEvent ) {
             ChunkEvent ce = (ChunkEvent) event;
             World world = ce.getWorld();
-            if ( world == null || world.provider == null )
+            if ( world == null || world.provider == null ) {
+                WirelessUtils.profiler.endSection();
                 return;
+            }
 
             dimension = world.provider.getDimension();
             Chunk chunkObj = ce.getChunk();
@@ -178,19 +185,27 @@ public class EventDispatcher<T extends Event> {
             dimension = world.provider.getDimension();
             chunk = 0;
 
-        } else
+        } else {
+            WirelessUtils.profiler.endSection();
             return;
+        }
 
         Map<Long, ConcurrentMap<IEventListener, IEventListener>> worldListeners = allListeners.get(dimension);
-        if ( worldListeners == null )
+        if ( worldListeners == null ) {
+            WirelessUtils.profiler.endSection();
             return;
+        }
 
         ConcurrentMap<IEventListener, IEventListener> listeners = worldListeners.get(chunk);
-        if ( listeners == null )
+        if ( listeners == null ) {
+            WirelessUtils.profiler.endSection();
             return;
+        }
 
         for (IEventListener listener : listeners.keySet())
             listener.handleEvent(event);
+
+        WirelessUtils.profiler.endSection();
     }
 
     public interface IEventListener {

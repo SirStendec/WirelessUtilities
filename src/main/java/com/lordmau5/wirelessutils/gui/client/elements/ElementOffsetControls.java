@@ -3,11 +3,9 @@ package com.lordmau5.wirelessutils.gui.client.elements;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
-import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
+import com.lordmau5.wirelessutils.tile.base.IConfigurableRange;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 
@@ -18,7 +16,7 @@ public class ElementOffsetControls extends ElementContainer {
     public static final String INTL_KEY = "btn." + WirelessUtils.MODID + ".offset.";
 
     private final BaseGuiContainer gui;
-    private final TileEntityBaseMachine machine;
+    private final IConfigurableRange config;
 
     private final ElementContainedButton decVert;
     private final ElementContainedButton incVert;
@@ -27,12 +25,12 @@ public class ElementOffsetControls extends ElementContainer {
     private final ElementContainedButton incHoriz;
 
 
-    public ElementOffsetControls(BaseGuiContainer gui, TileEntityBaseMachine machine, int posX, int posY) {
+    public ElementOffsetControls(BaseGuiContainer gui, IConfigurableRange config, int posX, int posY) {
         super(gui, posX, posY, 30, 30);
         this.gui = gui;
-        this.machine = machine;
+        this.config = config;
 
-        if ( !(machine instanceof IDirectionalMachine) ) {
+        if ( config == null ) {
             setEnabled(false);
             setVisible(false);
         }
@@ -54,17 +52,13 @@ public class ElementOffsetControls extends ElementContainer {
     public void drawForeground(int mouseX, int mouseY) {
         super.drawForeground(mouseX, mouseY);
 
-        if ( !(machine instanceof IDirectionalMachine) )
-            return;
-
-        IDirectionalMachine dir = (IDirectionalMachine) machine;
-        if ( dir.getRange() == 0 )
+        if ( config == null || config.getRange() == 0 )
             return;
 
         FontRenderer fontRenderer = gui.getFontRenderer();
 
-        fontRenderer.drawString(StringHelper.formatNumber(dir.getOffsetVertical()), posX - 22, posY + 4, 0);
-        fontRenderer.drawString(StringHelper.formatNumber(dir.getOffsetHorizontal()), posX - 22, posY + 20, 0);
+        fontRenderer.drawString(StringHelper.formatNumber(config.getOffsetVertical()), posX - 22, posY + 4, 0);
+        fontRenderer.drawString(StringHelper.formatNumber(config.getOffsetHorizontal()), posX - 22, posY + 20, 0);
 
         gui.drawRightAlignedText(StringHelper.localize(INTL_KEY + "vertical"), posX - 28, posY + 4, 0x404040);
         gui.drawRightAlignedText(StringHelper.localize(INTL_KEY + "horizontal"), posX - 28, posY + 20, 0x404040);
@@ -74,23 +68,21 @@ public class ElementOffsetControls extends ElementContainer {
     public void updateElementInformation() {
         super.updateElementInformation();
 
-        IDirectionalMachine dir = machine instanceof IDirectionalMachine ? (IDirectionalMachine) machine : null;
-        int range = dir == null ? 0 : dir.getRange();
+        int range = config == null ? 0 : config.getRange();
         setVisible(range != 0);
         if ( range == 0 )
             return;
 
-        boolean facingY = dir.getEnumFacing().getAxis() == EnumFacing.Axis.Y;
-        int rangeHorizontal = dir.getRangeWidth();
-        int rangeVertical = facingY ? dir.getRangeLength() : dir.getRangeHeight();
+        int rangeHorizontal = config.getRangeWidth();
+        int rangeVertical = config.isFacingY() ? config.getRangeLength() : config.getRangeHeight();
 
         boolean isMulti = GuiScreen.isCtrlKeyDown();
 
-        updateButton(decHoriz, rangeHorizontal, dir.getOffsetHorizontal(), false, isMulti);
-        updateButton(incHoriz, rangeHorizontal, dir.getOffsetHorizontal(), true, isMulti);
+        updateButton(decHoriz, rangeHorizontal, config.getOffsetHorizontal(), false, isMulti);
+        updateButton(incHoriz, rangeHorizontal, config.getOffsetHorizontal(), true, isMulti);
 
-        updateButton(decVert, rangeVertical, dir.getOffsetVertical(), false, isMulti);
-        updateButton(incVert, rangeVertical, dir.getOffsetVertical(), true, isMulti);
+        updateButton(decVert, rangeVertical, config.getOffsetVertical(), false, isMulti);
+        updateButton(incVert, rangeVertical, config.getOffsetVertical(), true, isMulti);
     }
 
     public void updateButton(ElementContainedButton button, int max, int value, boolean increment, boolean isMulti) {
@@ -108,17 +100,13 @@ public class ElementOffsetControls extends ElementContainer {
 
     @Override
     public void handleElementButtonClick(String buttonName, int mouseButton) {
-        float pitch = 0.7F;
-
-        if ( !(machine instanceof IDirectionalMachine) )
+        if ( config == null )
             return;
 
-        IDirectionalMachine dir = (IDirectionalMachine) machine;
-
+        float pitch = 0.7F;
         boolean isMulti = GuiScreen.isCtrlKeyDown();
-        boolean facingY = dir.getEnumFacing().getAxis() == EnumFacing.Axis.Y;
-        int rangeHorizontal = dir.getRangeWidth();
-        int rangeVertical = facingY ? dir.getRangeLength() : dir.getRangeHeight();
+        int rangeHorizontal = config.getRangeWidth();
+        int rangeVertical = config.isFacingY() ? config.getRangeLength() : config.getRangeHeight();
 
         int amount = 1;
 
@@ -128,20 +116,20 @@ public class ElementOffsetControls extends ElementContainer {
             case "IncVert":
                 if ( isMulti )
                     amount *= rangeVertical * 2;
-                dir.setOffsetVertical(dir.getOffsetVertical() + amount);
+                config.setOffsetVertical(config.getOffsetVertical() + amount);
                 break;
             case "DecHoriz":
                 amount = -1;
             case "IncHoriz":
                 if ( isMulti )
                     amount *= rangeHorizontal * 2;
-                dir.setOffsetHorizontal(dir.getOffsetHorizontal() + amount);
+                config.setOffsetHorizontal(config.getOffsetHorizontal() + amount);
                 break;
             default:
                 return;
         }
 
         BaseGuiContainer.playClickSound(pitch);
-        machine.sendModePacket();
+        config.saveRanges();
     }
 }

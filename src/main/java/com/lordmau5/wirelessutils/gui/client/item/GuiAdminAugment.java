@@ -387,7 +387,7 @@ public class GuiAdminAugment extends BaseGuiItem {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-        container.sendUpdate();
+        container.sendUpdateIfChanged();
     }
 
     public boolean hasNormalGui() {

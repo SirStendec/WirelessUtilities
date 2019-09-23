@@ -34,6 +34,11 @@ public class PageBase extends ElementContainer implements IPageTabProvider {
         this.gui = gui;
     }
 
+    @Override
+    public BaseGuiContainer getGui() {
+        return gui;
+    }
+
     public boolean wantsSlots() {
         return false;
     }

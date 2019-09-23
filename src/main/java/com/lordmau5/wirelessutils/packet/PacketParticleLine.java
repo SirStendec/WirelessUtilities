@@ -183,7 +183,7 @@ public class PacketParticleLine extends BasePacket {
 
         // TODO: Determine if these are actually work particles, if we ever
         // use this packet for more things.
-        if ( !ModConfig.rendering.enableWorkParticles )
+        if ( !ModConfig.rendering.particlesEnabled )
             return;
 
         try {

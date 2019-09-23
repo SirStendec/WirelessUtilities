@@ -46,7 +46,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -84,7 +83,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         IFluidGenAugmentable,
         IWorkProvider<TileBaseVaporizer.VaporizerTarget> {
 
-    protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
+    //protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker<VaporizerTarget> worker;
     private final Map<Integer, WUVaporizerPlayer> fakePlayerMap = new Int2ObjectOpenHashMap<>();
 
@@ -1234,19 +1233,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     public abstract int getEnergyCost(double distance, boolean interdimensional);
 
-    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
-        if ( validTargets == null ) {
-            tickActive();
-            calculateTargets();
-        }
-
-        if ( world != null && !world.isRemote ) {
-            validTargetsPerTick = 0;
-            maxEnergyPerBlock = 0;
-            maxEnergyPerEntity = 0;
-        }
-
-        return validTargets;
+    public void onTargetCacheRebuild() {
+        validTargetsPerTick = 0;
+        maxEnergyPerBlock = 0;
+        maxEnergyPerEntity = 0;
     }
 
     public boolean shouldProcessBlocks() {
@@ -1433,8 +1423,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     /* Effects */
 
     @Override
-    public void performEffect(@Nonnull VaporizerTarget target, @Nonnull World world, boolean isEntity) {
-
+    public boolean performEffect(@Nonnull VaporizerTarget target, @Nonnull World world, boolean isEntity) {
+        return false;
     }
 
     /* Energy */
@@ -1678,6 +1668,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     @Override
     public void update() {
+        WirelessUtils.profiler.startSection("vaporizer:update"); // 1 - update
         super.update();
 
         worker.tickDown();
@@ -1730,6 +1721,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             setActive(false);
             updateTrackers();
             saveEnergyHistory(energyPerTick);
+            WirelessUtils.profiler.endSection(); // 1 - update
             return;
         }
 
@@ -1744,6 +1736,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         saveEnergyHistory(energyPerTick);
         remainingPerTick = total - remainingPerTick;
+        WirelessUtils.profiler.endSection(); // 1 - update
     }
 
     /* Event Handling */
@@ -2131,6 +2124,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     @Override
     public void onInactive() {
         super.onInactive();
+        onTargetCacheRebuild();
         if ( behavior != null )
             behavior.onInactive();
     }

@@ -17,6 +17,7 @@ import com.lordmau5.wirelessutils.block.vaporizer.BlockPositionalVaporizer;
 import com.lordmau5.wirelessutils.commands.DebugCommand;
 import com.lordmau5.wirelessutils.commands.EditItemCommand;
 import com.lordmau5.wirelessutils.commands.FluidGenCommand;
+import com.lordmau5.wirelessutils.commands.ProfileCommand;
 import com.lordmau5.wirelessutils.commands.VoidGenCommand;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.entity.pearl.EntityChargedPearl;
@@ -30,14 +31,11 @@ import com.lordmau5.wirelessutils.fixers.BlockInventoryWalker;
 import com.lordmau5.wirelessutils.fixers.BlockNullableItemListWalker;
 import com.lordmau5.wirelessutils.fixers.ItemNullableItemListWalker;
 import com.lordmau5.wirelessutils.fixers.ItemVoidEntityWalker;
-import com.lordmau5.wirelessutils.item.ItemAbsolutePositionalCard;
 import com.lordmau5.wirelessutils.item.ItemBlockExplainable;
 import com.lordmau5.wirelessutils.item.ItemBlockMachine;
 import com.lordmau5.wirelessutils.item.ItemEnderCoil;
 import com.lordmau5.wirelessutils.item.ItemGlasses;
 import com.lordmau5.wirelessutils.item.ItemMachinePanel;
-import com.lordmau5.wirelessutils.item.ItemPlayerPositionalCard;
-import com.lordmau5.wirelessutils.item.ItemRelativePositionalCard;
 import com.lordmau5.wirelessutils.item.augment.ItemBaseAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemBlockAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemCapacityAugment;
@@ -55,6 +53,11 @@ import com.lordmau5.wirelessutils.item.augment.ItemSlotAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemTransferAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemWorldAugment;
 import com.lordmau5.wirelessutils.item.base.IEnhancedItem;
+import com.lordmau5.wirelessutils.item.cards.ItemAbsoluteAreaCard;
+import com.lordmau5.wirelessutils.item.cards.ItemAbsolutePositionalCard;
+import com.lordmau5.wirelessutils.item.cards.ItemPlayerPositionalCard;
+import com.lordmau5.wirelessutils.item.cards.ItemRelativeAreaCard;
+import com.lordmau5.wirelessutils.item.cards.ItemRelativePositionalCard;
 import com.lordmau5.wirelessutils.item.module.ItemBaseModule;
 import com.lordmau5.wirelessutils.item.module.ItemCaptureModule;
 import com.lordmau5.wirelessutils.item.module.ItemCloneModule;
@@ -179,6 +182,7 @@ public class CommonProxy {
         event.registerServerCommand(new FluidGenCommand());
         event.registerServerCommand(new EditItemCommand());
         event.registerServerCommand(new VoidGenCommand());
+        event.registerServerCommand(new ProfileCommand());
     }
 
     public void handleIdMapping(FMLModIdMappingEvent event) {
@@ -401,8 +405,10 @@ public class CommonProxy {
         registerItem(event, new ItemAbsolutePositionalCard());
         registerItem(event, new ItemRelativePositionalCard());
         registerItem(event, new ItemPlayerPositionalCard());
-        registerItem(event, new ItemGlasses());
+        registerItem(event, new ItemAbsoluteAreaCard());
+        registerItem(event, new ItemRelativeAreaCard());
 
+        registerItem(event, new ItemGlasses());
         registerItem(event, new ItemEnderCoil());
 
         registerItem(event, new ItemMachinePanel());

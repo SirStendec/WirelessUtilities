@@ -2,6 +2,7 @@ package com.lordmau5.wirelessutils.plugins.RefinedStorage.network.directional;
 
 import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.base.TileRSNetworkBase;
+import com.lordmau5.wirelessutils.tile.base.IConfigurableRange;
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
 import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
@@ -27,7 +28,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 @Machine(name = "directional_rs_network")
-public class TileDirectionalRSNetwork extends TileRSNetworkBase<NetworkNodeDirectionalRSNetwork> implements IDirectionalMachine {
+public class TileDirectionalRSNetwork extends TileRSNetworkBase<NetworkNodeDirectionalRSNetwork> implements IConfigurableRange, IDirectionalMachine {
 
     private Tuple<BlockPosDimension, BlockPosDimension> corners;
 
@@ -178,6 +179,8 @@ public class TileDirectionalRSNetwork extends TileRSNetworkBase<NetworkNodeDirec
             return;
 
         clearRenderAreas();
+        EventDispatcher.BREAK_BLOCK.removeListener(this);
+        EventDispatcher.PLACE_BLOCK.removeListener(this);
 
         if ( validTargets == null )
             validTargets = new ArrayList<>();
@@ -197,21 +200,20 @@ public class TileDirectionalRSNetwork extends TileRSNetworkBase<NetworkNodeDirec
 
         int cost = 0;
 
-        for (BlockPos target : BlockPos.getAllInBox(corners.getFirst(), corners.getSecond())) {
-            if ( target.equals(pos) )
+        for (BlockPosDimension target : BlockPosDimension.getAllInBox(corners.getFirst(), corners.getSecond(), dimension, null)) {
+            if ( target.equalsIgnoreFacing(pos) )
                 continue;
 
-            BlockPosDimension targetPos = new BlockPosDimension(target, dimension, facing);
-            validTargets.add(targetPos);
+            validTargets.add(target);
 
             if ( !world.isRemote ) {
-                if ( isNodeValid(targetPos) ) {
-                    double distance = origin.getDistance(target.getX(), target.getY(), target.getZ()) - 1;
+                if ( isNodeValid(target) ) {
+                    double distance = origin.getDistance(target);
                     cost += calculateEnergyCost(distance, false);
                 }
 
-                EventDispatcher.PLACE_BLOCK.addListener(targetPos, this);
-                EventDispatcher.BREAK_BLOCK.addListener(targetPos, this);
+                EventDispatcher.PLACE_BLOCK.addListener(target, this);
+                EventDispatcher.BREAK_BLOCK.addListener(target, this);
             }
         }
 
@@ -272,6 +274,15 @@ public class TileDirectionalRSNetwork extends TileRSNetworkBase<NetworkNodeDirec
     }
 
     /* Range */
+
+    public boolean isFacingY() {
+        return getEnumFacing().getAxis() == EnumFacing.Axis.Y;
+    }
+
+    public void saveRanges() {
+        if ( world != null && world.isRemote )
+            sendModePacket();
+    }
 
     public int getRangeHeight() {
         return rangeHeight;

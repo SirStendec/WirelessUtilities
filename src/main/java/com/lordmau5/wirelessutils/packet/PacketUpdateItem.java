@@ -45,9 +45,9 @@ public class PacketUpdateItem extends BasePacket {
             return;
 
         if ( isAdmin && item instanceof IAdminEditableItem )
-            ((IAdminEditableItem) item).handleAdminPacket(stack, player, slot, getItemStack(), this);
+            ((IAdminEditableItem) item).handleAdminPacket(stack.copy(), player, slot, getItemStack(), this);
 
         else if ( !isAdmin && item instanceof IUpdateableItem )
-            ((IUpdateableItem) item).handleUpdatePacket(stack, player, slot, getItemStack(), this);
+            ((IUpdateableItem) item).handleUpdatePacket(stack.copy(), player, slot, getItemStack(), this);
     }
 }

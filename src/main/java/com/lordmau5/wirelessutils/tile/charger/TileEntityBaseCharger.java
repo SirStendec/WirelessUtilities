@@ -2,6 +2,7 @@ package com.lordmau5.wirelessutils.tile.charger;
 
 import cofh.core.network.PacketBase;
 import cofh.core.util.helpers.MathHelper;
+import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.packet.PacketParticleLine;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
@@ -31,7 +32,6 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -44,17 +44,16 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.List;
 
 public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy implements
         IChunkLoadAugmentable, IInvertAugmentable, IRoundRobinMachine, ICapacityAugmentable, IWUCraftingMachine,
         ITransferAugmentable, IInventoryAugmentable, ISidedTransfer, ITickable, ISidedTransferAugmentable,
         IWorkProvider<TileEntityBaseCharger.ChargerTarget> {
 
-    protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
+    //protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
 
-    private boolean inverted = false;
+    protected boolean inverted = false;
     protected boolean chunkLoading = false;
 
     protected long transferLimit = -1;
@@ -64,21 +63,21 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     protected IterationMode iterationMode = IterationMode.ROUND_ROBIN;
     protected long roundRobin = -1;
 
-    private boolean didCraftingTicks = false;
-    private ChargerRecipeManager.ChargerRecipe lastRecipe = null;
-    private int craftingSlot = -1;
-    private int craftingEnergy = 0;
-    private int craftingTicks = 0;
-    private long remainingPerTick;
+    protected boolean didCraftingTicks = false;
+    protected ChargerRecipeManager.ChargerRecipe lastRecipe = null;
+    protected int craftingSlot = -1;
+    protected int craftingEnergy = 0;
+    protected int craftingTicks = 0;
+    protected long remainingPerTick;
     protected int activeTargetsPerTick;
     protected int validTargetsPerTick;
 
     protected boolean sideTransferAugment = false;
-    private final Mode[] sideTransfer;
-    private final boolean[] sideIsCached;
-    private final TileEntity[] sideCache;
+    protected final Mode[] sideTransfer;
+    protected final boolean[] sideIsCached;
+    protected final TileEntity[] sideCache;
 
-    private boolean processItems = false;
+    protected boolean processItems = false;
 
     public TileEntityBaseCharger() {
         super();
@@ -119,7 +118,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
 
         System.out.println("  Remaining/Tick: " + remainingPerTick);
         System.out.println("    Maximum/Tick: " + getFullMaxEnergyPerTick());
-        System.out.println("   Valid Targets: " + (validTargets == null ? "NULL" : validTargets.size()));
+        //System.out.println("   Valid Targets: " + (validTargets == null ? "NULL" : validTargets.size()));
 
         if ( worker != null )
             worker.debugPrint();
@@ -447,25 +446,17 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         return new BlockPosDimension(getPos(), getWorld().provider.getDimension());
     }
 
-    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
-        if ( validTargets == null ) {
-            tickActive();
-            calculateTargets();
-        }
-
+    public void onTargetCacheRebuild() {
         validTargetsPerTick = 0;
         craftingSlot = -1;
         lastRecipe = null;
-        return validTargets;
     }
 
     @Override
     public void onInactive() {
         super.onInactive();
+        onTargetCacheRebuild();
         worker.clearTargetCache();
-        validTargets = null;
-        lastRecipe = null;
-        craftingSlot = -1;
     }
 
     public boolean shouldProcessBlocks() {
@@ -686,9 +677,9 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     }
 
     @Override
-    public void performEffect(@Nonnull ChargerTarget target, @Nonnull World world, boolean isEntity) {
-        if ( world.isRemote || world != this.world || pos == null || !ModConfig.rendering.enableWorkParticles )
-            return;
+    public boolean performEffect(@Nonnull ChargerTarget target, @Nonnull World world, boolean isEntity) {
+        if ( world.isRemote || world != this.world || pos == null || !ModConfig.rendering.particlesEnabled )
+            return false;
 
         PacketParticleLine packet;
         if ( isEntity && target.entity != null )
@@ -704,10 +695,13 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
                     3, 0, 0, 0
             );
         else
-            return;
+            return false;
 
-        if ( packet != null )
-            packet.sendToNearbyWorkers(this);
+        if ( packet == null )
+            return false;
+
+        packet.sendToNearbyWorkers(this);
+        return true;
     }
 
     /* Sided Transfer */
@@ -809,9 +803,10 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     @Override
     public void update() {
         super.update();
-
         if ( world.isRemote )
             return;
+
+        WirelessUtils.profiler.startSection("charger:update"); // 1 - update
 
         worker.tickDown();
 
@@ -831,6 +826,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
             setActive(false);
             updateTrackers();
             saveEnergyHistory(energyPerTick);
+            WirelessUtils.profiler.endSection(); // 1 - update
             return;
         }
 
@@ -870,6 +866,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         energyPerTick = total - remainingPerTick;
         saveEnergyHistory(energyPerTick);
         updateTrackers();
+        WirelessUtils.profiler.endSection(); // 1 - update
     }
 
     /* NBT Save and Load */

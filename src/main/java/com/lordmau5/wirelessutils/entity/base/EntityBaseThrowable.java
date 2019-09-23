@@ -195,6 +195,10 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         return reaction;
     }
 
+    public boolean shouldHitLiquids() {
+        return false;
+    }
+
     public boolean shouldHitEntities() {
         return false;
     }
@@ -261,7 +265,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
             Vec3d currentPos = new Vec3d(posX, posY, posZ);
             Vec3d targetPos = new Vec3d(posX + remainingX, posY + remainingY, posZ + remainingZ);
 
-            RayTraceResult ray = world.rayTraceBlocks(currentPos, targetPos, false, false, false);
+            RayTraceResult ray = world.rayTraceBlocks(currentPos, targetPos, shouldHitLiquids(), false, false);
 
             if ( shouldHitEntities() ) {
                 RayTraceResult entityHit = findEntityOnPath(currentPos, ray == null ? targetPos : ray.hitVec);

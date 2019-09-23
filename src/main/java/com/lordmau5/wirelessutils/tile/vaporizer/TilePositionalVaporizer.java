@@ -3,10 +3,10 @@ package com.lordmau5.wirelessutils.tile.vaporizer;
 import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.gui.client.vaporizer.GuiPositionalVaporizer;
 import com.lordmau5.wirelessutils.gui.container.vaporizer.ContainerPositionalVaporizer;
+import com.lordmau5.wirelessutils.item.base.ItemBaseAreaCard;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.tile.base.IFacing;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
-import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
@@ -27,6 +27,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRangeAugment;
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRelativePositionalCard;
@@ -34,6 +35,8 @@ import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRelativePosition
 @Machine(name = "positional_vaporizer")
 public class TilePositionalVaporizer extends TileBaseVaporizer implements IFacing, IRangeAugmentable, ISlotAugmentable, IUnlockableSlots, IPositionalMachine {
 
+    protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
+    protected List<Iterable<Tuple<BlockPosDimension, ItemStack>>> areaTargets;
     private EnumFacing facing = EnumFacing.NORTH;
 
     private boolean interdimensional = false;
@@ -54,6 +57,8 @@ public class TilePositionalVaporizer extends TileBaseVaporizer implements IFacin
         System.out.println("Interdimensional: " + interdimensional);
         System.out.println("  Unlocked Slots: " + unlockedSlots);
         System.out.println("          Facing: " + facing);
+        System.out.println("   Valid Targets: " + (validTargets == null ? "NULL" : validTargets.size()));
+        System.out.println("    Area Targets: " + (areaTargets == null ? "NULL" : areaTargets.size()));
     }
 
     /* IFacing */
@@ -214,14 +219,35 @@ public class TilePositionalVaporizer extends TileBaseVaporizer implements IFacin
         return null;
     }
 
+    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
+        if ( areaTargets == null ) {
+            tickActive();
+            calculateTargets();
+        }
+
+        return IPositionalMachine.buildTargetIterator(areaTargets);
+    }
+
+    @Override
+    public void onInactive() {
+        super.onInactive();
+        validTargets = null;
+        areaTargets = null;
+    }
+
     public void calculateTargets() {
         if ( world == null )
             return;
 
         if ( validTargets == null )
-            validTargets = new ArrayList<>();
+            validTargets = new ArrayList<>(9);
         else
             validTargets.clear();
+
+        if ( areaTargets == null )
+            areaTargets = new ArrayList<>();
+        else
+            areaTargets.clear();
 
         worker.clearTargetCache();
         clearRenderAreas();
@@ -248,7 +274,45 @@ public class TilePositionalVaporizer extends TileBaseVaporizer implements IFacin
             if ( target == null || (!isTargetInRange(target) && !card.shouldIgnoreDistance(slotted)) )
                 continue;
 
-            boolean sameDimension = target.getDimension() == origin.getDimension();
+            final boolean sameDimension = target.getDimension() == origin.getDimension();
+
+            if ( card instanceof ItemBaseAreaCard ) {
+                ItemBaseAreaCard areaCard = (ItemBaseAreaCard) card;
+                Iterable<Tuple<BlockPosDimension, ItemStack>> iterable = areaCard.getTargetArea(slotted, origin);
+                if ( iterable == null )
+                    continue;
+
+                areaTargets.add(iterable);
+
+                if ( sameDimension || chunkLoading ) {
+                    Tuple<BlockPosDimension, BlockPosDimension> corners = areaCard.getCorners(slotted, target);
+                    if ( corners != null ) {
+                        if ( chunkLoading ) {
+                            int x1 = corners.getFirst().getX() >> 4;
+                            int z1 = corners.getFirst().getZ() >> 4;
+                            int x2 = corners.getSecond().getX() >> 4;
+                            int z2 = corners.getSecond().getZ() >> 4;
+
+                            for (int x = x1; x <= x2; ++x) {
+                                for (int z = z1; z <= z2; ++z) {
+                                    loadChunk(BlockPosDimension.fromChunk(x, z, target.getDimension()));
+                                }
+                            }
+                        }
+
+                        if ( sameDimension )
+                            addRenderArea(
+                                    corners.getFirst(), corners.getSecond(),
+                                    NiceColors.COLORS[i],
+                                    slotted.hasDisplayName() ? slotted.getDisplayName() : null,
+                                    null
+                            );
+                    }
+                }
+
+                continue;
+            }
+
             if ( sameDimension )
                 addRenderArea(
                         target,
@@ -263,7 +327,8 @@ public class TilePositionalVaporizer extends TileBaseVaporizer implements IFacin
             validTargets.add(new Tuple<>(target, slotted));
         }
 
-        ITargetProvider.sortTargetList(origin, validTargets);
+        if ( !validTargets.isEmpty() )
+            areaTargets.add(validTargets);
     }
 
     /* Range and IRangeAugmentable */

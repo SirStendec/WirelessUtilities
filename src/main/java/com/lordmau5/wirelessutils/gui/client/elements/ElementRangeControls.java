@@ -3,8 +3,8 @@ package com.lordmau5.wirelessutils.gui.client.elements;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
+import com.lordmau5.wirelessutils.tile.base.IConfigurableRange;
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiScreen;
@@ -18,7 +18,7 @@ public class ElementRangeControls extends ElementContainer {
     public static final String INTL_KEY = "btn." + WirelessUtils.MODID + ".range.";
 
     private final BaseGuiContainer gui;
-    private final TileEntityBaseMachine machine;
+    private final IConfigurableRange config;
 
     private final ElementContainedButton decHeight;
     private final ElementContainedButton incHeight;
@@ -29,10 +29,10 @@ public class ElementRangeControls extends ElementContainer {
     private final ElementContainedButton decWidth;
     private final ElementContainedButton incWidth;
 
-    public ElementRangeControls(BaseGuiContainer gui, TileEntityBaseMachine machine, int posX, int posY) {
+    public ElementRangeControls(BaseGuiContainer gui, IConfigurableRange config, int posX, int posY) {
         super(gui, posX, posY, 30, 46);
         this.gui = gui;
-        this.machine = machine;
+        this.config = config;
 
         decHeight = new ElementContainedButton(this, 0, 0, "DecHeight", 176, 0, 176, 14, 176, 28, 14, 14, TEXTURE.toString());
         incHeight = new ElementContainedButton(this, 16, 0, "IncHeight", 190, 0, 190, 14, 190, 28, 14, 14, TEXTURE.toString());
@@ -57,27 +57,25 @@ public class ElementRangeControls extends ElementContainer {
     public void drawForeground(int mouseX, int mouseY) {
         super.drawForeground(mouseX, mouseY);
 
-        if ( !(machine instanceof IDirectionalMachine) )
+        if ( config == null )
             return;
-
-        IDirectionalMachine dir = (IDirectionalMachine) machine;
 
         if ( GuiScreen.isAltKeyDown() ) {
             FontRenderer fontRenderer = getFontRenderer();
 
             fontRenderer.drawString(StringHelper.localize(INTL_KEY + "volume"), posX - 70, posY + 4, 0x404040);
-            drawVolume(dir.getRangeHeight(), dir.getRangeLength(), dir.getRangeWidth(), posX - 62, posY + 14, 0);
+            drawVolume(config.getRangeHeight(), config.getRangeLength(), config.getRangeWidth(), posX - 62, posY + 14, 0);
 
             if ( ModConfig.common.area == ModConfig.Common.DirectionalArea.AREA ) {
                 fontRenderer.drawString(StringHelper.localize(INTL_KEY + "max_volume"), posX - 70, posY + 28, 0x404040);
-                int range = dir.getRange();
+                int range = config.getRange();
                 drawVolume(range, range, range, posX - 62, posY + 38, 0);
             }
 
         } else {
-            drawRange(dir.getRangeHeight(), posX - 22, posY + 4, 0);
-            drawRange(dir.getRangeLength(), posX - 22, posY + 20, 0);
-            drawRange(dir.getRangeWidth(), posX - 22, posY + 36, 0);
+            drawRange(config.getRangeHeight(), posX - 22, posY + 4, 0);
+            drawRange(config.getRangeLength(), posX - 22, posY + 20, 0);
+            drawRange(config.getRangeWidth(), posX - 22, posY + 36, 0);
 
             gui.drawRightAlignedText(StringHelper.localize(INTL_KEY + "height"), posX - 28, posY + 4, 0x404040);
             gui.drawRightAlignedText(StringHelper.localize(INTL_KEY + "length"), posX - 28, posY + 20, 0x404040);
@@ -100,15 +98,14 @@ public class ElementRangeControls extends ElementContainer {
     public void updateElementInformation() {
         super.updateElementInformation();
 
-        IDirectionalMachine dir = machine instanceof IDirectionalMachine ? (IDirectionalMachine) machine : null;
-        int range = dir == null ? 0 : dir.getRange();
+        int range = config == null ? 0 : config.getRange();
         setVisible(range != 0);
         if ( range == 0 )
             return;
 
-        int rangeHeight = dir.getRangeHeight();
-        int rangeLength = dir.getRangeLength();
-        int rangeWidth = dir.getRangeWidth();
+        int rangeHeight = config.getRangeHeight();
+        int rangeLength = config.getRangeLength();
+        int rangeWidth = config.getRangeWidth();
 
         boolean isMulti = GuiScreen.isCtrlKeyDown();
         boolean isAll = GuiScreen.isShiftKeyDown();
@@ -157,17 +154,14 @@ public class ElementRangeControls extends ElementContainer {
 
     @Override
     public void handleElementButtonClick(String buttonName, int mouseButton) {
-        float pitch = 0.7F;
-
-        if ( !(machine instanceof IDirectionalMachine) )
+        if ( config == null )
             return;
 
-        IDirectionalMachine dir = (IDirectionalMachine) machine;
-
-        int range = dir.getRange();
-        int rangeHeight = dir.getRangeHeight();
-        int rangeLength = dir.getRangeLength();
-        int rangeWidth = dir.getRangeWidth();
+        float pitch = 0.7F;
+        int range = config.getRange();
+        int rangeHeight = config.getRangeHeight();
+        int rangeLength = config.getRangeLength();
+        int rangeWidth = config.getRangeWidth();
 
         if ( GuiScreen.isShiftKeyDown() ) {
             int amount;
@@ -191,38 +185,38 @@ public class ElementRangeControls extends ElementContainer {
                     amount = 0;
             }
 
-            dir.setRanges(rangeHeight + amount, rangeLength + amount, rangeWidth + amount);
+            config.setRanges(rangeHeight + amount, rangeLength + amount, rangeWidth + amount);
 
         } else {
             boolean max = GuiScreen.isCtrlKeyDown();
 
             switch (buttonName) {
                 case "DecHeight":
-                    dir.setRangeHeight(max ? 0 : rangeHeight - 1);
+                    config.setRangeHeight(max ? 0 : rangeHeight - 1);
                     break;
 
                 case "IncHeight":
-                    dir.setRangeHeight(rangeHeight + (max ?
+                    config.setRangeHeight(rangeHeight + (max ?
                             IDirectionalMachine.getMaximumHeightIncrease(range, rangeHeight, rangeLength, rangeWidth) :
                             1));
                     break;
 
                 case "DecLength":
-                    dir.setRangeLength(max ? 0 : rangeLength - 1);
+                    config.setRangeLength(max ? 0 : rangeLength - 1);
                     break;
 
                 case "IncLength":
-                    dir.setRangeLength(rangeLength + (max ?
+                    config.setRangeLength(rangeLength + (max ?
                             IDirectionalMachine.getMaximumLengthIncrease(range, rangeHeight, rangeLength, rangeWidth) :
                             1));
                     break;
 
                 case "DecWidth":
-                    dir.setRangeWidth(max ? 0 : rangeWidth - 1);
+                    config.setRangeWidth(max ? 0 : rangeWidth - 1);
                     break;
 
                 case "IncWidth":
-                    dir.setRangeWidth(rangeWidth + (max ?
+                    config.setRangeWidth(rangeWidth + (max ?
                             IDirectionalMachine.getMaximumWidthIncrease(range, rangeHeight, rangeLength, rangeWidth) :
                             1));
                     break;
@@ -230,6 +224,6 @@ public class ElementRangeControls extends ElementContainer {
         }
 
         BaseGuiContainer.playClickSound(pitch);
-        machine.sendModePacket();
+        config.saveRanges();
     }
 }

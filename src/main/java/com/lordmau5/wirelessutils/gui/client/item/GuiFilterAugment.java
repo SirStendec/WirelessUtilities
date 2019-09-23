@@ -58,7 +58,7 @@ public class GuiFilterAugment extends BaseGuiItem {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-        container.sendUpdate();
+        container.sendUpdateIfChanged();
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
+import net.minecraft.profiler.Profiler;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -34,6 +35,7 @@ public class WirelessUtils {
     public static final String DEPENDENCIES = CoFHCore.VERSION_GROUP;
 
     public static final Logger logger = LogManager.getLogManager().getLogger(MODID);
+    public static final Profiler profiler = new Profiler();
 
     @SidedProxy(clientSide = "com.lordmau5.wirelessutils.proxy.ClientProxy", serverSide = "com.lordmau5.wirelessutils.proxy.ServerProxy")
     private static CommonProxy proxy;

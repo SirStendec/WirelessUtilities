@@ -4,8 +4,8 @@ import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.gui.client.condenser.GuiDirectionalCondenser;
 import com.lordmau5.wirelessutils.gui.container.condenser.ContainerDirectionalCondenser;
 import com.lordmau5.wirelessutils.item.augment.ItemRangeAugment;
+import com.lordmau5.wirelessutils.tile.base.IConfigurableRange;
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
-import com.lordmau5.wirelessutils.tile.base.ITargetProvider;
 import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IFacingAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
@@ -26,14 +26,14 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 
 @Machine(name = "directional_condenser")
 public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser implements
-        IRangeAugmentable, IDirectionalMachine, IFacingAugmentable {
+        IConfigurableRange, IRangeAugmentable, IDirectionalMachine, IFacingAugmentable {
 
     private EnumFacing facing = EnumFacing.NORTH;
     private boolean rotationX = false;
+    private boolean calculated = false;
 
     private boolean hasFacingAugment = false;
     private EnumFacing facingAugment = null;
@@ -68,7 +68,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
         hasFacingAugment = augmented;
         facingAugment = facing;
 
-        if ( validTargets != null )
+        if ( calculated )
             calculateTargets();
     }
 
@@ -88,7 +88,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
             return true;
 
         this.rotationX = rotationX;
-        if ( validTargets != null )
+        if ( calculated )
             calculateTargets();
 
         if ( !world.isRemote ) {
@@ -116,7 +116,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
         }
 
         this.facing = facing;
-        if ( validTargets != null )
+        if ( calculated )
             calculateTargets();
 
         if ( !world.isRemote ) {
@@ -156,7 +156,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
     @Override
     public void setDefaultColor(int color) {
         super.setDefaultColor(color);
-        if ( validTargets != null )
+        if ( calculated )
             calculateTargets();
     }
 
@@ -178,20 +178,26 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
         return output;*/
     }
 
+    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
+        if ( !calculated ) {
+            tickActive();
+            calculateTargets();
+        }
+
+        EnumFacing facing = hasFacingAugment ? facingAugment : getEnumFacing().getOpposite();
+        return IDirectionalMachine.iterateTargets(this, getPosition(), facing);
+    }
+
     public void calculateTargets() {
         World world = getWorld();
         BlockPos pos = getPos();
         if ( world == null || pos == null || world.provider == null || !world.isBlockLoaded(pos) )
             return;
 
+        calculated = true;
         unloadAllChunks();
         clearRenderAreas();
         worker.clearTargetCache();
-
-        if ( validTargets == null )
-            validTargets = new ArrayList<>();
-        else
-            validTargets.clear();
 
         BlockPosDimension origin = getPosition();
         Tuple<BlockPosDimension, BlockPosDimension> corners = calculateTargetCorners(origin);
@@ -199,18 +205,19 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
         int dimension = origin.getDimension();
         EnumFacing facing = hasFacingAugment ? facingAugment : getEnumFacing().getOpposite();
 
-        for (BlockPos target : BlockPos.getAllInBox(corners.getFirst(), corners.getSecond())) {
-            if ( target.equals(pos) )
-                continue;
+        if ( chunkLoading ) {
+            int x1 = corners.getFirst().getX() >> 4;
+            int z1 = corners.getFirst().getZ() >> 4;
+            int x2 = corners.getSecond().getX() >> 4;
+            int z2 = corners.getSecond().getZ() >> 4;
 
-            BlockPosDimension bpd = new BlockPosDimension(target, dimension, facing);
-            if ( chunkLoading )
-                loadChunk(bpd);
-
-            validTargets.add(new Tuple<>(bpd, ItemStack.EMPTY));
+            for (int x = x1; x <= x2; ++x) {
+                for (int z = z1; z <= z2; ++z) {
+                    loadChunk(BlockPosDimension.fromChunk(x, z, dimension));
+                }
+            }
         }
 
-        ITargetProvider.sortTargetList(origin, validTargets);
         addRenderArea(corners.getFirst().facing(facing), corners.getSecond());
     }
 
@@ -242,7 +249,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
             return;
 
         offsetHorizontal = offset;
-        if ( validTargets != null )
+        if ( calculated )
             calculateTargets();
 
         if ( !world.isRemote ) {
@@ -256,7 +263,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
             return;
 
         offsetVertical = offset;
-        if ( validTargets != null )
+        if ( calculated )
             calculateTargets();
 
         if ( !world.isRemote ) {
@@ -266,6 +273,15 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
     }
 
     /* Range */
+
+    public boolean isFacingY() {
+        return getEnumFacing().getAxis() == EnumFacing.Axis.Y;
+    }
+
+    public void saveRanges() {
+        if ( world != null && world.isRemote )
+            sendModePacket();
+    }
 
     public int getRangeHeight() {
         return rangeHeight;
@@ -293,7 +309,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
 
         rangeHeight = range;
 
-        if ( validTargets != null )
+        if ( calculated )
             calculateTargets();
     }
 
@@ -311,7 +327,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
 
         rangeLength = range;
 
-        if ( validTargets != null )
+        if ( calculated )
             calculateTargets();
     }
 
@@ -329,7 +345,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
 
         rangeWidth = range;
 
-        if ( validTargets != null )
+        if ( calculated )
             calculateTargets();
     }
 
@@ -357,7 +373,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
         rangeLength = length;
         rangeWidth = width;
 
-        if ( validTargets != null )
+        if ( calculated )
             calculateTargets();
 
         if ( !world.isRemote ) {

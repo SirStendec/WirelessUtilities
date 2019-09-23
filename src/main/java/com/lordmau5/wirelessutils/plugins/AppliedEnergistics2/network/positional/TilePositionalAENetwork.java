@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional;
 
 import cofh.core.network.PacketBase;
+import com.lordmau5.wirelessutils.item.base.ItemBaseAreaCard;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics2Plugin;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.TileAENetworkBase;
@@ -20,6 +21,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Tuple;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
@@ -211,6 +213,8 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
             validTargets.clear();
 
         clearRenderAreas();
+        EventDispatcher.PLACE_BLOCK.removeListener(this);
+        EventDispatcher.BREAK_BLOCK.removeListener(this);
 
         setEnergyCost(0);
 
@@ -241,29 +245,71 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
 
             if ( card.updateCard(slotted, this) ) {
                 itemStackHandler.setStackInSlot(i, slotted);
-                markDirty();
+                markChunkDirty();
             }
 
             BlockPosDimension target = card.getTarget(slotted, origin);
             if ( target == null || (!isTargetInRange(target) && !card.shouldIgnoreDistance(slotted)) )
                 continue;
 
-            boolean sameDimension = target.getDimension() == dimension;
+            final boolean sameDimension = target.getDimension() == dimension;
+
+            if ( card instanceof ItemBaseAreaCard ) {
+                ItemBaseAreaCard areaCard = (ItemBaseAreaCard) card;
+                Iterable<Tuple<BlockPosDimension, ItemStack>> iterable = areaCard.getTargetArea(slotted, origin);
+                if ( iterable == null )
+                    continue;
+
+                for (Tuple<BlockPosDimension, ItemStack> pair : iterable) {
+                    BlockPosDimension areaTarget = pair.getFirst();
+                    if ( areaTarget == null )
+                        continue;
+
+                    BlockPosDimension nullTarget = areaTarget.facing(null);
+                    if ( !validTargets.contains(nullTarget) ) {
+                        validTargets.add(nullTarget);
+                        if ( !world.isRemote ) {
+                            cachePlacedPosition(nullTarget);
+                            EventDispatcher.PLACE_BLOCK.addListener(nullTarget, this);
+                            EventDispatcher.BREAK_BLOCK.addListener(nullTarget, this);
+                        }
+                    }
+                }
+
+                if ( sameDimension ) {
+                    Tuple<BlockPosDimension, BlockPosDimension> corners = areaCard.getCorners(slotted, target);
+                    if ( corners != null ) {
+                        addRenderArea(
+                                corners.getFirst(), corners.getSecond(),
+                                NiceColors.COLORS[i],
+                                slotted.hasDisplayName() ? slotted.getDisplayName() : null,
+                                null
+                        );
+                    }
+                }
+
+                continue;
+            }
+
+            BlockPosDimension nullTarget = target.facing(null);
+
             if ( sameDimension )
                 addRenderArea(
-                        target,
+                        target.toImmutable(),
                         NiceColors.COLORS[i],
                         slotted.hasDisplayName() ? slotted.getDisplayName() : null,
                         card == itemRelativePositionalCard ? itemRelativePositionalCard.getVector(slotted) : null
                 );
 
-            validTargets.add(target);
+            if ( !validTargets.contains(nullTarget) ) {
+                validTargets.add(nullTarget);
 
-            if ( !world.isRemote ) {
-                cachePlacedPosition(target);
+                if ( !world.isRemote ) {
+                    cachePlacedPosition(nullTarget);
 
-                EventDispatcher.PLACE_BLOCK.addListener(target, this);
-                EventDispatcher.BREAK_BLOCK.addListener(target, this);
+                    EventDispatcher.PLACE_BLOCK.addListener(nullTarget, this);
+                    EventDispatcher.BREAK_BLOCK.addListener(nullTarget, this);
+                }
             }
         }
     }

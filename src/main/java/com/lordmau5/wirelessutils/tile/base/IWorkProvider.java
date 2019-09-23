@@ -174,9 +174,10 @@ public interface IWorkProvider<T extends TargetInfo> extends ITargetProvider {
      *
      * @param target The TargetInfo returned from createInfo.
      * @param world  The world the target is in.
+     * @returns True if the effect was rendered.
      */
-    default void performEffect(@Nonnull T target, @Nonnull World world, boolean isEntity) {
-
+    default boolean performEffect(@Nonnull T target, @Nonnull World world, boolean isEntity) {
+        return false;
     }
 
     /**

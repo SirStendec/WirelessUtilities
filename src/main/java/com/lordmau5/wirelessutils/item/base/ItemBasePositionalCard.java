@@ -4,13 +4,16 @@ import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
 import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import com.lordmau5.wirelessutils.utils.crafting.INBTPreservingIngredient;
+import com.lordmau5.wirelessutils.utils.location.BlockArea;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -19,6 +22,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.lordmau5.wirelessutils.utils.constants.TextHelpers.GRAY;
@@ -57,6 +61,16 @@ public abstract class ItemBasePositionalCard extends ItemBase implements ISlotCo
     public abstract boolean isCardConfigured(@Nonnull ItemStack stack);
 
     public abstract BlockPosDimension getTarget(@Nonnull ItemStack stack, @Nonnull BlockPosDimension origin);
+
+    /**
+     * Called when rendering the area for a positional card held in the
+     * player's hand.
+     *
+     * @param stack The item the player is holding.
+     * @return The block area to render, or null if no area can be rendered.
+     */
+    @Nullable
+    public abstract BlockArea getHandRenderArea(@Nonnull ItemStack stack, @Nonnull EntityPlayer player, @Nullable EnumHand hand, int color);
 
     @Override
     public int getItemStackLimit(@Nonnull ItemStack stack) {

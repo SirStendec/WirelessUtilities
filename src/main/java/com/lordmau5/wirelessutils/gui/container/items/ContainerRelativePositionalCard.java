@@ -2,6 +2,7 @@ package com.lordmau5.wirelessutils.gui.container.items;
 
 import com.lordmau5.wirelessutils.gui.container.BaseContainerItem;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -14,10 +15,12 @@ import net.minecraft.util.math.Vec3d;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ContainerRelativePositionalCard extends BaseContainerItem {
+public class ContainerRelativePositionalCard extends BaseContainerItem implements IRelativeCardConfig {
 
     public ContainerRelativePositionalCard(@Nonnull ItemStack stack, int slot, @Nonnull InventoryPlayer inventory) {
         super(stack, slot, inventory);
+
+        setWatchingChanges(false);
 
         BlockPosDimension origin = getOrigin();
         if ( origin == null ) {
@@ -33,8 +36,17 @@ public class ContainerRelativePositionalCard extends BaseContainerItem {
                     setByte("Stage", (byte) 2);
                 else
                     setByte("Stage", (byte) 1);
+
+                if ( !allowNullFacing() && (tag == null || !tag.hasKey("Facing")) )
+                    setFacing(EnumFacing.NORTH);
             }
         }
+
+        setWatchingChanges(true);
+    }
+
+    public boolean allowNullFacing() {
+        return ModConfig.items.relativeCards.allowNullFacing;
     }
 
     @Nullable
@@ -51,77 +63,28 @@ public class ContainerRelativePositionalCard extends BaseContainerItem {
         return ModItems.itemRelativePositionalCard.getVector(stack);
     }
 
-    private boolean setByte(String key, byte value) {
-        NBTTagCompound tag = stack.getTagCompound();
-        if ( tag == null )
-            tag = new NBTTagCompound();
-        else if ( tag.getBoolean("Locked") )
-            return false;
-
-        tag.setByte(key, value);
-
-        stack.setTagCompound(tag);
-        setItemStack(stack);
-        return true;
-    }
-
-    private boolean setInteger(String key, int value) {
-        NBTTagCompound tag = stack.getTagCompound();
-        if ( tag == null )
-            tag = new NBTTagCompound();
-        else if ( tag.getBoolean("Locked") )
-            return false;
-
-        tag.setInteger(key, value);
-
-        stack.setTagCompound(tag);
-        setItemStack(stack);
-        return true;
-    }
-
     public int getX() {
-        NBTTagCompound tag = stack.getTagCompound();
-        return tag == null ? 0 : tag.getInteger("X");
+        return getInteger("X");
     }
 
     public int getY() {
-        NBTTagCompound tag = stack.getTagCompound();
-        return tag == null ? 0 : tag.getInteger("Y");
+        return getInteger("Y");
     }
 
     public int getZ() {
-        NBTTagCompound tag = stack.getTagCompound();
-        return tag == null ? 0 : tag.getInteger("Z");
+        return getInteger("Z");
     }
 
     public byte getStage() {
-        NBTTagCompound tag = stack.getTagCompound();
-        return tag == null ? 0 : tag.getByte("Stage");
+        return getByte("Stage");
     }
 
-    public void clear() {
-        NBTTagCompound tag = stack.getTagCompound();
-        if ( tag != null && !tag.hasKey("Locked") ) {
-            tag.removeTag("Origin");
-            tag.removeTag("Dimension");
-            tag.removeTag("X");
-            tag.removeTag("Y");
-            tag.removeTag("Z");
-            tag.removeTag("Stage");
-            tag.removeTag("Facing");
-            tag.removeTag("Range");
-
-            stack.setTagCompound(tag);
-            setItemStack(stack);
-        }
-    }
-
+    @Nullable
     public EnumFacing getFacing() {
-        NBTTagCompound tag = stack.getTagCompound();
-        byte ordinal = tag == null ? 0 : tag.getByte("Facing");
-        return EnumFacing.byIndex(ordinal);
+        return ModItems.itemRelativePositionalCard.getFacing(getItemStack());
     }
 
+    @Nullable
     public BlockPosDimension getOrigin() {
         NBTTagCompound tag = stack.getTagCompound();
         if ( tag == null || !tag.hasKey("Origin") || !tag.hasKey("Dimension") )
@@ -134,12 +97,15 @@ public class ContainerRelativePositionalCard extends BaseContainerItem {
         );
     }
 
-    public boolean setOrigin(BlockPosDimension origin) {
-        NBTTagCompound tag = stack.getTagCompound();
-        if ( tag == null )
-            tag = new NBTTagCompound();
-        else if ( tag.getBoolean("Locked") )
+    public boolean setOrigin(@Nullable BlockPosDimension origin) {
+        if ( isLocked() )
             return false;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        if ( tag == null && origin == null )
+            return true;
+        else if ( tag == null )
+            tag = new NBTTagCompound();
 
         if ( origin == null ) {
             tag.removeTag("Origin");
@@ -172,7 +138,7 @@ public class ContainerRelativePositionalCard extends BaseContainerItem {
 
     public boolean setFacing(EnumFacing facing) {
         if ( facing == null )
-            facing = EnumFacing.NORTH;
+            return removeTag("Facing");
 
         return setByte("Facing", (byte) facing.ordinal());
     }

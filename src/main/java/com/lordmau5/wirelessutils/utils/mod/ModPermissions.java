@@ -14,9 +14,12 @@ import javax.annotation.Nullable;
 
 public enum ModPermissions {
 
-    COMMAND_FLUIDGEN,
     COMMAND_DEBUG,
+    COMMAND_PROFILE,
+
     COMMAND_EDIT_ITEM,
+
+    COMMAND_FLUIDGEN,
     COMMAND_VOIDGEN;
 
     public final String node;

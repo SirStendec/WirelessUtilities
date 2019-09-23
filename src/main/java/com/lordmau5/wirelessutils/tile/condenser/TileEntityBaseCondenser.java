@@ -7,6 +7,7 @@ import cofh.core.util.helpers.FluidHelper;
 import cofh.core.util.helpers.InventoryHelper;
 import cofh.core.util.helpers.MathHelper;
 import cofh.core.util.helpers.StringHelper;
+import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.packet.PacketParticleLine;
 import com.lordmau5.wirelessutils.tile.base.IConfigurableWorldTickRate;
@@ -48,7 +49,6 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -74,7 +74,6 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.List;
 
 public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy implements
         IConfigurableWorldTickRate, IWUCraftingMachine,
@@ -83,7 +82,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         IFluidGenAugmentable, ISidedTransfer, ISidedTransferAugmentable,
         IWorkProvider<TileEntityBaseCondenser.CondenserTarget> {
 
-    protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
+    //protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
 
     protected final FluidTank tank;
@@ -107,22 +106,22 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     protected IterationMode iterationMode = IterationMode.ROUND_ROBIN;
     private int roundRobin = -1;
 
-    private boolean didCraftingTicks = false;
-    private CondenserRecipeManager.CondenserRecipe lastRecipe = null;
-    private int craftingSlot = -1;
-    private FluidStack craftingFluid = null;
-    private int craftingTicks = 0;
-    private byte gatherTick = 0;
-    private int gatherTickRate = -1;
+    protected boolean didCraftingTicks = false;
+    protected CondenserRecipeManager.CondenserRecipe lastRecipe = null;
+    protected int craftingSlot = -1;
+    protected FluidStack craftingFluid = null;
+    protected int craftingTicks = 0;
+    protected byte gatherTick = 0;
+    protected int gatherTickRate = -1;
 
-    private int remainingPerTick;
-    private int fluidPerTick;
-    private int activeTargetsPerTick;
-    private int validTargetsPerTick;
-    private int maxEnergyPerTick;
-    private boolean processBlocks = false;
-    private boolean processItems = false;
-    private boolean processEntities = false;
+    protected int remainingPerTick;
+    protected int fluidPerTick;
+    protected int activeTargetsPerTick;
+    protected int validTargetsPerTick;
+    protected int maxEnergyPerTick;
+    protected boolean processBlocks = false;
+    protected boolean processItems = false;
+    protected boolean processEntities = false;
 
     private boolean fluidGen = false;
     private FluidStack fluidGenStack = null;
@@ -831,29 +830,18 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     public abstract int getEnergyCost(double distance, boolean interdimensional);
 
-    public Iterable<Tuple<BlockPosDimension, ItemStack>> getTargets() {
-        if ( validTargets == null ) {
-            tickActive();
-            calculateTargets();
-        }
-
-        if ( world == null || !world.isRemote ) {
-            validTargetsPerTick = 0;
-            maxEnergyPerTick = 0;
-            lastRecipe = null;
-            craftingSlot = -1;
-        }
-
-        return validTargets;
+    public void onTargetCacheRebuild() {
+        validTargetsPerTick = 0;
+        maxEnergyPerTick = 0;
+        lastRecipe = null;
+        craftingSlot = -1;
     }
 
     @Override
     public void onInactive() {
         super.onInactive();
+        onTargetCacheRebuild();
         worker.clearTargetCache();
-        validTargets = null;
-        lastRecipe = null;
-        craftingSlot = -1;
     }
 
     public boolean shouldProcessBlocks() {
@@ -1389,9 +1377,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     /* Effects */
 
     @Override
-    public void performEffect(@Nonnull CondenserTarget target, @Nonnull World world, boolean isEntity) {
-        if ( world.isRemote || world != this.world || pos == null || !ModConfig.rendering.enableWorkParticles )
-            return;
+    public boolean performEffect(@Nonnull CondenserTarget target, @Nonnull World world, boolean isEntity) {
+        if ( world.isRemote || world != this.world || pos == null || !ModConfig.rendering.particlesEnabled )
+            return false;
 
         int color = ColorHandler.getFluidColor(getTankFluid());
         float colorR = (color >> 16 & 255) / 255.0F;
@@ -1415,10 +1403,13 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
                     3, colorR, colorG, colorB
             );
         else
-            return;
+            return false;
 
-        if ( packet != null )
-            packet.sendToNearbyWorkers(this);
+        if ( packet == null )
+            return false;
+
+        packet.sendToNearbyWorkers(this);
+        return true;
     }
 
     /* ITickable */
@@ -1603,6 +1594,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     public void update() {
+        WirelessUtils.profiler.startSection("condenser:update"); // 1 - update
         super.update();
 
         worker.tickDown();
@@ -1643,6 +1635,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             setActive(false);
             updateTrackers();
             saveEnergyHistory(energyPerTick);
+            WirelessUtils.profiler.endSection(); // 1 - update
             return;
         }
 
@@ -1667,6 +1660,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
         updateTrackers();
         saveEnergyHistory(energyPerTick);
+        WirelessUtils.profiler.endSection(); // 1 - update
     }
 
     /* NBT Read and Write */

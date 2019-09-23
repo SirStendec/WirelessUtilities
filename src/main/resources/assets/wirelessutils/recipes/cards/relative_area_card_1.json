@@ -1,0 +1,29 @@
+{
+	"type": "wirelessutils:copy_nbt",
+	"group": "wirelessutils",
+	"pattern": [
+		"NBN",
+		"DCD",
+		"NBN"
+	],
+	"key": {
+		"N": {
+			"item": "#NETHER_BRICK"
+		},
+		"B": {
+			"item": "#BLAZE_ROD"
+		},
+		"D": {
+			"item": "#DIAMOND"
+		},
+		"C": {
+			"item": "wirelessutils:relative_area_card",
+			"data": 0
+		}
+	},
+	"result": {
+		"item": "wirelessutils:relative_area_card",
+		"data": 1,
+		"count": 1
+	}
+}
