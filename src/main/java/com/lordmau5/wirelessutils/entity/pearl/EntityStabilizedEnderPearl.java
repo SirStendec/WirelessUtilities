@@ -107,7 +107,10 @@ public class EntityStabilizedEnderPearl extends EntityBaseThrowable {
                     newZ = newZ > 0 ? .2D : -.2D;
                 }
 
-                entity.setVelocity(newX, newY, newZ);
+                entity.motionX = newX;
+                entity.motionY = newY;
+                entity.motionZ = newZ;
+
                 world.spawnEntity(entity);
 
                 if ( world instanceof WorldServer ) {

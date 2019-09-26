@@ -124,7 +124,10 @@ public class ServerProxy extends CommonProxy {
             return;
 
         DamageSource source = event.getSource();
-        if ( source != null && source.isFireDamage() ) {
+        if ( source == null || source.isUnblockable() || (source instanceof EntityDamageSource && ((EntityDamageSource) source).getIsThornsDamage()) )
+            return;
+
+        if ( source.isFireDamage() ) {
             if ( !ModConfig.items.quenchedPearl.douseEntityLava && source == DamageSource.LAVA )
                 return;
 

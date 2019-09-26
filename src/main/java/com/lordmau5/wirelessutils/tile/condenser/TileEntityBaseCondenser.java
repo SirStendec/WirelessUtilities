@@ -10,6 +10,7 @@ import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.packet.PacketParticleLine;
+import com.lordmau5.wirelessutils.plugins.JEI.condenser.CondenserRecipeCategory;
 import com.lordmau5.wirelessutils.tile.base.IConfigurableWorldTickRate;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
@@ -745,6 +746,11 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
     }
 
     /* Condenser Crafting */
+
+    @Nullable
+    public String getRecipeCategory() {
+        return CondenserRecipeCategory.UID;
+    }
 
     @Nullable
     public IWURecipe getCurrentRecipe() {

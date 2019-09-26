@@ -1,6 +1,5 @@
 package com.lordmau5.wirelessutils.item.pearl;
 
-import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.entity.pearl.EntityScorchedPearl;
 import com.lordmau5.wirelessutils.item.base.IDimensionallyStableItem;
 import com.lordmau5.wirelessutils.item.base.ItemBasePearl;
@@ -8,6 +7,7 @@ import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -33,12 +33,26 @@ public class ItemScorchedPearl extends ItemBasePearl implements IDimensionallySt
 
     @Override
     public boolean onEntityItemUpdate(EntityItem entity) {
-        if ( entity instanceof EntityItemEnhanced )
-            ((EntityItemEnhanced) entity).setBurnWhenImmune(false);
+        World world = entity.getEntityWorld();
+        if ( world == null )
+            return false;
+
+        if ( world.isRemote ) {
+            int setting = Minecraft.getMinecraft().gameSettings.particleSetting;
+            if ( setting != 2 ) {
+                if ( world.rand.nextFloat() < (setting == 0 ? 0.1F : 0.04F) )
+                    world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, entity.posX, entity.posY + 0.5D, entity.posZ, 0, 0, 0);
+            }
+        }
+
+        return false;
+
+        /*if ( entity instanceof EntityItemEnhanced )
+            ((EntityItemEnhanced) entity).setBurnWhenImmune(true);
 
         if ( !entity.isInWater() )
             entity.setFire(1);
-        return false;
+        return false;*/
     }
 
     @Override
@@ -61,7 +75,7 @@ public class ItemScorchedPearl extends ItemBasePearl implements IDimensionallySt
 
             if ( entity.world instanceof WorldServer ) {
                 WorldServer ws = (WorldServer) entity.world;
-                ws.spawnParticle(EnumParticleTypes.PORTAL, false, entity.posX, entity.posY, entity.posZ, 0, 0, 0);
+                ws.spawnParticle(EnumParticleTypes.PORTAL, false, entity.posX, entity.posY, entity.posZ, 1, 0D, 0D, 0D, 0D);
                 entity.world.playSound(null, entity.getPosition(), SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.NEUTRAL, 1F, 0.2F);
             }
 

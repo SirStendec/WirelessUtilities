@@ -5,6 +5,7 @@ import cofh.core.util.helpers.MathHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.packet.PacketParticleLine;
+import com.lordmau5.wirelessutils.plugins.JEI.charger.ChargerRecipeCategory;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
@@ -389,6 +390,11 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
     public abstract int getEnergyCost(double distance, boolean isInterdimensional);
 
     /* Charger Crafting */
+
+    @Nullable
+    public String getRecipeCategory() {
+        return ChargerRecipeCategory.UID;
+    }
 
     @Nullable
     public IWURecipe getCurrentRecipe() {

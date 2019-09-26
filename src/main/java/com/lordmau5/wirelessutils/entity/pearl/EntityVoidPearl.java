@@ -63,11 +63,8 @@ public class EntityVoidPearl extends EntityBaseThrowable {
     }
 
     @Override
-    public void onUpdate() {
-        super.onUpdate();
-
-        if ( world.isRemote && !isDead )
-            world.spawnParticle(EnumParticleTypes.END_ROD, posX, posY, posZ, 0.2 * motionX, 0.2 * motionY, 0.2 * motionZ);
+    public void renderTrail() {
+        world.spawnParticle(EnumParticleTypes.END_ROD, posX, posY, posZ, 0.2 * motionX, 0.2 * motionY, 0.2 * motionZ);
     }
 
     @Override

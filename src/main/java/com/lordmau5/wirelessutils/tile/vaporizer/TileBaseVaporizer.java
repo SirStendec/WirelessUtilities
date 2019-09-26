@@ -1256,7 +1256,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
     }
 
     public boolean canWorkBlock(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nullable TileEntity tile) {
-        return !block.getMaterial().blocksMovement();
+        if ( behavior == null )
+            return false;
+
+        return behavior.canWorkBlock(target, source, world, block, tile);
     }
 
     public boolean canWorkTile(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nullable IBlockState block, @Nonnull TileEntity tile) {
@@ -2224,6 +2227,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         }
 
+        @Nullable
         ElementModuleBase getGUI(@Nonnull GuiBaseVaporizer gui);
 
         default void updateModePacket(@Nonnull PacketBase packet) {
@@ -2287,6 +2291,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
         default void preWork() {
 
+        }
+
+        default boolean canWorkBlock(@Nonnull BlockPosDimension target, @Nonnull ItemStack source, @Nonnull World world, @Nonnull IBlockState block, @Nullable TileEntity tile) {
+            return !block.getMaterial().blocksMovement();
         }
 
         @Nonnull

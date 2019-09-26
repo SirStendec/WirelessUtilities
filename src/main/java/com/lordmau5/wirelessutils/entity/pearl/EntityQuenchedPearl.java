@@ -60,9 +60,11 @@ public class EntityQuenchedPearl extends EntityBaseThrowable {
     @Override
     public void onUpdate() {
         super.onUpdate();
+    }
 
-        if ( world.isRemote && !isDead )
-            world.spawnParticle(EnumParticleTypes.WATER_SPLASH, posX, posY, posZ, rand.nextGaussian(), rand.nextGaussian(), rand.nextGaussian());
+    @Override
+    public void renderTrail() {
+        world.spawnParticle(EnumParticleTypes.WATER_SPLASH, posX, posY, posZ, rand.nextGaussian(), rand.nextGaussian(), rand.nextGaussian());
     }
 
     @Override
@@ -80,21 +82,38 @@ public class EntityQuenchedPearl extends EntityBaseThrowable {
 
             playSound(SoundEvents.ENTITY_GENERIC_SPLASH, 0.4F, 2.0F + world.rand.nextFloat() * 0.4F);
 
-            for (BlockPos.MutableBlockPos pos : positions) {
-                if ( pos.distanceSq(result.hitVec.x, result.hitVec.y, result.hitVec.z) <= 64D ) {
-                    final int x = pos.getX();
-                    final int y = pos.getY();
-                    final int z = pos.getZ();
+            final int setting = Minecraft.getMinecraft().gameSettings.particleSetting;
+            if ( setting != 2 ) {
+                final byte skip = setting == 0 ? (byte) 2 : (byte) 4;
+                byte skipped = (byte) (skip + 1);
 
-                    world.spawnParticle(
-                            EnumParticleTypes.WATER_SPLASH,
-                            x, y, z,
-                            x > hitX ? 10F : x == hitX ? 0F : -10F,
-                            y > hitY ? 10F : y == hitY ? 0F : -10F,
-                            z > hitZ ? 10F : z == hitZ ? 0F : -10F
-                    );
+                for (BlockPos.MutableBlockPos pos : positions) {
+                    if ( pos.distanceSq(result.hitVec.x, result.hitVec.y, result.hitVec.z) <= 64D ) {
+                        final int x = pos.getX();
+                        final int y = pos.getY();
+                        final int z = pos.getZ();
+
+                        if ( skipped >= skip ) {
+                            IBlockState state = world.getBlockState(pos);
+                            if ( state.isOpaqueCube() ) {
+                                skipped++;
+                            } else {
+                                skipped = 0;
+                                world.spawnParticle(
+                                        EnumParticleTypes.WATER_SPLASH,
+                                        x, y, z,
+                                        x > hitX ? 10F : x == hitX ? 0F : -10F,
+                                        y > hitY ? 10F : y == hitY ? 0F : -10F,
+                                        z > hitZ ? 10F : z == hitZ ? 0F : -10F
+                                );
+                            }
+
+                        } else
+                            skipped++;
+                    }
                 }
             }
+
         } else if ( !world.isRemote ) {
             boolean consumed = ModConfig.items.quenchedPearl.alwaysConsumed;
 
@@ -102,6 +121,8 @@ public class EntityQuenchedPearl extends EntityBaseThrowable {
                 final double fireRange = Math.pow(ModConfig.items.quenchedPearl.extinguishFire, 2);
                 final double lavaRange = Math.pow(ModConfig.items.quenchedPearl.quenchLava, 2);
                 final double maxDistance = Math.max(fireRange, lavaRange);
+
+                boolean sound = false;
 
                 for (BlockPos.MutableBlockPos pos : positions) {
                     if ( !world.isBlockLoaded(pos) )
@@ -113,8 +134,6 @@ public class EntityQuenchedPearl extends EntityBaseThrowable {
 
                     IBlockState state = world.getBlockState(pos);
                     Block block = state.getBlock();
-
-                    boolean sound = false;
 
                     if ( distance <= fireRange && block instanceof BlockFire ) {
                         // Extinguish Fire
@@ -131,7 +150,7 @@ public class EntityQuenchedPearl extends EntityBaseThrowable {
                         BlockPos.PooledMutableBlockPos facing = BlockPos.PooledMutableBlockPos.retain();
                         for (EnumFacing face : EnumFacing.VALUES) {
                             facing.setPos(pos).move(face);
-                            if ( !world.getBlockState(facing).getMaterial().blocksMovement() ) {
+                            if ( world.isAirBlock(facing) ) {
                                 exposed = true;
                                 break;
                             }
@@ -152,10 +171,10 @@ public class EntityQuenchedPearl extends EntityBaseThrowable {
                                 consumed = true;
                         }
                     }
-
-                    if ( sound )
-                        world.playSound(null, pos, SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
                 }
+
+                if ( sound )
+                    world.playSound(null, result.getBlockPos(), SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
             }
 
             if ( !consumed )

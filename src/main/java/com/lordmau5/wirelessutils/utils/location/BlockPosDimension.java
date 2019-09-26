@@ -268,7 +268,7 @@ public class BlockPosDimension extends BlockPos {
     public boolean isInsideBorders() {
         World world = DimensionManager.getWorld(getDimension(), false);
         if ( world == null )
-            return false;
+            return true;
 
         WorldBorder border = world.getWorldBorder();
         return border != null && border.contains(this);
@@ -277,7 +277,7 @@ public class BlockPosDimension extends BlockPos {
     public boolean isInsideWorld() {
         World world = DimensionManager.getWorld(getDimension(), false);
         if ( world == null )
-            return false;
+            return true;
 
         if ( !world.isValid(this) )
             return false;

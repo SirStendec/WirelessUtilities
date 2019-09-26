@@ -116,37 +116,41 @@ public class ItemPlayerPositionalCard extends ItemBaseEntityPositionalCard imple
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
-        if ( !world.isRemote && player.isSneaking() && hand == EnumHand.MAIN_HAND ) {
+        if ( player.isSneaking() && hand == EnumHand.MAIN_HAND ) {
             ItemStack stack = player.getHeldItem(hand);
-            NBTTagCompound tag = stack.getTagCompound();
-            if ( tag == null )
-                tag = new NBTTagCompound();
+            if ( !isLocked(stack) ) {
+                if ( !world.isRemote ) {
+                    NBTTagCompound tag = stack.getTagCompound();
+                    if ( tag == null )
+                        tag = new NBTTagCompound();
 
-            if ( tag.getBoolean("Locked") )
-                return new ActionResult<>(EnumActionResult.PASS, stack);
-            else if ( stack.getCount() > 1 )
-                tag = tag.copy();
+                    if ( tag.getBoolean("Locked") )
+                        return new ActionResult<>(EnumActionResult.PASS, stack);
+                    else if ( stack.getCount() > 1 )
+                        tag = tag.copy();
 
-            tag.setString("Player", player.getName());
-            tag.setString("PlayerUUID", player.getUniqueID().toString());
+                    tag.setString("Player", player.getName());
+                    tag.setString("PlayerUUID", player.getUniqueID().toString());
 
-            if ( stack.getCount() == 1 ) {
-                stack.setTagCompound(tag);
-                // The GUI is not ready yet.
-                // player.openGui(WirelessUtils.instance, WirelessUtils.GUI_PLAYER_CARD, player.getEntityWorld(), hand.ordinal(), 0, 0);
+                    if ( stack.getCount() == 1 ) {
+                        stack.setTagCompound(tag);
+                        // The GUI is not ready yet.
+                        // player.openGui(WirelessUtils.instance, WirelessUtils.GUI_PLAYER_CARD, player.getEntityWorld(), hand.ordinal(), 0, 0);
 
-            } else {
-                ItemStack newStack = new ItemStack(this, 1);
-                newStack.setTagCompound(tag);
-                stack.shrink(1);
-                if ( !player.addItemStackToInventory(newStack) )
-                    CoreUtils.dropItemStackIntoWorldWithVelocity(newStack, world, player.getPositionVector());
+                    } else {
+                        ItemStack newStack = new ItemStack(this, 1);
+                        newStack.setTagCompound(tag);
+                        stack.shrink(1);
+                        if ( !player.addItemStackToInventory(newStack) )
+                            CoreUtils.dropItemStackIntoWorldWithVelocity(newStack, world, player.getPositionVector());
+                    }
+
+                    if ( player instanceof EntityPlayerMP )
+                        ModAdvancements.SET_POSITIONAL_CARD.trigger((EntityPlayerMP) player);
+                }
+
+                return new ActionResult<>(EnumActionResult.SUCCESS, stack);
             }
-
-            if ( player instanceof EntityPlayerMP )
-                ModAdvancements.SET_POSITIONAL_CARD.trigger((EntityPlayerMP) player);
-
-            return new ActionResult<>(EnumActionResult.SUCCESS, stack);
         }
 
         return super.onItemRightClick(world, player, hand);

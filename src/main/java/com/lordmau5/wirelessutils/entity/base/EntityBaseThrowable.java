@@ -12,6 +12,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -111,6 +112,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
     private double startY;
     private double startZ;
 
+    private byte skippedTrailFrames = 0;
 
     public EntityBaseThrowable(World world) {
         super(world);
@@ -228,6 +230,10 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         };
 
         return RayTracing.findEntityOnPath(world, start, end, realPred);
+    }
+
+    public void renderTrail() {
+
     }
 
     @Override
@@ -519,6 +525,17 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
 
         setPosition(posX, posY, posZ);
 
+        if ( world.isRemote && !isDead ) {
+            int setting = Minecraft.getMinecraft().gameSettings.particleSetting;
+            if ( setting != 2 ) {
+                final byte skip = setting == 0 ? (byte) 0 : (byte) 2;
+                if ( skippedTrailFrames >= skip ) {
+                    renderTrail();
+                    skippedTrailFrames = 0;
+                } else
+                    skippedTrailFrames++;
+            }
+        }
     }
 
     @Override

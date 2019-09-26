@@ -53,7 +53,7 @@ public class BlockDirectionalRSNetwork extends BlockBaseMachine {
         manager.markForSaving();
 
         if ( node != null && node.getNetwork() != null ) {
-            node.getNetwork().getNodeGraph().invalidate(Action.PERFORM, world, pos);
+            node.getNetwork().getNodeGraph().invalidate(Action.PERFORM, node.getNetwork().world(), node.getNetwork().getPosition());
         }
 
         super.breakBlock(world, pos, state);

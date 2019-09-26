@@ -6,6 +6,7 @@ import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFire;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -36,8 +37,11 @@ public class ItemQuenchedPearl extends ItemBasePearl {
             return false;
 
         if ( world.isRemote ) {
-            if ( world.rand.nextFloat() < 0.05F )
-                world.spawnParticle(EnumParticleTypes.WATER_DROP, entity.posX, entity.posY + 0.5D, entity.posZ, 0, 0, 0);
+            int setting = Minecraft.getMinecraft().gameSettings.particleSetting;
+            if ( setting != 2 ) {
+                if ( world.rand.nextFloat() < (setting == 0 ? 0.1F : 0.04F) )
+                    world.spawnParticle(EnumParticleTypes.WATER_DROP, entity.posX, entity.posY + 0.5D, entity.posZ, 0, 0, 0);
+            }
             return false;
         }
 

@@ -267,7 +267,7 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard implement
     @Override
     @Nonnull
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, @Nonnull EnumHand hand) {
-        if ( !world.isRemote && player.isSneaking() && hand == EnumHand.MAIN_HAND ) {
+        if ( player.isSneaking() && hand == EnumHand.MAIN_HAND ) {
             ItemStack stack = player.getHeldItemMainhand();
             RayTraceResult ray = rayTrace(world, player, false);
             if ( ray != null && ray.typeOfHit == RayTraceResult.Type.BLOCK )
@@ -278,13 +278,15 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard implement
                 return new ActionResult<>(EnumActionResult.FAIL, stack);
 
             if ( stack.getCount() == 1 )
-                return new ActionResult<>(EnumActionResult.PASS, cleared);
+                return new ActionResult<>(EnumActionResult.SUCCESS, cleared);
 
             stack.shrink(1);
             cleared.setCount(1);
 
-            if ( !player.addItemStackToInventory(cleared) )
-                CoreUtils.dropItemStackIntoWorldWithVelocity(cleared, world, player.getPositionVector());
+            if ( !world.isRemote ) {
+                if ( !player.addItemStackToInventory(cleared) )
+                    CoreUtils.dropItemStackIntoWorldWithVelocity(cleared, world, player.getPositionVector());
+            }
 
             return new ActionResult<>(EnumActionResult.SUCCESS, stack);
         }
@@ -295,30 +297,32 @@ public class ItemAbsolutePositionalCard extends ItemBasePositionalCard implement
     @Override
     @Nonnull
     public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand) {
-        if ( !world.isRemote && player.isSneaking() && hand == EnumHand.MAIN_HAND ) {
+        if ( player.isSneaking() && hand == EnumHand.MAIN_HAND ) {
             ItemStack stack = player.getHeldItemMainhand();
             if ( !isLocked(stack) ) {
-                BlockPosDimension target = new BlockPosDimension(pos, world.provider.getDimension(), side);
-                NBTTagCompound tag = stack.getTagCompound();
-                if ( tag == null )
-                    tag = new NBTTagCompound();
-                else if ( stack.getCount() > 1 )
-                    tag = tag.copy();
+                if ( !world.isRemote ) {
+                    BlockPosDimension target = new BlockPosDimension(pos, world.provider.getDimension(), side);
+                    NBTTagCompound tag = stack.getTagCompound();
+                    if ( tag == null )
+                        tag = new NBTTagCompound();
+                    else if ( stack.getCount() > 1 )
+                        tag = tag.copy();
 
-                target.writeToTag(tag);
+                    target.writeToTag(tag);
 
-                if ( stack.getCount() == 1 ) {
-                    stack.setTagCompound(tag);
-                } else {
-                    ItemStack newStack = new ItemStack(this, 1);
-                    newStack.setTagCompound(tag);
-                    stack.shrink(1);
-                    if ( !player.addItemStackToInventory(newStack) )
-                        CoreUtils.dropItemStackIntoWorldWithVelocity(newStack, world, player.getPositionVector());
+                    if ( stack.getCount() == 1 ) {
+                        stack.setTagCompound(tag);
+                    } else {
+                        ItemStack newStack = new ItemStack(this, 1);
+                        newStack.setTagCompound(tag);
+                        stack.shrink(1);
+                        if ( !player.addItemStackToInventory(newStack) )
+                            CoreUtils.dropItemStackIntoWorldWithVelocity(newStack, world, player.getPositionVector());
+                    }
+
+                    if ( player instanceof EntityPlayerMP )
+                        ModAdvancements.SET_POSITIONAL_CARD.trigger((EntityPlayerMP) player);
                 }
-
-                if ( player instanceof EntityPlayerMP )
-                    ModAdvancements.SET_POSITIONAL_CARD.trigger((EntityPlayerMP) player);
 
                 return EnumActionResult.SUCCESS;
             }

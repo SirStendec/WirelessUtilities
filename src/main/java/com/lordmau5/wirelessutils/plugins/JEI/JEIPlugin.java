@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.plugins.JEI;
 
+import com.google.common.collect.ImmutableList;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.item.base.IJEIInformationItem;
 import com.lordmau5.wirelessutils.plugins.JEI.charger.ChargerRecipeCategory;
@@ -9,16 +10,43 @@ import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
 import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.IJeiHelpers;
+import mezz.jei.api.IJeiRuntime;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.IModRegistry;
+import mezz.jei.api.IRecipesGui;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+import javax.annotation.Nonnull;
+
 @SuppressWarnings("unused")
 @mezz.jei.api.JEIPlugin
 public class JEIPlugin implements IModPlugin {
+
+    private static IJeiRuntime jeiRuntime = null;
+
+    @Override
+    public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
+        JEIPlugin.jeiRuntime = jeiRuntime;
+    }
+
+    public static boolean hasJEI() {
+        return jeiRuntime != null;
+    }
+
+    public static boolean showRecipeCategory(@Nonnull String category) {
+        if ( jeiRuntime == null )
+            return false;
+
+        IRecipesGui gui = jeiRuntime.getRecipesGui();
+        if ( gui == null )
+            return false;
+
+        gui.showCategories(ImmutableList.of(category));
+        return true;
+    }
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registry) {

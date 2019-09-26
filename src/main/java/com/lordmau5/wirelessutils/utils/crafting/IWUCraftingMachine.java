@@ -5,6 +5,9 @@ import javax.annotation.Nullable;
 public interface IWUCraftingMachine {
 
     @Nullable
+    String getRecipeCategory();
+
+    @Nullable
     IWURecipe getCurrentRecipe();
 
     float getCraftingProgress();

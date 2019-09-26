@@ -708,6 +708,7 @@ info.wirelessutils.crafting.input=Input: %s
 info.wirelessutils.crafting.fluid=Using: %s mB of %s
 info.wirelessutils.crafting.power=Using: %s RF
 info.wirelessutils.crafting.output=Output: %s
+info.wirelessutils.crafting.recipes=Click for Recipes
 
 info.wirelessutils.work_budget=Work Buffer
 info.wirelessutils.work_budget.per_tick=+%s/tick

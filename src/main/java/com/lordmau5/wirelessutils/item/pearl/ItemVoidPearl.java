@@ -5,6 +5,7 @@ import com.lordmau5.wirelessutils.entity.pearl.EntityVoidPearl;
 import com.lordmau5.wirelessutils.item.base.ItemBaseVoidPearl;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModStats;
+import net.minecraft.client.Minecraft;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -62,7 +63,7 @@ public class ItemVoidPearl extends ItemBaseVoidPearl {
             double centerY = entity.posY + (box.maxY - box.minY) / 2;
             double centerZ = entity.posZ + (box.maxZ - box.minZ) / 2;
 
-            ws.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, centerX, centerY, centerZ, 3, .2D, .2D, .2D, 0D);
+            ws.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, false, centerX, centerY, centerZ, 3, .2D, .2D, .2D, 0D);
         }
 
         if ( stack.getCount() == 1 )
@@ -80,12 +81,15 @@ public class ItemVoidPearl extends ItemBaseVoidPearl {
     @Override
     public boolean onEntityItemUpdate(EntityItem entity) {
         if ( entity.world != null && entity.world.isRemote && isFilledBall(entity.getItem()) ) {
-            if ( entity.world.rand.nextFloat() > 0.92 ) {
-                float offsetX = entity.world.rand.nextFloat() * 0.4F - 0.2F;
-                float offsetY = entity.world.rand.nextFloat() * 0.4F + 0.4F;
-                float offsetZ = entity.world.rand.nextFloat() * 0.4F - 0.2F;
+            int setting = Minecraft.getMinecraft().gameSettings.particleSetting;
+            if ( setting != 2 ) {
+                if ( entity.world.rand.nextFloat() > (setting == 0 ? 0.92F : 0.97F) ) {
+                    float offsetX = entity.world.rand.nextFloat() * 0.4F - 0.2F;
+                    float offsetY = entity.world.rand.nextFloat() * 0.4F + 0.4F;
+                    float offsetZ = entity.world.rand.nextFloat() * 0.4F - 0.2F;
 
-                entity.world.spawnParticle(EnumParticleTypes.END_ROD, entity.posX + offsetX, entity.posY + offsetY, entity.posZ + offsetZ, 0, 0.005F, 0);
+                    entity.world.spawnParticle(EnumParticleTypes.END_ROD, entity.posX + offsetX, entity.posY + offsetY, entity.posZ + offsetZ, 0, 0.005F, 0);
+                }
             }
         }
 

@@ -53,11 +53,8 @@ public class EntityScorchedPearl extends EntityBaseThrowable {
     }
 
     @Override
-    public void onUpdate() {
-        super.onUpdate();
-
-        if ( world.isRemote && !isDead )
-            world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, posX, posY, posZ, 0.2 * motionX, 0.2 * motionY, 0.2 * motionZ);
+    public void renderTrail() {
+        world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, posX, posY, posZ, 0.2 * motionX, 0.2 * motionY, 0.2 * motionZ);
     }
 
     @Override
@@ -95,12 +92,15 @@ public class EntityScorchedPearl extends EntityBaseThrowable {
                         newZ = newZ > 0 ? .2D : -.2D;
                     }
 
-                    entity.setVelocity(newX, newY, newZ);
+                    entity.motionX = newX;
+                    entity.motionY = newY;
+                    entity.motionZ = newZ;
+
                     world.spawnEntity(entity);
 
                     if ( world instanceof WorldServer ) {
                         WorldServer ws = (WorldServer) world;
-                        ws.spawnParticle(EnumParticleTypes.PORTAL, false, posX, posY, posZ, 0, 0, 0);
+                        ws.spawnParticle(EnumParticleTypes.PORTAL, posX, posY, posZ, 1, 0D, 0D, 0D, 0D);
                         ws.playSound(null, pos, SoundEvents.BLOCK_END_PORTAL_FRAME_FILL, SoundCategory.NEUTRAL, 1, 0.1F);
                     }
 

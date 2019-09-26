@@ -201,9 +201,12 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
         Block block = state.getBlock();
         if ( block == Blocks.END_PORTAL ) {
             entity.setPosition(entity.posX, Math.ceil(entity.posY), entity.posZ);
-            entity.setVelocity(entity.motionX, .2, entity.motionZ);
-        } else if ( block == Blocks.END_GATEWAY )
-            entity.setVelocity(-entity.motionX, -entity.motionY, -entity.motionZ);
+            entity.motionY = .2F;
+        } else if ( block == Blocks.END_GATEWAY ) {
+            entity.motionX = -entity.motionX;
+            entity.motionY = -entity.motionY;
+            entity.motionZ = -entity.motionZ;
+        }
 
         if ( entity.world != null && !entity.world.isRemote ) {
             NBTTagCompound data = entity.getEntityData();

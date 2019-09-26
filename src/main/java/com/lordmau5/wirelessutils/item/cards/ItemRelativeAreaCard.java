@@ -237,8 +237,10 @@ public class ItemRelativeAreaCard extends ItemBaseAreaCard implements IGuiItem {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-        if ( !worldIn.isRemote && !playerIn.isSneaking() && handIn == EnumHand.MAIN_HAND ) {
-            openGui(playerIn, handIn);
+        if ( !playerIn.isSneaking() && handIn == EnumHand.MAIN_HAND ) {
+            if ( !worldIn.isRemote )
+                openGui(playerIn, handIn);
+
             return new ActionResult<>(EnumActionResult.SUCCESS, playerIn.getHeldItemMainhand());
         }
 
@@ -255,58 +257,60 @@ public class ItemRelativeAreaCard extends ItemBaseAreaCard implements IGuiItem {
 
     @Override
     public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand) {
-        if ( !world.isRemote && player.isSneaking() && hand == EnumHand.MAIN_HAND ) {
+        if ( player.isSneaking() && hand == EnumHand.MAIN_HAND ) {
             ItemStack stack = player.getHeldItemMainhand();
-            BlockPosDimension target = new BlockPosDimension(pos, world.provider.getDimension(), side);
-            NBTTagCompound tag = stack.getTagCompound();
-            if ( tag == null )
-                tag = new NBTTagCompound();
-            else if ( tag.getBoolean("Locked") )
-                return EnumActionResult.PASS;
-            else if ( stack.getCount() > 1 )
-                tag = tag.copy();
+            if ( !isLocked(stack) ) {
+                if ( !world.isRemote ) {
+                    BlockPosDimension target = new BlockPosDimension(pos, world.provider.getDimension(), side);
+                    NBTTagCompound tag = stack.getTagCompound();
+                    if ( tag == null )
+                        tag = new NBTTagCompound();
+                    else if ( stack.getCount() > 1 )
+                        tag = tag.copy();
 
-            byte stage = tag.getByte("Stage");
-            if ( stage == 0 ) {
-                tag.setLong("Origin", target.toLong());
-                tag.setInteger("Dimension", target.getDimension());
+                    byte stage = tag.getByte("Stage");
+                    if ( stage == 0 ) {
+                        tag.setLong("Origin", target.toLong());
+                        tag.setInteger("Dimension", target.getDimension());
 
-                tag.setByte("Stage", (byte) 1);
-                tag.removeTag("X");
-                tag.removeTag("Y");
-                tag.removeTag("Z");
-                tag.setByte("Facing", (byte) target.getFacing().ordinal());
+                        tag.setByte("Stage", (byte) 1);
+                        tag.removeTag("X");
+                        tag.removeTag("Y");
+                        tag.removeTag("Z");
+                        tag.setByte("Facing", (byte) target.getFacing().ordinal());
 
-            } else {
-                BlockPosDimension origin = new BlockPosDimension(
-                        BlockPos.fromLong(tag.getLong("Origin")),
-                        tag.getInteger("Dimension"),
-                        null);
+                    } else {
+                        BlockPosDimension origin = new BlockPosDimension(
+                                BlockPos.fromLong(tag.getLong("Origin")),
+                                tag.getInteger("Dimension"),
+                                null);
 
-                if ( origin.getDimension() != target.getDimension() )
-                    return EnumActionResult.SUCCESS;
+                        if ( origin.getDimension() != target.getDimension() )
+                            return EnumActionResult.SUCCESS;
 
-                tag.setInteger("X", target.getX() - origin.getX());
-                tag.setInteger("Y", target.getY() - origin.getY());
-                tag.setInteger("Z", target.getZ() - origin.getZ());
-                tag.setByte("Facing", (byte) target.getFacing().ordinal());
-                tag.setByte("Stage", (byte) 2);
+                        tag.setInteger("X", target.getX() - origin.getX());
+                        tag.setInteger("Y", target.getY() - origin.getY());
+                        tag.setInteger("Z", target.getZ() - origin.getZ());
+                        tag.setByte("Facing", (byte) target.getFacing().ordinal());
+                        tag.setByte("Stage", (byte) 2);
 
-                if ( player instanceof EntityPlayerMP )
-                    ModAdvancements.SET_POSITIONAL_CARD.trigger((EntityPlayerMP) player);
+                        if ( player instanceof EntityPlayerMP )
+                            ModAdvancements.SET_POSITIONAL_CARD.trigger((EntityPlayerMP) player);
+                    }
+
+                    if ( stack.getCount() == 1 ) {
+                        stack.setTagCompound(tag);
+                    } else {
+                        ItemStack newStack = new ItemStack(this, 1);
+                        newStack.setTagCompound(tag);
+                        stack.shrink(1);
+                        if ( !player.addItemStackToInventory(newStack) )
+                            CoreUtils.dropItemStackIntoWorldWithVelocity(newStack, world, player.getPositionVector());
+                    }
+                }
+
+                return EnumActionResult.SUCCESS;
             }
-
-            if ( stack.getCount() == 1 ) {
-                stack.setTagCompound(tag);
-            } else {
-                ItemStack newStack = new ItemStack(this, 1);
-                newStack.setTagCompound(tag);
-                stack.shrink(1);
-                if ( !player.addItemStackToInventory(newStack) )
-                    CoreUtils.dropItemStackIntoWorldWithVelocity(newStack, world, player.getPositionVector());
-            }
-
-            return EnumActionResult.SUCCESS;
         }
 
         return super.onItemUseFirst(player, world, pos, side, hitX, hitY, hitZ, hand);

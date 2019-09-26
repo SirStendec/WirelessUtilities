@@ -3,12 +3,15 @@ package com.lordmau5.wirelessutils.gui.client.elements;
 import cofh.core.gui.GuiContainerCore;
 import cofh.core.gui.element.ElementBase;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
+import com.lordmau5.wirelessutils.plugins.JEI.JEIPlugin;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.crafting.IWUCraftingMachine;
 import com.lordmau5.wirelessutils.utils.crafting.IWURecipe;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextComponentTranslation;
 
+import java.io.IOException;
 import java.util.List;
 
 public class ElementCraftingProgress extends ElementBase {
@@ -44,6 +47,17 @@ public class ElementCraftingProgress extends ElementBase {
     public ElementCraftingProgress setAlwaysShow(boolean show) {
         alwaysShowMinimum = show;
         return this;
+    }
+
+    @Override
+    public boolean onMousePressed(int mouseX, int mouseY, int mouseButton) throws IOException {
+        String category = machine.getRecipeCategory();
+        if ( category != null && JEIPlugin.showRecipeCategory(category) ) {
+            BaseGuiContainer.playClickSound(1F);
+            return true;
+        }
+
+        return super.onMousePressed(mouseX, mouseY, mouseButton);
     }
 
     @Override
@@ -89,16 +103,10 @@ public class ElementCraftingProgress extends ElementBase {
 
         } else
             recipe.addTooltip(list, machine);
-    }
 
-    private int getScaled(int value, int max, boolean showMinimum) {
-        if ( max <= 0 )
-            return sizeY;
-
-        int fraction = value * sizeY / max;
-        if ( showMinimum && value > 0 && fraction < 1 )
-            return 1;
-
-        return fraction;
+        if ( JEIPlugin.hasJEI() && machine.getRecipeCategory() != null ) {
+            list.add("");
+            list.add(new TextComponentTranslation("info." + WirelessUtils.MODID + ".crafting.recipes").setStyle(TextHelpers.GRAY).getFormattedText());
+        }
     }
 }
