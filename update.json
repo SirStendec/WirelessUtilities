@@ -1,7 +1,8 @@
 {
 	"homepage": "https://minecraft.curseforge.com/projects/wireless-utilities",
 	"1.12.2": {
-		"1.9": "Added: Particle effects for working machines.\nAdded: Filter Augments now filter items you pick up if held in your off-hand.\nFixed: Four potential crashes.\n\nFor full changes, see GitHub or CurseForge.",
+		"1.10": "Added: Absolute Area and Relative Area Cards\nAdded: Quenched Pearls now extinguish fire and quench lava when thrown.\nFixed: Crash when throwing Scorched Pearl into End Portal with dedicated server.\nFixed: Render less particles.\nFixed: Refined Storage networks breaking when removing a Directional/Positional RS Network block.\n\nFor full changes, see GitHub or CurseForge.",
+		"1.9.133": "Added: Particle effects for working machines.\nAdded: Filter Augments now filter items you pick up if held in your off-hand.\nFixed: Four potential crashes.\n\nFor full changes, see GitHub or CurseForge.",
 		"1.8.126": "Added: Filter Augment\nAdded: Remote Side Augment\nAdded: Vaporizer and Modules\n\nWay too many changes to list here. For full changes, see GitHub or CurseForge.",
 		"1.7.76": "Added: Dispenser Augment\nAdded: Void Pearl\nAdded: A ton of configuration.\nMany changes and bugfixes.\n\nFor full changes, see GitHub or CurseForge.",
 		"1.6.51": "Changed: Updated Russian language files.\nFixed: Excessive memory usage.",
@@ -13,7 +14,7 @@
 		"1.1.11": "See GitHub commits for changelog"
 	},
 	"promos": {
-		"1.12.2-latest": "1.9",
-		"1.12.2-recommended": "1.9"
+		"1.12.2-latest": "1.10",
+		"1.12.2-recommended": "1.10"
 	}
 }
