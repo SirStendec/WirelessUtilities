@@ -72,6 +72,10 @@ public class PluginRegistry {
             addPlugin("cyclicmagic", new CyclicPlugin());
     }
 
+    public static boolean hasJEI() {
+        return Loader.isModLoaded("jei");
+    }
+
     public static void preInit(FMLPreInitializationEvent event) {
         findPlugins();
 

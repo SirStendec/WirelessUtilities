@@ -5,6 +5,7 @@ import cofh.core.gui.element.ElementBase;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.plugins.JEI.JEIPlugin;
+import com.lordmau5.wirelessutils.plugins.PluginRegistry;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.crafting.IWUCraftingMachine;
 import com.lordmau5.wirelessutils.utils.crafting.IWURecipe;
@@ -52,7 +53,7 @@ public class ElementCraftingProgress extends ElementBase {
     @Override
     public boolean onMousePressed(int mouseX, int mouseY, int mouseButton) throws IOException {
         String category = machine.getRecipeCategory();
-        if ( category != null && JEIPlugin.showRecipeCategory(category) ) {
+        if ( category != null && PluginRegistry.hasJEI() && JEIPlugin.hasJEI() && JEIPlugin.showRecipeCategory(category) ) {
             BaseGuiContainer.playClickSound(1F);
             return true;
         }
@@ -104,7 +105,7 @@ public class ElementCraftingProgress extends ElementBase {
         } else
             recipe.addTooltip(list, machine);
 
-        if ( JEIPlugin.hasJEI() && machine.getRecipeCategory() != null ) {
+        if ( PluginRegistry.hasJEI() && JEIPlugin.hasJEI() && machine.getRecipeCategory() != null ) {
             list.add("");
             list.add(new TextComponentTranslation("info." + WirelessUtils.MODID + ".crafting.recipes").setStyle(TextHelpers.GRAY).getFormattedText());
         }
