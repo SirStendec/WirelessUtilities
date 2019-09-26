@@ -46,9 +46,26 @@ public interface ITargetProvider {
      *
      * @param origin The first position
      * @param target The second position
+     * @return The distance in blocks between the two positions.
+     */
+    static double calculateDistance(BlockPosDimension origin, BlockPosDimension target) {
+        final long squared = calculateDistanceSquared(origin, target);
+        if ( squared == 0 )
+            return 0;
+
+        return Math.sqrt(squared);
+    }
+
+    /**
+     * Calculate the distance squared between two positions, adding a penalty of 1000 for
+     * targets in other dimensions and using dimensional scale factors for correct
+     * calculations within the nether.
+     *
+     * @param origin The first position
+     * @param target The second position
      * @return The distance squared in blocks between the two positions.
      */
-    static long calculateDistance(BlockPosDimension origin, BlockPosDimension target) {
+    static long calculateDistanceSquared(BlockPosDimension origin, BlockPosDimension target) {
         int x1, x2, y1, y2, z1, z2, extra;
         x1 = origin.getX();
         y1 = origin.getY();
@@ -98,14 +115,14 @@ public interface ITargetProvider {
             if ( distanceMap.containsKey(o1) )
                 d1 = distanceMap.get(o1);
             else {
-                d1 = calculateDistance(origin, o1);
+                d1 = calculateDistanceSquared(origin, o1);
                 distanceMap.put(o1, d1);
             }
 
             if ( distanceMap.containsKey(o2) )
                 d2 = distanceMap.get(o2);
             else {
-                d2 = calculateDistance(origin, o2);
+                d2 = calculateDistanceSquared(origin, o2);
                 distanceMap.put(o2, d2);
             }
 

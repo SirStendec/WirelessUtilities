@@ -338,7 +338,7 @@ public class Worker<T extends TargetInfo> {
             else if ( distanceMap.containsKey(val1.pos) )
                 d1 = distanceMap.get(val1.pos);
             else {
-                d1 = ITargetProvider.calculateDistance(origin, val1.pos);
+                d1 = ITargetProvider.calculateDistanceSquared(origin, val1.pos);
                 distanceMap.put(val1.pos, d1);
             }
 
@@ -347,7 +347,7 @@ public class Worker<T extends TargetInfo> {
             else if ( distanceMap.containsKey(val2.pos) )
                 d2 = distanceMap.get(val2.pos);
             else {
-                d2 = ITargetProvider.calculateDistance(origin, val2.pos);
+                d2 = ITargetProvider.calculateDistanceSquared(origin, val2.pos);
                 distanceMap.put(val2.pos, d2);
             }
 
