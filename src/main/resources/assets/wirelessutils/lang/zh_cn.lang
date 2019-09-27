@@ -112,11 +112,35 @@ item.wirelessutils.relative_positional_card.name=相对位置卡
 item.wirelessutils.relative_positional_card.info.0=你可以潜行右击一个
 item.wirelessutils.relative_positional_card.info.1=方块来设置起始方块，
 item.wirelessutils.relative_positional_card.info.2=再潜行右击一个方块
-item.wirelessutils.relative_positional_card.info.3=来存储相对位置。
+item.wirelessutils.relative_positional_card.info.3=来存储偏移，或右击
+item.wirelessutils.relative_positional_card.info.4=打开GUI直接输入。
 item.wirelessutils.relative_positional_card.highlight=%s (%s)
 item.wirelessutils.relative_positional_card.distance=距离：%s
 item.wirelessutils.relative_positional_card.invalid.range=目标位置不在范围内。
 item.wirelessutils.relative_positional_card.invalid.unset=没有已设置的目标。
+
+item.wirelessutils.area_card.name=绝对区域位置卡
+item.wirelessutils.area_card.info.0=潜行右击一个方块来
+item.wirelessutils.area_card.info.1=存储锚定的位置和面，
+item.wirelessutils.area_card.info.2=然后右击打开GUI设
+item.wirelessutils.area_card.info.3=置区域的长宽高。
+item.wirelessutils.area_card.highlight=%s (%s)
+item.wirelessutils.area_card.distance=距离：%s
+item.wirelessutils.area_card.area=区域：高%s x 宽s% x 长%s
+item.wirelessutils.area_card.invalid.range=目标位置不在范围内。
+item.wirelessutils.area_card.invalid.unset=没有已设置的目标。
+
+item.wirelessutils.relative_area_card.name=相对绝对区域位置卡
+item.wirelessutils.relative_area_card.info.0=你可以潜行右击一个
+item.wirelessutils.relative_area_card.info.1=方块来设置起始方块，
+item.wirelessutils.relative_area_card.info.2=再潜行右击一个方块
+item.wirelessutils.relative_area_card.info.3=来存储偏移，或右击
+item.wirelessutils.relative_area_card.info.4=打开GUI直接输入。
+item.wirelessutils.relative_area_card.highlight=%s (%s)
+item.wirelessutils.relative_area_card.distance=距离：%s
+item.wirelessutils.relative_area_card.area=区域：高%s x 宽s% x 长%s
+item.wirelessutils.relative_area_card.invalid.range=目标位置不在范围内。
+item.wirelessutils.relative_area_card.invalid.unset=没有已设置的目标。
 
 item.wirelessutils.fluxed_pearl.name=通量珍珠
 item.wirelessutils.fluxed_pearl.weather.0=珍珠似乎对高空的云有
@@ -346,6 +370,10 @@ item.wirelessutils.filter_augment.info.0=该升级能防止匹配的
 item.wirelessutils.filter_augment.info.1=物品被插入机器的内
 item.wirelessutils.filter_augment.info.2=部存储。
 item.wirelessutils.filter_augment.info.3=
+item.wirelessutils.filter_augment.held_info.0=当拿在副手，该升级
+item.wirelessutils.filter_augment.held_info.1=会防止你拾起符合过
+item.wirelessutils.filter_augment.held_info.2=滤器过滤条件的物品。
+item.wirelessutils.filter_augment.held_info.3=
 
 item.wirelessutils.filter_augment.voiding=湮灭物品
 item.wirelessutils.filter_augment.nbt=忽略NBT
@@ -552,6 +580,9 @@ info.wirelessutils.vaporizer.bad_config.0=请配置模块。
 info.wirelessutils.vaporizer.empty_whitelist.0=目标白名单为空。
 info.wirelessutils.vaporizer.insufficient_budget.0=被配置的模块无法在此机器上运行。
 info.wirelessutils.vaporizer.missing_weapon.0=请放入武器以供屠宰模块使用。
+info.wirelessutils.vaporizer.too_many_entities.0=邻近实体过多，无法再生成。
+info.wirelessutils.vaporizer.no_input.0=请将物品输入输入缓存。
+info.wirelessutils.vaporizer.no_empty_output.0=请将物品移出输出缓存。
 
 info.wirelessutils.item_rate.second=个物品/s
 info.wirelessutils.item_rate.tick=个物品/t
@@ -597,11 +628,9 @@ btn.wirelessutils.use_ore.info.3=物品会同等对待。
 btn.wirelessutils.use_ore.list=匹配矿物：
 
 btn.wirelessutils.voiding=物品湮灭：%s
-btn.wirelessutils.voiding.info.0=当此选项被启用，安
-btn.wirelessutils.voiding.info.1=装此升级的机器会接
-btn.wirelessutils.voiding.info.2=收不通过过滤器的物
-btn.wirelessutils.voiding.info.3=品，这些物品会被直
-btn.wirelessutils.voiding.info.4=接散入虚空。
+btn.wirelessutils.voiding.info.0=当启用，不匹配过滤
+btn.wirelessutils.voiding.info.1=条件的物品会立即被
+btn.wirelessutils.voiding.info.2=删除。
 
 btn.wirelessutils.match_mod=匹配模组：%s
 btn.wirelessutils.match_mod.info.0=当选项被启用，只要
@@ -679,6 +708,7 @@ info.wirelessutils.crafting.input=输入：%s
 info.wirelessutils.crafting.fluid=使用：%2s的%1smB
 info.wirelessutils.crafting.power=使用：%s RF
 info.wirelessutils.crafting.output=输出：%s
+info.wirelessutils.crafting.recipes=单击查看配方
 
 info.wirelessutils.work_budget=工作缓存
 info.wirelessutils.work_budget.per_tick=+%s/tick
@@ -723,6 +753,12 @@ info.wirelessutils.ae2.channels=频道：%d/%d
 
 chat.wirelessutils.upgrade.success=将%s安装到%s。
 chat.wirelessutils.upgrade.failed=不能将%s安装到%s。
+
+commands.wirelessutils.profile.usage=/wu_profile <start/stop>
+commands.wirelessutils.profile.already_started=无线设备分析器已经在运行。
+commands.wirelessutils.profile.start=运行无线设备分析器。
+commands.wirelessutils.profile.not_started=无线设备分析器未在运行。
+commands.wirelessutils.profile.stop=无线设备分析器在%s秒(%s ticks)后停止运行。
 
 commands.wirelessutils.voidgen.usage=/wu_voidgen <entity-id> [crystallized:true/false] [entityTag]
 commands.wirelessutils.voidgen.tag_error=实体标签解析失败：%s
