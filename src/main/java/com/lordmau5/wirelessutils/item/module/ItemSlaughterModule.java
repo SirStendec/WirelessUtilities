@@ -197,7 +197,6 @@ public class ItemSlaughterModule extends ItemFilteringModule {
         else if ( mode > 3 )
             mode = ModConfig.vaporizers.modules.slaughter.collectExperienceMinimum;
 
-
         tag.setByte("CollectExp", (byte) mode);
         stack.setTagCompound(tag);
         return stack;

@@ -185,6 +185,13 @@ item.wirelessutils.conversion_upgrade.name=Conversion Kit
 
 item.wirelessutils.base_module.name=Module Base
 
+item.wirelessutils.fishing_module.name=Fishing Module
+item.wirelessutils.fishing_module.info.0=This module will attempt to fish from
+item.wirelessutils.fishing_module.info.1=any water blocks within the Vaporizer's
+item.wirelessutils.fishing_module.info.2=working area.
+item.wirelessutils.fishing_module.drops=Drops: %s
+item.wirelessutils.fishing_module.exp=Experience: %s
+
 item.wirelessutils.animal_slaughter_module.name=Animal Slaughter Module
 item.wirelessutils.animal_slaughter_module.info.0=This module will kill any living
 item.wirelessutils.animal_slaughter_module.info.1=creatures unfortunate enough to
@@ -583,6 +590,7 @@ info.wirelessutils.vaporizer.missing_weapon.0=Please insert a weapon for the Sla
 info.wirelessutils.vaporizer.too_many_entities.0=There are too many entities nearby to spawn more.
 info.wirelessutils.vaporizer.no_input.0=Please insert items into the input buffer.
 info.wirelessutils.vaporizer.no_empty_output.0=Please remove items from the output buffer.
+info.wirelessutils.vaporizer.missing_rod.0=Please insert a fishing rod for the Fishing Module to use.
 
 info.wirelessutils.item_rate.second=Items/s
 info.wirelessutils.item_rate.tick=Items/t

@@ -61,6 +61,7 @@ import com.lordmau5.wirelessutils.item.cards.ItemRelativePositionalCard;
 import com.lordmau5.wirelessutils.item.module.ItemBaseModule;
 import com.lordmau5.wirelessutils.item.module.ItemCaptureModule;
 import com.lordmau5.wirelessutils.item.module.ItemCloneModule;
+import com.lordmau5.wirelessutils.item.module.ItemFishingModule;
 import com.lordmau5.wirelessutils.item.module.ItemLaunchModule;
 import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
@@ -439,6 +440,7 @@ public class CommonProxy {
         registerItem(event, new ItemCloneModule());
         registerItem(event, new ItemLaunchModule());
         registerItem(event, new ItemTheoreticalSlaughterModule());
+        registerItem(event, new ItemFishingModule());
 
         PluginRegistry.registerItems(event);
     }

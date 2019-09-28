@@ -12,6 +12,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -26,6 +27,7 @@ import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LootingLevelEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.event.entity.player.ItemFishedEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -134,6 +136,16 @@ public class ServerProxy extends CommonProxy {
             EntityLivingBase entity = event.getEntityLiving();
             if ( entity.getHeldItemMainhand().getItem() == ModItems.itemQuenchedPearl || entity.getHeldItemOffhand().getItem() == ModItems.itemQuenchedPearl )
                 event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onFishing(ItemFishedEvent event) {
+        final EntityFishHook hook = event.getHookEntity();
+        if ( hook != null ) {
+            final EntityPlayer player = hook.getAngler();
+            if ( player instanceof TileBaseVaporizer.WUVaporizerPlayer )
+                ((TileBaseVaporizer.WUVaporizerPlayer) player).getVaporizer().onFishingDrops(event);
         }
     }
 

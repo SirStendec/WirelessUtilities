@@ -1,0 +1,26 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"pattern": [
+		" F ",
+		"BAV"
+	],
+	"key": {
+		"F": {
+			"item": "minecraft:fishing_rod"
+		},
+		"B": {
+			"item": "minecraft:bucket"
+		},
+		"V": {
+			"item": "#VILLAGER_VOID_PEARL"
+		},
+		"A": {
+			"item": "wirelessutils:base_module"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:fishing_module",
+		"count": 1
+	}
+}

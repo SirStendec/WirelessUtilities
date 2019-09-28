@@ -1265,6 +1265,10 @@ public class ModConfig {
         @Config.Comment("Slaughter Modules will kill all living entities within the Vaporizer's working area.")
         public SlaughterModule slaughter = new SlaughterModule();
 
+        @Config.Name("Fishing Module")
+        @Config.Comment("Fishing Modules will fish for things if there is water within the Vaporizer's working area.")
+        public FishingModule fishing = new FishingModule();
+
         @Config.Name("Theoretical Slaughter Module")
         @Config.Comment("The Theoretical Slaughter Module kills theoretical copies of an entity.")
         public TheoreticalSlaughterModule theoreticalSlaughter = new TheoreticalSlaughterModule();
@@ -1857,6 +1861,89 @@ public class ModConfig {
         @Config.Name("Never Void Player Drops")
         @Config.Comment("When enabled, items dropped by killed players will never be voided by a Vaporizer.")
         public boolean neverVoidPlayers = true;
+    }
+
+    public static class FishingModule {
+        @Config.Name("Required Level")
+        @Config.Comment("Vaporizers must be at least this level in order to use this module.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
+        @Config.Name("Allow Fishing Rod")
+        @Config.Comment("When enabled, the Fishing Module will allow a Fishing Rod to be placed in its input slot. It will use the fishing rod when fishing, applying looting and speed from the rod.")
+        @Config.RequiresWorldRestart
+        public boolean allowRod = true;
+
+        @Config.Name("Require Fishing Rod")
+        @Config.Comment("When enabled, the Fishing Module will not run without a Fishing Rod in its input slot.")
+        @Config.RequiresWorldRestart
+        public boolean requireRod = false;
+
+        @Config.Name("Maximum Exp per Catch")
+        @Config.Comment("At most this many experience points will be generated per catch. If set to zero, experience will not be generated.")
+        @Config.RangeInt(min = 0)
+        public int maxExp = 3;
+
+        @Config.Name("Collect Drops - Default")
+        @Config.Comment("0 = Ignore Drops, 1 = Collect Drops till Full, 2 = Collect All Drops, 3 = Void Drops")
+        public int collectDrops = 1;
+
+        @Config.Name("Collect Drops - Minimum")
+        @Config.Comment("0 = Ignore Drops, 1 = Collect Drops till Full, 2 = Collect All Drops, 3 = Void Drops")
+        public int collectDropsMinimum = 0;
+
+        @Config.Name("Collect Experience - Default")
+        @Config.Comment({
+                "Experience is not collected when drops are not collected.",
+                "0 = Ignore Experience, 1 = Collect Experience till Full, 2 = Collect All Experience, 3 = Void Experience"
+        })
+        public int collectExperience = 2;
+
+        @Config.Name("Collect Experience - Minimum")
+        @Config.Comment("0 = Ignore Experience, 1 = Collect Experience till Full, 2 = Collect All Experience, 3 = Void Experience")
+        public int collectExperienceMinimum = 0;
+
+        @Config.Name("Max Simultaneous Casts")
+        @Config.Comment("Do not allow a Fishing Module to cast more than this many lines at one time.")
+        @Config.RangeInt(min = 1)
+        public int maxCasts = 50;
+
+        @Config.Name("Budget per Cast")
+        @Config.Comment("Use this much action budget per cast line.")
+        @Config.RangeInt(min = 0)
+        public int budget = 15;
+
+        @Config.Name("Budget per Cast - Using Rod")
+        @Config.Comment("Use this much additional action budget per cast line when a rod is present.")
+        @Config.RangeInt(min = 0)
+        public int budgetRod = 10;
+
+        @Config.Name("Energy per Cast")
+        @Config.Comment("Use this much base energy per cast line.")
+        @Config.RangeInt(min = 0)
+        public int energy = 1000;
+
+        @Config.Name("Energy per Cast - Using Rod")
+        @Config.Comment("Use this much additional energy per cast line when a rod is present.")
+        @Config.RangeInt(min = 0)
+        public int energyRod = 500;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for vaporizers using this module.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double energyMultiplier = 1;
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for vaporizers using this module.")
+        @Config.RequiresWorldRestart
+        public int energyAddition = 0;
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This module will drain this amount of RF/t from non-disabled vaporizers using them.")
+        @Config.RequiresWorldRestart
+        public int energyDrain = 0;
     }
 
     public static class TheoreticalSlaughterModule {

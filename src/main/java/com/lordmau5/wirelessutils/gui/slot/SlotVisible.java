@@ -43,4 +43,6 @@ public class SlotVisible extends Slot implements IVisibleSlot {
 
         return super.canTakeStack(playerIn);
     }
+
+
 }

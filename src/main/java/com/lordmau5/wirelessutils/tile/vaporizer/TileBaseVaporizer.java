@@ -39,7 +39,9 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -56,6 +58,7 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
+import net.minecraftforge.event.entity.player.ItemFishedEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -1744,6 +1747,34 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     /* Event Handling */
 
+    public void onFishingDrops(ItemFishedEvent event) {
+        final int dropMode = behavior == null ? 0 : behavior.getDropMode();
+        final int expMode = behavior == null ? 0 : behavior.getExperienceMode();
+        final int maxExp = ModConfig.vaporizers.modules.fishing.maxExp;
+        if ( world == null || world.isRemote )
+            return;
+
+        final EntityFishHook hook = event.getHookEntity();
+        final BlockPos hookPos = hook.getPosition();
+        event.setCanceled(true);
+
+        for (ItemStack stack : event.getDrops()) {
+            if ( dropMode != 3 ) {
+                ItemStack remaining = dropMode == 0 ? stack : insertOutputStack(stack);
+                if ( dropMode != 2 && !remaining.isEmpty() )
+                    CoreUtils.dropItemStackIntoWorldWithVelocity(remaining, hook.world, hookPos);
+            }
+
+            if ( expMode != 3 && maxExp > 0 ) {
+                int remaining = world.rand.nextInt(maxExp) + 1;
+                if ( expMode != 0 )
+                    remaining = consumeExperience(remaining);
+                if ( expMode != 2 && remaining > 0 )
+                    world.spawnEntity(new EntityXPOrb(world, hook.posX, hook.posY, hook.posZ, remaining));
+            }
+        }
+    }
+
     public void onItemDrops(LivingDropsEvent event) {
         int mode = behavior == null ? 0 : behavior.getDropMode();
         if ( mode == 0 )
@@ -1768,18 +1799,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         });
     }
 
-    public void onExperienceDrops(LivingExperienceDropEvent event) {
-        int mode = behavior == null ? 0 : behavior.getExperienceMode();
-        if ( mode == 0 )
-            return;
-
-        else if ( mode == 3 ) {
-            event.setCanceled(true);
-            return;
-        }
-
+    public int consumeExperience(int value) {
         if ( !hasFluid() || hasSpecialFluid() )
-            return;
+            return value;
 
         FluidStack existing = tank.getFluid();
         Fluid fillFluid;
@@ -1801,20 +1823,32 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             rate = fluidRate;
         }
 
-        int remaining = event.getDroppedExperience();
+        if ( fillFluid == null || rate == 0 )
+            return value;
 
-        if ( fillFluid != null && rate != 0 ) {
-            int amount = rate * remaining;
-            int used = tank.fill(new FluidStack(fillFluid, amount), true);
-            if ( used > 0 ) {
-                markChunkDirty();
-                lastFluid = fillFluid;
-                if ( fluidRate == 0 )
-                    fluidRate = rate;
-            }
-
-            remaining = Math.floorDiv(amount - used, rate);
+        int amount = rate * value;
+        int used = tank.fill(new FluidStack(fillFluid, amount), true);
+        if ( used > 0 ) {
+            markChunkDirty();
+            lastFluid = fillFluid;
+            if ( fluidRate == 0 )
+                fluidRate = rate;
         }
+
+        return Math.floorDiv(amount - used, rate);
+    }
+
+    public void onExperienceDrops(LivingExperienceDropEvent event) {
+        int mode = behavior == null ? 0 : behavior.getExperienceMode();
+        if ( mode == 0 )
+            return;
+
+        else if ( mode == 3 ) {
+            event.setCanceled(true);
+            return;
+        }
+
+        int remaining = consumeExperience(event.getDroppedExperience());
 
         if ( mode == 2 || remaining == 0 )
             event.setCanceled(true);
