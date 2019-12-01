@@ -49,6 +49,12 @@ tile.wirelessutils.directional_vaporizer.info.1=испарения объект�
 tile.wirelessutils.directional_vaporizer.info.2=зоне, а затем обрабатывает их
 tile.wirelessutils.directional_vaporizer.info.3=с установленным модулем.
 
+tile.wirelessutils.positional_vaporizer.name=Позиционный испаритель
+tile.wirelessutils.positional_vaporizer.info.0=Позиционный испаритель работает путем
+tile.wirelessutils.positional_vaporizer.info.1=испарения сущностей в заданных позициях,
+tile.wirelessutils.positional_vaporizer.info.2= а затем обработки их с
+tile.wirelessutils.positional_vaporizer.info.3=установленным модулем.
+
 tile.wirelessutils.infinite_wireless_transmitter.name=Бесконечный беспроводной передатчик
 
 tile.wirelessutils.directional_rs_network.name=Направленная сеть RS
@@ -91,7 +97,7 @@ item.wirelessutils.player_positional_card.info.1=его для себя.
 #item.wirelessutils.player_positional_card.info.2=для настройки того,
 #item.wirelessutils.player_positional_card.info.3=что может быть доступно.
 item.wirelessutils.player_positional_card.highlight=%s (%s)
-item.wirelessutils.player_positional_card.player=Player: %s
+item.wirelessutils.player_positional_card.player=Игрок: %s
 item.wirelessutils.player_positional_card.invalid.unset=Цель не была установлена.
 
 item.wirelessutils.positional_card.name=Абсолютная позиционная карта
@@ -105,12 +111,36 @@ item.wirelessutils.positional_card.invalid.unset=Цель не была уста
 item.wirelessutils.relative_positional_card.name=Относительная позиционная карта
 item.wirelessutils.relative_positional_card.info.0=Сидя-Используйте этот предмет на блоке, чтобы установить
 item.wirelessutils.relative_positional_card.info.1=начало координат, а затем Сидя-Используйте этот предмет
-item.wirelessutils.relative_positional_card.info.2=в другом блоке, чтобы сохранить относительную
-item.wirelessutils.relative_positional_card.info.3=позицию.
+item.wirelessutils.relative_positional_card.info.2=в другом блоке, чтобы сохранить относительную позицию, или
+item.wirelessutils.relative_positional_card.info.3=просто используйте его, чтобы открыть свой графический
+item.wirelessutils.relative_positional_card.info.4=интерфейс для ввода чисел напрямую.
 item.wirelessutils.relative_positional_card.highlight=%s (%s)
 item.wirelessutils.relative_positional_card.distance=Дистанция: %s
 item.wirelessutils.relative_positional_card.invalid.range=Целевое местоположение не находится в пределах досягаемости.
 item.wirelessutils.relative_positional_card.invalid.unset=Цель не была установлена.
+
+item.wirelessutils.area_card.name=Абсолютная карта области
+item.wirelessutils.area_card.info.0=Сидя-используйте этот предмет на блоке для сохранения
+item.wirelessutils.area_card.info.1=его позиции привязки и стороны, а затем используйте его,
+item.wirelessutils.area_card.info.2=чтобы открыть графический интерфейс для установки
+item.wirelessutils.area_card.info.3=его диапазона.
+item.wirelessutils.area_card.highlight=%s (%s)
+item.wirelessutils.area_card.distance=Дистанция: %s
+item.wirelessutils.area_card.area=Область: %sв x %sш x %sд
+item.wirelessutils.area_card.invalid.range=Целевое местоположение не находится в пределах досягаемости.
+item.wirelessutils.area_card.invalid.unset=Цель не была установлена.
+
+item.wirelessutils.relative_area_card.name=Относительная карта области
+item.wirelessutils.relative_area_card.info.0=Сидя-используйте этот предмет в блоке для установки
+item.wirelessutils.relative_area_card.info.1=источника, а затем используйте его в другом блоке для
+item.wirelessutils.relative_area_card.info.2=хранения относительной позиции или просто используйте
+item.wirelessutils.relative_area_card.info.3=его для открытия графического интерфейса
+item.wirelessutils.relative_area_card.info.4=для ввода чисел напрямую.
+item.wirelessutils.relative_area_card.highlight=%s (%s)
+item.wirelessutils.relative_area_card.distance=Дистанция: %s
+item.wirelessutils.relative_area_card.area=Область: %sв x %sш x %sд
+item.wirelessutils.relative_area_card.invalid.range=Целевое местоположение не находится в пределах досягаемости.
+item.wirelessutils.relative_area_card.invalid.unset=Цель не была установлена.
 
 item.wirelessutils.fluxed_pearl.name=Флаксовый жемчуг
 item.wirelessutils.fluxed_pearl.weather.0=Кажется, жемчуг реагирует
@@ -130,10 +160,16 @@ item.wirelessutils.charged_pearl.jei.1=Ходят слухи, что заряж�
 item.wirelessutils.quenched_pearl.name=Закаленный жемчуг
 item.wirelessutils.scorched_pearl.name=Выжженный жемчуг
 
+item.wirelessutils.crystallized_void_pearl.name=Кристаллизованный пустотный жемчуг
+item.wirelessutils.crystallized_void_pearl.jei.0=Разбив пустотную жемчужину о кристалл Края, мы каким-то образом кристаллизовали сам пустотный жемчуг.
+item.wirelessutils.crystallized_void_pearl.jei.1=Пустотные жемчуги в этом состоянии становятся очень стабильными, и их больше нельзя использовать для захвата существ. Тем не менее, любые существа, ранее пойманные в ловушку внутри, становятся как-то легче получить доступ.
+
 item.wirelessutils.void_pearl.name=Жемчуг пустоты
 item.wirelessutils.void_pearl.contains=Содержит:
+item.wirelessutils.void_pearl.baby=Ребенок %s
+item.wirelessutils.void_pearl.health=Здоровье: %s
+item.wirelessutils.void_pearl.value=Значение: %s
 item.wirelessutils.void_pearl.empty=Пусто
-item.wirelessutils.void_pearl.entry=- %s
 item.wirelessutils.void_pearl.jei.0=Бросание стабилизированного жемчуга Края в портал Края заполнит его ничем.
 item.wirelessutils.void_pearl.jei.1=Пустота стремится быть заполненной, и с этой целью она, кажется, поглощает любое существо, с которым соприкасается.
 
@@ -146,6 +182,107 @@ item.wirelessutils.machine_panel.name=Панель машины
 
 item.wirelessutils.level_upgrade.name=Комплект обновления
 item.wirelessutils.conversion_upgrade.name=Набор для преобразования
+
+item.wirelessutils.base_module.name=Базовый модуль
+
+item.wirelessutils.animal_slaughter_module.name=Модуль убоя животных
+item.wirelessutils.animal_slaughter_module.info.0=Этот модуль убьет любое живое
+item.wirelessutils.animal_slaughter_module.info.1=существо, достаточно забрести
+item.wirelessutils.animal_slaughter_module.info.2=в него. Он производит мясо
+item.wirelessutils.animal_slaughter_module.info.3=или розовую слизь, в зависимости
+item.wirelessutils.animal_slaughter_module.info.4=от своей конфигурации.
+
+item.wirelessutils.animal_slaughter_module.fluid_invalid=Резервуар для жидкости испарителя содержит недопустимую жидкость.
+item.wirelessutils.animal_slaughter_module.fluid_full=Резервуар для жидкости испарителя полон.
+
+item.wirelessutils.animal_slaughter_module.producing=Производство: %s
+
+item.wirelessutils.slaughter_module.name=Убойный модуль
+item.wirelessutils.slaughter_module.info.0=Этот модуль убьет любое живое существо,
+item.wirelessutils.slaughter_module.info.1=достаточно несчастное,
+item.wirelessutils.slaughter_module.info.2=чтобы оказаться в рабочей 
+item.wirelessutils.slaughter_module.info.3=зоне его испарителя.
+
+item.wirelessutils.slaughter_module.weapon.valid=Это действительное оружие.
+item.wirelessutils.slaughter_module.weapon.invalid=Это не действительное оружие.
+
+item.wirelessutils.slaughter_module.as_player=Моделирование игрока
+item.wirelessutils.slaughter_module.drops=Выпадания: %s
+item.wirelessutils.slaughter_module.exp=Опыт: %s
+
+item.wirelessutils.theoretical_slaughter_module.name=Теоретический модуль убоя
+item.wirelessutils.theoretical_slaughter_module.info.0=Этот модуль теоретически убьет
+item.wirelessutils.theoretical_slaughter_module.info.1=теоретические дубликаты
+item.wirelessutils.theoretical_slaughter_module.info.2=захваченного существа.
+
+item.wirelessutils.theoretical_slaughter_module.exact=Убийство точных копий
+item.wirelessutils.theoretical_slaughter_module.exact.off=Не убивать точные копии
+item.wirelessutils.theoretical_slaughter_module.drops=Выпадания: %s
+
+item.wirelessutils.filtered_module.entry=- %s
+item.wirelessutils.filtered_module.info_list=%s Зажмите §e§oCtrl§r§7 для %s предметов
+item.wirelessutils.filtered_module.age=Возраст: %s
+item.wirelessutils.filtered_module.age_info.0=Фильтр живых существ на основе
+item.wirelessutils.filtered_module.age_info.1=их взрослой жизни.
+item.wirelessutils.filtered_module.named=Название: %s
+item.wirelessutils.filtered_module.named_info.0=Фильтр объектов,
+item.wirelessutils.filtered_module.named_info.1=основываясь на том,
+item.wirelessutils.filtered_module.named_info.2=было ли им дано имя.
+item.wirelessutils.filtered_module.sneak=Подлец: %s
+item.wirelessutils.filtered_module.sneak_info.0=Фильтр живых существ,
+item.wirelessutils.filtered_module.sneak_info.1=основываясь на том,
+item.wirelessutils.filtered_module.sneak_info.2=крадутся они или стоят.
+item.wirelessutils.filtered_module.player=Игрок: %s
+item.wirelessutils.filtered_module.player_info.0=Фильтр живых существ на основе того,
+item.wirelessutils.filtered_module.player_info.1=являются ли они игроком
+item.wirelessutils.filtered_module.player_info.2=или нет.
+item.wirelessutils.filtered_module.list_info.0=Следующий список может вести себя
+item.wirelessutils.filtered_module.list_info.1=как белый список или черный список.
+item.wirelessutils.filtered_module.list_info.2=
+item.wirelessutils.filtered_module.list_info.3=Записи могут быть добавлены
+item.wirelessutils.filtered_module.list_info.4=с помощью модуля о сущностях
+item.wirelessutils.filtered_module.list_info.5=в мире. Подстановочные знаки можно
+item.wirelessutils.filtered_module.list_info.6=использовать для фильтрации по целым модам,
+item.wirelessutils.filtered_module.list_info.7=например: "minecraft:*"
+
+item.wirelessutils.slaughter_module.kill=%s испарился.
+item.wirelessutils.slaughter_module.kill.item=%s испарился с %s.
+
+item.wirelessutils.teleport_module.name=Модуль телепортации
+item.wirelessutils.teleport_module.info.0=Этот модуль будет перевозить любые
+item.wirelessutils.teleport_module.info.1=объекты в рабочей области
+item.wirelessutils.teleport_module.info.2=его испарителя по адресу,
+item.wirelessutils.teleport_module.info.3=указанному в установленной
+item.wirelessutils.teleport_module.info.4=позиционной карты.
+
+item.wirelessutils.capture_module.name=Модуль захвата
+item.wirelessutils.capture_module.info.0=Этот модуль будет захватывать любые живые
+item.wirelessutils.capture_module.info.1=существа в пределах рабочей области 
+item.wirelessutils.capture_module.info.2=его испарителя в жемчуг пустоты, 
+item.wirelessutils.capture_module.info.3=взятых от входа испарителем.
+
+item.wirelessutils.clone_module.name=Модуль дублирования
+item.wirelessutils.clone_module.info.0=Этот модуль использует опыт и другие
+item.wirelessutils.clone_module.info.1=захваченные существа, чтобы создать
+item.wirelessutils.clone_module.info.2=дубликаты предоставленному захваченных существ.
+item.wirelessutils.clone_module.limit=Предел спавна: %s
+item.wirelessutils.clone_module.limit.info.0=Испаритель будет спавнить дубликаты только
+item.wirelessutils.clone_module.limit.info.1=в том случае, если область в пределах %s блоков
+item.wirelessutils.clone_module.limit.info.2=его рабочей области содержит меньше,
+item.wirelessutils.clone_module.limit.info.3=чем это количество существ целевого типа.
+item.wirelessutils.clone_module.exact=Спавн точных копии
+item.wirelessutils.clone_module.exact.info.0=Спавн точных копий делает именно то, 
+item.wirelessutils.clone_module.exact.info.1=что это звучит как, за счет 
+item.wirelessutils.clone_module.exact.info.2=использования значительно больше топлива.
+item.wirelessutils.clone_module.exact.off=Не спавнить точные копии
+
+item.wirelessutils.launch_module.name=Модуль запуска
+item.wirelessutils.launch_module.info.0=Этот модуль испаряет и повторно собирает вещи на месте,
+item.wirelessutils.launch_module.info.1=но, когда он кладет их обратно вместе,
+item.wirelessutils.launch_module.info.2=это добавляет дополнительную скорость.
+
+item.wirelessutils.launch_module.speed=Скорость: %s
+item.wirelessutils.launch_module.fall_protect=Отрицание урона от падения.
 
 item.wirelessutils.base_augment.name=Базовое дополнение
 
@@ -174,7 +311,7 @@ item.wirelessutils.fluid_gen_augment.info.2=бак этой машины жид�
 item.wirelessutils.fluid_gen_augment.info.3=в обмен на энергию.
 
 item.wirelessutils.fluid_gen_augment.fluid=Жидкость: %s
-item.wirelessutils.fluid_gen_augment.fluid_amount=Скорость: %s mB/тик
+item.wirelessutils.fluid_gen_augment.fluid_amount=Скорость: %s мВ/тик
 item.wirelessutils.fluid_gen_augment.energy=Потребление энергии: %s
 item.wirelessutils.fluid_gen_augment.cows=Захвачено коровы: %s
 item.wirelessutils.fluid_gen_augment.mooshrooms=Захвачено грибных коров: %s
@@ -228,12 +365,50 @@ item.wirelessutils.range_augment.lock.0=Дополнение диапазона 
 item.wirelessutils.range_augment.lock.1=когда цель требует, чтобы дополнение
 item.wirelessutils.range_augment.lock.2=диапазона было в пределах диапазона.
 
+item.wirelessutils.filter_augment.name=Фильтрирующее дополнение
+item.wirelessutils.filter_augment.info.0=Это предотвращает увеличивающие
+item.wirelessutils.filter_augment.info.1=соответствующие элементы
+item.wirelessutils.filter_augment.info.2=из вставки в инвентарь
+item.wirelessutils.filter_augment.info.3=машин.
+item.wirelessutils.filter_augment.held_info.0=При удерживании в левой руке, 
+item.wirelessutils.filter_augment.held_info.1=это дополнение остановит вас от 
+item.wirelessutils.filter_augment.held_info.2=собирания предметов, которые 
+item.wirelessutils.filter_augment.held_info.3=соответствуют его фильтрам.
+
+item.wirelessutils.filter_augment.voiding=Опустошение предметов
+item.wirelessutils.filter_augment.nbt=Игнорирование NBT
+item.wirelessutils.filter_augment.meta=Игнорирование метаданных
+item.wirelessutils.filter_augment.ore=Использование словаря руды
+item.wirelessutils.filter_augment.match_mod=Соответствие предметов мода
+
+item.wirelessutils.filter_augment.entry=- %s
+item.wirelessutils.filter_augment.info_list=%s Зажмите §e§oAlt§r§7 для %s предметов
+
+item.wirelessutils.facing_augment.name=Дополнение удаленная сторона
+item.wirelessutils.facing_augment.info.0=Это дополнение позволяет направленным машинам
+item.wirelessutils.facing_augment.info.1=ориентированых на различные
+item.wirelessutils.facing_augment.info.2=стороны блоков, чем стороны были
+item.wirelessutils.facing_augment.info.3=обращены сами машины.
+
 item.wirelessutils.disabled=Этот предмет отключен в конфигурации.
 
 item.wirelessutils.augment.min_level=Требуемый уровень машины: %s
 item.wirelessutils.augment.energy=Использование энергии:
-item.wirelessutils.augment.energy.entry=- %s
-item.wirelessutils.augment.energy.action=%sx + %s RF/действие
+
+info.wirelessutils.modifier.multiplier=%sx
+info.wirelessutils.modifier.addition=+ %s
+info.wirelessutils.modifier.subtraction=- %s
+info.wirelessutils.modifier.entry=- %s
+info.wirelessutils.modifier.combiner=%s %s
+info.wirelessutils.modifier.energy=RF/действие
+info.wirelessutils.modifier.budget=за действие
+
+item.wirelessutils.augment.budget=Использование рабочего буфера:
+
+item.wirelessutils.machine_ctrl.inactive=Зажмите §e§oCtrl§r§7 для допустимых дополнений
+item.wirelessutils.machine_ctrl.active=Допустимые дополнения:
+item.wirelessutils.machine_ctrl.entry=- %s
+item.wirelessutils.machine_ctrl.none=Нет
 
 item.wirelessutils.augment_ctrl.inactive=Зажмите §e§oCtrl§r§7 для допустимых машин
 item.wirelessutils.augment_ctrl.active=Допустимые машины:
@@ -256,6 +431,8 @@ item.wirelessutils.transfer_augment.info.0=Это дополнение знач�
 item.wirelessutils.transfer_augment.info.1=скорость, с которой машина может
 item.wirelessutils.transfer_augment.info.2=передавать ресурсы в свои цели.
 
+item.wirelessutils.range_augment.tip.dir.volume=Направленный объем: %s блоков
+item.wirelessutils.range_augment.tip.dir.max_side=Направленный макс. диапазон: %s
 item.wirelessutils.range_augment.tip.directional=Направленный диапазон: %sx%sx%s
 item.wirelessutils.range_augment.tip.positional=Позиционный диапазон: %s
 item.wirelessutils.range_augment.tip.range_positional=%s блоков
@@ -317,6 +494,16 @@ tab.wirelessutils.positional_ae_network.1=Поместите позиционн�
 tab.wirelessutils.positional_ae_network.2=Используя дополнения, можно добавить более одной позиционной карты.
 tab.wirelessutils.positional_ae_network.3=Дополнения также могут помочь вам соединить блоки дальше от Позиционной сети АЕ. В конце концов, даже в разных измерениях!
 
+tab.wirelessutils.directional_vaporizer.0=Направленный испаритель испаряет объекты в определенном направлении.
+tab.wirelessutils.directional_vaporizer.1=Поведение испарителя полностью зависит от установленного в нем модуля. Без модуля он не будет работать.
+tab.wirelessutils.directional_vaporizer.2=Модули позволяют испарителю телепортировать объекты, убивать их, порождать копии или толкать их.
+tab.wirelessutils.directional_vaporizer.3=Используя дополнения, можно увеличить диапазон испарителя и дополнительно настроить его возможности.
+
+tab.wirelessutils.positional_vaporizer.0=Позиционный испаритель испаряет объекты в определенных положениях.
+tab.wirelessutils.positional_vaporizer.1=Поведение испарителя полностью зависит от установленного в нем модуля. Без модуля он не будет работать.
+tab.wirelessutils.positional_vaporizer.2=Модули позволяют испарителю телепортировать объекты, убивать их, порождать копии или толкать их.
+tab.wirelessutils.positional_vaporizer.3=Используя дополнения, можно увеличить диапазон испарителя и дополнительно настроить его возможности.
+
 tab.wirelessutils.auto_transfer=Контроль I/O
 tab.wirelessutils.auto_transfer.mode=Режим: %s
 tab.wirelessutils.auto_transfer.mode.input=Вход
@@ -324,6 +511,8 @@ tab.wirelessutils.auto_transfer.mode.output=Выход
 tab.wirelessutils.auto_transfer.mode.PASSIVE=Пассивный
 tab.wirelessutils.auto_transfer.mode.ACTIVE=Активный
 tab.wirelessutils.auto_transfer.mode.DISABLED=Отключено
+tab.wirelessutils.auto_transfer.mode.INPUT=Вход
+tab.wirelessutils.auto_transfer.mode.OUTPUT=Выход
 tab.wirelessutils.auto_transfer.side=Сторона: %s
 tab.wirelessutils.auto_transfer.side.TOP=Верх
 tab.wirelessutils.auto_transfer.side.LEFT=Лево
@@ -332,10 +521,26 @@ tab.wirelessutils.auto_transfer.side.BOTTOM=Низ
 tab.wirelessutils.auto_transfer.side.FRONT=Перед
 tab.wirelessutils.auto_transfer.side.BACK=Сзади
 
+tab.wirelessutils.open_gui.0=Открыть стандартный графический интерфейс для этого предмета.
+
+tab.wirelessutils.lock.locked.0=Нажмите здесь, чтобы разблокировать.
+tab.wirelessutils.lock.locked.1=Этот предмет в настоящее время заблокирован
+tab.wirelessutils.lock.locked.2=от всех изменений.
+
+tab.wirelessutils.lock.unlocked.0=Нажмите здесь, чтобы заблокировать.
+tab.wirelessutils.lock.unlocked.1=Этот предмет в настоящее время разблокирован
+tab.wirelessutils.lock.unlocked.2=и может быть изменен кем угодно.
+
 btn.wirelessutils.dec_area.one=Уменьшить на %s
 btn.wirelessutils.dec_area.all=Уменьшить все на %s
 btn.wirelessutils.inc_area.one=Увеличить на %s
 btn.wirelessutils.inc_area.all=Увеличить все на %s
+
+info.wirelessutils.x=X:
+info.wirelessutils.y=Y:
+info.wirelessutils.z=Z:
+
+info.wirelessutils.energy_at_tick=Мощность в тик
 
 info.wirelessutils.owner=Владелец: %s
 info.wirelessutils.no_owner=(не установлен)
@@ -354,19 +559,115 @@ info.wirelessutils.work_info.tooltip.rate=Скорость: %s
 info.wirelessutils.work_info.tooltip.targets=Цели: %s из %s
 info.wirelessutils.work_info.current=Текущая скорость:
 info.wirelessutils.work_info.maximum=Максимальная скорость:
+info.wirelessutils.work_info.sustained=Устойчивая скорость:
 info.wirelessutils.work_info.targets.name=Активные цели:
 info.wirelessutils.work_info.targets.info=%s из %s
 
+info.wirelessutils.work_info.unconfigured.title=Не удалось запустить
+info.wirelessutils.work_info.unconfigured.tooltip=Машина не может запуститься
+info.wirelessutils.work_info.unconfigured.explanation.0=Эта машина в настоящее время не может работать.
+
+info.wirelessutils.vaporizer_unit=Сущности/тик
+info.wirelessutils.vaporizer_unit.second=Сущности/сек.
+info.wirelessutils.vaporizer_unit.tick=Сущности/тик
+info.wirelessutils.vaporizer_unit.item=сек./сущность
+
+info.wirelessutils.vaporizer.missing_module.0=Пожалуйста, установите допустимый модуль.
+info.wirelessutils.vaporizer.cannot_spawn.0=Эта сущность не может быть порождена.
+info.wirelessutils.vaporizer.missing_entity.0=Пожалуйста, установите допустимый шаблон сущности.
+info.wirelessutils.vaporizer.missing_modifier.0=Пожалуйста, установите допустимый модификатор.
+info.wirelessutils.vaporizer.bad_config.0=Пожалуйста, настройте установленный модуль.
+info.wirelessutils.vaporizer.empty_whitelist.0=Цель белого списка пуста.
+info.wirelessutils.vaporizer.insufficient_budget.0=Настроенный модуль не может работать на этой машине.
+info.wirelessutils.vaporizer.missing_weapon.0=Пожалуйста, вставьте оружие для модуля убоя, чтобы использовать.
+info.wirelessutils.vaporizer.too_many_entities.0=Есть слишком много объектов поблизости, чтобы породить больше.
+info.wirelessutils.vaporizer.no_input.0=Пожалуйста, вставьте предметы в буфер ввода.
+info.wirelessutils.vaporizer.no_empty_output.0=Пожалуйста, удалите предметы из буфер вывода.
+
 info.wirelessutils.item_rate.second=Предметов/сек.
 info.wirelessutils.item_rate.tick=Предметов/тик
-info.wirelessutils.item_rate.item=Сек./предмет
+info.wirelessutils.item_rate.item=сек./предмет
 info.wirelessutils.buffer=Буфер
+info.wirelessutils.buffer.in_out=Вход / Выход
 
 jei.wirelessutils.charger=Предметная зарядка
 jei.wirelessutils.condenser=Предметная конденсация
 
+btn.wirelessutils.main=Основной
+btn.wirelessutils.module=Модуль
+
+btn.wirelessutils.as_player=Как игрок:
+btn.wirelessutils.as_player.info.0=При включении испаритель будет
+btn.wirelessutils.as_player.info.1=полностью имитировать игрока, использующего свое
+btn.wirelessutils.as_player.info.2=оружие, увеличивая поддержку определенного
+btn.wirelessutils.as_player.info.3=оружия за счет снижения
+btn.wirelessutils.as_player.info.4=качества и производительности.
+
+btn.wirelessutils.drop.drops=Выпадания:
+btn.wirelessutils.drop.exp=Опыт:
+
+btn.wirelessutils.blacklist=Черный список:
+btn.wirelessutils.whitelist=Белый список:
+
+btn.wirelessutils.ignore_meta=Игнорировать метаданные: %s
+btn.wirelessutils.ignore_meta.info.0=Если этот параметр включен, мета-значения
+btn.wirelessutils.ignore_meta.info.1=для предметов, такие как повреждения, будут
+btn.wirelessutils.ignore_meta.info.2=игнорироваться при фильтрации.
+
+btn.wirelessutils.ignore_nbt=Игнорировать NBT: %s
+btn.wirelessutils.ignore_nbt.info.0=Если этот параметр включен, данные NBT
+btn.wirelessutils.ignore_nbt.info.1=для предметов будут игнорироваться
+btn.wirelessutils.ignore_nbt.info.2=при фильтрации.
+
+btn.wirelessutils.use_ore=Использовать словарь руды: %s
+btn.wirelessutils.use_ore.info.0=Если этот параметр включен, элементы будут
+btn.wirelessutils.use_ore.info.1=проверяться на соответствие словарю руды
+btn.wirelessutils.use_ore.info.2=для фильтрации. Эквивалентные предметы
+btn.wirelessutils.use_ore.info.3=будут рассматриваться одинаково.
+
+btn.wirelessutils.use_ore.list=Соответствие руд:
+
+btn.wirelessutils.voiding=Опустошение предметов: %s
+btn.wirelessutils.voiding.info.0=Если этот параметр включен, предметы,
+btn.wirelessutils.voiding.info.1=не соответствующие этому фильтру,
+btn.wirelessutils.voiding.info.2=будут немедленно удалены.
+
+btn.wirelessutils.match_mod=Соответствие моду: %s
+btn.wirelessutils.match_mod.info.0=Если этот параметр включен, предметы
+btn.wirelessutils.match_mod.info.1=будут сопоставляться, пока они
+btn.wirelessutils.match_mod.info.2=добавляются тем же модом, что и один
+btn.wirelessutils.match_mod.info.3=из фильтра предметов.
+btn.wirelessutils.match_mod.info.4=Этот параметр несовместим с другими
+btn.wirelessutils.match_mod.info.5=режимами фильтрации.
+
+btn.wirelessutils.match_mod.disabled=Эта опция несовместима с соответствием мода.
+
+btn.wirelessutils.fall_protect=Защита от падения:
+btn.wirelessutils.fall_protect.0=Отключено
+btn.wirelessutils.fall_protect.1=Включено
+btn.wirelessutils.fall_protect.info.0=Если этот параметр включен, испаритель будет
+btn.wirelessutils.fall_protect.info.1=использовать немного больше энергии, чтобы
+btn.wirelessutils.fall_protect.info.2=гарантировать, что все, что он запускает,
+btn.wirelessutils.fall_protect.info.3=не получит никакого урона при приземлении.
+
+btn.wirelessutils.mode.0=---
+btn.wirelessutils.mode.1=Нет
+btn.wirelessutils.mode.2=Да
+
+btn.wirelessutils.age_mode.0=---
+btn.wirelessutils.age_mode.1=Ребенок
+btn.wirelessutils.age_mode.2=Взрослый
+
+btn.wirelessutils.drop_mode.0=Игнорировать
+btn.wirelessutils.drop_mode.1=Соберать до полного
+btn.wirelessutils.drop_mode.2=Собирать, потом опустошать
+btn.wirelessutils.drop_mode.3=Опустошать все
+
 btn.wirelessutils.edit=Редактировать
 btn.wirelessutils.save=Сохранить
+
+btn.wirelessutils.clear=Очистить
+btn.wirelessutils.clear.info.0=Ctrl+ЛКМ на этой кнопке, чтобы очистить карту.
 
 btn.wirelessutils.slot_locks.lock=Блокировка слотов
 btn.wirelessutils.slot_locks.unlock=Очистить слоты блокировки
@@ -389,17 +690,34 @@ btn.wirelessutils.hide_area=Скрыть рабочую зону
 btn.wirelessutils.area_scroll=Прокрутите, чтобы изменить цвета.
 btn.wirelessutils.range=Диапазон:
 
+btn.wirelessutils.cost=Стоимость:
+btn.wirelessutils.cost_fluid=%s (%s мВ)
+
 btn.wirelessutils.offset.vertical=Вертикально:
 btn.wirelessutils.offset.horizontal=Горизонтально:
 
+btn.wirelessutils.range.volume=Объем:
+btn.wirelessutils.range.max_volume=Макс. объем:
 btn.wirelessutils.range.height=Высота:
 btn.wirelessutils.range.length=Длина:
 btn.wirelessutils.range.width=Ширина:
 
+info.wirelessutils.crafting=Инвентарь создания
+info.wirelessutils.crafting.none=Не активно
+info.wirelessutils.crafting.input=Вход: %s
+info.wirelessutils.crafting.fluid=Использование: %s мВ из %s
+info.wirelessutils.crafting.power=Использование: %s RF
+info.wirelessutils.crafting.output=Выход: %s
+info.wirelessutils.crafting.recipes=Нажмите для рецептов
+
+info.wirelessutils.work_budget=Рабочий буфер
+info.wirelessutils.work_budget.per_tick=+%s/тик
+info.wirelessutils.work_budget.per_op=-%s/действие
+
 info.wirelessutils.slot_lock=Этот предмет не может быть удален.
 info.wirelessutils.max=Макс.: %s
 info.wirelessutils.min=Мин.: %s
-info.wirelessutils.range=Диапазон: %s to %s
+info.wirelessutils.range=Диапазон: %s в %s
 
 info.wirelessutils.blockpos.full=X: %s Y: %s Z: %s Изм.: %s
 info.wirelessutils.blockpos.basic=X: %s Y: %s Z: %s
@@ -408,10 +726,12 @@ info.wirelessutils.blockpos.dimension.simple=Изм.: %s
 info.wirelessutils.blockpos.dimension.named=Изм.: %s (%s)
 
 info.wirelessutils.configured=%s (настроено)
+info.wirelessutils.locked=%s (заблокировано)
+info.wirelessutils.locked.tip=Этот элемент заблокирован и не может быть перенастроен.
 
 info.wirelessutils.tiered.name=%s (%s)
-info.wirelessutils.tiered.tier=уровень %s
-info.wirelessutils.tiered.level.5=Творческий
+info.wirelessutils.tiered.tier=Уровень %s
+info.wirelessutils.tiered.level.creative=Творческий
 
 info.wirelessutils.tiered.upgrade.info.0=Этот предмет модернизирует машины
 info.wirelessutils.tiered.upgrade.info.1=из %s в %s.
@@ -434,13 +754,30 @@ info.wirelessutils.ae2.channels=%d из %d каналов
 chat.wirelessutils.upgrade.success=Установлено %s в %s.
 chat.wirelessutils.upgrade.failed=Не удалось установить %s в %s.
 
+commands.wirelessutils.profile.usage=/wu_profile <start/stop>
+commands.wirelessutils.profile.already_started=Профилировщик Wireless Utilities уже запущен.
+commands.wirelessutils.profile.start=Запуск профилировщика Wireless Utilities.
+commands.wirelessutils.profile.not_started=Профилировщик Wireless Utilities не запущен.
+commands.wirelessutils.profile.stop=Остановлен профилировщик Wireless Utilities после %s секунд (%s тиков).
+
+commands.wirelessutils.voidgen.usage=/wu_voidgen <entity-id> [crystallized:true/false] [entityTag]
+commands.wirelessutils.voidgen.tag_error=Не удалось выполнить синтаксический анализ тега сущности: %s
+commands.wirelessutils.voidgen.invalid_entity=Нет такой сущности: %s
+commands.wirelessutils.voidgen.success=Создан пустотный жемчуг: %s
+
 commands.wirelessutils.fluidgen.usage=/wu_fluidgen <held OR fluid-name> <mB/t> <energy> [color OR -] [fluidTag]
 commands.wirelessutils.fluidgen.tag_error=Ошибка анализа тега жидкости: %s
 commands.wirelessutils.fluidgen.not_holding=Не содержит предмет, содержащий жидкость для копирования.
 commands.wirelessutils.fluidgen.no_such_fluid=Нет такой жидкости с именем: %s
 commands.wirelessutils.fluidgen.success=Созданное дополнение: %s
 
+commands.wirelessutils.edit_item.not_holding=Нет удерживаемого предмета, который можно редактировать.
+
 commands.wirelessutils.debug.success=Созданный предмет: %s
+
+stat.wirelessutils.CapturedEntities=Захвачено пустотным жемчугом
+stat.wirelessutils.ThrownPearls=Брошено жемчугов
+stat.wirelessutils.CrystallizedPearls=Кристаллизировано пустотных жемчугов
 
 advancements.wirelessutils.root.title=Беспроводные утилиты
 advancements.wirelessutils.root.description=Поскольку провода просто мешают.
@@ -486,3 +823,9 @@ advancements.wirelessutils.roundabout.description=Бросьте жемчуг, �
 
 advancements.wirelessutils.enlightened.title=Просвещенный
 advancements.wirelessutils.enlightened.description=Бросьте флаксовый жемчуг на редстоун лампу.
+
+advancements.wirelessutils.the_void_tolls.title=Для кого звонит пустота
+advancements.wirelessutils.the_void_tolls.description=Сожгите жемчуг, а затем бросьте его в портал Края.
+
+advancements.wirelessutils.void_tolls_for_thee.title=Он звонит по тебе
+advancements.wirelessutils.void_tolls_for_thee.description=Захватите что-то в пустотный жемчуг.
