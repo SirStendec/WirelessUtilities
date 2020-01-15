@@ -677,7 +677,7 @@ public class Worker<T extends TargetInfo> {
                 profiler.endSection(); // 5 - check
                 profiler.startSection("loop"); // 5
 
-                if ( slots > start ) {
+                if ( slots > start && start >= 0 ) {
                     boolean invStarted = false;
                     boolean invWorked = false;
                     int i = start;
