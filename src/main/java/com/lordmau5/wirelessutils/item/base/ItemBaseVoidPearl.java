@@ -158,7 +158,7 @@ public abstract class ItemBaseVoidPearl extends ItemBasePearl implements INBTPre
             if ( health > 0 )
                 tooltip.add(new TextComponentTranslation(
                         I18N_KEY + ".health",
-                        health
+                        StringHelper.formatNumber((long) Math.floor(health))
                 ).getFormattedText());
 
             int exp = EntityUtilities.getBaseExperience(stack, worldIn);

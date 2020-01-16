@@ -17,8 +17,10 @@ import appeng.api.util.DimensionalCoord;
 import appeng.core.AEConfig;
 import appeng.core.features.AEFeature;
 import appeng.core.worlddata.WorldData;
+import cofh.core.network.PacketBase;
 import cofh.core.util.CoreUtils;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AEColorHelpers;
 import com.lordmau5.wirelessutils.tile.base.ITileInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
@@ -38,8 +40,11 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -65,6 +70,8 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
 
     private int activeUpdateDelay = 10;
 
+    private AEColor aeColor = AEColor.TRANSPARENT;
+
     private IGridNode node;
     private int lastUsedChannels = 0;
 
@@ -72,6 +79,36 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         super();
 
         setWatchUnload();
+    }
+
+    public AEColor getAEColor() {
+        if ( !ModConfig.plugins.appliedEnergistics.enableColor )
+            return AEColor.TRANSPARENT;
+
+        return aeColor;
+    }
+
+    public void setAEColor(AEColor color) {
+        if ( aeColor == color )
+            return;
+
+        aeColor = color;
+
+        if ( world != null && !world.isRemote ) {
+            markDirty();
+
+            if ( ModConfig.plugins.appliedEnergistics.enableColor )
+                setNeedsRecalculation();
+        }
+
+        if ( ModConfig.plugins.appliedEnergistics.enableColor ) {
+            callBlockUpdate();
+            callNeighborStateChange();
+        }
+    }
+
+    public void setAEColor(int color) {
+        setAEColor(AEColorHelpers.fromByte((byte) color));
     }
 
     @Override
@@ -217,6 +254,13 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
             return;
         }
 
+        if ( ModConfig.plugins.appliedEnergistics.enableColor ) {
+            IGridBlock block = otherNode.getGridBlock();
+            AEColor color = block == null ? null : block.getGridColor();
+            if ( color == null || !getAEColor().matches(color) )
+                return;
+        }
+
         try {
             getConnections().put(pos, AEApi.instance().grid().createGridConnection(getNode(), otherNode));
 
@@ -283,6 +327,24 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     }
 
     @Override
+    public void readExtraFromNBT(NBTTagCompound tag) {
+        super.readExtraFromNBT(tag);
+        if ( tag.hasKey("AEColor", Constants.NBT.TAG_BYTE) )
+            aeColor = AEColorHelpers.fromByte(tag.getByte("AEColor"));
+        else
+            aeColor = AEColor.TRANSPARENT;
+    }
+
+    @Override
+    public NBTTagCompound writeExtraToNBT(NBTTagCompound tag) {
+        tag = super.writeExtraToNBT(tag);
+        if ( aeColor != AEColor.TRANSPARENT )
+            tag.setByte("AEColor", (byte) aeColor.ordinal());
+
+        return tag;
+    }
+
+    @Override
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
 
@@ -308,6 +370,35 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         }
 
         return tag;
+    }
+
+    /* Packets */
+
+    @Override
+    public PacketBase getTilePacket() {
+        PacketBase payload = super.getTilePacket();
+        payload.addByte(aeColor.ordinal());
+        return payload;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void handleTilePacket(PacketBase payload) {
+        super.handleTilePacket(payload);
+        setAEColor(payload.getByte());
+    }
+
+    @Override
+    public PacketBase getModePacket() {
+        PacketBase payload = super.getModePacket();
+        payload.addByte(aeColor.ordinal());
+        return payload;
+    }
+
+    @Override
+    protected void handleModePacket(PacketBase payload) {
+        super.handleModePacket(payload);
+        setAEColor(payload.getByte());
     }
 
     public abstract void calculateTargets();
@@ -441,6 +532,9 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
 
     @Override
     public EnumSet<GridFlags> getFlags() {
+        if ( ModConfig.plugins.appliedEnergistics.denseCableConnection )
+            return EnumSet.of(GridFlags.REQUIRE_CHANNEL, GridFlags.DENSE_CAPACITY);
+
         return EnumSet.of(GridFlags.REQUIRE_CHANNEL);
     }
 
@@ -456,7 +550,10 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
 
     @Override
     public AEColor getGridColor() {
-        return AEColor.TRANSPARENT;
+        if ( !ModConfig.plugins.appliedEnergistics.enableColor || ModConfig.plugins.appliedEnergistics.colorsWireless )
+            return AEColor.TRANSPARENT;
+
+        return getAEColor();
     }
 
     @Override

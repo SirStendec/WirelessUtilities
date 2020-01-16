@@ -2225,6 +2225,16 @@ public class ModConfig {
         @Config.Name("Directional AE Network")
         public DirectionalAENetwork directionalAENetwork = new DirectionalAENetwork();
 
+        @Config.Name("Colors - Enabled")
+        @Config.Comment("When enabled, the AE Network machines will have configurable colors. When disabled, AE Network machines ignore color.")
+        @Config.RequiresWorldRestart
+        public boolean enableColor = true;
+
+        @Config.Name("Colors - Wireless Only")
+        @Config.Comment("When enabled, the AE Network machines will accept direct connections from any color but will only connect wirelessly to their set color.")
+        @Config.RequiresWorldRestart
+        public boolean colorsWireless = true;
+
         @Config.Name("Dense Cable Connection")
         @Config.Comment("Whether or not the AE Network machines should act like a Dense Cable (32 channels) or not (8 channels)")
         public boolean denseCableConnection = true;

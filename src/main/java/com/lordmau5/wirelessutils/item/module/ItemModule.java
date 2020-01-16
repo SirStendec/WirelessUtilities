@@ -167,6 +167,11 @@ public abstract class ItemModule extends ItemBaseUpgrade {
     }
 
     public boolean canApplyTo(@Nonnull ItemStack stack, @Nonnull TileBaseVaporizer vaporizer) {
+        final Level requiredLevel = getRequiredLevel(stack);
+        final Level level = vaporizer.getLevel();
+        if ( level.toInt() < requiredLevel.toInt() )
+            return false;
+
         if ( stack.hasTagCompound() ) {
             NBTTagCompound tag = stack.getTagCompound();
             if ( tag != null && tag.hasKey("AllowedMachines", Constants.NBT.TAG_LIST) ) {

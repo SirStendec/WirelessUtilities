@@ -16,6 +16,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,6 +39,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
 public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInformationItem, IInventoryRetainer, INBTPreservingIngredient {
 
@@ -55,6 +57,10 @@ public abstract class BlockBaseMachine extends BlockBaseTile implements IJEIInfo
                 .withProperty(Properties.ACTIVE, false)
                 .withProperty(Properties.FACING_ROTATION, EnumFacingRotation.NORTH)
         );
+    }
+
+    public void addItemStackInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
+
     }
 
     @Override

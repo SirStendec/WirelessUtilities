@@ -77,6 +77,10 @@ public class TilePositionalDesublimator extends TileBaseDesublimator implements
         return rotateBlock(side);
     }
 
+    public EnumFacing getEffectOriginFace() {
+        return EnumFacing.UP;
+    }
+
     @Override
     public EnumFacing getEnumFacing() {
         return facing;

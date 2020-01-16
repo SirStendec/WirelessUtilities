@@ -1,6 +1,8 @@
 package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2;
 
+import appeng.api.util.AEColor;
 import com.lordmau5.wirelessutils.item.ItemBlockMachine;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.TileAENetworkBase;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.directional.BlockDirectionalAENetwork;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.directional.TileDirectionalAENetwork;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional.BlockPositionalAENetwork;
@@ -8,16 +10,25 @@ import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional
 import com.lordmau5.wirelessutils.plugins.IPlugin;
 import com.lordmau5.wirelessutils.proxy.CommonProxy;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;
-import com.lordmau5.wirelessutils.utils.ColorHandler;
+import com.lordmau5.wirelessutils.utils.Level;
+import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraft.client.renderer.color.IBlockColor;
+import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+
+import javax.annotation.Nullable;
 
 public class AppliedEnergistics2Plugin implements IPlugin {
     public static BlockDirectionalAENetwork blockDirectionalAENetwork;
@@ -68,13 +79,52 @@ public class AppliedEnergistics2Plugin implements IPlugin {
 
     @Override
     public void initColors(BlockColors blockColors) {
-        blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockDirectionalAENetwork);
-        blockColors.registerBlockColorHandler(ColorHandler.Machine.handleBlockColor, blockPositionalAENetwork);
+        blockColors.registerBlockColorHandler(handleBlockColor, blockDirectionalAENetwork);
+        blockColors.registerBlockColorHandler(handleBlockColor, blockPositionalAENetwork);
     }
 
     @Override
     public void initColors(ItemColors itemColors) {
-        itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(blockDirectionalAENetwork));
-        itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(blockPositionalAENetwork));
+        itemColors.registerItemColorHandler(handleItemColor, Item.getItemFromBlock(blockDirectionalAENetwork));
+        itemColors.registerItemColorHandler(handleItemColor, Item.getItemFromBlock(blockPositionalAENetwork));
     }
+
+    public static final IBlockColor handleBlockColor = (IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex) -> {
+        if ( worldIn != null && pos != null ) {
+            TileEntity tile = worldIn.getTileEntity(pos);
+            if ( tile instanceof TileAENetworkBase ) {
+                TileAENetworkBase base = (TileAENetworkBase) tile;
+
+                if ( tintIndex == 2 )
+                    return base.getLevel().color;
+
+                if ( tintIndex == 1 ) {
+                    AEColor color = base.getAEColor();
+                    return color.getVariantByTintIndex(AEColor.TINTINDEX_MEDIUM);
+                }
+            }
+        }
+
+        return 0xFFFFFF;
+    };
+
+    public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
+        if ( tintIndex == 2 ) {
+            Level level = Level.getMinLevel();
+            if ( !stack.isEmpty() )
+                level = Level.fromItemStack(stack);
+
+            return level.color;
+        }
+
+        if ( tintIndex == 1 ) {
+            AEColor color = AEColor.TRANSPARENT;
+            if ( ModConfig.plugins.appliedEnergistics.enableColor )
+                color = AEColorHelpers.fromItemStack(stack);
+
+            return color.getVariantByTintIndex(AEColor.TINTINDEX_MEDIUM);
+        }
+
+        return 0xFFFFFF;
+    };
 }

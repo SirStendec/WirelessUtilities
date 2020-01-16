@@ -228,15 +228,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                 System.out.println("  " + i + ": " + locks[i]);
         }
 
-        for (TransferSide side : TransferSide.VALUES) {
-            if ( side != getSideForFacing(getFacingForSide(side)) )
-                System.out.println(" MISMATCH: side: " + side + " -- facing: " + getFacingForSide(side) + " -- reversed: " + getSideForFacing(getFacingForSide(side)));
-        }
-
-        for (EnumFacing facing : EnumFacing.VALUES) {
-            if ( facing != getFacingForSide(getSideForFacing(facing)) )
-                System.out.println(" MISMATCH: facing: " + facing + " -- side: " + getSideForFacing(facing) + " -- reversed: " + getFacingForSide(getSideForFacing(facing)));
-        }
+        if ( worker != null )
+            worker.debugPrint();
     }
 
     /* Comparator */
@@ -1034,6 +1027,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                     player.setHeldItem(EnumHand.MAIN_HAND, stack);
                     EnumActionResult result = stack.onItemUse(player, world, target.pos.down(), EnumHand.MAIN_HAND, EnumFacing.UP, 0, 0, 0);
 
+                    if ( !isCreative )
+                        capabilityHandler.setStackInSlot(i, stack);
+
                     if ( result == EnumActionResult.SUCCESS ) {
                         itemsPerTick++;
                         remainingBudget -= costPerItem;
@@ -1111,6 +1107,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
                             EnumActionResult result = stack.onItemUse(player, world, target.pos, EnumHand.MAIN_HAND, EnumFacing.UP, 0, 0, 0);
                             success = result == EnumActionResult.SUCCESS;
                         }
+
+                        if ( !isCreative )
+                            capabilityHandler.setStackInSlot(i, stack);
 
                         if ( success ) {
                             itemsPerTick++;
@@ -1531,6 +1530,8 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     /* Effects */
 
+    public abstract EnumFacing getEffectOriginFace();
+
     @Override
     public boolean performEffect(@Nonnull DesublimatorTarget target, @Nonnull World world, boolean isEntity) {
         if ( world.isRemote || world != this.world || pos == null || !ModConfig.rendering.particlesEnabled )
@@ -1548,13 +1549,13 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( isEntity && target.entity != null )
             packet = PacketParticleLine.betweenPoints(
                     EnumParticleTypes.REDSTONE, true,
-                    pos, getEnumFacing(), target.entity,
+                    pos, getEffectOriginFace(), target.entity,
                     3, colorR, colorG, colorB
             );
         else if ( target.pos != null )
             packet = PacketParticleLine.betweenPoints(
                     EnumParticleTypes.REDSTONE, true,
-                    pos, getEnumFacing(), target.pos, target.pos.getFacing(),
+                    pos, getEffectOriginFace(), target.pos, target.pos.getFacing(),
                     3, colorR, colorG, colorB
             );
         else

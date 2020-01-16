@@ -453,6 +453,10 @@ public class ItemFishingModule extends ItemModule {
                     hooks.remove(target.pos);
             }
 
+            // Make sure we don't have more active hooks than we're allowed.
+            if ( hooks.size() >= ModConfig.vaporizers.modules.fishing.maxCasts )
+                return IWorkProvider.WorkResult.FAILURE_CONTINUE;
+
             final ItemStack rod = hasRod ? vaporizer.getInput().getStackInSlot(0) : ItemStack.EMPTY;
             player.inventory.clear();
             player.setHeldItem(EnumHand.MAIN_HAND, hasRod ? rod : new ItemStack(Items.FISHING_ROD));

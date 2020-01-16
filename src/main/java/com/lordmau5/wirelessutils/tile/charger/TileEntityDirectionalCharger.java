@@ -97,6 +97,10 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
         return true;
     }
 
+    public EnumFacing getEffectOriginFace() {
+        return getEnumFacing();
+    }
+
     public EnumFacing getEnumFacing() {
         return facing;
     }

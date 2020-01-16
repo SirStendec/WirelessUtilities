@@ -308,7 +308,15 @@ public class Worker<T extends TargetInfo> {
 
         profiler.endStartSection("sorting"); // blocks - 2
 
+        // We want to store the current target so we can find it again once the list
+        // of targets has been sorted.
+        T currentTarget = cachePosition == -1 ? null : cacheList.get(cachePosition);
+
         sortCacheList();
+
+        // If we saved the current target, set the position based on its new position.
+        if ( currentTarget != null )
+            cachePosition = cacheList.indexOf(currentTarget);
 
         if ( randomList != null ) {
             if ( provider.getIterationMode() == IWorkProvider.IterationMode.RANDOM ) {
@@ -659,96 +667,98 @@ public class Worker<T extends TargetInfo> {
                 int totalSlots = handler.getSlots();
                 int slots = target.slots.length;
 
-                int start, inc;
-                if ( mode == IWorkProvider.IterationMode.FURTHEST_FIRST ) {
-                    start = slots - 1;
-                    inc = -1;
-                } else if ( mode == IWorkProvider.IterationMode.RANDOM ) {
-                    start = random.nextInt(slots);
-                    inc = random.nextBoolean() ? 1 : -1;
-                } else {
-                    start = 0;
-                    inc = 1;
-                }
+                if ( slots > 0 ) {
+                    int start, inc;
+                    if ( mode == IWorkProvider.IterationMode.FURTHEST_FIRST ) {
+                        start = slots - 1;
+                        inc = -1;
+                    } else if ( mode == IWorkProvider.IterationMode.RANDOM ) {
+                        start = random.nextInt(slots);
+                        inc = random.nextBoolean() ? 1 : -1;
+                    } else {
+                        start = 0;
+                        inc = 1;
+                    }
 
-                if ( cacheInInventory )
-                    start = cacheInvPosition;
+                    if ( cacheInInventory )
+                        start = cacheInvPosition;
 
-                profiler.endSection(); // 5 - check
-                profiler.startSection("loop"); // 5
+                    profiler.endSection(); // 5 - check
+                    profiler.startSection("loop"); // 5
 
-                if ( slots > start && start >= 0 ) {
-                    boolean invStarted = false;
-                    boolean invWorked = false;
-                    int i = start;
-                    while ( steps > 0 ) {
-                        loops++;
-                        if ( loops > 1000000000 )
-                            throw new IllegalStateException("Infinite loop in Worker.");
+                    if ( slots > start && start >= 0 ) {
+                        boolean invStarted = false;
+                        boolean invWorked = false;
+                        int i = start;
+                        while ( steps > 0 ) {
+                            loops++;
+                            if ( loops > 1000000000 )
+                                throw new IllegalStateException("Infinite loop in Worker.");
 
-                        if ( invStarted ) {
-                            if ( invWorked && mode != IWorkProvider.IterationMode.ROUND_ROBIN )
-                                break;
+                            if ( invStarted ) {
+                                if ( invWorked && mode != IWorkProvider.IterationMode.ROUND_ROBIN )
+                                    break;
 
-                            i += inc;
-                            if ( i < 0 )
-                                i = slots - 1;
-                            else if ( i >= slots )
-                                i = 0;
+                                i += inc;
+                                if ( i < 0 )
+                                    i = slots - 1;
+                                else if ( i >= slots )
+                                    i = 0;
 
-                            if ( i == start || i >= slots || i < 0 )
-                                break;
-                        } else
-                            invStarted = true;
-
-                        int slot = target.slots[i];
-                        if ( slot < 0 || slot >= totalSlots )
-                            continue;
-
-                        invWorked = false;
-                        ItemStack stack = handler.getStackInSlot(slot);
-                        profiler.startSection("work"); // 6
-                        IWorkProvider.WorkResult result = provider.performWorkItem(stack, slot, handler, target, world, state, tile, entity);
-                        profiler.endSection(); // 6 - work
-                        if ( result == null )
-                            result = IWorkProvider.WorkResult.SKIPPED;
-
-                        steps -= result.cost;
-                        if ( result.success ) {
-                            worked = true;
-                            didWork = true;
-                            invWorked = true;
-                        }
-
-                        if ( result.remove ) {
-                            target.slots[i] = -1;
-                            target.liveSlots--;
-                            if ( target.liveSlots <= 0 ) {
-                                wasRemoved = true;
-                                target.processInventory = false;
-                            }
-                        }
-
-                        if ( steps < 1 || !result.keepProcessing ) {
-                            if ( didWork ) {
-                                profiler.startSection("effect"); // 6
-                                performEffect(target);
-                                profiler.endSection(); // 6 - effect
-                            }
-
-                            if ( target.processInventory ) {
-                                cacheInInventory = true;
-                                cacheInvPosition = i + (result.noAdvance ? 0 : 1);
+                                if ( i == start || i >= slots || i < 0 )
+                                    break;
                             } else
-                                cacheInInventory = false;
+                                invStarted = true;
 
-                            profiler.endSection(); // 5 - loop
-                            profiler.endSection(); // 4 - inventory
-                            profiler.endSection(); // 3 - work
-                            profiler.endSection(); // 2 - loop
-                            profiler.endSection(); // 1 - performWork
+                            int slot = target.slots[i];
+                            if ( slot < 0 || slot >= totalSlots )
+                                continue;
 
-                            return worked;
+                            invWorked = false;
+                            ItemStack stack = handler.getStackInSlot(slot);
+                            profiler.startSection("work"); // 6
+                            IWorkProvider.WorkResult result = provider.performWorkItem(stack, slot, handler, target, world, state, tile, entity);
+                            profiler.endSection(); // 6 - work
+                            if ( result == null )
+                                result = IWorkProvider.WorkResult.SKIPPED;
+
+                            steps -= result.cost;
+                            if ( result.success ) {
+                                worked = true;
+                                didWork = true;
+                                invWorked = true;
+                            }
+
+                            if ( result.remove ) {
+                                target.slots[i] = -1;
+                                target.liveSlots--;
+                                if ( target.liveSlots <= 0 ) {
+                                    wasRemoved = true;
+                                    target.processInventory = false;
+                                }
+                            }
+
+                            if ( steps < 1 || !result.keepProcessing ) {
+                                if ( didWork ) {
+                                    profiler.startSection("effect"); // 6
+                                    performEffect(target);
+                                    profiler.endSection(); // 6 - effect
+                                }
+
+                                if ( target.processInventory ) {
+                                    cacheInInventory = true;
+                                    cacheInvPosition = i + (result.noAdvance ? 0 : 1);
+                                } else
+                                    cacheInInventory = false;
+
+                                profiler.endSection(); // 5 - loop
+                                profiler.endSection(); // 4 - inventory
+                                profiler.endSection(); // 3 - work
+                                profiler.endSection(); // 2 - loop
+                                profiler.endSection(); // 1 - performWork
+
+                                return worked;
+                            }
                         }
                     }
                 }

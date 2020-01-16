@@ -28,6 +28,8 @@ public class Textures {
     public static TextureAtlasSprite FURTHEST_FIRST;
     public static TextureAtlasSprite RANDOM;
 
+    public static TextureAtlasSprite COLOR;
+
     private static TextureMap textureMap;
 
     @SideOnly(Side.CLIENT)
@@ -52,6 +54,7 @@ public class Textures {
         RANDOM = register("random");
 
         INPUT_OUTPUT = register("input_output");
+        COLOR = register("color");
     }
 
     private static TextureAtlasSprite register(String icon) {

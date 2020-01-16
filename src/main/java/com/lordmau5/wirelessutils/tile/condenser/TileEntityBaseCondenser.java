@@ -411,6 +411,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         System.out.println("Fluid Gen Fluid: " + fluidGenStack);
         System.out.println(" Fluid Gen Cost: " + fluidGenCost);
         System.out.println("  Side Transfer: " + Arrays.toString(sideTransfer));
+
+        if ( worker != null )
+            worker.debugPrint();
     }
 
     /* Tank Stuff */
@@ -1382,6 +1385,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
 
     /* Effects */
 
+    public abstract EnumFacing getEffectOriginFace();
+
     @Override
     public boolean performEffect(@Nonnull CondenserTarget target, @Nonnull World world, boolean isEntity) {
         if ( world.isRemote || world != this.world || pos == null || !ModConfig.rendering.particlesEnabled )
@@ -1399,13 +1404,13 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( isEntity && target.entity != null )
             packet = PacketParticleLine.betweenPoints(
                     EnumParticleTypes.REDSTONE, true,
-                    pos, getEnumFacing(), target.entity,
+                    pos, getEffectOriginFace(), target.entity,
                     3, colorR, colorG, colorB
             );
         else if ( target.pos != null )
             packet = PacketParticleLine.betweenPoints(
                     EnumParticleTypes.REDSTONE, true,
-                    pos, getEnumFacing(), target.pos, target.pos.getFacing(),
+                    pos, getEffectOriginFace(), target.pos, target.pos.getFacing(),
                     3, colorR, colorG, colorB
             );
         else

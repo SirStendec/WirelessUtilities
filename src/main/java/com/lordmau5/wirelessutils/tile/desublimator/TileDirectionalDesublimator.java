@@ -105,6 +105,10 @@ public class TileDirectionalDesublimator extends TileBaseDesublimator implements
         return true;
     }
 
+    public EnumFacing getEffectOriginFace() {
+        return getEnumFacing();
+    }
+
     public EnumFacing getEnumFacing() {
         return facing;
     }

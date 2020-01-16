@@ -16,6 +16,8 @@ public abstract class ElementDynamicButton extends ElementButtonManaged {
     private TextureAtlasSprite icon;
     private ItemStack item = ItemStack.EMPTY;
 
+    private int foregroundColor = 0xFFFFFFFF;
+
     public ElementDynamicButton(GuiContainerCore container, int posX, int posY, int sizeX, int sizeY) {
         super(container, posX, posY, sizeX, sizeY, null);
     }
@@ -62,10 +64,41 @@ public abstract class ElementDynamicButton extends ElementButtonManaged {
         return item;
     }
 
+    public void setForegroundColor(float r, float g, float b) {
+        setForegroundColor(r, g, b, 1F);
+    }
+
+    public void setForegroundColor(float r, float g, float b, float a) {
+        setForegroundColor(
+                (int) Math.floor(a * 255F) << 24 +
+                        (int) Math.floor(r * 255F) << 16 +
+                        (int) Math.floor(g * 255) << 8 +
+                        (int) Math.floor(b * 255)
+        );
+    }
+
+    public void setForegroundColor(int color) {
+        foregroundColor = color;
+    }
+
+    public int getForegroundColor() {
+        return foregroundColor;
+    }
+
     @Override
     public void drawForeground(int mouseX, int mouseY) {
         int width = sizeX - 4;
         boolean hasItem = item != null && !item.isEmpty();
+
+        if ( foregroundColor != 0xFFFFFFFF ) {
+            float cA = (foregroundColor >> 24 & 0xFF) / 255f;
+            float cR = (foregroundColor >> 16 & 0xFF) / 255f;
+            float cG = (foregroundColor >> 8 & 0xFF) / 255f;
+            float cB = (foregroundColor & 0xFF) / 255f;
+
+            GlStateManager.color(cR, cG, cB, cA);
+        } else
+            GlStateManager.color(1F, 1F, 1F, 1F);
 
         if ( icon != null )
             width -= icon.getIconWidth();
@@ -86,7 +119,8 @@ public abstract class ElementDynamicButton extends ElementButtonManaged {
         int left = 2 + (width / 2);
 
         if ( icon != null ) {
-            gui.drawIcon(icon, posX + left, posY + (sizeY - icon.getIconHeight()) / 2);
+            cofh.core.util.helpers.RenderHelper.setBlockTextureSheet();
+            gui.drawColorIcon(icon, posX + left, posY + (sizeY - icon.getIconHeight()) / 2);
             left += 2 + icon.getIconWidth();
         }
 
@@ -99,5 +133,7 @@ public abstract class ElementDynamicButton extends ElementButtonManaged {
 
         if ( text != null )
             fontRenderer.drawString(text, posX + left, posY + (sizeY - 8) / 2, getTextColor(mouseX, mouseY));
+
+        GlStateManager.color(1F, 1F, 1F, 1F);
     }
 }

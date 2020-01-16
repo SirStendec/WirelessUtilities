@@ -75,6 +75,10 @@ public class TileEntityPositionalCharger extends TileEntityBaseCharger implement
         return rotateBlock(side);
     }
 
+    public EnumFacing getEffectOriginFace() {
+        return EnumFacing.UP;
+    }
+
     @Override
     public EnumFacing getEnumFacing() {
         return facing;

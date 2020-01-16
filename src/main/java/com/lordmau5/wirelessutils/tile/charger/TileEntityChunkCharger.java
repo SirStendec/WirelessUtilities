@@ -23,7 +23,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.relauncher.Side;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
@@ -105,12 +104,8 @@ public class TileEntityChunkCharger extends TileEntityBaseCharger implements
         return true;
     }
 
-    @Nullable
-    BlockPos getEffectOrigin() {
-        if ( pos == null )
-            return null;
-
-        return pos.offset(EnumFacing.UP);
+    public EnumFacing getEffectOriginFace() {
+        return EnumFacing.UP;
     }
 
     @Override

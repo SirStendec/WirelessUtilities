@@ -286,6 +286,9 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         System.out.println("        Behavior: " + behavior);
         if ( behavior != null )
             behavior.debugPrint();
+
+        if ( worker != null )
+            worker.debugPrint();
     }
 
     /* Fluid Stuff */

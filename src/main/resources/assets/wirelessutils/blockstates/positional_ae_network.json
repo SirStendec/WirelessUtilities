@@ -45,7 +45,7 @@
 			"false": {},
 			"true": {
 				"textures": {
-					"layer1:cutout:mark": "appliedenergistics2:blocks/controller_lights"
+					"layer1:cutout:mark": "wirelessutils:block/ae2/ae_network_active"
 				}
 			}
 		},

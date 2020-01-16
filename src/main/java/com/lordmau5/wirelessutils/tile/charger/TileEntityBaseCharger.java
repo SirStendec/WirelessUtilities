@@ -682,6 +682,8 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         }
     }
 
+    public abstract EnumFacing getEffectOriginFace();
+
     @Override
     public boolean performEffect(@Nonnull ChargerTarget target, @Nonnull World world, boolean isEntity) {
         if ( world.isRemote || world != this.world || pos == null || !ModConfig.rendering.particlesEnabled )
@@ -691,13 +693,13 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         if ( isEntity && target.entity != null )
             packet = PacketParticleLine.betweenPoints(
                     EnumParticleTypes.REDSTONE, true,
-                    pos, getEnumFacing(), target.entity,
+                    pos, getEffectOriginFace(), target.entity,
                     3, 0, 0, 0
             );
         else if ( target.pos != null )
             packet = PacketParticleLine.betweenPoints(
                     EnumParticleTypes.REDSTONE, true,
-                    pos, getEnumFacing(), target.pos, target.pos.getFacing(),
+                    pos, getEffectOriginFace(), target.pos, target.pos.getFacing(),
                     3, 0, 0, 0
             );
         else

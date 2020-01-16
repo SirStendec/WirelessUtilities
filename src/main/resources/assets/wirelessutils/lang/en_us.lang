@@ -698,6 +698,18 @@ btn.wirelessutils.hide_area=Hide Working Area
 btn.wirelessutils.area_scroll=Scroll to change colors.
 btn.wirelessutils.range=Range:
 
+btn.wirelessutils.ae_color=Color: %s
+btn.wirelessutils.ae_color.sides.0=This machine will only accept
+btn.wirelessutils.ae_color.sides.1=connections from this color
+btn.wirelessutils.ae_color.sides.2=and will only connect wirelessly
+btn.wirelessutils.ae_color.sides.3=to this color.
+
+btn.wirelessutils.ae_color.no_sides.0=This machine will accept
+btn.wirelessutils.ae_color.no_sides.1=connections from any color
+btn.wirelessutils.ae_color.no_sides.2=but will only connect
+btn.wirelessutils.ae_color.no_sides.3=wirelessly to this color.
+
+btn.wirelessutils.color=Color: %s
 btn.wirelessutils.cost=Cost:
 btn.wirelessutils.cost_fluid=%s (%s mB)
 

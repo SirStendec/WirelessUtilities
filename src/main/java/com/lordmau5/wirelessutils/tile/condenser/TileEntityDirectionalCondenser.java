@@ -99,6 +99,10 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
         return true;
     }
 
+    public EnumFacing getEffectOriginFace() {
+        return getEnumFacing();
+    }
+
     public EnumFacing getEnumFacing() {
         return facing;
     }

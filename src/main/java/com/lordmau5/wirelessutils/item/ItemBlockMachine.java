@@ -37,6 +37,8 @@ public class ItemBlockMachine extends ItemBlockExplainable {
     public void addInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
 
+        block.addItemStackInformation(stack, worldIn, tooltip, flagIn);
+
         if ( StringHelper.isControlKeyDown() ) {
             tooltip.add(StringHelper.localize("item." + WirelessUtils.MODID + ".machine_ctrl.active"));
             boolean had_augments = false;
