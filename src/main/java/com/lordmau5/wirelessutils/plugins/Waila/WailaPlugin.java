@@ -1,7 +1,7 @@
 package com.lordmau5.wirelessutils.plugins.Waila;
 
 import com.lordmau5.wirelessutils.plugins.IPlugin;
-import com.lordmau5.wirelessutils.tile.base.ITileInfoProvider;
+import com.lordmau5.wirelessutils.tile.base.IWorkInfoProvider;
 import mcp.mobius.waila.api.IWailaDataProvider;
 import mcp.mobius.waila.api.IWailaRegistrar;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -15,9 +15,9 @@ public class WailaPlugin implements IPlugin {
     }
 
     public static void register(IWailaRegistrar registrar) {
-        IWailaDataProvider provider = new WirelessUtilitiesWailaDataProvider();
-        registrar.registerBodyProvider(provider, ITileInfoProvider.class);
-        registrar.registerNBTProvider(provider, ITileInfoProvider.class);
+        IWailaDataProvider provider = new WailaInfoProvider();
+        registrar.registerBodyProvider(provider, IWorkInfoProvider.class);
+        registrar.registerNBTProvider(provider, IWorkInfoProvider.class);
     }
 
 }

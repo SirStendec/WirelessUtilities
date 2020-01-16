@@ -17,6 +17,7 @@ public abstract class ElementDynamicButton extends ElementButtonManaged {
     private ItemStack item = ItemStack.EMPTY;
 
     private int foregroundColor = 0xFFFFFFFF;
+    private int foregroundHoverColor = 0;
 
     public ElementDynamicButton(GuiContainerCore container, int posX, int posY, int sizeX, int sizeY) {
         super(container, posX, posY, sizeX, sizeY, null);
@@ -64,6 +65,29 @@ public abstract class ElementDynamicButton extends ElementButtonManaged {
         return item;
     }
 
+    public void setForegroundHoverColor(float r, float g, float b) {
+        setForegroundHoverColor(r, g, b, 1F);
+    }
+
+    public void setForegroundHoverColor(float r, float g, float b, float a) {
+        setForegroundHoverColor(
+                (int) Math.floor(a * 255F) << 24 +
+                        (int) Math.floor(r * 255F) << 16 +
+                        (int) Math.floor(g * 255) << 8 +
+                        (int) Math.floor(b * 255)
+        );
+    }
+
+    public void setForegroundHoverColor(int color) {
+        foregroundHoverColor = color;
+    }
+
+    public int getForegroundHoverColor() {
+        if ( foregroundHoverColor == 0 )
+            return foregroundColor;
+        return foregroundHoverColor;
+    }
+
     public void setForegroundColor(float r, float g, float b) {
         setForegroundColor(r, g, b, 1F);
     }
@@ -88,13 +112,14 @@ public abstract class ElementDynamicButton extends ElementButtonManaged {
     @Override
     public void drawForeground(int mouseX, int mouseY) {
         int width = sizeX - 4;
-        boolean hasItem = item != null && !item.isEmpty();
-
-        if ( foregroundColor != 0xFFFFFFFF ) {
-            float cA = (foregroundColor >> 24 & 0xFF) / 255f;
-            float cR = (foregroundColor >> 16 & 0xFF) / 255f;
-            float cG = (foregroundColor >> 8 & 0xFF) / 255f;
-            float cB = (foregroundColor & 0xFF) / 255f;
+        final boolean hasItem = item != null && !item.isEmpty();
+        final boolean hovered = intersectsWith(mouseX, mouseY);
+        final int color = hovered ? getForegroundHoverColor() : getForegroundColor();
+        if ( color != 0xFFFFFFFF ) {
+            float cA = (color >> 24 & 0xFF) / 255f;
+            float cR = (color >> 16 & 0xFF) / 255f;
+            float cG = (color >> 8 & 0xFF) / 255f;
+            float cB = (color & 0xFF) / 255f;
 
             GlStateManager.color(cR, cG, cB, cA);
         } else

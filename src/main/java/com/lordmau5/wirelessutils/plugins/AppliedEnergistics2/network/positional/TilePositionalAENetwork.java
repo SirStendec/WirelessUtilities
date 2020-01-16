@@ -30,8 +30,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Set;
 
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRangeAugment;
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRelativePositionalCard;
@@ -216,19 +214,11 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
         EventDispatcher.PLACE_BLOCK.removeListener(this);
         EventDispatcher.BREAK_BLOCK.removeListener(this);
 
-        setEnergyCost(0);
-
-        Set<BlockPosDimension> positions = new HashSet<>(getConnections().keySet());
-        for (BlockPosDimension connectionPos : positions) {
-            destroyConnection(connectionPos);
-        }
-
-        getConnections().clear();
+        clearConnections();
+        setEnergyCost(IDLE_ENERGY_COST);
 
         if ( !redstoneControlOrDisable() )
             return;
-
-        setEnergyCost(IDLE_ENERGY_COST);
 
         BlockPosDimension origin = getPosition();
         int dimension = origin.getDimension();

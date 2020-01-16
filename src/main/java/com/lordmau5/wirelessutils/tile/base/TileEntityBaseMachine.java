@@ -5,13 +5,13 @@ import cofh.core.network.PacketBase;
 import cofh.core.util.CoreUtils;
 import cofh.core.util.TimeTracker;
 import cofh.core.util.helpers.SecurityHelper;
-import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.augment.ItemAugment;
 import com.lordmau5.wirelessutils.utils.ChunkManager;
 import com.lordmau5.wirelessutils.utils.ItemStackHandler;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.constants.Properties;
+import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
@@ -39,7 +39,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -429,23 +428,13 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     /* ITileInfoProvider */
 
     @Override
-    public List<String> getInfoTooltips(@Nullable NBTTagCompound tag) {
-        List<String> tooltip = new ArrayList<>();
-
+    public void getInfoTooltip(@Nonnull List<String> tooltip, @Nullable NBTTagCompound tag) {
         tooltip.add(new TextComponentTranslation(
                 "info." + WirelessUtils.MODID + ".owner",
                 CoreProps.DEFAULT_OWNER.equals(owner) ?
-                        StringHelper.localize("info." + WirelessUtils.MODID + ".no_owner") :
-                        owner.getName()
+                        new TextComponentTranslation("info." + WirelessUtils.MODID + ".no_owner") :
+                        TextHelpers.getComponent(owner.getName())
         ).getFormattedText());
-
-        return tooltip;
-    }
-
-    @Override
-    public NBTTagCompound getInfoNBT(NBTTagCompound tag) {
-        return new NBTTagCompound();
-        //return null;
     }
 
     /* Chunk Loading */

@@ -44,6 +44,9 @@ public class AppliedEnergistics2Plugin implements IPlugin {
     @GameRegistry.ObjectHolder("appliedenergistics2:material")
     public static Item itemMaterial;
 
+    @GameRegistry.ObjectHolder("appliedenergistics2:part")
+    public static Item itemPart;
+
     @Override
     public void registerBlocks(RegistryEvent.Register<Block> event) {
         blockDirectionalAENetwork = new BlockDirectionalAENetwork();

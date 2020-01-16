@@ -2241,15 +2241,20 @@ public class ModConfig {
     }
 
     public static class PositionalAENetwork {
+        @Config.Name("Base Energy")
+        @Config.Comment("Positional AE Network machines should use this much energy per level.")
+        @Config.RangeInt(min = 0)
+        public int[] baseEnergy = {1, 1, 2, 2, 4};
+
         @Config.Name("Cost per Block")
         @Config.Comment("The cost to connect a distant block goes up by this amount per tick, linearly with distance.")
-        @Config.RangeInt(min = 0)
-        public int costPerBlock = 1;
+        @Config.RangeDouble(min = 0)
+        public double costPerBlock = 1;
 
         @Config.Name("Cost per Block Squared")
         @Config.Comment("The cost to connect a distant block goes up by this amount per tick as a square with distance.")
-        @Config.RangeInt(min = 0)
-        public int costPerBlockSquared = 0;
+        @Config.RangeDouble(min = 0)
+        public double costPerBlockSquared = 0;
 
         @Config.Name("Maximum / Interdimensional Cost")
         @Config.Comment("The maximum cost to connect a distant block will never exceed this value. Also the cost for interdimensional connections.")
@@ -2258,15 +2263,20 @@ public class ModConfig {
     }
 
     public static class DirectionalAENetwork {
+        @Config.Name("Base Energy")
+        @Config.Comment("Directional AE Network machines should use this much energy per level.")
+        @Config.RangeInt(min = 0)
+        public int[] baseEnergy = {1, 1, 2, 2, 4};
+
         @Config.Name("Cost per Block")
         @Config.Comment("The cost to connect a distant block goes up by this amount per tick, linearly with distance.")
-        @Config.RangeInt(min = 0)
-        public int costPerBlock = 1;
+        @Config.RangeDouble(min = 0)
+        public double costPerBlock = 1;
 
         @Config.Name("Cost per Block Squared")
         @Config.Comment("The cost to connect a distant block goes up by this amount per tick as a square with distance.")
-        @Config.RangeInt(min = 0)
-        public int costPerBlockSquared = 0;
+        @Config.RangeDouble(min = 0)
+        public double costPerBlockSquared = 0;
 
         @Config.Name("Maximum Cost")
         @Config.Comment("The cost to connect a distant block will never exceed this value.")

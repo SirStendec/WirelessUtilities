@@ -27,8 +27,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Set;
 
 @Machine(name = "directional_ae_network")
 public class TileDirectionalAENetwork extends TileAENetworkBase implements
@@ -195,14 +193,8 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
         else
             validTargets.clear();
 
+        clearConnections();
         setEnergyCost(IDLE_ENERGY_COST);
-
-        Set<BlockPosDimension> positions = new HashSet<>(getConnections().keySet());
-        for (BlockPosDimension connectionPos : positions) {
-            destroyConnection(connectionPos);
-        }
-
-        getConnections().clear();
 
         if ( !redstoneControlOrDisable() )
             return;
@@ -212,8 +204,6 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
 
         int dimension = origin.getDimension();
         EnumFacing facing = getEnumFacing().getOpposite();
-
-        setEnergyCost(IDLE_ENERGY_COST);
 
         for (BlockPosDimension target : BlockPosDimension.getAllInBox(corners.getFirst(), corners.getSecond(), dimension, null)) {
             if ( target.equalsIgnoreFacing(pos) )

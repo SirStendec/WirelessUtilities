@@ -698,17 +698,6 @@ btn.wirelessutils.hide_area=Hide Working Area
 btn.wirelessutils.area_scroll=Scroll to change colors.
 btn.wirelessutils.range=Range:
 
-btn.wirelessutils.ae_color=Color: %s
-btn.wirelessutils.ae_color.sides.0=This machine will only accept
-btn.wirelessutils.ae_color.sides.1=connections from this color
-btn.wirelessutils.ae_color.sides.2=and will only connect wirelessly
-btn.wirelessutils.ae_color.sides.3=to this color.
-
-btn.wirelessutils.ae_color.no_sides.0=This machine will accept
-btn.wirelessutils.ae_color.no_sides.1=connections from any color
-btn.wirelessutils.ae_color.no_sides.2=but will only connect
-btn.wirelessutils.ae_color.no_sides.3=wirelessly to this color.
-
 btn.wirelessutils.color=Color: %s
 btn.wirelessutils.cost=Cost:
 btn.wirelessutils.cost_fluid=%s (%s mB)
@@ -769,7 +758,24 @@ info.wirelessutils.tiered.required.lower.2=been installed.
 
 info.wirelessutils.voiding_fluids=Voiding Fluids
 
-info.wirelessutils.ae2.channels=%d of %d Channels
+info.wirelessutils.ae2.channels=Channels: %s of %s
+
+btn.wirelessutils.ae2.color=Color: %s
+btn.wirelessutils.ae2.color.sides.0=This machine will only accept
+btn.wirelessutils.ae2.color.sides.1=connections from this color
+btn.wirelessutils.ae2.color.sides.2=and will only connect wirelessly
+btn.wirelessutils.ae2.color.sides.3=to this color.
+
+btn.wirelessutils.ae2.color.no_sides.0=This machine will accept
+btn.wirelessutils.ae2.color.no_sides.1=connections from any color
+btn.wirelessutils.ae2.color.no_sides.2=but will only connect
+btn.wirelessutils.ae2.color.no_sides.3=wirelessly to this color.
+
+btn.wirelessutils.ae2.color.none.0=This machine will accept
+btn.wirelessutils.ae2.color.none.1=connections from any color
+btn.wirelessutils.ae2.color.none.2=and connect wirelessly to
+btn.wirelessutils.ae2.color.none.3=any color.
+
 
 chat.wirelessutils.upgrade.success=Installed %s into %s.
 chat.wirelessutils.upgrade.failed=Could not install %s into %s.

@@ -21,15 +21,18 @@ import cofh.core.network.PacketBase;
 import cofh.core.util.CoreUtils;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AEColorHelpers;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics2Plugin;
 import com.lordmau5.wirelessutils.tile.base.ITileInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
+import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -52,6 +55,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         IRangeAugmentable, ITickable,
@@ -61,25 +65,69 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     public int IDLE_ENERGY_COST = 2;
 
     private Map<BlockPosDimension, IGridConnection> connections;
+
+    private int activeUpdateDelay = 0;
     private Map<BlockPosDimension, Integer> placedCacheMap;
+
     public List<BlockPosDimension> validTargets;
+    Set<BlockPosDimension> staleTargets;
+    Set<BlockPosDimension> freshTargets;
+
     private int energyCost;
 
     private boolean needsRecalculation;
     private int recalculationDelay = 10;
 
-    private int activeUpdateDelay = 10;
-
     private AEColor aeColor = AEColor.TRANSPARENT;
 
     private IGridNode node;
-    private int lastUsedChannels = 0;
+    private int usedChannels = 0;
+    private int usedConnections = 0;
 
     public TileAENetworkBase() {
         super();
 
         setWatchUnload();
     }
+
+    @Override
+    public void debugPrint() {
+        super.debugPrint();
+        System.out.println("Targets: " + (validTargets == null ? "null" : validTargets.size()));
+        System.out.println("Energy Cost: " + getEnergyCost());
+    }
+
+    /* Life Cycle */
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        EventDispatcher.PLACE_BLOCK.removeListener(this);
+        EventDispatcher.BREAK_BLOCK.removeListener(this);
+
+        unregisterNode();
+    }
+
+    @Override
+    public void onChunkUnload() {
+        unregisterNode();
+
+        super.onChunkUnload();
+    }
+
+    @Override
+    public void invalidate() {
+        unregisterNode();
+
+        super.invalidate();
+    }
+
+    @Override
+    public abstract void handleEvent(@Nonnull Event event);
+
+
+    /* Network Colors */
 
     public AEColor getAEColor() {
         if ( !ModConfig.plugins.appliedEnergistics.enableColor )
@@ -111,46 +159,14 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         setAEColor(AEColorHelpers.fromByte((byte) color));
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
 
-        EventDispatcher.PLACE_BLOCK.removeListener(this);
-        EventDispatcher.BREAK_BLOCK.removeListener(this);
-
-        unregisterNode();
-    }
-
-    @Override
-    public void onChunkUnload() {
-        unregisterNode();
-
-        super.onChunkUnload();
-    }
-
-    @Override
-    public void invalidate() {
-        unregisterNode();
-
-        super.invalidate();
-    }
-
-    @Override
-    public abstract void handleEvent(@Nonnull Event event);
-
-
-    @Override
-    public void debugPrint() {
-        super.debugPrint();
-        System.out.println("Targets: " + (validTargets == null ? "null" : validTargets.size()));
-        System.out.println("Energy Cost: " + getEnergyCost());
-    }
+    /* Targeting */
 
     public BlockPosDimension getPosition() {
-        if ( !hasWorld() )
+        if ( world == null || pos == null )
             return null;
 
-        return new BlockPosDimension(getPos(), getWorld().provider.getDimension());
+        return new BlockPosDimension(pos, world.provider.getDimension());
     }
 
     public Iterable<BlockPosDimension> getTargets() {
@@ -159,6 +175,9 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
 
         return validTargets;
     }
+
+
+    /* The Update */
 
     @Override
     public void update() {
@@ -239,30 +258,56 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     }
 
     public Map<BlockPosDimension, IGridConnection> getConnections() {
-        if ( connections == null ) {
+        if ( connections == null )
             connections = new Object2ObjectOpenHashMap<>();
-        }
+
         return connections;
     }
 
-    public void addConnection(BlockPosDimension pos, IGridNode otherNode) {
-        if ( getConnections().containsKey(pos) ) {
-            getConnections().get(pos).destroy();
-        }
-
-        if ( !validTargets.contains(pos) ) {
+    public void clearConnections() {
+        if ( connections == null )
             return;
+
+        // TODO: Concurrent modification fix
+        for (BlockPosDimension pos : connections.keySet())
+            destroyConnection(pos);
+
+        connections.clear();
+        usedConnections = 0;
+    }
+
+    public void addConnection(BlockPosDimension pos, IGridNode otherNode) {
+        final IGridNode node = getNode();
+        if ( node == null )
+            return;
+
+        final Map<BlockPosDimension, IGridConnection> connections = getConnections();
+
+        if ( connections.containsKey(pos) ) {
+            connections.get(pos).destroy();
+            connections.remove(pos);
+            usedConnections--;
         }
 
-        if ( ModConfig.plugins.appliedEnergistics.enableColor ) {
-            IGridBlock block = otherNode.getGridBlock();
-            AEColor color = block == null ? null : block.getGridColor();
-            if ( color == null || !getAEColor().matches(color) )
-                return;
-        }
+        if ( !validTargets.contains(pos) )
+            return;
+
+        final IGridBlock block = otherNode.getGridBlock();
+        if ( block == null )
+            return;
+
+        // Dense cables are broken and will not be fixed by AE2's developers
+        // So we need to just detect them and purposefully not connect.
+        final ItemStack stack = block.getMachineRepresentation();
+        if ( stack.getItem() == AppliedEnergistics2Plugin.itemPart && otherNode.hasFlag(GridFlags.DENSE_CAPACITY) )
+            return;
+
+        if ( !getAEColor().matches(block.getGridColor()) )
+            return;
 
         try {
-            getConnections().put(pos, AEApi.instance().grid().createGridConnection(getNode(), otherNode));
+            connections.put(pos, AEApi.instance().grid().createGridConnection(node, otherNode));
+            usedConnections++;
 
             boolean sameDimension = pos.getDimension() == getWorld().provider.getDimension();
             double distance = getPos().getDistance(pos.getX(), pos.getY(), pos.getZ()) - 1;
@@ -273,17 +318,21 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     }
 
     public void destroyConnection(BlockPosDimension pos) {
-        if ( getConnections().containsKey(pos) ) {
-            IGridConnection connection = getConnections().get(pos);
-            if ( connection != null ) {
-                IGridHost host = connection.b().getMachine();
+        Map<BlockPosDimension, IGridConnection> connections = getConnections();
+
+        if ( connections.containsKey(pos) ) {
+            IGridConnection con = connections.get(pos);
+            connections.remove(pos);
+            usedConnections--;
+
+            if ( con != null ) {
+                IGridHost host = con.b().getMachine();
                 if ( host instanceof TileAENetworkBase ) {
                     ((TileAENetworkBase) host).setNeedsRecalculation();
                 }
 
-                connection.destroy();
+                con.destroy();
             }
-            getConnections().remove(pos);
 
             boolean sameDimension = pos.getDimension() == getWorld().provider.getDimension();
             double distance = getPos().getDistance(pos.getX(), pos.getY(), pos.getZ()) - 1;
@@ -292,9 +341,8 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     }
 
     public void cachePlacedPosition(BlockPosDimension pos) {
-        if ( validTargets.contains(pos) && !getPlacedCacheMap().containsKey(pos) ) {
+        if ( validTargets.contains(pos) && !getPlacedCacheMap().containsKey(pos) )
             getPlacedCacheMap().put(pos, 0);
-        }
     }
 
     public Map<BlockPosDimension, Integer> getPlacedCacheMap() {
@@ -348,31 +396,55 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
 
-        if ( this.node != null && tag.hasKey("ae_node") ) {
-            this.node.loadFromNBT("ae_node", tag);
-        }
+        if ( node != null && tag.hasKey("ae_node") )
+            node.loadFromNBT("ae_node", tag);
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         tag = super.writeToNBT(tag);
 
-        if ( FMLCommonHandler.instance().getEffectiveSide().isServer() ) {
-            if ( node != null ) {
-                node.saveToNBT("ae_node", tag);
+        updateChannels();
+        tag.setByte("channels", (byte) usedChannels);
 
-                byte usedChannels = 0;
-                for (IGridConnection con : getConnections().values()) {
-                    usedChannels += con.getUsedChannels();
-                }
-                tag.setByte("channels", usedChannels);
-            }
-        }
+        if ( node != null )
+            node.saveToNBT("ae_node", tag);
 
         return tag;
     }
 
+    public void updateChannels() {
+        if ( FMLCommonHandler.instance().getEffectiveSide().isServer() && AEConfig.instance().isFeatureEnabled(AEFeature.CHANNELS) ) {
+            IGridNode node = getNode();
+
+            if ( node == null )
+                usedChannels = 0;
+            else {
+                for (IGridConnection n : node.getConnections()) {
+                    if ( n != null )
+                        usedChannels = Math.max(n.getUsedChannels(), usedChannels);
+                }
+            }
+        }
+    }
+
     /* Packets */
+
+    @Override
+    public PacketBase getGuiPacket() {
+        PacketBase payload = super.getGuiPacket();
+        payload.addByte((byte) usedChannels);
+        payload.addByte((byte) usedConnections);
+        return payload;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    protected void handleGuiPacket(PacketBase payload) {
+        super.handleGuiPacket(payload);
+        usedChannels = payload.getByte();
+        usedConnections = payload.getByte();
+    }
 
     @Override
     public PacketBase getTilePacket() {
@@ -403,41 +475,56 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
 
     public abstract void calculateTargets();
 
-    @Override
-    public List<String> getInfoTooltips(@Nullable NBTTagCompound tag) {
-        List<String> tooltips = super.getInfoTooltips(tag);
 
-        if ( !AEConfig.instance().isFeatureEnabled(AEFeature.CHANNELS) )
-            return tooltips;
+    /* ITileInfoProvider */
 
-        boolean dense = ModConfig.plugins.appliedEnergistics.denseCableConnection;
+    public void getInfoTooltip(@Nonnull List<String> tooltip, @Nullable NBTTagCompound tag) {
+        final boolean dense = ModConfig.plugins.appliedEnergistics.denseCableConnection;
 
-        if ( tag == null ) {
-            if ( getNode() != null && getNode().isActive() ) {
-                tag = new NBTTagCompound();
-                writeToNBT(tag);
-                lastUsedChannels = tag.getByte("channels");
-            }
-        } else {
-            lastUsedChannels = tag.getByte("channels");
-        }
+        if ( tag != null && tag.hasKey("channels", Constants.NBT.TAG_BYTE) )
+            usedChannels = tag.getByte("channels");
 
-        tooltips.add(new TextComponentTranslation("info." + WirelessUtils.MODID + ".ae2.channels", lastUsedChannels, dense ? 32 : 8).getUnformattedText());
+        if ( tag != null && tag.hasKey("connections", Constants.NBT.TAG_INT) )
+            usedConnections = tag.getInteger("connections");
 
-        return tooltips;
+        int targets;
+        if ( tag != null && tag.hasKey("targets", Constants.NBT.TAG_INT) )
+            targets = tag.getInteger("targets");
+        else
+            targets = validTargets == null ? 0 : validTargets.size();
+
+        tooltip.add(new TextComponentTranslation(
+                "info." + WirelessUtils.MODID + ".work_info.tooltip.targets",
+                TextHelpers.getComponent(usedConnections),
+                TextHelpers.getComponent(targets)
+        ).getFormattedText());
+
+        if ( AEConfig.instance().isFeatureEnabled(AEFeature.CHANNELS) )
+            tooltip.add(new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".ae2.channels",
+                    TextHelpers.getComponent(usedChannels).setStyle(TextHelpers.WHITE),
+                    TextHelpers.getComponent(dense ? 32 : 8).setStyle(TextHelpers.WHITE)
+            ).setStyle(TextHelpers.GRAY).getFormattedText());
     }
 
+    @Nonnull
     @Override
-    public NBTTagCompound getInfoNBT(NBTTagCompound tag) {
-        NBTTagCompound tempTag = new NBTTagCompound();
-        writeToNBT(tempTag);
+    public NBTTagCompound getInfoNBT(@Nonnull NBTTagCompound tag, @Nullable EntityPlayerMP player) {
+        updateChannels();
 
-        if ( tempTag.hasKey("channels") ) {
-            byte usedChannels = tempTag.getByte("channels");
-            tag.setByte("channels", usedChannels);
-        }
+        tag.setByte("channels", (byte) usedChannels);
+        tag.setInteger("connections", usedConnections);
+        tag.setInteger("targets", validTargets == null ? 0 : validTargets.size());
 
         return tag;
+    }
+
+    public int getUsedChannels() {
+        return usedChannels;
+    }
+
+    public int getUsedConnections() {
+        return usedConnections;
     }
 
     /* Grid */
@@ -460,9 +547,8 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     }
 
     public IGridNode getNode() {
-        if ( getWorld() == null || getWorld().isRemote ) {
+        if ( world == null || world.isRemote )
             return null;
-        }
 
         if ( node == null ) {
             node = AEApi.instance().grid().createGridNode(this);

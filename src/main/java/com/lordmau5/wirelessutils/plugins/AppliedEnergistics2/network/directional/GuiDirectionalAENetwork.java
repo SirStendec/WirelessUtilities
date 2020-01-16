@@ -1,6 +1,5 @@
 package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.directional;
 
-import appeng.api.util.AEColor;
 import cofh.core.gui.container.IAugmentableContainer;
 import cofh.core.gui.element.tab.TabInfo;
 import cofh.core.gui.element.tab.TabRedstoneControl;
@@ -12,12 +11,12 @@ import com.lordmau5.wirelessutils.gui.client.elements.ElementDynamicContainedBut
 import com.lordmau5.wirelessutils.gui.client.elements.ElementOffsetControls;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementRangeControls;
 import com.lordmau5.wirelessutils.gui.client.elements.TabAugmentTwoElectricBoogaloo;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.ElementColorButton;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.TabChannels;
 import com.lordmau5.wirelessutils.utils.Textures;
-import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentTranslation;
 
 public class GuiDirectionalAENetwork extends BaseGuiContainer {
 
@@ -25,7 +24,6 @@ public class GuiDirectionalAENetwork extends BaseGuiContainer {
 
     private final TileDirectionalAENetwork tile;
 
-    private ElementDynamicContainedButton btnColor;
     private ElementDynamicContainedButton btnMode;
     private ElementRangeControls rangeControls;
     private ElementOffsetControls offsetControls;
@@ -43,14 +41,14 @@ public class GuiDirectionalAENetwork extends BaseGuiContainer {
 
         addElement(new ElementAreaButton(this, tile, 152, 69));
 
+        addTab(new TabChannels(this, tile));
         addTab(new TabInfo(this, myInfo));
 
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));
         addTab(new TabRedstoneControl(this, tile));
 
-        btnColor = new ElementDynamicContainedButton(this, "Color", 110, 69, 16, 16, Textures.COLOR);
         if ( ModConfig.plugins.appliedEnergistics.enableColor )
-            addElement(btnColor);
+            addElement(new ElementColorButton(this, tile, 116, 69));
 
         btnMode = new ElementDynamicContainedButton(this, "Mode", 134, 69, 16, 16, Textures.SIZE);
         addElement(btnMode);
@@ -64,14 +62,9 @@ public class GuiDirectionalAENetwork extends BaseGuiContainer {
 
     @Override
     public void handleElementButtonClick(String buttonName, int mouseButton) {
-        float pitch = mouseButton == 1 ? 1F : 0.7F;
-        int amount = mouseButton == 1 ? -1 : 1;
+        final float pitch = mouseButton == 1 ? 1F : 0.7F;
 
         switch (buttonName) {
-            case "Color":
-                tile.setAEColor(tile.getAEColor().ordinal() + amount);
-                tile.sendModePacket();
-                break;
             case "Mode":
                 SharedState.offsetMode = !SharedState.offsetMode;
                 break;
@@ -86,15 +79,7 @@ public class GuiDirectionalAENetwork extends BaseGuiContainer {
     protected void updateElementInformation() {
         super.updateElementInformation();
 
-        AEColor color = tile.getAEColor();
-        btnColor.setForegroundColor(0xFF000000 | color.getVariantByTintIndex(AEColor.TINTINDEX_MEDIUM));
-        btnColor.setToolTip(new TextComponentTranslation(
-                "btn." + WirelessUtils.MODID + ".ae_color",
-                TextHelpers.getComponent(color.toString()).setStyle(TextHelpers.WHITE)
-        ).setStyle(TextHelpers.GRAY).getFormattedText());
-        btnColor.setToolTipExtra("btn." + WirelessUtils.MODID + ".ae_color." + (ModConfig.plugins.appliedEnergistics.colorsWireless ? "no_sides" : "sides"));
-
-        boolean offsetMode = SharedState.offsetMode;
+        final boolean offsetMode = SharedState.offsetMode;
 
         btnMode.setIcon(offsetMode ? Textures.OFFSET : Textures.SIZE);
         btnMode.setToolTip("btn." + WirelessUtils.MODID + ".mode." + (offsetMode ? "offset" : "range"));

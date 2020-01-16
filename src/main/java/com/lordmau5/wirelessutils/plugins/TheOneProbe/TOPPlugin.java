@@ -15,7 +15,7 @@ public class TOPPlugin implements IPlugin, Function<ITheOneProbe, Void> {
 
     @Override
     public Void apply(ITheOneProbe input) {
-        input.registerProvider(new WirelessUtilitiesProbeInfoProvider());
+        input.registerProvider(new ProbeInfoProvider());
 
         return null;
     }

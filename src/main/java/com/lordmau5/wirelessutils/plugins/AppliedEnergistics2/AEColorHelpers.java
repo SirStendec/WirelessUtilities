@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 
 public class AEColorHelpers {
 
+    @Nonnull
     public static AEColor fromItemStack(@Nonnull ItemStack stack) {
         if ( !stack.isEmpty() && stack.hasTagCompound() ) {
             NBTTagCompound tag = stack.getTagCompound();
@@ -19,6 +20,7 @@ public class AEColorHelpers {
         return AEColor.TRANSPARENT;
     }
 
+    @Nonnull
     public static AEColor fromByte(byte index) {
         AEColor[] colors = AEColor.values();
         if ( index < 0 )
