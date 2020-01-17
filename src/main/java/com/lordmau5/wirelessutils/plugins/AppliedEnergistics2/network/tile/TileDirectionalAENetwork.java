@@ -1,12 +1,12 @@
-package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.directional;
+package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.tile;
 
 import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics2Plugin;
-import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.TileAENetworkBase;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.directional.ContainerDirectionalAENetwork;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.directional.GuiDirectionalAENetwork;
 import com.lordmau5.wirelessutils.tile.base.IConfigurableRange;
 import com.lordmau5.wirelessutils.tile.base.IDirectionalMachine;
 import com.lordmau5.wirelessutils.tile.base.Machine;
-import com.lordmau5.wirelessutils.utils.EventDispatcher;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
@@ -16,23 +16,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.EnumSet;
 
 @Machine(name = "directional_ae_network")
 public class TileDirectionalAENetwork extends TileAENetworkBase implements
         IConfigurableRange, IDirectionalMachine {
-
-    private Tuple<BlockPosDimension, BlockPosDimension> corners;
 
     private EnumFacing facing = EnumFacing.NORTH;
     private boolean rotationX = false;
@@ -60,32 +52,31 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
         System.out.println(" Rotated: " + rotationX);
     }
 
-    /* Events */
+    public boolean isDense() {
+        boolean[] dense = ModConfig.plugins.appliedEnergistics.directionalAENetwork.dense;
+        int idx = level.toInt();
+        if ( idx < 0 )
+            idx = 0;
+        else if ( idx >= dense.length )
+            idx = dense.length - 1;
 
-    @Override
-    public void handleEvent(@Nonnull Event event) {
-        if ( event instanceof BlockEvent ) {
-            BlockEvent blockEvent = (BlockEvent) event;
-
-            if ( blockEvent.getWorld() != null && blockEvent.getWorld().equals(getWorld()) ) {
-                BlockPos min = corners.getFirst();
-                BlockPos max = corners.getSecond();
-                BlockPosDimension check = new BlockPosDimension(blockEvent.getPos(), getWorld().provider.getDimension());
-
-                if ( check.getX() >= min.getX() && check.getY() >= min.getY() && check.getZ() >= min.getZ()
-                        && check.getX() <= max.getX() && check.getY() <= max.getY() && check.getZ() <= max.getZ() ) {
-                    if ( blockEvent instanceof BlockEvent.PlaceEvent ) {
-                        cachePlacedPosition(check);
-                    } else if ( blockEvent instanceof BlockEvent.BreakEvent ) {
-                        destroyConnection(check);
-                    }
-                }
-            }
-        }
+        return dense[idx];
     }
 
-    @Override
-    public int calculateEnergyCost(double distance, boolean isInterdimensional) {
+    /* Energy */
+
+    public int getBaseEnergy() {
+        int[] levels = ModConfig.plugins.appliedEnergistics.directionalAENetwork.baseEnergy;
+        int idx = level.toInt();
+        if ( idx < 0 )
+            idx = 0;
+        else if ( idx >= levels.length )
+            idx = levels.length - 1;
+
+        return levels[idx];
+    }
+
+    public int getEnergyCost(double distance, boolean isInterdimensional) {
         int cost = ModConfig.plugins.appliedEnergistics.directionalAENetwork.maximumCost;
         if ( !isInterdimensional ) {
             int dimCost = 0;
@@ -102,11 +93,12 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
         return cost;
     }
 
+
     /* IFacing */
 
     @Override
     public boolean onWrench(EntityPlayer player, EnumFacing side) {
-        setNeedsRecalculation();
+        scheduleRecalculate();
         return rotateBlock(side);
     }
 
@@ -119,7 +111,7 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
             return true;
 
         this.rotationX = rotationX;
-        setNeedsRecalculation();
+        scheduleRecalculate();
 
         if ( !world.isRemote ) {
             markChunkDirty();
@@ -146,7 +138,7 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
         }
 
         this.facing = facing;
-        setNeedsRecalculation();
+        scheduleRecalculate();
 
         if ( !world.isRemote ) {
             markChunkDirty();
@@ -156,13 +148,6 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
         return true;
     }
 
-    @Override
-    public void validate() {
-        super.validate();
-
-        if ( validTargets == null )
-            validTargets = new ArrayList<>();
-    }
 
     /* Targeting */
 
@@ -178,54 +163,30 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
             calculateTargets();
     }
 
-    public void calculateTargets() {
-        World world = getWorld();
-        BlockPos pos = getPos();
-        if ( world == null || pos == null || world.provider == null || !world.isBlockLoaded(pos) )
-            return;
-
+    public void calculateTargetsDelegate() {
         clearRenderAreas();
-        EventDispatcher.BREAK_BLOCK.removeListener(this);
-        EventDispatcher.PLACE_BLOCK.removeListener(this);
 
-        if ( validTargets == null )
-            validTargets = new ArrayList<>();
-        else
-            validTargets.clear();
+        final BlockPosDimension origin = getPosition();
+        final int dimension = origin.getDimension();
 
-        clearConnections();
-        setEnergyCost(IDLE_ENERGY_COST);
+        final Tuple<BlockPosDimension, BlockPosDimension> corners = calculateTargetCorners(origin);
+        final BlockPosDimension first = corners.getFirst();
+        final BlockPosDimension second = corners.getSecond();
 
-        if ( !redstoneControlOrDisable() )
-            return;
-
-        BlockPosDimension origin = getPosition();
-        corners = calculateTargetCorners(origin);
-
-        int dimension = origin.getDimension();
-        EnumFacing facing = getEnumFacing().getOpposite();
-
-        for (BlockPosDimension target : BlockPosDimension.getAllInBox(corners.getFirst(), corners.getSecond(), dimension, null)) {
-            if ( target.equalsIgnoreFacing(pos) )
+        for (BlockPosDimension target : BlockPosDimension.getAllInBox(first, second, dimension, null)) {
+            if ( target.equalsIgnoreFacing(origin) )
                 continue;
 
-            validTargets.add(target);
-
-            if ( !world.isRemote ) {
-                cachePlacedPosition(target);
-
-                EventDispatcher.PLACE_BLOCK.addListener(target, this);
-                EventDispatcher.BREAK_BLOCK.addListener(target, this);
-            }
+            addValidTarget(target, ItemStack.EMPTY);
         }
 
-        addRenderArea(corners.getFirst().facing(facing), corners.getSecond());
+        addRenderArea(first.facing(getEnumFacing().getOpposite()), second);
     }
 
-    @Nullable
+    @Nonnull
     @Override
     public ItemStack getMachineRepresentation() {
-        return new ItemStack(AppliedEnergistics2Plugin.blockDirectionalAENetwork);
+        return new ItemStack(AppliedEnergistics2Plugin.blockDirectionalAENetwork, 1, level.toInt());
     }
 
     /* Offset */
@@ -256,7 +217,7 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
             return;
 
         offsetHorizontal = offset;
-        setNeedsRecalculation();
+        scheduleRecalculate();
 
         if ( !world.isRemote ) {
             markChunkDirty();
@@ -269,7 +230,7 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
             return;
 
         offsetVertical = offset;
-        setNeedsRecalculation();
+        scheduleRecalculate();
 
         if ( !world.isRemote ) {
             markChunkDirty();
@@ -313,7 +274,7 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
         }
 
         rangeHeight = range;
-        setNeedsRecalculation();
+        scheduleRecalculate();
     }
 
     public void setRangeLength(int range) {
@@ -329,7 +290,7 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
         }
 
         rangeLength = range;
-        setNeedsRecalculation();
+        scheduleRecalculate();
     }
 
     public void setRangeWidth(int range) {
@@ -345,7 +306,7 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
         }
 
         rangeWidth = range;
-        setNeedsRecalculation();
+        scheduleRecalculate();
     }
 
     public void setRanges(int height, int length, int width) {
@@ -372,7 +333,7 @@ public class TileDirectionalAENetwork extends TileAENetworkBase implements
         rangeLength = length;
         rangeWidth = width;
 
-        setNeedsRecalculation();
+        scheduleRecalculate();
 
         if ( !world.isRemote ) {
             markChunkDirty();

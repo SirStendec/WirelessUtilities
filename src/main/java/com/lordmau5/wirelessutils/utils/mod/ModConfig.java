@@ -2235,12 +2235,18 @@ public class ModConfig {
         @Config.RequiresWorldRestart
         public boolean colorsWireless = true;
 
-        @Config.Name("Dense Cable Connection")
-        @Config.Comment("Whether or not the AE Network machines should act like a Dense Cable (32 channels) or not (8 channels)")
-        public boolean denseCableConnection = true;
+        @Config.Name("Channels - Machines Use a Channel")
+        @Config.Comment("When enabled, AE Network machines use a single channel. When disabled, AE Network machines use no channels.")
+        @Config.RequiresWorldRestart
+        public boolean requireChannels = false;
     }
 
     public static class PositionalAENetwork {
+        @Config.Name("Channels - Dense Cable")
+        @Config.Comment("When enabled, AE Network machines act like a Dense Cable providing 32 channels rather than merely 8.")
+        @Config.RequiresWorldRestart
+        public boolean[] dense = {false, false, true, true, true};
+
         @Config.Name("Base Energy")
         @Config.Comment("Positional AE Network machines should use this much energy per level.")
         @Config.RangeInt(min = 0)
@@ -2263,6 +2269,11 @@ public class ModConfig {
     }
 
     public static class DirectionalAENetwork {
+        @Config.Name("Channels - Dense Cable")
+        @Config.Comment("When enabled, AE Network machines act like a Dense Cable providing 32 channels rather than merely 8.")
+        @Config.RequiresWorldRestart
+        public boolean[] dense = {false, false, true, true, true};
+
         @Config.Name("Base Energy")
         @Config.Comment("Directional AE Network machines should use this much energy per level.")
         @Config.RangeInt(min = 0)

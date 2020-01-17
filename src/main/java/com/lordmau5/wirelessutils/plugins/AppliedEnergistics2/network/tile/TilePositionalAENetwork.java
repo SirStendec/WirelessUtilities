@@ -1,16 +1,16 @@
-package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional;
+package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.tile;
 
 import cofh.core.network.PacketBase;
 import com.lordmau5.wirelessutils.item.base.ItemBaseAreaCard;
 import com.lordmau5.wirelessutils.item.base.ItemBasePositionalCard;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics2Plugin;
-import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.TileAENetworkBase;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional.ContainerPositionalAENetwork;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional.GuiPositionalAENetwork;
 import com.lordmau5.wirelessutils.tile.base.IFacing;
 import com.lordmau5.wirelessutils.tile.base.IPositionalMachine;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ISlotAugmentable;
-import com.lordmau5.wirelessutils.utils.EventDispatcher;
 import com.lordmau5.wirelessutils.utils.constants.NiceColors;
 import com.lordmau5.wirelessutils.utils.location.BlockPosDimension;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
@@ -22,13 +22,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.EnumSet;
 
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRangeAugment;
@@ -65,7 +61,6 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
 
     @Override
     public boolean onWrench(EntityPlayer player, EnumFacing side) {
-        setNeedsRecalculation();
         return rotateBlock(side);
     }
 
@@ -93,7 +88,6 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
             return false;
 
         this.facing = facing;
-        setNeedsRecalculation();
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
@@ -107,26 +101,20 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
         return false;
     }
 
-    /* Events */
+    /* Energy */
 
-    @Override
-    public void handleEvent(@Nonnull Event event) {
-        if ( event instanceof BlockEvent ) {
-            BlockEvent blockEvent = (BlockEvent) event;
+    public int getBaseEnergy() {
+        int[] levels = ModConfig.plugins.appliedEnergistics.positionalAENetwork.baseEnergy;
+        int idx = level.toInt();
+        if ( idx < 0 )
+            idx = 0;
+        else if ( idx >= levels.length )
+            idx = levels.length - 1;
 
-            BlockPosDimension check = new BlockPosDimension(blockEvent.getPos(), blockEvent.getWorld().provider.getDimension());
-            if ( validTargets.contains(check) ) {
-                if ( blockEvent instanceof BlockEvent.PlaceEvent ) {
-                    cachePlacedPosition(check);
-                } else if ( blockEvent instanceof BlockEvent.BreakEvent ) {
-                    destroyConnection(check);
-                }
-            }
-        }
+        return levels[idx];
     }
 
-    @Override
-    public int calculateEnergyCost(double distance, boolean isInterdimensional) {
+    public int getEnergyCost(double distance, boolean isInterdimensional) {
         int cost = ModConfig.plugins.appliedEnergistics.positionalAENetwork.costInterdimensional;
         if ( !isInterdimensional ) {
             int dimCost = 0;
@@ -148,7 +136,7 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
     @Override
     public void onContentsChanged(int slot) {
         super.onContentsChanged(slot);
-        setNeedsRecalculation();
+        scheduleRecalculate();
     }
 
     @Override
@@ -204,32 +192,19 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
 
     /* Targeting */
 
-    public void calculateTargets() {
-        if ( validTargets == null )
-            validTargets = new ArrayList<>();
-        else
-            validTargets.clear();
-
+    public void calculateTargetsDelegate() {
         clearRenderAreas();
-        EventDispatcher.PLACE_BLOCK.removeListener(this);
-        EventDispatcher.BREAK_BLOCK.removeListener(this);
 
-        clearConnections();
-        setEnergyCost(IDLE_ENERGY_COST);
+        final BlockPosDimension origin = getPosition();
+        final int dimension = origin.getDimension();
 
-        if ( !redstoneControlOrDisable() )
-            return;
-
-        BlockPosDimension origin = getPosition();
-        int dimension = origin.getDimension();
-
-        int slots = itemStackHandler.getSlots();
+        final int slots = itemStackHandler.getSlots();
         for (int i = 0; i < slots; i++) {
-            ItemStack slotted = itemStackHandler.getStackInSlot(i);
+            final ItemStack slotted = itemStackHandler.getStackInSlot(i);
             if ( !isPositionalCardValid(slotted) )
                 continue;
 
-            ItemBasePositionalCard card = (ItemBasePositionalCard) slotted.getItem();
+            final ItemBasePositionalCard card = (ItemBasePositionalCard) slotted.getItem();
             if ( card == null )
                 continue;
 
@@ -238,36 +213,23 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
                 markChunkDirty();
             }
 
-            BlockPosDimension target = card.getTarget(slotted, origin);
+            final BlockPosDimension target = card.getTarget(slotted, origin);
             if ( target == null || (!isTargetInRange(target) && !card.shouldIgnoreDistance(slotted)) )
                 continue;
 
             final boolean sameDimension = target.getDimension() == dimension;
 
             if ( card instanceof ItemBaseAreaCard ) {
-                ItemBaseAreaCard areaCard = (ItemBaseAreaCard) card;
-                Iterable<Tuple<BlockPosDimension, ItemStack>> iterable = areaCard.getTargetArea(slotted, origin);
+                final ItemBaseAreaCard areaCard = (ItemBaseAreaCard) card;
+                final Iterable<Tuple<BlockPosDimension, ItemStack>> iterable = areaCard.getTargetArea(slotted, origin);
                 if ( iterable == null )
                     continue;
 
-                for (Tuple<BlockPosDimension, ItemStack> pair : iterable) {
-                    BlockPosDimension areaTarget = pair.getFirst();
-                    if ( areaTarget == null )
-                        continue;
-
-                    BlockPosDimension nullTarget = areaTarget.facing(null);
-                    if ( !validTargets.contains(nullTarget) ) {
-                        validTargets.add(nullTarget);
-                        if ( !world.isRemote ) {
-                            cachePlacedPosition(nullTarget);
-                            EventDispatcher.PLACE_BLOCK.addListener(nullTarget, this);
-                            EventDispatcher.BREAK_BLOCK.addListener(nullTarget, this);
-                        }
-                    }
-                }
+                for (Tuple<BlockPosDimension, ItemStack> pair : iterable)
+                    addValidTarget(pair.getFirst(), pair.getSecond());
 
                 if ( sameDimension ) {
-                    Tuple<BlockPosDimension, BlockPosDimension> corners = areaCard.getCorners(slotted, target);
+                    final Tuple<BlockPosDimension, BlockPosDimension> corners = areaCard.getCorners(slotted, target);
                     if ( corners != null ) {
                         addRenderArea(
                                 corners.getFirst(), corners.getSecond(),
@@ -278,36 +240,35 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
                     }
                 }
 
-                continue;
-            }
+            } else {
+                addValidTarget(target, slotted);
 
-            BlockPosDimension nullTarget = target.facing(null);
-
-            if ( sameDimension )
-                addRenderArea(
-                        target.toImmutable(),
-                        NiceColors.COLORS[i],
-                        slotted.hasDisplayName() ? slotted.getDisplayName() : null,
-                        card == itemRelativePositionalCard ? itemRelativePositionalCard.getVector(slotted) : null
-                );
-
-            if ( !validTargets.contains(nullTarget) ) {
-                validTargets.add(nullTarget);
-
-                if ( !world.isRemote ) {
-                    cachePlacedPosition(nullTarget);
-
-                    EventDispatcher.PLACE_BLOCK.addListener(nullTarget, this);
-                    EventDispatcher.BREAK_BLOCK.addListener(nullTarget, this);
-                }
+                if ( sameDimension )
+                    addRenderArea(
+                            target.toImmutable(),
+                            NiceColors.COLORS[i],
+                            slotted.hasDisplayName() ? slotted.getDisplayName() : null,
+                            card == itemRelativePositionalCard ? itemRelativePositionalCard.getVector(slotted) : null
+                    );
             }
         }
     }
 
-    @Nullable
+    @Nonnull
     @Override
     public ItemStack getMachineRepresentation() {
-        return new ItemStack(AppliedEnergistics2Plugin.blockPositionalAENetwork);
+        return new ItemStack(AppliedEnergistics2Plugin.blockPositionalAENetwork, 1, level.toInt());
+    }
+
+    public boolean isDense() {
+        boolean[] dense = ModConfig.plugins.appliedEnergistics.positionalAENetwork.dense;
+        int idx = level.toInt();
+        if ( idx < 0 )
+            idx = 0;
+        else if ( idx >= dense.length )
+            idx = dense.length - 1;
+
+        return dense[idx];
     }
 
     /* Range */
@@ -334,7 +295,7 @@ public class TilePositionalAENetwork extends TileAENetworkBase implements
 
         this.interdimensional = interdimensional;
         this.range = range;
-        setNeedsRecalculation();
+        scheduleRecalculate();
     }
 
     /* Augments */

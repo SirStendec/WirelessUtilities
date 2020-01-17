@@ -96,6 +96,10 @@ public class BlockPosDimension extends BlockPos {
         this(x, y, z, dimension, null);
     }
 
+    public BlockPosDimension(int x, int y, int z, @Nonnull World world) {
+        this(x, y, z, world, null);
+    }
+
     public BlockPosDimension(int x, int y, int z, int dimension, @Nullable EnumFacing facing) {
         super(x, y, z);
 
@@ -103,8 +107,19 @@ public class BlockPosDimension extends BlockPos {
         this.facing = facing;
     }
 
+    public BlockPosDimension(int x, int y, int z, @Nonnull World world, @Nullable EnumFacing facing) {
+        super(x, y, z);
+
+        this.dimension = world.provider.getDimension();
+        this.facing = facing;
+    }
+
     public BlockPosDimension(double x, double y, double z, int dimension) {
         this(x, y, z, dimension, null);
+    }
+
+    public BlockPosDimension(double x, double y, double z, @Nonnull World world) {
+        this(x, y, z, world, null);
     }
 
     public BlockPosDimension(double x, double y, double z, int dimension, @Nullable EnumFacing facing) {
@@ -114,14 +129,32 @@ public class BlockPosDimension extends BlockPos {
         this.facing = facing;
     }
 
+    public BlockPosDimension(double x, double y, double z, @Nonnull World world, @Nullable EnumFacing facing) {
+        super(x, y, z);
+
+        this.dimension = world.provider.getDimension();
+        this.facing = facing;
+    }
+
     public BlockPosDimension(@Nonnull BlockPos pos, int dimension) {
         this(pos, dimension, null);
+    }
+
+    public BlockPosDimension(@Nonnull BlockPos pos, @Nonnull World world) {
+        this(pos, world, null);
     }
 
     public BlockPosDimension(@Nonnull BlockPos pos, int dimension, @Nullable EnumFacing facing) {
         super(pos);
 
         this.dimension = dimension;
+        this.facing = facing;
+    }
+
+    public BlockPosDimension(@Nonnull BlockPos pos, @Nonnull World world, @Nullable EnumFacing facing) {
+        super(pos);
+
+        this.dimension = world.provider.getDimension();
         this.facing = facing;
     }
 

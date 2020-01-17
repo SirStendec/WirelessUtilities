@@ -574,6 +574,12 @@ info.wirelessutils.work_info.unconfigured.title=Unable to Run
 info.wirelessutils.work_info.unconfigured.tooltip=Machine Cannot Run
 info.wirelessutils.work_info.unconfigured.explanation.0=This machine cannot currently run.
 
+info.wirelessutils.ae2.tab.name=Statistics
+info.wirelessutils.ae2.tab.channels=Active Channels:
+info.wirelessutils.ae2.tab.info=%s of %s
+info.wirelessutils.ae2.tab.targets=Active Targets:
+info.wirelessutils.ae2.tab.power=Power Draw:
+
 info.wirelessutils.vaporizer_unit=Entities/t
 info.wirelessutils.vaporizer_unit.second=Entities/s
 info.wirelessutils.vaporizer_unit.tick=Entities/t
@@ -759,6 +765,7 @@ info.wirelessutils.tiered.required.lower.2=been installed.
 info.wirelessutils.voiding_fluids=Voiding Fluids
 
 info.wirelessutils.ae2.channels=Channels: %s of %s
+info.wirelessutils.ae2.max_channels=Max Channels: %s
 
 btn.wirelessutils.ae2.color=Color: %s
 btn.wirelessutils.ae2.color.sides.0=This machine will only accept

@@ -2,11 +2,11 @@ package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2;
 
 import appeng.api.util.AEColor;
 import com.lordmau5.wirelessutils.item.ItemBlockMachine;
-import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.TileAENetworkBase;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.directional.BlockDirectionalAENetwork;
-import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.directional.TileDirectionalAENetwork;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional.BlockPositionalAENetwork;
-import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional.TilePositionalAENetwork;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.tile.TileAENetworkBase;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.tile.TileDirectionalAENetwork;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.tile.TilePositionalAENetwork;
 import com.lordmau5.wirelessutils.plugins.IPlugin;
 import com.lordmau5.wirelessutils.proxy.CommonProxy;
 import com.lordmau5.wirelessutils.utils.ChargerRecipeManager;

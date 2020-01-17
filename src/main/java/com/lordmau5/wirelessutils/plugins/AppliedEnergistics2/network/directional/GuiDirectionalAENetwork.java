@@ -13,6 +13,7 @@ import com.lordmau5.wirelessutils.gui.client.elements.ElementRangeControls;
 import com.lordmau5.wirelessutils.gui.client.elements.TabAugmentTwoElectricBoogaloo;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.ElementColorButton;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.TabChannels;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.tile.TileDirectionalAENetwork;
 import com.lordmau5.wirelessutils.utils.Textures;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.entity.player.InventoryPlayer;

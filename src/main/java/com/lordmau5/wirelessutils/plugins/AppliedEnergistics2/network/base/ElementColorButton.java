@@ -4,6 +4,7 @@ import appeng.api.util.AEColor;
 import cofh.core.gui.GuiContainerCore;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementDynamicButton;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.tile.TileAENetworkBase;
 import com.lordmau5.wirelessutils.utils.Textures;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;

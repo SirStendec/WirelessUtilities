@@ -9,6 +9,8 @@ import com.lordmau5.wirelessutils.gui.client.base.BaseGuiPositional;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementAreaButton;
 import com.lordmau5.wirelessutils.gui.client.elements.TabAugmentTwoElectricBoogaloo;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.ElementColorButton;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.base.TabChannels;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.tile.TilePositionalAENetwork;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -34,6 +36,7 @@ public class GuiPositionalAENetwork extends BaseGuiPositional {
         if ( ModConfig.plugins.appliedEnergistics.enableColor )
             addElement(new ElementColorButton(this, tile, 134, 74));
 
+        addTab(new TabChannels(this, tile));
         addTab(new TabInfo(this, myInfo));
 
         addTab(new TabAugmentTwoElectricBoogaloo(this, (IAugmentableContainer) inventorySlots));

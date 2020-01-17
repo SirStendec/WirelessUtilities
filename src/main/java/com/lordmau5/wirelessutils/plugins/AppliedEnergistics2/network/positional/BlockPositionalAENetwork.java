@@ -1,9 +1,14 @@
 package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.positional;
 
 import appeng.api.util.AEColor;
+import appeng.core.AEConfig;
+import appeng.core.features.AEFeature;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.block.base.BlockBaseMachine;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AEColorHelpers;
+import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.network.tile.TilePositionalAENetwork;
+import com.lordmau5.wirelessutils.utils.Level;
+import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.util.ITooltipFlag;
@@ -31,9 +36,26 @@ public class BlockPositionalAENetwork extends BlockBaseMachine {
         return TilePositionalAENetwork.class;
     }
 
+    public boolean isStackDense(@Nonnull ItemStack stack) {
+        boolean[] dense = ModConfig.plugins.appliedEnergistics.positionalAENetwork.dense;
+        int idx = Level.fromItemStack(stack).toInt();
+        if ( idx < 0 )
+            idx = 0;
+        else if ( idx >= dense.length )
+            idx = dense.length - 1;
+
+        return dense[idx];
+    }
+
     @Override
     public void addItemStackInformation(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<String> tooltip, ITooltipFlag flagIn) {
         super.addItemStackInformation(stack, worldIn, tooltip, flagIn);
+
+        if ( AEConfig.instance().isFeatureEnabled(AEFeature.CHANNELS) )
+            tooltip.add(new TextComponentTranslation(
+                    "info." + WirelessUtils.MODID + ".ae2.max_channels",
+                    TextHelpers.getComponent(isStackDense(stack) ? 32 : 8)
+            ).getFormattedText());
 
         if ( ModConfig.plugins.appliedEnergistics.enableColor ) {
             AEColor color = AEColorHelpers.fromItemStack(stack);
@@ -41,26 +63,6 @@ public class BlockPositionalAENetwork extends BlockBaseMachine {
         }
     }
 
-
-//    @Override
-//    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-//        super.onBlockPlacedBy(world, pos, state, placer, stack);
-//
-//        if ( !world.isRemote ) {
-//            TileAENetworkBase tile = (TileAENetworkBase) world.getTileEntity(pos);
-//
-//            if ( tile != null ) {
-//                tile.setNeedsRecalculation();
-//
-//                if ( placer instanceof EntityPlayer ) {
-//                    GameProfile profile = ((EntityPlayer) placer).getGameProfile();
-//                    int playerID = AEApi.instance().registries().players().getID(profile);
-//
-//                    tile.getNode().setPlayerID(playerID);
-//                }
-//            }
-//        }
-//    }
 
     @Override
     public void breakBlock(World world, BlockPos pos, IBlockState state) {
