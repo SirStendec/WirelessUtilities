@@ -59,6 +59,11 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements IAdminEdita
             setHasSubtypes(true);
     }
 
+
+    public ITickableAugment getTickableAugment(@Nonnull ItemStack stack, @Nonnull IAugmentable tile) {
+        return null;
+    }
+
     @Override
     public void initModel() {
         ModelLoader.setCustomMeshDefinition(this, stack -> new ModelResourceLocation(stack.getItem().getRegistryName(), "inventory"));
@@ -86,16 +91,19 @@ public abstract class ItemAugment extends ItemBaseUpgrade implements IAdminEdita
 
         Level out = getRequiredLevelDelegate(stack);
         if ( out == null )
-            return Level.getMinLevel();
+            out = Level.getMinLevel();
+
+        if ( ModConfig.augments.requireMachineLevel ) {
+            Level min = getLevel(stack);
+            if ( out.toInt() < min.toInt() )
+                out = min;
+        }
 
         return out;
     }
 
     @Nullable
     public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {
-        if ( ModConfig.augments.requireMachineLevel )
-            return getLevel(stack);
-
         return null;
     }
 

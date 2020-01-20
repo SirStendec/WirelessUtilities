@@ -77,6 +77,26 @@ public class ContainerFilterAugment extends BaseContainerItem implements IFilter
         setList(list);
     }
 
+    public boolean canFilterArmor() {
+        return ModItems.itemFilterAugment.canFilterArmor(stack);
+    }
+
+    public boolean getFilterArmor() {
+        return ModItems.itemFilterAugment.getFilterArmor(stack);
+    }
+
+    public boolean setFilterArmor(boolean match) {
+        if ( isLocked() )
+            return false;
+
+        ItemStack augment = ModItems.itemFilterAugment.setFilterArmor(stack, match);
+        if ( augment.isEmpty() )
+            return false;
+
+        setItemStack(augment);
+        return true;
+    }
+
     public boolean canMatchMod() {
         return ModItems.itemFilterAugment.canMatchMod(stack);
     }

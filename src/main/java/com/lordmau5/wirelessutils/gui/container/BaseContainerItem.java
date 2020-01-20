@@ -305,6 +305,10 @@ public class BaseContainerItem extends BaseContainer {
         return changed;
     }
 
+    public void markChanged() {
+        changed = true;
+    }
+
     @Nonnull
     public ItemStack getItemStack() {
         return stack;

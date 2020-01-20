@@ -50,6 +50,7 @@ public class ContainerAdminAugment extends BaseContainerItem {
 
     public void setWantNormalGui(boolean want) {
         wantNormalGui = want;
+        markChanged();
     }
 
     public boolean hasRequiredLevel() {

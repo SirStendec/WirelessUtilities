@@ -23,6 +23,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
@@ -162,6 +163,18 @@ public class ItemFilterAugment extends ItemAugment implements IGuiItem, IUpdatea
         return options[tier];
     }
 
+    public boolean canFilterArmor(@Nonnull ItemStack stack) {
+        int tier = getLevel(stack).toInt();
+        boolean[] options = ModConfig.augments.filter.allowArmor;
+        if ( options.length == 0 )
+            return true;
+
+        if ( tier >= options.length )
+            tier = options.length - 1;
+
+        return options[tier];
+    }
+
     public boolean canVoid(@Nonnull ItemStack stack) {
         int tier = getLevel(stack).toInt();
         boolean[] options = ModConfig.augments.filter.allowVoiding;
@@ -272,6 +285,9 @@ public class ItemFilterAugment extends ItemAugment implements IGuiItem, IUpdatea
         if ( matchMod ) {
             tooltip.add(StringHelper.localize(name + ".match_mod"));
         } else {
+            if ( getFilterArmor(stack) )
+                tooltip.add(StringHelper.localize(name + ".filter_armor"));
+
             if ( getIgnoreMetadata(stack) )
                 tooltip.add(StringHelper.localize(name + ".meta"));
 
@@ -332,6 +348,42 @@ public class ItemFilterAugment extends ItemAugment implements IGuiItem, IUpdatea
                 ).getFormattedText());
         }
     }
+
+    public boolean getFilterArmor(@Nonnull ItemStack stack) {
+        if ( !canFilterArmor(stack) )
+            return false;
+
+        if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            return tag != null && tag.getBoolean("FilterArmor");
+        }
+
+        return false;
+    }
+
+    @Nonnull
+    public ItemStack setFilterArmor(@Nonnull ItemStack stack, boolean match) {
+        if ( stack.isEmpty() || stack.getItem() != this )
+            return ItemStack.EMPTY;
+
+        NBTTagCompound tag = stack.getTagCompound();
+        if ( tag == null )
+            tag = new NBTTagCompound();
+        else if ( tag.getBoolean("Locked") )
+            return ItemStack.EMPTY;
+
+        if ( match )
+            tag.setBoolean("FilterArmor", true);
+        else
+            tag.removeTag("FilterArmor");
+
+        if ( tag.isEmpty() )
+            tag = null;
+
+        stack.setTagCompound(tag);
+        return stack;
+    }
+
 
     public boolean getMatchMod(@Nonnull ItemStack stack) {
         if ( !canMatchMod(stack) )
@@ -651,6 +703,7 @@ public class ItemFilterAugment extends ItemAugment implements IGuiItem, IUpdatea
         setIgnoreNBT(stack, getIgnoreNBT(newStack));
         setUseOreDict(stack, getUseOreDict(newStack));
         setVoiding(stack, isVoiding(newStack));
+        setFilterArmor(stack, getFilterArmor(newStack));
 
         player.inventory.setInventorySlotContents(slot, stack);
     }
@@ -684,9 +737,23 @@ public class ItemFilterAugment extends ItemAugment implements IGuiItem, IUpdatea
         final boolean ignoreMeta = getIgnoreMetadata(stack);
         final boolean ignoreNBT = getIgnoreNBT(stack);
         final boolean useOre = !matchMod && getUseOreDict(stack);
+        final boolean filterArmor = !matchMod && getFilterArmor(stack);
 
-        if ( matching == null || matching.length == 0 )
+        if ( matching == null || matching.length == 0 ) {
+            if ( filterArmor )
+                return item -> {
+                    if ( item == null || item.isEmpty() )
+                        return false;
+
+                    Item itemItem = item.getItem();
+                    if ( itemItem instanceof ItemArmor )
+                        return retVal;
+
+                    return !retVal;
+                };
+
             return null;
+        }
 
         Set<String> mods = matchMod ? new ObjectOpenHashSet<>() : null;
         IntOpenHashSet oreIDs = useOre ? new IntOpenHashSet() : null;
@@ -756,6 +823,9 @@ public class ItemFilterAugment extends ItemAugment implements IGuiItem, IUpdatea
                 }
 
                 Item itemItem = item.getItem();
+                if ( filterArmor && itemItem instanceof ItemArmor )
+                    return retVal;
+
                 for (ItemStack test : stacks) {
                     if ( test.getItem() != itemItem )
                         continue;

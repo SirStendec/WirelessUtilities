@@ -25,6 +25,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 
+import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemFilterAugment;
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemFluidGenAugment;
 import static com.lordmau5.wirelessutils.utils.mod.ModItems.itemRangeAugment;
 
@@ -132,6 +133,23 @@ public class ColorHandler {
 
             return Level.fromAugment(stack).color;
         };
+
+        public static class Filter {
+            public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
+                final NBTTagCompound tag = stack.getTagCompound();
+                if ( tag != null && tag.hasKey("WUTint:" + tintIndex, Constants.NBT.TAG_INT) )
+                    return tag.getInteger("WUTint:" + tintIndex);
+
+                final boolean whitelist = itemFilterAugment.isWhitelist(stack);
+                if ( tintIndex == 0 && !whitelist )
+                    return 0x333333;
+
+                if ( tintIndex == 0 || tintIndex == 1 )
+                    return 0xFFFFFF;
+
+                return Level.fromAugment(stack).color;
+            };
+        }
 
         public static class FluidGen {
             public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {

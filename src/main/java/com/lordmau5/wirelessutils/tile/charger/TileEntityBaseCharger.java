@@ -9,8 +9,9 @@ import com.lordmau5.wirelessutils.plugins.JEI.charger.ChargerRecipeCategory;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
+import com.lordmau5.wirelessutils.tile.base.TileEntityBaseAE2;
 import com.lordmau5.wirelessutils.tile.base.Worker;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IBusAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IInventoryAugmentable;
@@ -37,6 +38,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -45,10 +48,12 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.EnumSet;
 
-public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy implements
+public abstract class TileEntityBaseCharger extends TileEntityBaseAE2 implements
         IChunkLoadAugmentable, IInvertAugmentable, IRoundRobinMachine, ICapacityAugmentable, IWUCraftingMachine,
         ITransferAugmentable, IInventoryAugmentable, ISidedTransfer, ITickable, ISidedTransferAugmentable,
+        IBusAugmentable,
         IWorkProvider<TileEntityBaseCharger.ChargerTarget> {
 
     //protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
@@ -712,7 +717,68 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         return true;
     }
 
+    /* Bus */
+
+    @Override
+    public boolean getBusShouldExtractEnergy(TickPhase phase) {
+        return inverted;
+    }
+
+    @Override
+    public boolean getBusShouldInsertEnergy(TickPhase phase) {
+        return phase == TickPhase.PRE && !inverted;
+    }
+
+    @Nullable
+    public IItemHandler getBusItemOutputHandler(TickPhase phase) {
+        return null;
+    }
+
+    @Nullable
+    public IItemHandler getBusItemInputHandler(TickPhase phase) {
+        return null;
+    }
+
+    @Nullable
+    public ItemStack[] getBusItemInputRequest(TickPhase phase) {
+        return null;
+    }
+
+    @Nullable
+    public IFluidHandler getBusFluidOutputHandler(TickPhase phase) {
+        return null;
+    }
+
+    @Nullable
+    public IFluidHandler getBusFluidInputHandler(TickPhase phase) {
+        return null;
+    }
+
+    @Nullable
+    public FluidStack[] getBusFluidInputRequest(TickPhase phase) {
+        return null;
+    }
+
     /* Sided Transfer */
+
+    @Nonnull
+    @Override
+    public EnumSet<EnumFacing> getAE2ConnectableSides() {
+        EnumSet<EnumFacing> out = null;
+        for (TransferSide side : TransferSide.VALUES)
+            if ( getSideTransferMode(side) != Mode.DISABLED ) {
+                EnumFacing face = getFacingForSide(side);
+                if ( out == null )
+                    out = EnumSet.of(face);
+                else
+                    out.add(face);
+            }
+
+        if ( out == null )
+            return EnumSet.noneOf(EnumFacing.class);
+        else
+            return out;
+    }
 
     public Mode getSideTransferMode(TransferSide side) {
         if ( !canSideTransfer(side) )
@@ -744,6 +810,7 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
+            updateNode();
         }
 
         callBlockUpdate();
@@ -825,12 +892,15 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         if ( sideTransferAugment && enabled )
             executeSidedTransfer();
 
+        preTickAugments(enabled);
+
         long energy = getFullEnergyStored();
 
         if ( !enabled || (inverted ?
                 (energy == getFullMaxEnergyStored() || getMaxReceive() == 0) :
                 (energy == 0 || getMaxExtract() == 0 || energy < augmentDrain)) ) {
             tickInactive();
+            tickAugments(false);
             setActive(false);
             updateTrackers();
             saveEnergyHistory(energyPerTick);
@@ -861,7 +931,9 @@ public abstract class TileEntityBaseCharger extends TileEntityBaseEnergy impleme
         if ( !inverted && augmentDrain > 0 )
             remainingPerTick -= extractEnergy(augmentDrain, false);
 
+        tickAugments(true);
         setActive(worker.performWork());
+        postTickAugments();
 
         // While crafting, we always want to advance the ticks, even if we
         // didn't hit a crafting target this loop.

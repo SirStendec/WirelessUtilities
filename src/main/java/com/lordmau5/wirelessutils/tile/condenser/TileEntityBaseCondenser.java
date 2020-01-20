@@ -15,8 +15,9 @@ import com.lordmau5.wirelessutils.tile.base.IConfigurableWorldTickRate;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
+import com.lordmau5.wirelessutils.tile.base.TileEntityBaseAE2;
 import com.lordmau5.wirelessutils.tile.base.Worker;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IBusAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IFluidGenAugmentable;
@@ -75,12 +76,14 @@ import net.minecraftforge.items.IItemHandler;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.EnumSet;
 
-public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy implements
+public abstract class TileEntityBaseCondenser extends TileEntityBaseAE2 implements
         IConfigurableWorldTickRate, IWUCraftingMachine,
         IChunkLoadAugmentable, IRoundRobinMachine, IWorldAugmentable, ITransferAugmentable,
         ICapacityAugmentable, IInventoryAugmentable, IInvertAugmentable, ITickable,
         IFluidGenAugmentable, ISidedTransfer, ISidedTransferAugmentable,
+        IBusAugmentable,
         IWorkProvider<TileEntityBaseCondenser.CondenserTarget> {
 
     //protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
@@ -1460,7 +1463,88 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         return getInfoMaxEnergyPerTick();
     }
 
+    /* Bus Augment */
+
+    @Override
+    public boolean getBusShouldInsertEnergy(TickPhase phase) {
+        return phase == TickPhase.PRE;
+    }
+
+    @Nullable
+    public IItemHandler getBusItemOutputHandler(TickPhase phase) {
+        return null;
+    }
+
+    @Nullable
+    public IItemHandler getBusItemInputHandler(TickPhase phase) {
+        return null;
+    }
+
+    @Nullable
+    public ItemStack[] getBusItemInputRequest(TickPhase phase) {
+        return null;
+    }
+
+    @Nullable
+    public IFluidHandler getBusFluidOutputHandler(TickPhase phase) {
+        if ( !inverted )
+            return null;
+
+        int stored = tank.getFluidAmount();
+        if ( stored > 0 && (phase == TickPhase.POST || stored >= tank.getCapacity()) )
+            return fluidHandler;
+
+        return null;
+    }
+
+    @Nullable
+    public IFluidHandler getBusFluidInputHandler(TickPhase phase) {
+        if ( phase != TickPhase.PRE || inverted || tank.getSpace() == 0 )
+            return null;
+
+        return fluidHandler;
+    }
+
+    @Nullable
+    public FluidStack[] getBusFluidInputRequest(TickPhase phase) {
+        if ( inverted || phase != TickPhase.PRE )
+            return null;
+
+        FluidStack stack = getTankFluid();
+        if ( stack == null || stack.amount == 0 ) {
+            if ( lockStack == null )
+                return null;
+
+            return new FluidStack[]{new FluidStack(lockStack, tank.getCapacity())};
+        }
+
+        int remaining = tank.getCapacity() - stack.amount;
+        if ( remaining > 0 )
+            return new FluidStack[]{new FluidStack(stack, remaining)};
+
+        return null;
+    }
+
     /* Sided Transfer */
+
+    @Nonnull
+    @Override
+    public EnumSet<EnumFacing> getAE2ConnectableSides() {
+        EnumSet<EnumFacing> out = null;
+        for (TransferSide side : TransferSide.VALUES)
+            if ( getSideTransferMode(side) != Mode.DISABLED ) {
+                EnumFacing face = getFacingForSide(side);
+                if ( out == null )
+                    out = EnumSet.of(face);
+                else
+                    out.add(face);
+            }
+
+        if ( out == null )
+            return EnumSet.noneOf(EnumFacing.class);
+        else
+            return out;
+    }
 
     public Mode getSideTransferMode(TransferSide side) {
         if ( !canSideTransfer(side) )
@@ -1492,6 +1576,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
+            updateNode();
         }
 
         callBlockUpdate();
@@ -1623,6 +1708,8 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
         if ( sideTransferAugment && enabled )
             executeSidedTransfer();
 
+        preTickAugments(enabled);
+
         if ( enabled && augmentDrain > 0 ) {
             if ( augmentDrain > getEnergyStored() )
                 enabled = false;
@@ -1643,6 +1730,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             }
 
             tickInactive();
+            tickAugments(false);
             setActive(false);
             updateTrackers();
             saveEnergyHistory(energyPerTick);
@@ -1658,7 +1746,9 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseEnergy imple
             total = fluidMaxRate;
 
         remainingPerTick = total;
+        tickAugments(true);
         setActive(worker.performWork());
+        postTickAugments();
         fluidPerTick = total - remainingPerTick;
 
         // While crafting, we always want to advance the ticks, even if we

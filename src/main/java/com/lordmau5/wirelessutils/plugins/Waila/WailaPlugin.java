@@ -16,13 +16,14 @@ public class WailaPlugin implements IPlugin {
     }
 
     public static void register(IWailaRegistrar registrar) {
-        IWailaDataProvider provider = new WailaInfoProvider();
+        IWailaDataProvider tileProvider = new WailaInfoProvider(true);
+        IWailaDataProvider workProvider = new WailaInfoProvider(false);
 
-        registrar.registerBodyProvider(provider, ITileInfoProvider.class);
-        registrar.registerNBTProvider(provider, ITileInfoProvider.class);
+        registrar.registerBodyProvider(tileProvider, ITileInfoProvider.class);
+        registrar.registerNBTProvider(tileProvider, ITileInfoProvider.class);
 
-        registrar.registerBodyProvider(provider, IWorkInfoProvider.class);
-        registrar.registerNBTProvider(provider, IWorkInfoProvider.class);
+        registrar.registerBodyProvider(workProvider, IWorkInfoProvider.class);
+        registrar.registerNBTProvider(workProvider, IWorkInfoProvider.class);
     }
 
 }

@@ -17,7 +17,6 @@ import appeng.api.util.DimensionalCoord;
 import appeng.api.util.IReadOnlyCollection;
 import appeng.core.AEConfig;
 import appeng.core.features.AEFeature;
-import appeng.core.worlddata.WorldData;
 import cofh.core.network.PacketBase;
 import cofh.core.util.CoreUtils;
 import com.google.common.base.MoreObjects;
@@ -27,6 +26,7 @@ import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AEColorHelpers;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics2Plugin;
 import com.lordmau5.wirelessutils.tile.base.ITileInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IRangeAugmentable;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
@@ -67,7 +67,7 @@ import java.util.Set;
 
 public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         IRangeAugmentable, ITickable,
-        IGridHost, IGridBlock,
+        IGridHost, IGridBlock, IChunkLoadAugmentable,
         EventDispatcher.IEventListener, ITileInfoProvider {
 
     private Map<BlockPosDimension, TargetInfo> connections = new Object2ObjectOpenHashMap<>();
@@ -80,6 +80,7 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     private int energyCost = 0;
 
     private boolean needsRecalculation;
+    private boolean chunkAugmented;
 
     private AEColor aeColor = AEColor.TRANSPARENT;
     private boolean enabled = false;
@@ -88,6 +89,8 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     private int usedChannels = 0;
     private int usedConnections = 0;
     private int powerDraw = 0;
+
+    private byte recalcTick = 0;
 
     public TileAENetworkBase() {
         super();
@@ -100,6 +103,7 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         System.out.println("    Enabled: " + enabled + " (RS:" + redstoneControlOrDisable() + ")");
         System.out.println("       Node: " + node);
         System.out.println("     Recalc: " + needsRecalculation);
+        System.out.println(" Chunk Load: " + chunkAugmented);
         System.out.println("      Color: " + getAEColor().toString());
         System.out.println("Base Energy: " + baseEnergy);
         System.out.println("Energy Cost: " + energyCost);
@@ -168,6 +172,19 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         }
     }
 
+    /* Augments */
+
+    public void setChunkLoadAugmented(boolean augmented) {
+        if ( augmented == chunkAugmented )
+            return;
+
+        chunkAugmented = augmented;
+        if ( chunkAugmented )
+            startChunkLoading();
+        else
+            stopChunkLoading();
+    }
+
     /* Network Colors */
 
     public AEColor getAEColor() {
@@ -233,6 +250,8 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
 
         for (BlockPosDimension target : staleTargets) {
             if ( !world.isRemote ) {
+                unloadChunk(target);
+
                 EventDispatcher.PLACE_BLOCK.removeListener(target, this);
                 EventDispatcher.BREAK_BLOCK.removeListener(target, this);
                 destroyConnection(target);
@@ -246,7 +265,23 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         needsRecalculation = false;
     }
 
+    public void clearTargets() {
+        clearConnections();
+        stopChunkLoading();
+
+        checkTargets = null;
+        validTargets = null;
+        sources.clear();
+
+        EventDispatcher.PLACE_BLOCK.removeListener(this);
+        EventDispatcher.BREAK_BLOCK.removeListener(this);
+    }
+
     public void checkTarget(@Nonnull BlockPosDimension pos) {
+        checkTarget(pos, true);
+    }
+
+    public void checkTarget(@Nonnull BlockPosDimension pos, boolean multiTry) {
         if ( validTargets == null || !validTargets.contains(pos) )
             return;
 
@@ -256,7 +291,7 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         if ( checkTargets == null )
             checkTargets = new Object2ByteOpenHashMap<>();
 
-        checkTargets.put(pos, (byte) 0);
+        checkTargets.put(pos, (byte) (multiTry ? 0 : 3));
     }
 
     public void addValidTarget(@Nonnull BlockPosDimension pos, @Nonnull ItemStack stack) {
@@ -275,8 +310,12 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         if ( stale )
             staleTargets.remove(pos);
         else if ( world != null && !world.isRemote ) {
-            if ( enabled )
+            if ( enabled ) {
                 checkTarget(pos);
+
+                if ( chunkAugmented )
+                    loadChunk(pos);
+            }
 
             EventDispatcher.PLACE_BLOCK.addListener(pos, this);
             EventDispatcher.BREAK_BLOCK.addListener(pos, this);
@@ -291,6 +330,18 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
             getTargets();
 
         super.enableRenderAreas(enabled);
+    }
+
+    public void startChunkLoading() {
+        if ( validTargets == null || validTargets.isEmpty() || !chunkAugmented || !enabled )
+            return;
+
+        for (BlockPosDimension target : validTargets)
+            loadChunk(target);
+    }
+
+    public void stopChunkLoading() {
+        unloadAllChunks();
     }
 
     /* Power */
@@ -368,11 +419,14 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     /* The Update */
 
     @Override
+    public void onInactive() {
+        super.onInactive();
+        clearTargets();
+    }
+
+    @Override
     public void update() {
         super.update();
-
-        // TODO: tickActive / tickInactive
-        // And shutting down completely when we're off for an extended period.
 
         final IGridNode node = getNode();
         final boolean enabled = redstoneControlOrDisable() && node != null && node.isActive();
@@ -388,30 +442,35 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
             // If we were previously enabled, we want to destroy our old connections
             // and clear our queue.
             if ( this.enabled ) {
+                stopChunkLoading();
                 updateBaseEnergy();
                 clearConnections();
                 checkTargets = null;
                 this.enabled = false;
             }
 
+            tickInactive();
             updateTrackers();
             return;
         }
 
         // Alright, so we are enabled.
+        tickActive();
 
         // If we weren't previously enabled, or if we've been told to recalculate,
         // we want to recalculate now.
         if ( !this.enabled || needsRecalculation ) {
-            if ( !this.enabled )
+            if ( !this.enabled ) {
+                this.enabled = true;
                 updateBaseEnergy();
-
-            this.enabled = true;
+            }
 
             recalculate();
             updateTrackers();
             return;
         }
+
+        tickRecalculate();
 
         // Still here? Then we want to check blocks we're interested in.
         handleWaitingTargets();
@@ -421,6 +480,15 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
 
     /* Connection Management */
 
+    public void tickRecalculate() {
+        recalcTick--;
+        if ( recalcTick == 0 ) {
+            checkAllValidTargets();
+            pruneExistingConnections();
+            recalcTick = 120;
+        }
+    }
+
     public void scheduleRecalculate() {
         if ( world != null && world.isRemote )
             recalculate();
@@ -429,6 +497,7 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
     }
 
     public void recalculate() {
+        recalcTick = 120;
         calculateTargets();
         pruneExistingConnections();
         checkAllValidTargets();
@@ -439,7 +508,7 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
             return;
 
         for (BlockPosDimension target : validTargets)
-            checkTarget(target);
+            checkTarget(target, false);
     }
 
     public void pruneExistingConnections() {
@@ -768,14 +837,13 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
      * @return IGridNode instance or null if running on the client.
      */
     @Nullable
-    @SuppressWarnings("deprecation")
     public IGridNode getNode() {
         if ( world == null || world.isRemote )
             return null;
 
         if ( node == null ) {
             node = AEApi.instance().grid().createGridNode(this);
-            node.setPlayerID(WorldData.instance().playerData().getPlayerID(owner));
+            node.setPlayerID(AEApi.instance().registries().players().getID(owner));
             node.updateState();
         }
 
@@ -789,8 +857,9 @@ public abstract class TileAENetworkBase extends TileEntityBaseMachine implements
         if ( node != null ) {
             clearConnections();
 
-            node.destroy();
+            final IGridNode temp = node;
             node = null;
+            temp.destroy();
         }
     }
 

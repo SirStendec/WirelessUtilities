@@ -22,6 +22,12 @@ import java.util.List;
 
 public class WailaInfoProvider implements IWailaDataProvider {
 
+    private final boolean skipWorkInfo;
+
+    public WailaInfoProvider(boolean skipWorkInfo) {
+        this.skipWorkInfo = skipWorkInfo;
+    }
+
     private static boolean shouldProcessTile(TileEntity tile) {
         if ( tile instanceof ITileInfoProvider && ((ITileInfoProvider) tile).skipWorkInfo() )
             return false;
@@ -34,6 +40,9 @@ public class WailaInfoProvider implements IWailaDataProvider {
     public List<String> getWailaBody(ItemStack itemStack, List<String> tooltip, IWailaDataAccessor accessor, IWailaConfigHandler config) {
         TileEntity tile = accessor.getTileEntity();
         NBTTagCompound tag = accessor.getNBTData();
+
+        if ( skipWorkInfo && tile instanceof IWorkInfoProvider )
+            return tooltip;
 
         if ( tooltip == null )
             tooltip = new ArrayList<>();
@@ -82,6 +91,9 @@ public class WailaInfoProvider implements IWailaDataProvider {
     @Override
     public NBTTagCompound getNBTData(EntityPlayerMP player, TileEntity tile, NBTTagCompound tag, World world, BlockPos pos) {
         boolean processWork = tile instanceof IWorkInfoProvider;
+        if ( skipWorkInfo && processWork )
+            return tag;
+
         if ( tile instanceof ITileInfoProvider ) {
             ITileInfoProvider provider = (ITileInfoProvider) tile;
             tag = provider.getInfoNBT(tag, player);

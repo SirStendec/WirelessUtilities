@@ -16,10 +16,11 @@ import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
+import com.lordmau5.wirelessutils.tile.base.TileEntityBaseAE2;
 import com.lordmau5.wirelessutils.tile.base.Worker;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBlockAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBudgetInfoProvider;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IBusAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICropAugmentable;
@@ -90,6 +91,8 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -99,22 +102,25 @@ import net.minecraftforge.oredict.OreDictionary;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implements
+public abstract class TileBaseDesublimator extends TileEntityBaseAE2 implements
         IConfigurableWorldTickRate, IBudgetInfoProvider, IFilterAugmentable,
         IWorldAugmentable, IBlockAugmentable, IChunkLoadAugmentable, IDispenserAugmentable,
         ICropAugmentable, IInvertAugmentable, ITransferAugmentable, ICapacityAugmentable,
         IUnlockableSlots, IRoundRobinMachine, ITickable, ISidedTransfer, ISidedTransferAugmentable,
+        IBusAugmentable,
         IWorkProvider<TileBaseDesublimator.DesublimatorTarget> {
 
     //protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
     protected final Worker worker;
     protected ItemHandlerProxy capabilityHandler;
 
+    private ItemStack[] rawLocks;
     private ComparableItemStackValidatedNBT[] locks;
     private boolean[] emptySlots;
     private boolean[] fullSlots;
@@ -125,6 +131,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     private int full = 0;
     private int empty = 0;
 
+    private boolean hasLocks = false;
     private boolean wantTargets = false;
 
     private int transferAugment;
@@ -184,6 +191,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     @Override
     protected void initializeItemStackHandler(int size) {
         super.initializeItemStackHandler(size);
+        rawLocks = new ItemStack[size];
         locks = new ComparableItemStackValidatedNBT[size];
         fullSlots = new boolean[size];
         emptySlots = new boolean[size];
@@ -191,6 +199,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         fertilizerSlots = new boolean[size];
         Arrays.fill(plantableSlots, false);
         Arrays.fill(fertilizerSlots, false);
+        Arrays.fill(rawLocks, ItemStack.EMPTY);
 
         plantables = 0;
         fertilizers = 0;
@@ -380,7 +389,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     }
 
     public void clearLocks() {
+        Arrays.fill(rawLocks, ItemStack.EMPTY);
         Arrays.fill(locks, null);
+        hasLocks = false;
         if ( world != null && !world.isRemote )
             markChunkDirty();
     }
@@ -392,8 +403,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         int slots = itemStackHandler.getSlots();
         for (int i = 0; i < slots; i++) {
             ItemStack slotted = itemStackHandler.getStackInSlot(i);
-            if ( slotted.getItem() != Items.AIR )
+            if ( slotted.getItem() != Items.AIR ) {
                 locks[i] = new ComparableItemStackValidatedNBT(slotted);
+                rawLocks[i] = slotted.copy();
+                hasLocks = true;
+            }
         }
 
         if ( world != null && !world.isRemote )
@@ -404,10 +418,24 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( stack == null )
             stack = ItemStack.EMPTY;
 
-        if ( stack.getItem() == Items.AIR )
+        if ( stack.getItem() == Items.AIR ) {
+            rawLocks[slot] = ItemStack.EMPTY;
             locks[slot] = null;
-        else
+            if ( hasLocks ) {
+                hasLocks = false;
+                for (int i = 0; i < locks.length; i++) {
+                    if ( locks[i] != null ) {
+                        hasLocks = true;
+                        break;
+                    }
+                }
+            }
+
+        } else {
+            rawLocks[slot] = stack.copy();
             locks[slot] = new ComparableItemStackValidatedNBT(stack);
+            hasLocks = true;
+        }
 
         if ( world != null && !world.isRemote )
             markChunkDirty();
@@ -647,6 +675,60 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         }
 
         return true;
+    }
+
+    /* Bus Augmentable */
+
+    @Override
+    public boolean getBusShouldInsertEnergy(TickPhase phase) {
+        return phase == TickPhase.PRE;
+    }
+
+    public IItemHandler getBusItemOutputHandler(TickPhase phase) {
+        // We're only interested in sending items when inverted.
+        if ( !inverted )
+            return null;
+
+        final int totalSlots = itemStackHandler.getSlots() - getBufferOffset();
+        if ( (phase == TickPhase.POST || full >= totalSlots) && empty < totalSlots )
+            return capabilityHandler;
+
+        return null;
+    }
+
+    @Override
+    public IItemHandler getBusItemInputHandler(TickPhase phase) {
+        if ( phase != TickPhase.PRE || inverted )
+            return null;
+
+        final int totalSlots = itemStackHandler.getSlots() - getBufferOffset();
+        if ( full < totalSlots )
+            return capabilityHandler;
+
+        return null;
+    }
+
+    @Override
+    public ItemStack[] getBusItemInputRequest(TickPhase phase) {
+        if ( inverted || phase != TickPhase.PRE )
+            return null;
+
+        return rawLocks;
+    }
+
+    @Nullable
+    public IFluidHandler getBusFluidOutputHandler(TickPhase phase) {
+        return null;
+    }
+
+    @Nullable
+    public IFluidHandler getBusFluidInputHandler(TickPhase phase) {
+        return null;
+    }
+
+    @Nullable
+    public FluidStack[] getBusFluidInputRequest(TickPhase phase) {
+        return null;
     }
 
     /* Budget Info */
@@ -1613,6 +1695,25 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
     /* Sided Transfer */
 
+    @Nonnull
+    @Override
+    public EnumSet<EnumFacing> getAE2ConnectableSides() {
+        EnumSet<EnumFacing> out = null;
+        for (TransferSide side : TransferSide.VALUES)
+            if ( getSideTransferMode(side) != Mode.DISABLED ) {
+                EnumFacing face = getFacingForSide(side);
+                if ( out == null )
+                    out = EnumSet.of(face);
+                else
+                    out.add(face);
+            }
+
+        if ( out == null )
+            return EnumSet.noneOf(EnumFacing.class);
+        else
+            return out;
+    }
+
     public Mode getSideTransferMode(TransferSide side) {
         if ( !canSideTransfer(side) )
             return Mode.DISABLED;
@@ -1643,6 +1744,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
+            updateNode();
         }
 
         callBlockUpdate();
@@ -1788,11 +1890,13 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         boolean enabled = redstoneControlOrDisable();
 
         int totalSlots = itemStackHandler.getSlots() - getBufferOffset();
-        boolean canRun = remainingBudget >= costPerItem && (inverted ? full < totalSlots : empty < totalSlots);
 
         if ( sideTransferAugment && enabled && (inverted ? empty < totalSlots : full < totalSlots) )
             executeSidedTransfer();
 
+        preTickAugments(enabled);
+
+        boolean canRun = remainingBudget >= costPerItem && (inverted ? full < totalSlots : empty < totalSlots);
         if ( enabled && canRun && augmentDrain > 0 ) {
             if ( augmentDrain > getEnergyStored() )
                 enabled = false;
@@ -1807,6 +1911,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
             }
 
             tickInactive();
+            tickAugments(false);
             setActive(false);
             updateTrackers();
             saveEnergyHistory(energyPerTick);
@@ -1815,7 +1920,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         }
 
         tickActive();
+        tickAugments(true);
         setActive(worker.performWork());
+        postTickAugments();
 
         if ( gatherTick == 0 )
             gatherTick = (byte) getActualWorldTickRate();
@@ -1956,13 +2063,28 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         NBTTagList locks = tag.getTagList("Locks", Constants.NBT.TAG_COMPOUND);
         if ( locks != null && !locks.isEmpty() ) {
             int length = Math.min(this.locks.length, locks.tagCount());
+            hasLocks = false;
+            if ( this.locks.length != length ) {
+                Arrays.fill(rawLocks, ItemStack.EMPTY);
+                Arrays.fill(this.locks, null);
+            }
+
             for (int i = 0; i < length; i++) {
                 NBTTagCompound itemTag = locks.getCompoundTagAt(i);
                 if ( itemTag != null && !itemTag.isEmpty() ) {
                     ItemStack lockStack = new ItemStack(itemTag);
-                    this.locks[i] = lockStack.isEmpty() ? null : new ComparableItemStackValidatedNBT(lockStack);
-                } else
+                    rawLocks[i] = lockStack;
+                    if ( lockStack.isEmpty() )
+                        this.locks[i] = null;
+                    else {
+                        this.locks[i] = new ComparableItemStackValidatedNBT(lockStack);
+                        hasLocks = true;
+                    }
+
+                } else {
+                    rawLocks[i] = ItemStack.EMPTY;
                     this.locks[i] = null;
+                }
             }
         }
     }
@@ -1983,11 +2105,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
         if ( this.locks != null ) {
             NBTTagList locks = new NBTTagList();
             for (int i = 0; i < this.locks.length; i++) {
-                ComparableItemStackValidatedNBT lock = this.locks[i];
-                if ( lock == null )
+                ItemStack lock = rawLocks[i];
+                if ( lock.isEmpty() )
                     locks.appendTag(new NBTTagCompound());
                 else
-                    locks.appendTag(lock.toItemStack().serializeNBT());
+                    locks.appendTag(lock.serializeNBT());
             }
 
             tag.setTag("Locks", locks);
@@ -2006,7 +2128,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
 
         payload.addByte(locks.length);
         for (int i = 0; i < locks.length; i++)
-            payload.addItemStack(locks[i] == null ? ItemStack.EMPTY : locks[i].toItemStack());
+            payload.addItemStack(rawLocks[i]);
 
         payload.addInt(maxEnergyPerTick);
         payload.addShort(validTargetsPerTick);
@@ -2042,9 +2164,11 @@ public abstract class TileBaseDesublimator extends TileEntityBaseEnergy implemen
     @Override
     public PacketBase getModePacket() {
         PacketBase payload = super.getModePacket();
+
         payload.addByte(locks.length);
         for (int i = 0; i < locks.length; i++)
-            payload.addItemStack(locks[i] == null ? ItemStack.EMPTY : locks[i].toItemStack());
+            payload.addItemStack(rawLocks[i]);
+
         payload.addByte(iterationMode.ordinal());
         payload.addInt(roundRobin);
         payload.addInt(gatherTickRate);

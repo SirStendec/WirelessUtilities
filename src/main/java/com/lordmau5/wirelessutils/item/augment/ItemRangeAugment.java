@@ -32,6 +32,15 @@ public class ItemRangeAugment extends ItemAugment {
         setName("range_augment");
     }
 
+    @Nullable
+    @Override
+    public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {
+        if ( isInterdimensional(stack) )
+            return Level.fromInt(ModConfig.augments.range.interdimensionalLevel);
+
+        return super.getRequiredLevelDelegate(stack);
+    }
+
     @Override
     public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
         int[] drain = ModConfig.augments.range.energyDrain;
@@ -45,13 +54,30 @@ public class ItemRangeAugment extends ItemAugment {
         return drain[idx];
     }
 
-    @Nullable
     @Override
-    public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {
-        if ( isInterdimensional(stack) )
-            return Level.fromInt(ModConfig.augments.range.interdimensionalLevel);
+    public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        double[] multipliers = ModConfig.augments.range.energyMultiplier;
+        if ( multipliers.length == 0 )
+            return 0;
 
-        return super.getRequiredLevelDelegate(stack);
+        int idx = getLevel(stack).toInt();
+        if ( idx >= multipliers.length )
+            idx = multipliers.length - 1;
+
+        return multipliers[idx];
+    }
+
+    @Override
+    public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
+        int[] drain = ModConfig.augments.range.energyAddition;
+        if ( drain.length == 0 )
+            return 0;
+
+        int idx = getLevel(stack).toInt();
+        if ( idx >= drain.length )
+            idx = drain.length - 1;
+
+        return drain[idx];
     }
 
     @Override

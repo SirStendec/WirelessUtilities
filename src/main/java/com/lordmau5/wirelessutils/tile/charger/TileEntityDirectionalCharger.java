@@ -92,6 +92,7 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
+            updateNode();
         }
 
         return true;
@@ -124,6 +125,7 @@ public class TileEntityDirectionalCharger extends TileEntityBaseCharger implemen
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
+            updateNode();
         }
 
         return true;

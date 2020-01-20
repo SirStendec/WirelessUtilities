@@ -356,6 +356,20 @@ item.wirelessutils.chunk_load_augment.info.1=force all of its targets to stay
 item.wirelessutils.chunk_load_augment.info.2=loaded at all times as long as the
 item.wirelessutils.chunk_load_augment.info.3=machine itself remains loaded.
 
+item.wirelessutils.ae_bus_augment.name=AE Bus Augment
+item.wirelessutils.ae_bus_augment.info.0=This augment connects a machine
+item.wirelessutils.ae_bus_augment.info.1=to an AE Network, allowing it to
+item.wirelessutils.ae_bus_augment.info.2=directly send and receive resources.
+
+item.wirelessutils.ae_bus_augment.tick_rate=Runs Every %d Ticks
+item.wirelessutils.ae_bus_augment.tick_rate.slow=Runs Every %d Ticks (Min: %d)
+item.wirelessutils.ae_bus_augment.rate=Rate:
+item.wirelessutils.ae_bus_augment.transfers=Transfers:
+item.wirelessutils.ae_bus_augment.transfer_line=- %s %s
+item.wirelessutils.ae_bus_augment.energy_mode=Energy:
+item.wirelessutils.ae_bus_augment.items_mode=Items:
+item.wirelessutils.ae_bus_augment.fluid_mode=Fluid:
+
 item.wirelessutils.slot_augment.name=Target Slot Augment
 item.wirelessutils.slot_augment.info.0=This augment increases the number of
 item.wirelessutils.slot_augment.info.1=slots available for Positional Cards
@@ -387,6 +401,7 @@ item.wirelessutils.filter_augment.nbt=Ignoring NBT
 item.wirelessutils.filter_augment.meta=Ignoring Metadata
 item.wirelessutils.filter_augment.ore=Using Ore Dictionary
 item.wirelessutils.filter_augment.match_mod=Matching Mod Items
+item.wirelessutils.filter_augment.filter_armor=Filtering Armor
 
 item.wirelessutils.filter_augment.entry=- %s
 item.wirelessutils.filter_augment.info_list=%s Hold §e§oAlt§r§7 for %s Items
@@ -656,6 +671,13 @@ btn.wirelessutils.match_mod.info.5=other filtering modes.
 
 btn.wirelessutils.match_mod.disabled=This option is incompatible with Match Mod.
 
+btn.wirelessutils.filter_armor=Filter Armor: %s
+btn.wirelessutils.filter_armor.info.0=When this is enabled, items will
+btn.wirelessutils.filter_armor.info.1=be matched so long as they are
+btn.wirelessutils.filter_armor.info.2=armor of any kind. Note: May be
+btn.wirelessutils.filter_armor.info.3=incompatible with some modded
+btn.wirelessutils.filter_armor.info.4=armors.
+
 btn.wirelessutils.fall_protect=Fall Protection:
 btn.wirelessutils.fall_protect.0=Disabled
 btn.wirelessutils.fall_protect.1=Enabled
@@ -782,6 +804,11 @@ btn.wirelessutils.ae2.color.none.0=This machine will accept
 btn.wirelessutils.ae2.color.none.1=connections from any color
 btn.wirelessutils.ae2.color.none.2=and connect wirelessly to
 btn.wirelessutils.ae2.color.none.3=any color.
+
+btn.wirelessutils.bus_mode.0=Disabled
+btn.wirelessutils.bus_mode.1=Import
+btn.wirelessutils.bus_mode.2=Export
+btn.wirelessutils.bus_mode.3=Import/Export
 
 
 chat.wirelessutils.upgrade.success=Installed %s into %s.

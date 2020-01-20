@@ -6,6 +6,7 @@ import cofh.core.util.CoreUtils;
 import cofh.core.util.TimeTracker;
 import cofh.core.util.helpers.SecurityHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.item.augment.ITickableAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemAugment;
 import com.lordmau5.wirelessutils.utils.ChunkManager;
 import com.lordmau5.wirelessutils.utils.ItemStackHandler;
@@ -26,9 +27,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PreYggdrasilConverter;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -55,6 +58,8 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     /* Inventory */
     protected ItemStackHandler itemStackHandler;
     protected ItemStack[] augments = new ItemStack[0];
+
+    protected Map<Item, ITickableAugment> tickableAugments;
 
     /* Levels */
     protected Level level = Level.getMinLevel();
@@ -274,6 +279,9 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
             }
         }
 
+        if ( tickableAugments == null )
+            tickableAugments = new Object2ObjectOpenHashMap<>();
+
         for (ItemAugment item : ItemAugment.AUGMENT_TYPES) {
             ItemStack stack = augments.getOrDefault(item, ItemStack.EMPTY);
             item.apply(stack, this);
@@ -283,11 +291,55 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
 
             augmentBudgetMult *= item.getBudgetMultiplier(stack, this);
             augmentBudgetAdd += item.getBudgetAddition(stack, this);
+
+            ITickableAugment tickable = tickableAugments.get(item);
+            if ( tickable != null ) {
+                if ( stack.isEmpty() ) {
+                    tickable.destroy();
+                    tickableAugments.remove(item);
+                } else if ( !tickable.update(stack) ) {
+                    tickable.destroy();
+                    ITickableAugment newTickable = item.getTickableAugment(stack, this);
+                    if ( newTickable == null )
+                        tickableAugments.remove(item);
+                    else
+                        tickableAugments.put(item, newTickable);
+                }
+            } else if ( !stack.isEmpty() ) {
+                ITickableAugment newTickable = item.getTickableAugment(stack, this);
+                if ( newTickable != null )
+                    tickableAugments.put(item, newTickable);
+            }
         }
 
         if ( !updateBaseEnergy() && augmentDrain != oldDrain )
             energyChanged();
     }
+
+    public void preTickAugments(boolean active) {
+        if ( tickableAugments == null || tickableAugments.isEmpty() )
+            return;
+
+        for (ITickableAugment tickable : tickableAugments.values())
+            tickable.preTick(active);
+    }
+
+    public void tickAugments(boolean active) {
+        if ( tickableAugments == null || tickableAugments.isEmpty() )
+            return;
+
+        for (ITickableAugment tickable : tickableAugments.values())
+            tickable.tick(active);
+    }
+
+    public void postTickAugments() {
+        if ( tickableAugments == null || tickableAugments.isEmpty() )
+            return;
+
+        for (ITickableAugment tickable : tickableAugments.values())
+            tickable.postTick();
+    }
+
 
     public boolean updateBaseEnergy() {
         int newEnergy = (int) ((level.baseEnergyPerOperation + augmentEnergy) * augmentMultiplier);
@@ -486,6 +538,13 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     public void onDestroy() {
         super.onDestroy();
         unloadAllChunks();
+
+        if ( tickableAugments != null ) {
+            for (ITickableAugment tickable : tickableAugments.values())
+                tickable.destroy();
+
+            tickableAugments = null;
+        }
     }
 
     public void unloadAllChunks() {
@@ -595,6 +654,7 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         readOwnerFromNBT(tag);
         readAugmentsFromNBT(tag);
         updateAugmentStatus();
+        readTickableAugmentsFromNBT(tag);
 
         inactiveTicks = tag.getByte("InactiveTicks");
 
@@ -607,10 +667,63 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         writeLevelToNBT(tag);
         writeOwnerToNBT(tag);
         writeAugmentsToNBT(tag);
+        writeTickableAugmentsToNBT(tag);
 
         tag.setByte("InactiveTicks", inactiveTicks);
 
         return tag;
+    }
+
+    public void writeTickableAugmentsToNBT(@Nonnull NBTTagCompound tag) {
+        if ( tickableAugments == null || tickableAugments.isEmpty() )
+            return;
+
+        NBTTagList list = null;
+
+        for (Map.Entry<Item, ITickableAugment> entry : tickableAugments.entrySet()) {
+            ResourceLocation id = entry.getKey().getRegistryName();
+            if ( id == null )
+                continue;
+
+            NBTTagCompound data = entry.getValue().writeToNBT();
+            if ( data != null ) {
+                if ( list == null ) {
+                    list = new NBTTagList();
+                    tag.setTag("AugmentNBT", list);
+                }
+
+                data.setString("id", id.toString());
+                list.appendTag(data);
+            }
+        }
+    }
+
+    public void readTickableAugmentsFromNBT(@Nonnull NBTTagCompound tag) {
+        if ( tickableAugments == null || tickableAugments.isEmpty() )
+            return;
+
+        if ( !tag.hasKey("AugmentNBT") )
+            return;
+
+        NBTTagList list = tag.getTagList("AugmentNBT", Constants.NBT.TAG_COMPOUND);
+        if ( list == null )
+            return;
+
+        final int count = list.tagCount();
+        for (int i = 0; i < count; i++) {
+            NBTTagCompound data = list.getCompoundTagAt(i);
+            if ( data == null || !data.hasKey("id", Constants.NBT.TAG_STRING) )
+                continue;
+
+            ResourceLocation id = new ResourceLocation(data.getString("id"));
+            Item item = id != null ? Item.REGISTRY.getObject(id) : null;
+            if ( item == null )
+                continue;
+
+            ITickableAugment tickable = tickableAugments.get(item);
+            if ( tickable != null )
+                tickable.readFromNBT(data);
+        }
     }
 
     @Override

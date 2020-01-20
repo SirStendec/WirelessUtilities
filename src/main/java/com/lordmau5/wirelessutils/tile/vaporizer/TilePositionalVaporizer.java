@@ -100,6 +100,7 @@ public class TilePositionalVaporizer extends TileBaseVaporizer implements IFacin
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
+            updateNode();
         }
 
         return true;

@@ -426,7 +426,7 @@ public class ModItems {
         itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemFacingAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemSidedTransferAugment);
         itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemDispenserAugment);
-        itemColors.registerItemColorHandler(ColorHandler.Augment.handleItemColor, itemFilterAugment);
+        itemColors.registerItemColorHandler(ColorHandler.Augment.Filter.handleItemColor, itemFilterAugment);
 
         itemColors.registerItemColorHandler(ColorHandler.VoidPearl.handleItemColor, itemVoidPearl);
         itemColors.registerItemColorHandler(ColorHandler.VoidPearl.handleItemColor, itemCrystallizedVoidPearl);

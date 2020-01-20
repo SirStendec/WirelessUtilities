@@ -1,5 +1,6 @@
 package com.lordmau5.wirelessutils.gui.client.base;
 
+import cofh.core.gui.element.tab.TabBase;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.container.BaseContainerItem;
@@ -29,15 +30,23 @@ public class BaseGuiItem extends BaseGuiContainer {
     }
 
     @Override
+    public int getTabXOffset(int side) {
+        if ( side == TabBase.LEFT )
+            return 22;
+
+        return super.getTabXOffset(side);
+    }
+
+    @Override
     protected void drawGuiContainerForegroundLayer(int x, int y) {
         super.drawGuiContainerForegroundLayer(x, y);
 
         if ( drawName && name != null ) {
             String localized = StringHelper.localize(name);
-            fontRenderer.drawString(localized, getCenteredOffset(localized, (xSize - 22) / 2 + 22), 6, 0x404040);
+            fontRenderer.drawString(localized, getCenteredOffset(localized, (xSize - 22) / 2 + 22), 6, textColor);
         }
 
         if ( drawOwnInventory )
-            fontRenderer.drawString(StringHelper.localize("container.inventory"), 30, ySize - 96 + 3, 0x404040);
+            fontRenderer.drawString(StringHelper.localize("container.inventory"), 30, ySize - 96 + 3, textColor);
     }
 }

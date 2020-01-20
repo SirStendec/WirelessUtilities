@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.gui.client.base;
 import cofh.core.gui.GuiContainerCore;
 import cofh.core.gui.element.ElementBase;
 import cofh.core.gui.element.tab.TabBase;
+import cofh.core.gui.element.tab.TabTracker;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.elements.IContainsButtons;
@@ -310,6 +311,105 @@ public abstract class BaseGuiContainer extends GuiContainerCore implements IPage
         this.mainItem = item;
         mainPageNeedsSize = true;
         return this;
+    }
+
+    public int getTabXOffset(int side) {
+        if ( side == TabBase.LEFT )
+            return 0;
+        else
+            return xSize;
+    }
+
+    public int getTabYOffset(int side) {
+        return 4;
+    }
+
+    @Override
+    protected void drawTabs(float partialTick, boolean foreground) {
+        int yPosRight = getTabYOffset(TabBase.RIGHT);
+        int yPosLeft = getTabYOffset(TabBase.LEFT);
+
+        int xPosLeft = getTabXOffset(TabBase.LEFT);
+        int xPosRight = getTabXOffset(TabBase.RIGHT);
+
+        if ( foreground ) {
+            for (TabBase tab : tabs) {
+                tab.update();
+                if ( !tab.isVisible() )
+                    continue;
+
+                tab.drawForeground(mouseX, mouseY);
+                if ( tab.side == TabBase.LEFT )
+                    yPosLeft += tab.currentHeight;
+                else
+                    yPosRight += tab.currentHeight;
+            }
+        } else {
+            for (TabBase tab : tabs) {
+                tab.update();
+                if ( !tab.isVisible() )
+                    continue;
+
+                if ( tab.side == TabBase.LEFT ) {
+                    tab.setPosition(xPosLeft, yPosLeft);
+                    tab.drawBackground(mouseX, mouseY, partialTick);
+                    yPosLeft += tab.currentHeight;
+                } else {
+                    tab.setPosition(xPosRight, yPosRight);
+                    tab.drawBackground(mouseX, mouseY, partialTick);
+                    yPosRight += tab.currentHeight;
+                }
+            }
+        }
+    }
+
+    @Override
+    public TabBase addTab(TabBase tab) {
+        int yOffset = getTabYOffset(tab.side);
+
+        for (TabBase other : tabs) {
+            if ( tab.side == other.side && other.isVisible() )
+                yOffset += other.currentHeight;
+        }
+
+        tab.setPosition(getTabXOffset(tab.side), yOffset);
+        tabs.add(tab);
+
+        if ( (tab.side == TabBase.LEFT && TabTracker.getOpenedLeftTab() != null && tab.getClass().equals(TabTracker.getOpenedLeftTab())) || (tab.side == TabBase.RIGHT && TabTracker.getOpenedRightTab() != null && tab.getClass().equals(TabTracker.getOpenedRightTab())) )
+            tab.setFullyOpen();
+
+        return tab;
+    }
+
+    @Override
+    protected TabBase getTabAtPosition(int mX, int mY) {
+        int yPosRight = getTabYOffset(TabBase.RIGHT);
+        int yPosLeft = getTabYOffset(TabBase.LEFT);
+
+        int xPosLeft = getTabXOffset(TabBase.LEFT);
+        int xPosRight = getTabXOffset(TabBase.RIGHT);
+
+        for (TabBase tab : tabs) {
+            if ( !tab.isVisible() )
+                continue;
+
+            if ( tab.side == TabBase.LEFT ) {
+                tab.setCurrentShift(xPosLeft, yPosLeft);
+                if ( tab.intersectsWith(mX, mY, xPosLeft, yPosLeft) )
+                    return tab;
+
+                yPosLeft += tab.currentHeight;
+
+            } else {
+                tab.setCurrentShift(xPosRight, yPosRight);
+                if ( tab.intersectsWith(mX, mY, xPosRight, yPosRight) )
+                    return tab;
+
+                yPosRight += tab.currentHeight;
+            }
+        }
+
+        return null;
     }
 
     public void updateMainPageTabSize() {

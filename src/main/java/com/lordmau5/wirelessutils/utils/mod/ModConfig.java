@@ -921,6 +921,10 @@ public class ModConfig {
         @Config.Comment("Whether Filter Augments will have access to Mod Matching, per tier.")
         public boolean[] allowMatchingMod = {false, false, true};
 
+        @Config.Name("Allow Armor Filtering")
+        @Config.Comment("Whether Filter Augments will have access to Armor Filtering, per tier.")
+        public boolean[] allowArmor = {false, true, true};
+
         @Config.Name("Allow Voiding")
         @Config.Comment("Whether Filter Augments will have access to Voiding, per tier.")
         public boolean[] allowVoiding = {false, false, true};
@@ -999,6 +1003,17 @@ public class ModConfig {
         @Config.Comment("Each additional tier adds this many blocks to the range of positional machines.")
         @Config.RangeInt(min = 1, max = 128)
         public int blocksPerTier = 16;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] energyMultiplier = {1, 1, 1, 1, 1};
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] energyAddition = {0, 0, 0, 0, 0};
 
         @Config.Name("Energy Drain per Tick")
         @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
@@ -2225,6 +2240,10 @@ public class ModConfig {
         @Config.Name("Directional AE Network")
         public DirectionalAENetwork directionalAENetwork = new DirectionalAENetwork();
 
+        @Config.Name("AE Bus Augment")
+        @Config.Comment("The AE Bus Augment allows machines to directly interface with AE networks.")
+        public AEBusAugment aeBusAugment = new AEBusAugment();
+
         @Config.Name("Colors - Enabled")
         @Config.Comment("When enabled, the AE Network machines will have configurable colors. When disabled, AE Network machines ignore color.")
         @Config.RequiresWorldRestart
@@ -2239,6 +2258,71 @@ public class ModConfig {
         @Config.Comment("When enabled, AE Network machines use a single channel. When disabled, AE Network machines use no channels.")
         @Config.RequiresWorldRestart
         public boolean requireChannels = false;
+    }
+
+    public static class AEBusAugment {
+        @Config.Name("Required Level")
+        @Config.Comment("Machines must be at least this level in order to be augmented with this augment.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] energyMultiplier = {1, 1, 1, 1, 1};
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] energyAddition = {0, 0, 0, 0, 0};
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int[] energyDrain = {0, 0, 0, 0, 0};
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] budgetMultiplier = {1, 1, 1, 1, 1};
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] budgetAddition = {0, 0, 0, 0, 0};
+
+        @Config.Name("Available Tiers")
+        @Config.Comment("AE Bus Augments should be available in this many tiers.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int tiers = 5;
+
+        @Config.Name("Tick Rate per Level")
+        @Config.Comment("AE Bus Augments should tick once every this many ticks.")
+        @Config.RangeInt(min = 0, max = 100)
+        @Config.RequiresWorldRestart
+        public int[] tickRate = {20, 16, 10, 6, 4};
+
+        @Config.Name("Items - Maximum Transfer per Level")
+        @Config.Comment("Transfer up to this many items per tick per level.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int[] itemsPerTick = {8, 16, 32, 64, 96};
+
+        @Config.Name("Fluid - Maximum Transfer per Level")
+        @Config.Comment("Transfer up to this many mB of fluid per tick per level.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int[] fluidPerTick = {500, 2000, 4000, 8000, 12000};
+
+        @Config.Name("Energy - Maximum RF per Level")
+        @Config.Comment("Transfer up to this much RF per tick per level.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int[] energyPerTick = {500, 2000, 8000, 16000, 32000};
     }
 
     public static class PositionalAENetwork {

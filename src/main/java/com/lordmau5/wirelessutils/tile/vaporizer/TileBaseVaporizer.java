@@ -17,9 +17,10 @@ import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.IWorkInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseEnergy;
+import com.lordmau5.wirelessutils.tile.base.TileEntityBaseAE2;
 import com.lordmau5.wirelessutils.tile.base.Worker;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBudgetInfoProvider;
+import com.lordmau5.wirelessutils.tile.base.augmentable.IBusAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IChunkLoadAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IFilterAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IFluidGenAugmentable;
@@ -76,14 +77,15 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
+public abstract class TileBaseVaporizer extends TileEntityBaseAE2 implements
         IWorkInfoProvider, IBudgetInfoProvider, ISidedTransfer, ISidedTransferAugmentable,
         IConfigurableWorldTickRate, IUnlockableSlots, IFilterAugmentable, IChunkLoadAugmentable,
-        IFluidGenAugmentable,
+        IFluidGenAugmentable, IBusAugmentable,
         IWorkProvider<TileBaseVaporizer.VaporizerTarget> {
 
     //protected List<Tuple<BlockPosDimension, ItemStack>> validTargets;
@@ -921,6 +923,66 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         return (int) (behavior.getActionCost() * augmentBudgetMult) + augmentBudgetAdd;
     }
 
+    /* Bus Augment */
+
+    @Override
+    public boolean getBusShouldInsertEnergy(TickPhase phase) {
+        return phase == TickPhase.PRE;
+    }
+
+    public IItemHandler getBusItemOutputHandler(TickPhase phase) {
+        // We want to run this in PRE and POST because this machine
+        // doesn't often tick in POST.
+        return outputProxy;
+    }
+
+    public IItemHandler getBusItemInputHandler(TickPhase phase) {
+        return null;
+    }
+
+    public ItemStack[] getBusItemInputRequest(TickPhase phase) {
+        return null;
+    }
+
+    @Nullable
+    public IFluidHandler getBusFluidOutputHandler(TickPhase phase) {
+        if ( hasFluid() && !wantsFluid() )
+            return fluidHandler;
+
+        return null;
+    }
+
+    @Nullable
+    public IFluidHandler getBusFluidInputHandler(TickPhase phase) {
+        if ( hasFluid() && wantsFluid() && !isTankFull() && phase == TickPhase.PRE )
+            return fluidHandler;
+
+        return null;
+    }
+
+    @Nullable
+    public FluidStack[] getBusFluidInputRequest(TickPhase phase) {
+        if ( !hasFluid() || !wantsFluid() || isTankFull() || phase != TickPhase.PRE )
+            return null;
+
+        FluidStack stack = tank.getFluid();
+        if ( stack == null || stack.amount == 0 ) {
+            Fluid fluid = lastFluid;
+            if ( fluid == null )
+                fluid = getExperienceFluid();
+            if ( fluid == null )
+                return null;
+
+            return new FluidStack[]{new FluidStack(fluid, tank.getCapacity())};
+        }
+
+        int remaining = tank.getCapacity() - stack.amount;
+        if ( remaining < 1 )
+            return null;
+
+        return new FluidStack[]{new FluidStack(stack, remaining)};
+    }
+
     /* Work Info */
 
     @Override
@@ -1484,6 +1546,25 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
 
     /* Sided Transfer */
 
+    @Nonnull
+    @Override
+    public EnumSet<EnumFacing> getAE2ConnectableSides() {
+        EnumSet<EnumFacing> out = null;
+        for (TransferSide side : TransferSide.VALUES)
+            if ( getSideTransferMode(side) != Mode.DISABLED ) {
+                EnumFacing face = getFacingForSide(side);
+                if ( out == null )
+                    out = EnumSet.of(face);
+                else
+                    out.add(face);
+            }
+
+        if ( out == null )
+            return EnumSet.noneOf(EnumFacing.class);
+        else
+            return out;
+    }
+
     @Override
     public boolean isModeSpecific() {
         return true;
@@ -1523,6 +1604,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
+            updateNode();
         }
 
         callBlockUpdate();
@@ -1704,6 +1786,8 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         if ( enabled && sideTransferAugment )
             executeSidedTransfer();
 
+        preTickAugments(enabled);
+
         if ( enabled && (gatherTick != 0 || behavior == null || getBudgetPerOperation() > remainingBudget || !behavior.canRun()) )
             enabled = false;
 
@@ -1727,6 +1811,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
             }
 
             tickInactive();
+            tickAugments(false);
             setActive(false);
             updateTrackers();
             saveEnergyHistory(energyPerTick);
@@ -1739,8 +1824,10 @@ public abstract class TileBaseVaporizer extends TileEntityBaseEnergy implements
         int total = level.maxVaporizerEntities;
         remainingPerTick = total;
         tickActive();
+        tickAugments(true);
         behavior.preWork();
         setActive(worker.performWork());
+        postTickAugments();
         updateTrackers();
 
         saveEnergyHistory(energyPerTick);

@@ -107,6 +107,7 @@ public class TilePositionalDesublimator extends TileBaseDesublimator implements
         this.facing = facing;
         if ( !world.isRemote ) {
             markChunkDirty();
+            updateNode();
             sendTilePacket(Side.CLIENT);
         }
 

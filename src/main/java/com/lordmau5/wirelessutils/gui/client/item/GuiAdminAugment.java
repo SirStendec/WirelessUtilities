@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.gui.client.item;
 import cofh.api.core.IAugmentable;
 import cofh.core.gui.element.ElementTextField;
 import cofh.core.gui.element.ElementTextFieldLimited;
+import cofh.core.gui.element.tab.TabBase;
 import cofh.core.util.helpers.StringHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiItem;
@@ -63,6 +64,14 @@ public class GuiAdminAugment extends BaseGuiItem {
     @Override
     public boolean wantsSlots() {
         return false;
+    }
+
+    @Override
+    public int getTabXOffset(int side) {
+        if ( side == TabBase.LEFT )
+            return 0;
+
+        return super.getTabXOffset(side);
     }
 
     @Override
