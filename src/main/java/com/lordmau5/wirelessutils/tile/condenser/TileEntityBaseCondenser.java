@@ -15,7 +15,7 @@ import com.lordmau5.wirelessutils.tile.base.IConfigurableWorldTickRate;
 import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseAE2;
+import com.lordmau5.wirelessutils.tile.base.TileEntityBaseNetwork;
 import com.lordmau5.wirelessutils.tile.base.Worker;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBusAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.ICapacityAugmentable;
@@ -78,7 +78,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.EnumSet;
 
-public abstract class TileEntityBaseCondenser extends TileEntityBaseAE2 implements
+public abstract class TileEntityBaseCondenser extends TileEntityBaseNetwork implements
         IConfigurableWorldTickRate, IWUCraftingMachine,
         IChunkLoadAugmentable, IRoundRobinMachine, IWorldAugmentable, ITransferAugmentable,
         ICapacityAugmentable, IInventoryAugmentable, IInvertAugmentable, ITickable,
@@ -1576,7 +1576,7 @@ public abstract class TileEntityBaseCondenser extends TileEntityBaseAE2 implemen
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
-            updateNode();
+            updateNodes();
         }
 
         callBlockUpdate();

@@ -98,7 +98,7 @@ public class TileDirectionalVaporizer extends TileBaseVaporizer implements
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
-            updateNode();
+            updateNodes();
         }
 
         return true;
@@ -127,7 +127,7 @@ public class TileDirectionalVaporizer extends TileBaseVaporizer implements
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
-            updateNode();
+            updateNodes();
         }
 
         return true;

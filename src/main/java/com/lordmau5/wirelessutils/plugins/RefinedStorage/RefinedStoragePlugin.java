@@ -3,6 +3,7 @@ package com.lordmau5.wirelessutils.plugins.RefinedStorage;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.ItemBlockMachine;
 import com.lordmau5.wirelessutils.plugins.IPlugin;
+import com.lordmau5.wirelessutils.plugins.RefinedStorage.augment.ItemRSBusAugment;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.iwt.BlockInfiniteWirelessTransmitter;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.iwt.NetworkNodeInfiniteWirelessTransmitter;
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.iwt.TileInfiniteWirelessTransmitter;
@@ -39,6 +40,8 @@ public class RefinedStoragePlugin implements IPlugin {
     @SuppressWarnings("CanBeFinal")
     @CapabilityInject(INetworkNodeProxy.class)
     public static Capability<INetworkNodeProxy> NETWORK_NODE_PROXY_CAPABILITY = null;
+
+    public static ItemRSBusAugment itemRSBusAugment;
 
     public static BlockInfiniteWirelessTransmitter blockInfiniteWirelessTransmitter;
 
@@ -85,6 +88,10 @@ public class RefinedStoragePlugin implements IPlugin {
 
     @Override
     public void registerItems(RegistryEvent.Register<Item> event) {
+        itemRSBusAugment = new ItemRSBusAugment();
+
+        CommonProxy.registerItem(event, itemRSBusAugment);
+
         CommonProxy.registerItem(event, new ItemBlock(blockInfiniteWirelessTransmitter).setRegistryName(blockInfiniteWirelessTransmitter.getRegistryName()));
         CommonProxy.registerItem(event, new ItemBlockMachine(blockDirectionalRSNetwork).setRegistryName(blockDirectionalRSNetwork.getRegistryName()));
         CommonProxy.registerItem(event, new ItemBlockMachine(blockPositionalRSNetwork).setRegistryName(blockPositionalRSNetwork.getRegistryName()));
@@ -95,6 +102,8 @@ public class RefinedStoragePlugin implements IPlugin {
         blockInfiniteWirelessTransmitter.initModel();
         blockDirectionalRSNetwork.initModel();
         blockPositionalRSNetwork.initModel();
+
+        itemRSBusAugment.initModel();
     }
 
     @Override

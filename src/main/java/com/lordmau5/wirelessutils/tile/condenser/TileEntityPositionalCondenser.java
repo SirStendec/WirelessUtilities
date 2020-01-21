@@ -108,7 +108,7 @@ public class TileEntityPositionalCondenser extends TileEntityBaseCondenser imple
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
-            updateNode();
+            updateNodes();
         }
 
         return true;

@@ -14,12 +14,19 @@ import appeng.api.util.AEPartLocation;
 import appeng.api.util.DimensionalCoord;
 import appeng.api.util.INetworkToolAgent;
 import cofh.core.network.PacketBase;
+import com.lordmau5.wirelessutils.plugins.RefinedStorage.RefinedStoragePlugin;
+import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.base.RSMachineNode;
+import com.raoulvdberge.refinedstorage.api.network.INetwork;
+import com.raoulvdberge.refinedstorage.api.network.node.INetworkNodeProxy;
+import com.raoulvdberge.refinedstorage.api.util.Action;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
@@ -36,16 +43,41 @@ import java.util.Objects;
         @Optional.Interface(iface = "appeng.api.networking.security.IActionHost", modid = "appliedenergistics2"),
         @Optional.Interface(iface = "appeng.api.util.INetworkToolAgent", modid = "appliedenergistics2")
 })
-public abstract class TileEntityBaseAE2 extends TileEntityBaseEnergy implements IGridHost, IGridBlock, INetworkToolAgent, IActionHost {
+public abstract class TileEntityBaseNetwork extends TileEntityBaseEnergy implements
+        IGridHost, IGridBlock, INetworkToolAgent, IActionHost // AE2
+{
+
+    @SuppressWarnings("CanBeFinal")
+    @CapabilityInject(INetworkNodeProxy.class)
+    private static Capability<INetworkNodeProxy> NETWORK_NODE_PROXY_CAPABILITY = null;
+
+    private boolean enableRS = false;
+    private Object rsNode;
 
     private boolean enableAE = false;
-    private Object node;
-    private NBTTagCompound nodeTag;
+    private Object aeNode;
+    private NBTTagCompound aeNodeTag;
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        destroyNode();
+        destroyRSNode();
+        destroyAENode();
+    }
+
+    public void setRSEnabled(boolean enabled) {
+        if ( !Loader.isModLoaded("refinedstorage") )
+            return;
+
+        if ( enabled == enableRS )
+            return;
+
+        enableRS = enabled;
+        if ( !enabled )
+            destroyRSNode();
+
+        if ( world != null && !world.isRemote )
+            sendTilePacket(Side.CLIENT);
     }
 
     public void setAE2Enabled(boolean enabled) {
@@ -57,10 +89,15 @@ public abstract class TileEntityBaseAE2 extends TileEntityBaseEnergy implements 
 
         enableAE = enabled;
         if ( !enabled )
-            destroyNode();
+            destroyAENode();
 
         if ( world != null && !world.isRemote )
             sendTilePacket(Side.CLIENT);
+    }
+
+    public void updateNodes() {
+        updateAENode();
+        updateRSNode();
     }
 
     /* Packets are Fun for The Whole Family */
@@ -68,6 +105,7 @@ public abstract class TileEntityBaseAE2 extends TileEntityBaseEnergy implements 
     @Override
     public PacketBase getTilePacket() {
         PacketBase payload = super.getTilePacket();
+        payload.addBool(enableRS);
         payload.addBool(enableAE);
         return payload;
     }
@@ -76,6 +114,7 @@ public abstract class TileEntityBaseAE2 extends TileEntityBaseEnergy implements 
     @SideOnly(Side.CLIENT)
     public void handleTilePacket(PacketBase payload) {
         super.handleTilePacket(payload);
+        enableRS = payload.getBool();
         enableAE = payload.getBool();
     }
 
@@ -85,16 +124,16 @@ public abstract class TileEntityBaseAE2 extends TileEntityBaseEnergy implements 
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
 
-        if ( Loader.isModLoaded("appliedenergistics2") && tag.hasKey("node") && node == null )
-            nodeTag = tag.getCompoundTag("node");
+        if ( Loader.isModLoaded("appliedenergistics2") && tag.hasKey("node") && aeNode == null )
+            aeNodeTag = tag.getCompoundTag("node");
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound tag) {
         NBTTagCompound out = super.writeToNBT(tag);
 
-        if ( hasNode() ) {
-            NBTTagCompound data = saveNode();
+        if ( hasAENode() ) {
+            NBTTagCompound data = _saveAENode();
             if ( data != null )
                 tag.setTag("node", data);
         }
@@ -102,24 +141,80 @@ public abstract class TileEntityBaseAE2 extends TileEntityBaseEnergy implements 
         return out;
     }
 
-    public boolean hasNode() {
-        return Loader.isModLoaded("appliedenergistics2") && node != null;
+    /* RS Node Management */
+
+    public boolean hasRSNode() {
+        return Loader.isModLoaded("refinedstorage") && rsNode != null;
     }
 
-    public void updateNode() {
-        if ( Loader.isModLoaded("appliedenergistics2") && node != null )
-            this._updateNode();
+    public void updateRSNode() {
+        if ( hasRSNode() )
+            this._updateRSNode();
     }
 
-    public void destroyNode() {
-        if ( Loader.isModLoaded("appliedenergistics2") && node != null )
-            this._destroyNode();
+    public void destroyRSNode() {
+        if ( hasRSNode() )
+            this._destroyRSNode();
+    }
+
+    @Optional.Method(modid = "refinedstorage")
+    public void _updateRSNode() {
+        if ( !hasRSNode() )
+            return;
+
+        RSMachineNode node = (RSMachineNode) rsNode;
+        INetwork network = node.getNetwork();
+        if ( network != null )
+            network.getNodeGraph().invalidate(Action.PERFORM, network.world(), network.getPosition());
+    }
+
+    @Optional.Method(modid = "refinedstorage")
+    public void _destroyRSNode() {
+        if ( !hasRSNode() )
+            return;
+
+        RSMachineNode node = (RSMachineNode) rsNode;
+        node.destroy();
+
+        rsNode = null;
+    }
+
+    @Optional.Method(modid = "refinedstorage")
+    public RSMachineNode getRSNode() {
+        if ( !enableRS || world == null || world.isRemote || pos == null )
+            return null;
+
+        if ( hasRSNode() )
+            return (RSMachineNode) rsNode;
+
+        RSMachineNode node = new RSMachineNode(this);
+        rsNode = node;
+        node.discover();
+
+        return node;
+    }
+
+
+    /* AE Node Management */
+
+    public boolean hasAENode() {
+        return Loader.isModLoaded("appliedenergistics2") && aeNode != null;
+    }
+
+    public void updateAENode() {
+        if ( Loader.isModLoaded("appliedenergistics2") && aeNode != null )
+            this._updateAENode();
+    }
+
+    public void destroyAENode() {
+        if ( Loader.isModLoaded("appliedenergistics2") && aeNode != null )
+            this._destroyAENode();
     }
 
     @Optional.Method(modid = "appliedenergistics2")
-    private NBTTagCompound saveNode() {
-        if ( node instanceof IGridNode ) {
-            IGridNode n = (IGridNode) node;
+    private NBTTagCompound _saveAENode() {
+        if ( aeNode instanceof IGridNode ) {
+            IGridNode n = (IGridNode) aeNode;
             NBTTagCompound data = new NBTTagCompound();
             n.saveToNBT("n", data);
             return data;
@@ -129,18 +224,18 @@ public abstract class TileEntityBaseAE2 extends TileEntityBaseEnergy implements 
     }
 
     @Optional.Method(modid = "appliedenergistics2")
-    private void _updateNode() {
-        if ( node instanceof IGridNode ) {
-            IGridNode n = (IGridNode) node;
+    private void _updateAENode() {
+        if ( aeNode instanceof IGridNode ) {
+            IGridNode n = (IGridNode) aeNode;
             n.updateState();
         }
     }
 
     @Optional.Method(modid = "appliedenergistics2")
-    private void _destroyNode() {
-        if ( node instanceof IGridNode ) {
-            IGridNode n = (IGridNode) node;
-            node = null;
+    private void _destroyAENode() {
+        if ( aeNode instanceof IGridNode ) {
+            IGridNode n = (IGridNode) aeNode;
+            aeNode = null;
             n.destroy();
         }
     }
@@ -161,18 +256,18 @@ public abstract class TileEntityBaseAE2 extends TileEntityBaseEnergy implements 
             return null;
 
         IGridNode n = null;
-        if ( node instanceof IGridNode )
-            n = (IGridNode) node;
-        else if ( node == null && world != null && !world.isRemote ) {
+        if ( aeNode instanceof IGridNode )
+            n = (IGridNode) aeNode;
+        else if ( aeNode == null && world != null && !world.isRemote ) {
             n = AEApi.instance().grid().createGridNode(this);
             n.setPlayerID(AEApi.instance().registries().players().getID(owner));
-            if ( nodeTag != null ) {
-                n.loadFromNBT("n", nodeTag);
-                nodeTag = null;
+            if ( aeNodeTag != null ) {
+                n.loadFromNBT("n", aeNodeTag);
+                aeNodeTag = null;
             }
 
             n.updateState();
-            node = n;
+            aeNode = n;
         }
 
         return n;
@@ -271,4 +366,24 @@ public abstract class TileEntityBaseAE2 extends TileEntityBaseEnergy implements 
         return Objects.requireNonNull(getGridNode(AEPartLocation.INTERNAL));
     }
 
+    /* Capabilities */
+
+    @Override
+    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
+        if ( enableRS && capability != null && capability == RefinedStoragePlugin.NETWORK_NODE_PROXY_CAPABILITY )
+            return true;
+
+        return super.hasCapability(capability, facing);
+    }
+
+    @Nullable
+    @Override
+    public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
+        if ( enableRS && capability != null && capability == NETWORK_NODE_PROXY_CAPABILITY ) {
+            RSMachineNode node = getRSNode();
+            return node == null ? null : NETWORK_NODE_PROXY_CAPABILITY.cast(node);
+        }
+
+        return super.getCapability(capability, facing);
+    }
 }

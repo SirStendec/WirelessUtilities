@@ -2385,6 +2385,74 @@ public class ModConfig {
 
         @Config.Name("Directional RS Network")
         public DirectionalRSNetwork directionalRSNetwork = new DirectionalRSNetwork();
+
+        @Config.Name("RS Bus Augment")
+        public RSBusAugment rsBusAugment = new RSBusAugment();
+    }
+
+    public static class RSBusAugment {
+        @Config.Name("Required Level")
+        @Config.Comment("Machines must be at least this level in order to be augmented with this augment.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int requiredLevel = 0;
+
+        @Config.Name("Energy Multiplier")
+        @Config.Comment("Multiply the base cost per target by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] energyMultiplier = {1, 1, 1, 1, 1};
+
+        @Config.Name("Energy Addition")
+        @Config.Comment("Add this to the base cost per target for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] energyAddition = {0, 0, 0, 0, 0};
+
+        @Config.Name("Energy Drain per Tick")
+        @Config.Comment("This augment will drain this amount of RF/t from non-disabled machines they are in.")
+        @Config.RequiresWorldRestart
+        public int[] energyDrain = {0, 0, 0, 0, 0};
+
+        @Config.Name("Budget Multiplier")
+        @Config.Comment("Multiply the base budget cost per action by this much for machines with this augment installed.")
+        @Config.RangeDouble(min = 0)
+        @Config.RequiresWorldRestart
+        public double[] budgetMultiplier = {1, 1, 1, 1, 1};
+
+        @Config.Name("Budget Addition")
+        @Config.Comment("Add this to the base budget cost per action for machines with this augment installed.")
+        @Config.RequiresWorldRestart
+        public int[] budgetAddition = {0, 0, 0, 0, 0};
+
+        @Config.Name("Available Tiers")
+        @Config.Comment("AE Bus Augments should be available in this many tiers.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int tiers = 5;
+
+        @Config.Name("Tick Rate per Level")
+        @Config.Comment("AE Bus Augments should tick once every this many ticks.")
+        @Config.RangeInt(min = 0, max = 100)
+        @Config.RequiresWorldRestart
+        public int[] tickRate = {20, 16, 10, 6, 4};
+
+        @Config.Name("Items - Maximum Transfer per Level")
+        @Config.Comment("Transfer up to this many items per tick per level.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int[] itemsPerTick = {8, 16, 32, 64, 96};
+
+        @Config.Name("Fluid - Maximum Transfer per Level")
+        @Config.Comment("Transfer up to this many mB of fluid per tick per level.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int[] fluidPerTick = {500, 2000, 4000, 8000, 12000};
+
+        @Config.Name("Energy - Maximum RF per Level")
+        @Config.Comment("Transfer up to this much RF per tick per level.")
+        @Config.RangeInt(min = 0)
+        @Config.RequiresWorldRestart
+        public int[] energyPerTick = {500, 2000, 8000, 16000, 32000};
     }
 
     public static class PositionalRSNetwork {

@@ -361,14 +361,19 @@ item.wirelessutils.ae_bus_augment.info.0=This augment connects a machine
 item.wirelessutils.ae_bus_augment.info.1=to an AE Network, allowing it to
 item.wirelessutils.ae_bus_augment.info.2=directly send and receive resources.
 
-item.wirelessutils.ae_bus_augment.tick_rate=Runs Every %d Ticks
-item.wirelessutils.ae_bus_augment.tick_rate.slow=Runs Every %d Ticks (Min: %d)
-item.wirelessutils.ae_bus_augment.rate=Rate:
-item.wirelessutils.ae_bus_augment.transfers=Transfers:
-item.wirelessutils.ae_bus_augment.transfer_line=- %s %s
-item.wirelessutils.ae_bus_augment.energy_mode=Energy:
-item.wirelessutils.ae_bus_augment.items_mode=Items:
-item.wirelessutils.ae_bus_augment.fluid_mode=Fluid:
+item.wirelessutils.rs_bus_augment.name=RS Bus Augment
+item.wirelessutils.rs_bus_augment.info.0=This augment connects a machine
+item.wirelessutils.rs_bus_augment.info.1=to a RS Network, allowing it to
+item.wirelessutils.rs_bus_augment.info.2=directly send and receive resources.
+
+item.wirelessutils.bus_augment.tick_rate=Runs Every %d Ticks
+item.wirelessutils.bus_augment.tick_rate.slow=Runs Every %d Ticks (Min: %d)
+item.wirelessutils.bus_augment.rate=Rate:
+item.wirelessutils.bus_augment.transfers=Transfers:
+item.wirelessutils.bus_augment.transfer_line=- %s %s
+item.wirelessutils.bus_augment.energy_mode=Energy:
+item.wirelessutils.bus_augment.items_mode=Items:
+item.wirelessutils.bus_augment.fluid_mode=Fluid:
 
 item.wirelessutils.slot_augment.name=Target Slot Augment
 item.wirelessutils.slot_augment.info.0=This augment increases the number of

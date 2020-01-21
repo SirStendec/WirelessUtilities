@@ -20,13 +20,12 @@ import cofh.core.util.helpers.InventoryHelper;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.augment.ITickableAugment;
 import com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.AppliedEnergistics2Plugin;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseAE2;
+import com.lordmau5.wirelessutils.tile.base.TileEntityBaseNetwork;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBusAugmentable;
+import com.lordmau5.wirelessutils.utils.BusTransferMode;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -39,96 +38,8 @@ import java.util.Optional;
 
 public class AEBusTickable implements ITickableAugment, IActionSource {
 
-    public enum TransferMode {
-        DISABLED(false, false),
-        IMPORT(true, false),
-        EXPORT(false, true),
-        BOTH(true, true);
-
-        public final boolean _import;
-        public final boolean _export;
-
-        TransferMode(boolean _import, boolean _export) {
-            this._import = _import;
-            this._export = _export;
-        }
-
-        public TransferMode next() {
-            return byIndex(ordinal() + 1);
-        }
-
-        public TransferMode previous() {
-            return byIndex(ordinal() - 1);
-        }
-
-        public ITextComponent getComponent() {
-            return new TextComponentTranslation("btn." + WirelessUtils.MODID + ".bus_mode." + ordinal());
-        }
-
-        public TransferMode withImport(boolean enabled) {
-            if ( enabled ) {
-                switch (this) {
-                    case IMPORT:
-                    case DISABLED:
-                        return IMPORT;
-                    case EXPORT:
-                    case BOTH:
-                    default:
-                        return BOTH;
-                }
-            } else {
-                switch (this) {
-                    case DISABLED:
-                    case IMPORT:
-                        return DISABLED;
-                    case EXPORT:
-                    case BOTH:
-                    default:
-                        return EXPORT;
-                }
-            }
-        }
-
-        public TransferMode withExport(boolean enabled) {
-            if ( enabled ) {
-                switch (this) {
-                    case EXPORT:
-                    case DISABLED:
-                        return EXPORT;
-                    case IMPORT:
-                    case BOTH:
-                    default:
-                        return BOTH;
-                }
-            } else {
-                switch (this) {
-                    case DISABLED:
-                    case EXPORT:
-                        return DISABLED;
-                    case IMPORT:
-                    case BOTH:
-                    default:
-                        return IMPORT;
-                }
-            }
-        }
-
-        public static final TransferMode[] VALUES;
-
-        public static TransferMode byIndex(int index) {
-            while ( index < 0 )
-                index += VALUES.length;
-
-            return VALUES[index % VALUES.length];
-        }
-
-        static {
-            VALUES = values();
-        }
-    }
-
     private ItemStack stack;
-    private final TileEntityBaseAE2 tile;
+    private final TileEntityBaseNetwork tile;
     private final IBusAugmentable augmentable;
 
     private byte tickRate;
@@ -136,9 +47,9 @@ public class AEBusTickable implements ITickableAugment, IActionSource {
     private int fluidRate;
     private int energyRate;
 
-    private TransferMode itemsMode = TransferMode.DISABLED;
-    private TransferMode fluidMode = TransferMode.DISABLED;
-    private TransferMode energyMode = TransferMode.DISABLED;
+    private BusTransferMode itemsMode = BusTransferMode.DISABLED;
+    private BusTransferMode fluidMode = BusTransferMode.DISABLED;
+    private BusTransferMode energyMode = BusTransferMode.DISABLED;
 
     private int remainingItems = 0;
     private int remainingFluid = 0;
@@ -147,7 +58,7 @@ public class AEBusTickable implements ITickableAugment, IActionSource {
     private byte ticks = 0;
 
 
-    public AEBusTickable(@Nonnull ItemStack stack, TileEntityBaseAE2 tile) {
+    public AEBusTickable(@Nonnull ItemStack stack, @Nonnull TileEntityBaseNetwork tile) {
         this.stack = stack;
         this.tile = tile;
         this.augmentable = (IBusAugmentable) tile;
@@ -503,9 +414,9 @@ public class AEBusTickable implements ITickableAugment, IActionSource {
     }
 
     private void execute(IBusAugmentable.TickPhase phase) {
-        if ( ticks != 0 || ((energyMode == TransferMode.DISABLED || remainingEnergy == 0) &&
-                (itemsMode == TransferMode.DISABLED || remainingItems == 0) &&
-                (fluidMode == TransferMode.DISABLED || remainingFluid == 0)) )
+        if ( ticks != 0 || ((energyMode == BusTransferMode.DISABLED || remainingEnergy == 0) &&
+                (itemsMode == BusTransferMode.DISABLED || remainingItems == 0) &&
+                (fluidMode == BusTransferMode.DISABLED || remainingFluid == 0)) )
             return;
 
         WirelessUtils.profiler.startSection("AEBus:Init");

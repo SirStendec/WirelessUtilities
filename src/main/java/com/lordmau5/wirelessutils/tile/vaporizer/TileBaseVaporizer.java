@@ -17,7 +17,7 @@ import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.IWorkInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseAE2;
+import com.lordmau5.wirelessutils.tile.base.TileEntityBaseNetwork;
 import com.lordmau5.wirelessutils.tile.base.Worker;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBudgetInfoProvider;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBusAugmentable;
@@ -82,7 +82,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-public abstract class TileBaseVaporizer extends TileEntityBaseAE2 implements
+public abstract class TileBaseVaporizer extends TileEntityBaseNetwork implements
         IWorkInfoProvider, IBudgetInfoProvider, ISidedTransfer, ISidedTransferAugmentable,
         IConfigurableWorldTickRate, IUnlockableSlots, IFilterAugmentable, IChunkLoadAugmentable,
         IFluidGenAugmentable, IBusAugmentable,
@@ -1604,7 +1604,7 @@ public abstract class TileBaseVaporizer extends TileEntityBaseAE2 implements
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
-            updateNode();
+            updateNodes();
         }
 
         callBlockUpdate();

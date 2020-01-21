@@ -94,7 +94,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
-            updateNode();
+            updateNodes();
         }
 
         return true;
@@ -127,7 +127,7 @@ public class TileEntityDirectionalCondenser extends TileEntityBaseCondenser impl
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
-            updateNode();
+            updateNodes();
         }
 
         return true;

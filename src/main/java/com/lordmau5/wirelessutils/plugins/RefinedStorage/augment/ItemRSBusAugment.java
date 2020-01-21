@@ -1,4 +1,4 @@
-package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.augment;
+package com.lordmau5.wirelessutils.plugins.RefinedStorage.augment;
 
 import cofh.api.core.IAugmentable;
 import cofh.core.util.helpers.StringHelper;
@@ -32,11 +32,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemAEBusAugment extends ItemAugment implements IUpdateableItem, IGuiItem, INBTPreservingIngredient {
+public class ItemRSBusAugment extends ItemAugment implements IUpdateableItem, IGuiItem, INBTPreservingIngredient {
 
-    public ItemAEBusAugment() {
+    public ItemRSBusAugment() {
         super();
-        setName("ae_bus_augment");
+        setName("rs_bus_augment");
     }
 
     /* Crafting */
@@ -293,34 +293,7 @@ public class ItemAEBusAugment extends ItemAugment implements IUpdateableItem, IG
 
         return (byte) pickRate(
                 Level.fromItemStack(stack).toInt(),
-                ModConfig.plugins.appliedEnergistics.aeBusAugment.tickRate
-        );
-    }
-
-
-    public int getItemsRate(@Nonnull ItemStack stack) {
-        if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
-            NBTTagCompound tag = stack.getTagCompound();
-            if ( tag != null && tag.hasKey("M:ItemRate", Constants.NBT.TAG_INT) )
-                return tag.getInteger("M:ItemRate");
-        }
-
-        return pickRate(
-                Level.fromItemStack(stack).toInt(),
-                ModConfig.plugins.appliedEnergistics.aeBusAugment.itemsPerTick
-        );
-    }
-
-    public int getFluidRate(@Nonnull ItemStack stack) {
-        if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
-            NBTTagCompound tag = stack.getTagCompound();
-            if ( tag != null && tag.hasKey("M:FluidRate", Constants.NBT.TAG_INT) )
-                return tag.getInteger("M:FluidRate");
-        }
-
-        return pickRate(
-                Level.fromItemStack(stack).toInt(),
-                ModConfig.plugins.appliedEnergistics.aeBusAugment.fluidPerTick
+                ModConfig.plugins.refinedStorage.rsBusAugment.tickRate
         );
     }
 
@@ -333,27 +306,52 @@ public class ItemAEBusAugment extends ItemAugment implements IUpdateableItem, IG
 
         return pickRate(
                 Level.fromItemStack(stack).toInt(),
-                ModConfig.plugins.appliedEnergistics.aeBusAugment.energyPerTick
+                ModConfig.plugins.refinedStorage.rsBusAugment.energyPerTick
         );
     }
 
+    public int getItemsRate(@Nonnull ItemStack stack) {
+        if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("M:ItemRate", Constants.NBT.TAG_INT) )
+                return tag.getInteger("M:ItemRate");
+        }
+
+        return pickRate(
+                Level.fromItemStack(stack).toInt(),
+                ModConfig.plugins.refinedStorage.rsBusAugment.itemsPerTick
+        );
+    }
+
+    public int getFluidRate(@Nonnull ItemStack stack) {
+        if ( !stack.isEmpty() && stack.getItem() == this && stack.hasTagCompound() ) {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("M:FluidRate", Constants.NBT.TAG_INT) )
+                return tag.getInteger("M:FluidRate");
+        }
+
+        return pickRate(
+                Level.fromItemStack(stack).toInt(),
+                ModConfig.plugins.refinedStorage.rsBusAugment.fluidPerTick
+        );
+    }
 
     /* Stuff */
 
     @Override
     public int getTiers() {
-        return Math.min(ModConfig.plugins.appliedEnergistics.aeBusAugment.tiers, Level.values().length);
+        return Math.min(ModConfig.plugins.refinedStorage.rsBusAugment.tiers, Level.values().length);
     }
 
     @Nullable
     @Override
     public Level getRequiredLevelDelegate(@Nonnull ItemStack stack) {
-        return Level.fromInt(ModConfig.plugins.appliedEnergistics.aeBusAugment.requiredLevel);
+        return Level.fromInt(ModConfig.plugins.refinedStorage.rsBusAugment.requiredLevel);
     }
 
     @Override
     public double getEnergyMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
-        double[] multipliers = ModConfig.plugins.appliedEnergistics.aeBusAugment.energyMultiplier;
+        double[] multipliers = ModConfig.plugins.refinedStorage.rsBusAugment.energyMultiplier;
         if ( multipliers.length == 0 )
             return 0;
 
@@ -366,7 +364,7 @@ public class ItemAEBusAugment extends ItemAugment implements IUpdateableItem, IG
 
     @Override
     public int getEnergyAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
-        int[] additions = ModConfig.plugins.appliedEnergistics.aeBusAugment.energyAddition;
+        int[] additions = ModConfig.plugins.refinedStorage.rsBusAugment.energyAddition;
         if ( additions.length == 0 )
             return 0;
 
@@ -379,7 +377,7 @@ public class ItemAEBusAugment extends ItemAugment implements IUpdateableItem, IG
 
     @Override
     public int getEnergyDrainDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
-        int[] drain = ModConfig.plugins.appliedEnergistics.aeBusAugment.energyDrain;
+        int[] drain = ModConfig.plugins.refinedStorage.rsBusAugment.energyDrain;
         if ( drain.length == 0 )
             return 0;
 
@@ -392,7 +390,7 @@ public class ItemAEBusAugment extends ItemAugment implements IUpdateableItem, IG
 
     @Override
     public int getBudgetAdditionDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
-        int[] additions = ModConfig.plugins.appliedEnergistics.aeBusAugment.budgetAddition;
+        int[] additions = ModConfig.plugins.refinedStorage.rsBusAugment.budgetAddition;
         if ( additions.length == 0 )
             return 0;
 
@@ -405,7 +403,7 @@ public class ItemAEBusAugment extends ItemAugment implements IUpdateableItem, IG
 
     @Override
     public double getBudgetMultiplierDelegate(@Nonnull ItemStack stack, @Nullable IAugmentable augmentable) {
-        double[] multipliers = ModConfig.plugins.appliedEnergistics.aeBusAugment.budgetMultiplier;
+        double[] multipliers = ModConfig.plugins.refinedStorage.rsBusAugment.budgetMultiplier;
         if ( multipliers.length == 0 )
             return 0;
 
@@ -416,12 +414,13 @@ public class ItemAEBusAugment extends ItemAugment implements IUpdateableItem, IG
         return multipliers[idx];
     }
 
+
     /* Installation */
 
     @Override
     public ITickableAugment getTickableAugment(@Nonnull ItemStack stack, @Nonnull IAugmentable tile) {
         if ( canApplyTo(stack, tile) )
-            return new AEBusTickable(stack, (TileEntityBaseNetwork) tile);
+            return new RSBusTickable(stack, (TileEntityBaseNetwork) tile);
 
         return null;
     }
@@ -438,6 +437,7 @@ public class ItemAEBusAugment extends ItemAugment implements IUpdateableItem, IG
         return augmentable instanceof IBusAugmentable && augmentable instanceof TileEntityBaseNetwork;
     }
 
+
     /* Updating */
 
     @Override
@@ -451,12 +451,14 @@ public class ItemAEBusAugment extends ItemAugment implements IUpdateableItem, IG
 
     @Override
     public Object getClientGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
-        return new GuiAEBusAugment(new ContainerAEBusAugment(stack, slot, player.inventory));
+        return null;
+        //return new GuiAEBusAugment(new ContainerAEBusAugment(stack, slot, player.inventory));
     }
 
     @Override
     public Object getServerGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
-        return new ContainerAEBusAugment(stack, slot, player.inventory);
+        return null;
+        //return new ContainerAEBusAugment(stack, slot, player.inventory);
     }
 
     @Override

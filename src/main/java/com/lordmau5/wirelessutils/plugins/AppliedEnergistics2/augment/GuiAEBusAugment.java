@@ -6,6 +6,7 @@ import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiContainer;
 import com.lordmau5.wirelessutils.gui.client.base.BaseGuiItem;
 import com.lordmau5.wirelessutils.gui.client.elements.ElementDynamicContainedButton;
+import com.lordmau5.wirelessutils.utils.BusTransferMode;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import net.minecraft.util.text.TextComponentTranslation;
 
@@ -90,13 +91,13 @@ public class GuiAEBusAugment extends BaseGuiItem {
 
         switch (buttonName) {
             case "Energy":
-                container.setEnergyMode(AEBusTickable.TransferMode.byIndex(container.getEnergyMode().ordinal() + amount));
+                container.setEnergyMode(BusTransferMode.byIndex(container.getEnergyMode().ordinal() + amount));
                 break;
             case "Items":
-                container.setItemsMode(AEBusTickable.TransferMode.byIndex(container.getItemsMode().ordinal() + amount));
+                container.setItemsMode(BusTransferMode.byIndex(container.getItemsMode().ordinal() + amount));
                 break;
             case "Fluid":
-                container.setFluidMode(AEBusTickable.TransferMode.byIndex(container.getFluidMode().ordinal() + amount));
+                container.setFluidMode(BusTransferMode.byIndex(container.getFluidMode().ordinal() + amount));
                 break;
             default:
                 super.handleElementButtonClick(buttonName, mouseButton);

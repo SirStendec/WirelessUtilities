@@ -100,7 +100,7 @@ public class TileDirectionalDesublimator extends TileBaseDesublimator implements
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
-            updateNode();
+            updateNodes();
         }
 
         return true;
@@ -133,7 +133,7 @@ public class TileDirectionalDesublimator extends TileBaseDesublimator implements
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
-            updateNode();
+            updateNodes();
         }
 
         return true;

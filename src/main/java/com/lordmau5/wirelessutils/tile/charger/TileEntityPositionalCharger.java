@@ -106,7 +106,7 @@ public class TileEntityPositionalCharger extends TileEntityBaseCharger implement
         if ( !world.isRemote ) {
             markChunkDirty();
             sendTilePacket(Side.CLIENT);
-            updateNode();
+            updateNodes();
         }
 
         return true;

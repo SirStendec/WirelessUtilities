@@ -85,6 +85,7 @@ public class AppliedEnergistics2Plugin implements IPlugin {
     public void registerModels(ModelRegistryEvent event) {
         blockDirectionalAENetwork.initModel();
         blockPositionalAENetwork.initModel();
+
         itemAEBusAugment.initModel();
     }
 

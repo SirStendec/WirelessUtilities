@@ -16,7 +16,7 @@ import com.lordmau5.wirelessutils.tile.base.IRoundRobinMachine;
 import com.lordmau5.wirelessutils.tile.base.ISidedTransfer;
 import com.lordmau5.wirelessutils.tile.base.IUnlockableSlots;
 import com.lordmau5.wirelessutils.tile.base.IWorkProvider;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseAE2;
+import com.lordmau5.wirelessutils.tile.base.TileEntityBaseNetwork;
 import com.lordmau5.wirelessutils.tile.base.Worker;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBlockAugmentable;
 import com.lordmau5.wirelessutils.tile.base.augmentable.IBudgetInfoProvider;
@@ -108,7 +108,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-public abstract class TileBaseDesublimator extends TileEntityBaseAE2 implements
+public abstract class TileBaseDesublimator extends TileEntityBaseNetwork implements
         IConfigurableWorldTickRate, IBudgetInfoProvider, IFilterAugmentable,
         IWorldAugmentable, IBlockAugmentable, IChunkLoadAugmentable, IDispenserAugmentable,
         ICropAugmentable, IInvertAugmentable, ITransferAugmentable, ICapacityAugmentable,
@@ -690,7 +690,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseAE2 implements
             return null;
 
         final int totalSlots = itemStackHandler.getSlots() - getBufferOffset();
-        if ( (phase == TickPhase.POST || full >= totalSlots) && empty < totalSlots )
+        if ( empty < totalSlots )
             return capabilityHandler;
 
         return null;
@@ -701,8 +701,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseAE2 implements
         if ( phase != TickPhase.PRE || inverted )
             return null;
 
-        final int totalSlots = itemStackHandler.getSlots() - getBufferOffset();
-        if ( full < totalSlots )
+        if ( full < capacityAugment )
             return capabilityHandler;
 
         return null;
@@ -1744,7 +1743,7 @@ public abstract class TileBaseDesublimator extends TileEntityBaseAE2 implements
         if ( !world.isRemote ) {
             sendTilePacket(Side.CLIENT);
             markChunkDirty();
-            updateNode();
+            updateNodes();
         }
 
         callBlockUpdate();
@@ -1888,10 +1887,9 @@ public abstract class TileBaseDesublimator extends TileEntityBaseAE2 implements
         activeTargetsPerTick = 0;
 
         boolean enabled = redstoneControlOrDisable();
+        final int totalSlots = itemStackHandler.getSlots() - getBufferOffset();
 
-        int totalSlots = itemStackHandler.getSlots() - getBufferOffset();
-
-        if ( sideTransferAugment && enabled && (inverted ? empty < totalSlots : full < totalSlots) )
+        if ( sideTransferAugment && enabled && (inverted ? empty < totalSlots : full < capacityAugment) )
             executeSidedTransfer();
 
         preTickAugments(enabled);
