@@ -16,22 +16,29 @@ import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.positional.Netw
 import com.lordmau5.wirelessutils.plugins.RefinedStorage.network.positional.TilePositionalRSNetwork;
 import com.lordmau5.wirelessutils.proxy.CommonProxy;
 import com.lordmau5.wirelessutils.utils.ColorHandler;
+import com.lordmau5.wirelessutils.utils.Level;
 import com.raoulvdberge.refinedstorage.api.IRSAPI;
 import com.raoulvdberge.refinedstorage.api.RSAPIInject;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNodeProxy;
 import com.raoulvdberge.refinedstorage.apiimpl.network.node.NetworkNode;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class RefinedStoragePlugin implements IPlugin {
     @RSAPIInject
@@ -116,5 +123,23 @@ public class RefinedStoragePlugin implements IPlugin {
     public void initColors(ItemColors itemColors) {
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(blockDirectionalRSNetwork));
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(blockPositionalRSNetwork));
+        itemColors.registerItemColorHandler(handleRSBusColor, itemRSBusAugment);
     }
+
+    @SideOnly(Side.CLIENT)
+    public static final IItemColor handleRSBusColor = (ItemStack stack, int tintIndex) -> {
+        NBTTagCompound tag = stack.getTagCompound();
+        if ( tag != null && tag.hasKey("WUTint:" + tintIndex, Constants.NBT.TAG_INT) )
+            return tag.getInteger("WUTint:" + tintIndex);
+
+        if ( tintIndex == 1 ) {
+            Level level = Level.getMinLevel();
+            if ( !stack.isEmpty() )
+                level = Level.fromItemStack(stack);
+
+            return level.color;
+        }
+
+        return 0xFFFFFF;
+    };
 }

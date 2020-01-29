@@ -30,6 +30,8 @@ import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
@@ -102,6 +104,7 @@ public class AppliedEnergistics2Plugin implements IPlugin {
         itemColors.registerItemColorHandler(handleAEBusColor, itemAEBusAugment);
     }
 
+    @SideOnly(Side.CLIENT)
     public static final IBlockColor handleBlockColor = (IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex) -> {
         if ( worldIn != null && pos != null ) {
             TileEntity tile = worldIn.getTileEntity(pos);
@@ -121,6 +124,7 @@ public class AppliedEnergistics2Plugin implements IPlugin {
         return 0xFFFFFF;
     };
 
+    @SideOnly(Side.CLIENT)
     public static final IItemColor handleAEBusColor = (ItemStack stack, int tintIndex) -> {
         NBTTagCompound tag = stack.getTagCompound();
         if ( tag != null && tag.hasKey("WUTint:" + tintIndex, Constants.NBT.TAG_INT) )
@@ -137,6 +141,7 @@ public class AppliedEnergistics2Plugin implements IPlugin {
         return 0xFFFFFF;
     };
 
+    @SideOnly(Side.CLIENT)
     public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
         if ( tintIndex == 2 ) {
             Level level = Level.getMinLevel();

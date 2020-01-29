@@ -60,6 +60,8 @@ public class RSMachineNode implements INetworkNode, INetworkNodeProxy {
     /* INetworkNode */
 
     public int getEnergyUsage() {
+        // We can't report a summary of our energy usage here.
+        // It would cause the network to draw excess energy.
         return 0;
     }
 

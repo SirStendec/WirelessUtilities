@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "refinedstorage"
+		}
+	],
+	"ingredients": [
+		{
+			"item": "wirelessutils:rs_bus_augment",
+			"data": 0
+		},
+		{
+			"item": "#RS_CARD_SPEED"
+		},
+		{
+			"item": "#RS_CARD_SPEED"
+		}
+	],
+	"result": {
+		"item": "wirelessutils:rs_bus_augment",
+		"count": 1,
+		"data": 1
+	}
+}

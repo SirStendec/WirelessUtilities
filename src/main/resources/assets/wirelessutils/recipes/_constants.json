@@ -267,8 +267,60 @@
 	{
 		"name": "AE_ENGINEERING_PROCESSOR",
 		"ingredient": {
-			"item": "appliedenergistics2:material",
-			"data": 24
+			"type": "appliedenergistics2:part",
+			"part": "material.engineering_processor"
+		},
+		"conditions": [
+			{
+				"type": "forge:mod_loaded",
+				"modid": "appliedenergistics2"
+			}
+		]
+	},
+	{
+		"name": "AE_FORMATION_CORE",
+		"ingredient": {
+			"type": "appliedenergistics2:part",
+			"part": "material.formation_core"
+		},
+		"conditions": [
+			{
+				"type": "forge:mod_loaded",
+				"modid": "appliedenergistics2"
+			}
+		]
+	},
+	{
+		"name": "AE_ANNIHILATION_CORE",
+		"ingredient": {
+			"type": "appliedenergistics2:part",
+			"part": "material.annihilation_core"
+		},
+		"conditions": [
+			{
+				"type": "forge:mod_loaded",
+				"modid": "appliedenergistics2"
+			}
+		]
+	},
+	{
+		"name": "AE_CARD_CAPACITY",
+		"ingredient": {
+			"type": "appliedenergistics2:part",
+			"part": "material.card_capacity"
+		},
+		"conditions": [
+			{
+				"type": "forge:mod_loaded",
+				"modid": "appliedenergistics2"
+			}
+		]
+	},
+	{
+		"name": "AE_CARD_SPEED",
+		"ingredient": {
+			"type": "appliedenergistics2:part",
+			"part": "material.card_speed"
 		},
 		"conditions": [
 			{
@@ -282,6 +334,19 @@
 		"ingredient": {
 			"item": "refinedstorage:processor",
 			"data": 5
+		},
+		"conditions": [
+			{
+				"type": "forge:mod_loaded",
+				"modid": "refinedstorage"
+			}
+		]
+	},
+	{
+		"name": "RS_CARD_SPEED",
+		"ingredient": {
+			"item": "refinedstorage:upgrade",
+			"data": 2
 		},
 		"conditions": [
 			{

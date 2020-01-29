@@ -1,0 +1,27 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "appliedenergistics2"
+		}
+	],
+	"ingredients": [
+		{
+			"item": "wirelessutils:ae_bus_augment",
+			"data": 2
+		},
+		{
+			"item": "#AE_CARD_CAPACITY"
+		},
+		{
+			"item": "#AE_CARD_SPEED"
+		}
+	],
+	"result": {
+		"item": "wirelessutils:ae_bus_augment",
+		"count": 1,
+		"data": 3
+	}
+}

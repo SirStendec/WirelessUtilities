@@ -1,4 +1,4 @@
-package com.lordmau5.wirelessutils.plugins.AppliedEnergistics2.augment;
+package com.lordmau5.wirelessutils.plugins.RefinedStorage.augment;
 
 import cofh.core.gui.element.listbox.SliderHorizontal;
 import cofh.core.util.helpers.StringHelper;
@@ -12,11 +12,11 @@ import net.minecraft.util.text.TextComponentTranslation;
 
 import java.util.List;
 
-public class GuiAEBusAugment extends BaseGuiItem {
+public class GuiRSBusAugment extends BaseGuiItem {
 
     private final static String I18N_KEY = "item." + WirelessUtils.MODID + ".bus_augment";
 
-    private final ContainerAEBusAugment container;
+    private final ContainerRSBusAugment container;
 
     private SliderHorizontal ctlTick;
     private boolean updating = false;
@@ -25,8 +25,7 @@ public class GuiAEBusAugment extends BaseGuiItem {
     private ElementDynamicContainedButton btnItemsMode;
     private ElementDynamicContainedButton btnFluidMode;
 
-
-    public GuiAEBusAugment(ContainerAEBusAugment container) {
+    public GuiRSBusAugment(ContainerRSBusAugment container) {
         super(container);
         this.container = container;
         name = container.getItemStack().getDisplayName();

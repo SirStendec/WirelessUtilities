@@ -1,0 +1,34 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "refinedstorage"
+		}
+	],
+	"pattern": [
+		" I ",
+		"RBR",
+		" E "
+	],
+	"key": {
+		"B": {
+			"item": "wirelessutils:base_augment"
+		},
+		"I": {
+			"item": "refinedstorage:importer"
+		},
+		"E": {
+			"item": "refinedstorage:exporter"
+		},
+		"R": {
+			"item": "#REDSTONE"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:rs_bus_augment",
+		"count": 1,
+		"data": 0
+	}
+}

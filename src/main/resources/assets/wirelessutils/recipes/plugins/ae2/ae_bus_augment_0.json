@@ -1,0 +1,34 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"group": "wirelessutils",
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "appliedenergistics2"
+		}
+	],
+	"pattern": [
+		" G ",
+		"ABF",
+		" G "
+	],
+	"key": {
+		"B": {
+			"item": "wirelessutils:base_augment"
+		},
+		"A": {
+			"item": "#AE_ANNIHILATION_CORE"
+		},
+		"F": {
+			"item": "#AE_FORMATION_CORE"
+		},
+		"G": {
+			"item": "#GLASS_PANE"
+		}
+	},
+	"result": {
+		"item": "wirelessutils:ae_bus_augment",
+		"count": 1,
+		"data": 0
+	}
+}

@@ -132,8 +132,8 @@ public abstract class ItemBasePearl extends ItemBase implements IJEIInformationI
         return 2F;
     }
 
-    public abstract @Nonnull
-    EntityThrowable getProjectileEntity(@Nonnull World worldIn, @Nullable EntityPlayer playerIn, @Nullable IPosition position, @Nonnull ItemStack stack);
+    @Nonnull
+    public abstract EntityThrowable getProjectileEntity(@Nonnull World worldIn, @Nullable EntityPlayer playerIn, @Nullable IPosition position, @Nonnull ItemStack stack);
 
     public boolean shouldStackShrink(@Nonnull ItemStack stack, EntityPlayer player) {
         return !player.capabilities.isCreativeMode;

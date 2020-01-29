@@ -451,14 +451,12 @@ public class ItemRSBusAugment extends ItemAugment implements IUpdateableItem, IG
 
     @Override
     public Object getClientGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
-        return null;
-        //return new GuiAEBusAugment(new ContainerAEBusAugment(stack, slot, player.inventory));
+        return new GuiRSBusAugment(new ContainerRSBusAugment(stack, slot, player.inventory));
     }
 
     @Override
     public Object getServerGuiElement(@Nonnull ItemStack stack, int slot, @Nonnull EntityPlayer player, @Nonnull World world) {
-        return null;
-        //return new ContainerAEBusAugment(stack, slot, player.inventory);
+        return new ContainerRSBusAugment(stack, slot, player.inventory);
     }
 
     @Override
