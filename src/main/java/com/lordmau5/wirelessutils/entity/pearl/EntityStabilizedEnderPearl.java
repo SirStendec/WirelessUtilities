@@ -1,7 +1,7 @@
 package com.lordmau5.wirelessutils.entity.pearl;
 
 import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
-import com.lordmau5.wirelessutils.render.RenderPearl;
+import com.lordmau5.wirelessutils.render.RenderAsItem;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.client.Minecraft;
@@ -161,7 +161,7 @@ public class EntityStabilizedEnderPearl extends EntityBaseThrowable {
     public static class Factory implements IRenderFactory<EntityStabilizedEnderPearl> {
         @Override
         public Render<? super EntityStabilizedEnderPearl> createRenderFor(RenderManager manager) {
-            return new RenderPearl<EntityStabilizedEnderPearl>(manager, ModItems.itemStabilizedEnderPearl, Minecraft.getMinecraft().getRenderItem());
+            return new RenderAsItem<EntityStabilizedEnderPearl>(manager, ModItems.itemStabilizedEnderPearl, Minecraft.getMinecraft().getRenderItem());
         }
     }
 }

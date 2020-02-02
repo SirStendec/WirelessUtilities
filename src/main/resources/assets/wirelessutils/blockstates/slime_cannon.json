@@ -1,0 +1,73 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "wirelessutils:slime_cannon",
+		"textures": {
+			"base": "minecraft:blocks/stone_slab_top",
+			"top": "minecraft:blocks/dispenser_front_vertical",
+			"slime": "minecraft:blocks/slime",
+			"mark": "wirelessutils:block/blank",
+			"mark_two": "wirelessutils:block/blank",
+			"particle": "#base"
+		}
+	},
+	"variants": {
+		"normal": [{}],
+		"inventory": [
+			{
+				"model": "wirelessutils:slime_cannon_inv"
+			}
+		],
+		"count": {
+			"0": {
+				"textures": {
+					"mark": "wirelessutils:block/cannon_count_slow"
+				}
+			},
+			"1": {},
+			"2": {
+				"textures": {
+					"mark": "wirelessutils:block/cannon_count_1"
+				}
+			},
+			"3": {
+				"textures": {
+					"mark": "wirelessutils:block/cannon_count_2"
+				}
+			},
+			"4": {
+				"textures": {
+					"mark": "wirelessutils:block/cannon_count_3"
+				}
+			},
+			"5": {
+				"textures": {
+					"mark": "wirelessutils:block/cannon_count_4"
+				}
+			}
+		},
+		"speed": {
+			"0": {},
+			"1": {
+				"textures": {
+					"mark_two": "wirelessutils:block/cannon_speed_1"
+				}
+			},
+			"2": {
+				"textures": {
+					"mark_two": "wirelessutils:block/cannon_speed_2"
+				}
+			},
+			"3": {
+				"textures": {
+					"mark_two": "wirelessutils:block/cannon_speed_3"
+				}
+			},
+			"4": {
+				"textures": {
+					"mark_two": "wirelessutils:block/cannon_speed_4"
+				}
+			}
+		}
+	}
+}

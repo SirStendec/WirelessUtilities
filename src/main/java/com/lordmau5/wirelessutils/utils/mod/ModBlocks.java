@@ -11,10 +11,14 @@ import com.lordmau5.wirelessutils.block.desublimator.BlockPositionalDesublimator
 import com.lordmau5.wirelessutils.block.redstone.BlockPoweredAir;
 import com.lordmau5.wirelessutils.block.redstone.BlockPoweredRedstoneWire;
 import com.lordmau5.wirelessutils.block.slime.BlockAngledSlime;
+import com.lordmau5.wirelessutils.block.slime.BlockSlimeCannon;
 import com.lordmau5.wirelessutils.block.vaporizer.BlockDirectionalVaporizer;
 import com.lordmau5.wirelessutils.block.vaporizer.BlockPositionalVaporizer;
+import com.lordmau5.wirelessutils.render.TESRSlimeCannon;
+import com.lordmau5.wirelessutils.tile.TileSlimeCannon;
 import com.lordmau5.wirelessutils.utils.ColorHandler;
 import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -60,6 +64,9 @@ public class ModBlocks {
     @GameRegistry.ObjectHolder("wirelessutils:angled_slime")
     public static BlockAngledSlime blockAngledSlime;
 
+    @GameRegistry.ObjectHolder("wirelessutils:slime_cannon")
+    public static BlockSlimeCannon blockSlimeCannon;
+
     @SideOnly(Side.CLIENT)
     public static void initModels() {
         blockDirectionalCharger.initModel();
@@ -76,6 +83,9 @@ public class ModBlocks {
         blockPositionalVaporizer.initModel();
 
         blockAngledSlime.initModel();
+        blockSlimeCannon.initModel();
+
+        ClientRegistry.bindTileEntitySpecialRenderer(TileSlimeCannon.class, new TESRSlimeCannon());
     }
 
     @SideOnly(Side.CLIENT)

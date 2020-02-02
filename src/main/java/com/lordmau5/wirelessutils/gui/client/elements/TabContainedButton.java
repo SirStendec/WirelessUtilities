@@ -6,6 +6,9 @@ import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -18,6 +21,8 @@ public class TabContainedButton extends TabButton {
 
     private String tooltip;
     private String tooltipExtra;
+    private Style tooltipStyle;
+    private Style tooltipExtraStyle;
     private boolean tooltipLocalized = false;
     private boolean tooltipLines = false;
 
@@ -143,6 +148,8 @@ public class TabContainedButton extends TabButton {
     public TabContainedButton clearToolTip() {
         tooltip = null;
         tooltipExtra = null;
+        tooltipStyle = null;
+        tooltipExtraStyle = null;
         return this;
     }
 
@@ -151,8 +158,30 @@ public class TabContainedButton extends TabButton {
         return this;
     }
 
+    public TabContainedButton setToolTip(String tooltip, Style style) {
+        this.tooltip = tooltip;
+        this.tooltipStyle = style;
+        return this;
+    }
+
+    public TabContainedButton setToolTipStyle(Style style) {
+        this.tooltipStyle = style;
+        return this;
+    }
+
     public TabContainedButton setTooltipExtra(String extra) {
         tooltipExtra = extra;
+        return this;
+    }
+
+    public TabContainedButton setTooltipExtra(String extra, Style style) {
+        tooltipExtra = extra;
+        tooltipExtraStyle = style;
+        return this;
+    }
+
+    public TabContainedButton setTooltipExtraStyle(Style style) {
+        tooltipExtraStyle = style;
         return this;
     }
 
@@ -188,15 +217,20 @@ public class TabContainedButton extends TabButton {
 
         if ( tooltip != null ) {
             if ( tooltipLines )
-                TextHelpers.addLocalizedLines(list, tooltip, null);
-            else if ( tooltipLocalized )
+                TextHelpers.addLocalizedLines(list, tooltip, tooltipStyle);
+            else if ( tooltipStyle != null ) {
+                if ( !tooltipLocalized && StringHelper.canLocalize(tooltip) )
+                    list.add(new TextComponentTranslation(tooltip).setStyle(tooltipStyle).getFormattedText());
+                else
+                    list.add(new TextComponentString(tooltip).setStyle(tooltipStyle).getFormattedText());
+            } else if ( tooltipLocalized )
                 list.add(tooltip);
             else
                 list.add(StringHelper.localize(tooltip));
         }
 
         if ( tooltipExtra != null )
-            TextHelpers.addLocalizedLines(list, tooltipExtra, null);
+            TextHelpers.addLocalizedLines(list, tooltipExtra, tooltipExtraStyle);
     }
 
     @Override

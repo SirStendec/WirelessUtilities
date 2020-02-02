@@ -39,6 +39,10 @@ public class ModConfig {
     @Config.Comment("Vaporizers are machines that do things to living entities.")
     public static final Vaporizers vaporizers = new Vaporizers();
 
+    @Config.Name("Misc. Blocks")
+    @Config.Comment("Other blocks added by Wireless Utilities.")
+    public static final MiscBlocks blocks = new MiscBlocks();
+
     @Config.Name("Performance")
     @Config.Comment("Various settings for limiting the mod's performance impact.")
     public static final Performance performance = new Performance();
@@ -54,6 +58,40 @@ public class ModConfig {
     @Config.Name("Common")
     @Config.Comment("Options that don't fit into other categories.")
     public static final Common common = new Common();
+
+    public static class MiscBlocks {
+        @Config.Name("Slime Cannon")
+        @Config.Comment("The Slime Cannon is a machine that fires items in a given direction.")
+        public SlimeCannon slimeCannon = new SlimeCannon();
+    }
+
+    public static class SlimeCannon {
+        @Config.Name("Inventory Slots")
+        @Config.Comment("Slime Cannons have this many internal inventory slots.")
+        @Config.RequiresWorldRestart
+        @Config.RangeInt(min = 1, max = 6)
+        public int slots = 5;
+
+        @Config.Name("Allow Unwrapped Pearls")
+        @Config.Comment("When enabled, Slime Cannons can fire pearls as pearls rather than as wrapped items.")
+        @Config.RequiresWorldRestart
+        public boolean allowUnwrapped = true;
+
+        @Config.Name("Maximum Firing Speed")
+        @Config.Comment("Slime Cannons can fire pearls at up to this many blocks per tick.")
+        @Config.RangeDouble(min = 0.5)
+        public double maxVelocity = 2D;
+
+        @Config.Name("Tick Rate")
+        @Config.Comment("The cannon will fire items every x ticks. For 0, 1, 2, 3, and 4 installed speed modifiers.")
+        @Config.RequiresWorldRestart
+        @Config.RangeInt(min = 0)
+        public int[] tickRates = {10, 8, 6, 4, 2};
+
+        @Config.Name("Only Input from Bottom")
+        @Config.Comment("When enabled, the Slime Cannon will only expose its inventory from the bottom.")
+        public boolean onlyBottom = false;
+    }
 
     public static class Common {
         @Config.Name("Positional Machines - Allow Front/Top Connections")
@@ -2529,6 +2567,10 @@ public class ModConfig {
         @Config.Comment("Machines will generate this much budget per tick for work effects.")
         @Config.RangeInt(min = 0)
         public int particlePerTick = 1;
+
+        @Config.Name("Slime Cannon - Render Slime on Launched Items")
+        @Config.Comment("When enabled, items launched from a Slime Cannon will render with a slime ball around them.")
+        public boolean slimedItems = true;
     }
 
     public static class Plugins {

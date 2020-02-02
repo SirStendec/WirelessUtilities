@@ -39,6 +39,7 @@ import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
 import com.lordmau5.wirelessutils.item.module.ItemTheoreticalSlaughterModule;
 import com.lordmau5.wirelessutils.item.pearl.ItemChargedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemCrystallizedVoidPearl;
+import com.lordmau5.wirelessutils.item.pearl.ItemEncapsulatedItem;
 import com.lordmau5.wirelessutils.item.pearl.ItemFluxedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemQuenchedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemScorchedPearl;
@@ -115,6 +116,9 @@ public class ModItems {
 
     @GameRegistry.ObjectHolder("wirelessutils:crystallized_void_pearl")
     public static ItemCrystallizedVoidPearl itemCrystallizedVoidPearl;
+
+    @GameRegistry.ObjectHolder("wirelessutils:encapsulated_item")
+    public static ItemEncapsulatedItem itemEncapsulatedItem;
 
     @GameRegistry.ObjectHolder("wirelessutils:base_augment")
     public static ItemBaseAugment itemBaseAugment;
@@ -362,6 +366,7 @@ public class ModItems {
         itemStabilizedEnderPearl.initModel();
         itemVoidPearl.initModel();
         itemCrystallizedVoidPearl.initModel();
+        itemEncapsulatedItem.initModel();
 
         itemAbsolutePositionalCard.initModel();
         itemRelativePositionalCard.initModel();

@@ -9,6 +9,14 @@ tile.wirelessutils.angled_slime.info.2=work in progress, and the
 tile.wirelessutils.angled_slime.info.3=physics might not behave how
 tile.wirelessutils.angled_slime.info.4=you would expect.
 
+tile.wirelessutils.slime_cannon.name=Slime Cannon
+tile.wirelessutils.slime_cannon.info.0=This cannon coats items in
+tile.wirelessutils.slime_cannon.info.1=a thick, aerodynamic coating
+tile.wirelessutils.slime_cannon.info.2=of slime before firing them
+tile.wirelessutils.slime_cannon.info.3=off in the direction it's
+tile.wirelessutils.slime_cannon.info.4=aimed. The slime breaks off
+tile.wirelessutils.slime_cannon.info.5=once the item lands.
+
 tile.wirelessutils.chunk_charger.name=Chunk Charger
 tile.wirelessutils.chunk_charger.info.0=The Chunk Charger charges things
 tile.wirelessutils.chunk_charger.info.1=in a chunk! A whole chunk. One
@@ -163,6 +171,15 @@ item.wirelessutils.scorched_pearl.name=Scorched Pearl
 item.wirelessutils.crystallized_void_pearl.name=Crystallized Void Pearl
 item.wirelessutils.crystallized_void_pearl.jei.0=Smashing a Void Pearl up against an Ender Crystal has somehow crystallized the Void Pearl itself.
 item.wirelessutils.crystallized_void_pearl.jei.1=Void Pearls in this state become very stable, and they can't be used to capture creatures anymore. However, any creatures previously trapped inside become somehow easier to access.
+
+item.wirelessutils.encapsulated_item.name=Congealed %s
+item.wirelessutils.encapsulated_item.info.0=Congealed items have been wrapped
+item.wirelessutils.encapsulated_item.info.1=in slime! Slime protects the item
+item.wirelessutils.encapsulated_item.info.2=from fire, and lets you throw it
+item.wirelessutils.encapsulated_item.info.3=like a pearl. Throw the item to
+item.wirelessutils.encapsulated_item.info.4=knock all the slime off and get
+item.wirelessutils.encapsulated_item.info.5=the original item back.
+item.wirelessutils.encapsulated_item.contains=Contains: %s
 
 item.wirelessutils.void_pearl.name=Void Pearl
 item.wirelessutils.void_pearl.contains=Contains: %s
@@ -531,6 +548,14 @@ tab.wirelessutils.positional_vaporizer.1=The behavior of a Vaporizer depends ent
 tab.wirelessutils.positional_vaporizer.2=Modules allow a Vaporizer to teleport entities, kill them, spawn copies, or to push them around.
 tab.wirelessutils.positional_vaporizer.3=Using augments, it's possible to increase a Vaporizer's range and further customize its capabilities.
 
+tab.wirelessutils.slime_cannon.0=Slime Cannons fire items in a specific direction at a specific velocity.
+tab.wirelessutils.slime_cannon.1=They have several internal buffer slots, and they fire items automatically without needing any source of energy.
+tab.wirelessutils.slime_cannon.2=It is possible to precisely configure the target pitch and yaw, as well as the velocity. You can also change how the Slime Cannon reacts to redstone signals.
+tab.wirelessutils.slime_cannon.3=Using a configured Positional Card on the base of a Slime Cannon will attempt to aim the Slime Cannon at that location.
+tab.wirelessutils.slime_cannon.4=By their nature, Slime Cannons are very accurate and achieve superior aerodynamics when launching an item. This enhanced accuracy can be disabled.
+tab.wirelessutils.slime_cannon.5=By default, Slime Cannons fire eight items at a time. This can be reduced to one by applying a Slime Ball to the base of the cannon. It can also be increased by applying Glowstone Dust to the cannon.
+tab.wirelessutils.slime_cannon.6=Similarly, you can increase the rate at which the cannon fires by applying Redstone Dust to the cannon's base.
+
 tab.wirelessutils.auto_transfer=I/O Control
 tab.wirelessutils.auto_transfer.mode=Mode: %s
 tab.wirelessutils.auto_transfer.mode.input=Input
@@ -562,6 +587,27 @@ btn.wirelessutils.dec_area.one=Decrease by %s
 btn.wirelessutils.dec_area.all=Decrease all by %s
 btn.wirelessutils.inc_area.one=Increase by %s
 btn.wirelessutils.inc_area.all=Increase all by %s
+
+btn.wirelessutils.accurate_pearls=Accurate: %s
+btn.wirelessutils.accurate_pearls.info.0=When this is disabled, pearls
+btn.wirelessutils.accurate_pearls.info.1=will be fired with a degree
+btn.wirelessutils.accurate_pearls.info.2=of inaccuracy, as if thrown
+btn.wirelessutils.accurate_pearls.info.3=by hand.
+
+btn.wirelessutils.wrap_pearls=Wrapping Pearls: %s
+btn.wirelessutils.wrap_pearls.info.0=When this is disabled, pearls
+btn.wirelessutils.wrap_pearls.info.1=will be shot without wrapping
+btn.wirelessutils.wrap_pearls.info.2=them in slime, allowing them
+btn.wirelessutils.wrap_pearls.info.3=to behave as they would when
+btn.wirelessutils.wrap_pearls.info.4=thrown.
+
+info.wirelessutils.pitch=Pitch: %s
+info.wirelessutils.yaw=Yaw: %s
+info.wirelessutils.degrees=%s degrees
+info.wirelessutils.bpt=%s blocks/t
+info.wirelessutils.velocity=Speed: %s
+
+info.wirelessutils.angle_snap=Hold %s for %s degree increments.
 
 info.wirelessutils.x=X:
 info.wirelessutils.y=Y:
@@ -793,6 +839,10 @@ info.wirelessutils.voiding_fluids=Voiding Fluids
 
 info.wirelessutils.ae2.channels=Channels: %s of %s
 info.wirelessutils.ae2.max_channels=Max Channels: %s
+
+info.wirelessutils.cannon.set=Targeting %s at heading %s and pitch %s.
+info.wirelessutils.cannon.no_range=The target location is not within range.
+info.wirelessutils.cannon.no_range_velocity=The target location is not within range at this speed, but can be reached at a higher velocity.
 
 btn.wirelessutils.ae2.color=Color: %s
 btn.wirelessutils.ae2.color.sides.0=This machine will only accept

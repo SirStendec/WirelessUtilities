@@ -1,7 +1,7 @@
 package com.lordmau5.wirelessutils.entity.pearl;
 
 import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
-import com.lordmau5.wirelessutils.render.RenderPearl;
+import com.lordmau5.wirelessutils.render.RenderAsItem;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
@@ -128,7 +128,7 @@ public class EntityScorchedPearl extends EntityBaseThrowable {
     public static class Factory implements IRenderFactory<EntityScorchedPearl> {
         @Override
         public Render<? super EntityScorchedPearl> createRenderFor(RenderManager manager) {
-            return new RenderPearl<EntityScorchedPearl>(manager, ModItems.itemScorchedPearl, Minecraft.getMinecraft().getRenderItem());
+            return new RenderAsItem<EntityScorchedPearl>(manager, ModItems.itemScorchedPearl, Minecraft.getMinecraft().getRenderItem());
         }
     }
 

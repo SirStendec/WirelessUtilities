@@ -12,6 +12,7 @@ import com.lordmau5.wirelessutils.block.desublimator.BlockPositionalDesublimator
 import com.lordmau5.wirelessutils.block.redstone.BlockPoweredAir;
 import com.lordmau5.wirelessutils.block.redstone.BlockPoweredRedstoneWire;
 import com.lordmau5.wirelessutils.block.slime.BlockAngledSlime;
+import com.lordmau5.wirelessutils.block.slime.BlockSlimeCannon;
 import com.lordmau5.wirelessutils.block.vaporizer.BlockDirectionalVaporizer;
 import com.lordmau5.wirelessutils.block.vaporizer.BlockPositionalVaporizer;
 import com.lordmau5.wirelessutils.commands.DebugCommand;
@@ -22,10 +23,12 @@ import com.lordmau5.wirelessutils.commands.VoidGenCommand;
 import com.lordmau5.wirelessutils.entity.EntityItemEnhanced;
 import com.lordmau5.wirelessutils.entity.pearl.EntityChargedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityCrystallizedVoidPearl;
+import com.lordmau5.wirelessutils.entity.pearl.EntityEncapsulatedItem;
 import com.lordmau5.wirelessutils.entity.pearl.EntityFluxedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityQuenchedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityScorchedPearl;
 import com.lordmau5.wirelessutils.entity.pearl.EntityStabilizedEnderPearl;
+import com.lordmau5.wirelessutils.entity.pearl.EntityTracer;
 import com.lordmau5.wirelessutils.entity.pearl.EntityVoidPearl;
 import com.lordmau5.wirelessutils.fixers.BlockInventoryWalker;
 import com.lordmau5.wirelessutils.fixers.BlockNullableItemListWalker;
@@ -68,6 +71,7 @@ import com.lordmau5.wirelessutils.item.module.ItemTeleportModule;
 import com.lordmau5.wirelessutils.item.module.ItemTheoreticalSlaughterModule;
 import com.lordmau5.wirelessutils.item.pearl.ItemChargedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemCrystallizedVoidPearl;
+import com.lordmau5.wirelessutils.item.pearl.ItemEncapsulatedItem;
 import com.lordmau5.wirelessutils.item.pearl.ItemFluxedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemQuenchedPearl;
 import com.lordmau5.wirelessutils.item.pearl.ItemScorchedPearl;
@@ -80,6 +84,7 @@ import com.lordmau5.wirelessutils.packet.PacketParticleLine;
 import com.lordmau5.wirelessutils.packet.PacketUpdateItem;
 import com.lordmau5.wirelessutils.plugins.PluginRegistry;
 import com.lordmau5.wirelessutils.tile.TileAngledSlime;
+import com.lordmau5.wirelessutils.tile.TileSlimeCannon;
 import com.lordmau5.wirelessutils.tile.base.Machine;
 import com.lordmau5.wirelessutils.tile.base.TileEntityBaseMachine;
 import com.lordmau5.wirelessutils.tile.charger.TileEntityDirectionalCharger;
@@ -314,6 +319,20 @@ public class CommonProxy {
                 .name("crystallized_void_pearl")
                 .tracker(64, 20, true)
                 .build());
+
+        event.getRegistry().register(EntityEntryBuilder.create()
+                .entity(EntityEncapsulatedItem.class)
+                .id(new ResourceLocation(WirelessUtils.MODID, "encapsulated_item"), id++)
+                .name("encapsulated_item")
+                .tracker(64, 20, true)
+                .build());
+
+        event.getRegistry().register(EntityEntryBuilder.create()
+                .entity(EntityTracer.class)
+                .id(new ResourceLocation(WirelessUtils.MODID, "tracer"), id++)
+                .name("tracer")
+                .tracker(64, 20, true)
+                .build());
     }
 
     @SuppressWarnings("unused")
@@ -337,6 +356,7 @@ public class CommonProxy {
         registerBlock(event, new BlockDirectionalAir());
 
         registerBlock(event, new BlockAngledSlime());
+        registerBlock(event, new BlockSlimeCannon());
 
         GameRegistry.registerTileEntity(TileAngledSlime.class, new ResourceLocation(WirelessUtils.MODID, "tile_angled_slime"));
 
@@ -352,6 +372,8 @@ public class CommonProxy {
 
         registerMachineTile(TileDirectionalVaporizer.class);
         registerMachineTile(TilePositionalVaporizer.class);
+
+        registerMachineTile(TileSlimeCannon.class);
 
         PluginRegistry.registerBlocks(event);
     }
@@ -394,6 +416,7 @@ public class CommonProxy {
         registerItem(event, new ItemBlockMachine(ModBlocks.blockPositionalVaporizer).setRegistryName(ModBlocks.blockPositionalVaporizer.getRegistryName()));
 
         registerItem(event, new ItemBlockExplainable(ModBlocks.blockAngledSlime).setRegistryName(ModBlocks.blockAngledSlime.getRegistryName()));
+        registerItem(event, new ItemBlockExplainable(ModBlocks.blockSlimeCannon).setRegistryName(ModBlocks.blockSlimeCannon.getRegistryName()));
 
         registerItem(event, new ItemFluxedPearl());
         registerItem(event, new ItemChargedPearl());
@@ -402,6 +425,7 @@ public class CommonProxy {
         registerItem(event, new ItemStabilizedEnderPearl());
         registerItem(event, new ItemVoidPearl());
         registerItem(event, new ItemCrystallizedVoidPearl());
+        registerItem(event, new ItemEncapsulatedItem());
 
         registerItem(event, new ItemAbsolutePositionalCard());
         registerItem(event, new ItemRelativePositionalCard());

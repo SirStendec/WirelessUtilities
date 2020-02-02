@@ -1,7 +1,7 @@
 package com.lordmau5.wirelessutils.entity.pearl;
 
 import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
-import com.lordmau5.wirelessutils.render.RenderPearl;
+import com.lordmau5.wirelessutils.render.RenderAsItem;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -68,7 +68,7 @@ public class EntityCrystallizedVoidPearl extends EntityBaseThrowable {
     public static class Factory implements IRenderFactory<EntityCrystallizedVoidPearl> {
         @Override
         public Render<? super EntityCrystallizedVoidPearl> createRenderFor(RenderManager manager) {
-            return new RenderPearl<EntityCrystallizedVoidPearl>(manager, ModItems.itemCrystallizedVoidPearl, Minecraft.getMinecraft().getRenderItem());
+            return new RenderAsItem<EntityCrystallizedVoidPearl>(manager, ModItems.itemCrystallizedVoidPearl, Minecraft.getMinecraft().getRenderItem());
         }
     }
 }

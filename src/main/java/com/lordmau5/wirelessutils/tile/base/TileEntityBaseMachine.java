@@ -9,7 +9,6 @@ import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.item.augment.ITickableAugment;
 import com.lordmau5.wirelessutils.item.augment.ItemAugment;
 import com.lordmau5.wirelessutils.utils.ChunkManager;
-import com.lordmau5.wirelessutils.utils.ItemStackHandler;
 import com.lordmau5.wirelessutils.utils.Level;
 import com.lordmau5.wirelessutils.utils.constants.Properties;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
@@ -55,16 +54,13 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     private final Map<Integer, Tuple<Integer, ChunkPos>> loadedChunks = new Int2ObjectOpenHashMap<>();
     private final Map<BlockPosDimension, Integer> loadedByPos = new Object2IntOpenHashMap<>();
 
-    /* Inventory */
-    protected ItemStackHandler itemStackHandler;
+    /* Augments */
     protected ItemStack[] augments = new ItemStack[0];
-
     protected Map<Item, ITickableAugment> tickableAugments;
 
     /* Levels */
     protected Level level = Level.getMinLevel();
     protected boolean isCreative = false;
-    protected boolean wasDismantled = false;
 
     /* Throttling */
     protected final TimeTracker tracker = new TimeTracker();
@@ -82,9 +78,6 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     protected double augmentBudgetMult = 1;
     protected int augmentBudgetAdd = 0;
 
-
-    /* Comparator-ing */
-    private int comparatorState = 0;
 
     /* 1.7 to 1.8 placeholder */
     private boolean resetLevelState = false;
@@ -112,29 +105,6 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         return null;
     }
 
-    /* Comparator Logic */
-
-    @Override
-    public int getComparatorInputOverride() {
-        return comparatorState;
-    }
-
-    public int calculateComparatorInput() {
-        return 0;
-    }
-
-    public void runTrackers() {
-        int comparatorState = calculateComparatorInput();
-        if ( comparatorState != this.comparatorState ) {
-            this.comparatorState = comparatorState;
-            callNeighborTileChange();
-        }
-    }
-
-    public void updateTrackers() {
-        if ( timeCheck() )
-            runTrackers();
-    }
 
     /* Levels and Augments */
 
@@ -366,116 +336,19 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         updateBaseEnergy();
     }
 
-    /* Inventory */
-
-    public void onContentsChanged(int slot) {
-        markChunkDirty();
-    }
-
-    public int getStackLimit(int slot) {
-        return 64;
-    }
-
-    public int getStackLimit(int slot, @Nonnull ItemStack stack) {
-        return Math.min(getStackLimit(slot), stack.getMaxStackSize());
-    }
-
-    public boolean isItemValidForSlot(int slot, @Nonnull ItemStack stack) {
-        return false;
-    }
-
-    public boolean shouldVoidItem(int slot, @Nonnull ItemStack stack) {
-        return false;
-    }
-
-    public void readInventoryFromNBT(NBTTagCompound tag) {
-        if ( itemStackHandler != null && tag.hasKey("Inventory") )
-            itemStackHandler.deserializeNBT(tag.getCompoundTag("Inventory"));
-    }
-
-    public void writeInventoryToNBT(NBTTagCompound tag) {
-        if ( itemStackHandler == null )
-            return;
-
-        NBTTagCompound inventory = itemStackHandler.serializeNBT();
-        if ( inventory.getInteger("Size") > 0 && !inventory.getTagList("Items", Constants.NBT.TAG_COMPOUND).isEmpty() )
-            tag.setTag("Inventory", inventory);
-    }
-
-    protected void initializeItemStackHandler(int size) {
-        itemStackHandler = new ItemStackHandler(size) {
-            @Override
-            protected void onContentsChanged(int slot) {
-                super.onContentsChanged(slot);
-                TileEntityBaseMachine.this.onContentsChanged(slot);
-                TileEntityBaseMachine.this.markChunkDirty();
-            }
-
-            @Nonnull
-            @Override
-            public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-                if ( !isItemValid(slot, stack) )
-                    return stack;
-
-                if ( shouldVoidItem(slot, stack) )
-                    return ItemStack.EMPTY;
-
-                return super.insertItem(slot, stack, simulate);
-            }
-
-            @Override
-            protected int getStackLimit(int slot, @Nonnull ItemStack stack) {
-                return TileEntityBaseMachine.this.getStackLimit(slot, stack);
-            }
-
-            @Override
-            public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-                return isItemValidForSlot(slot, stack);
-            }
-        };
-    }
-
-    public ItemStackHandler getInventory() {
-        return itemStackHandler;
-    }
-
-    @Override
-    public int getInvSlotCount() {
-        if ( itemStackHandler == null )
-            return 0;
-
-        return itemStackHandler.getSlots();
-    }
 
     /* Life Cycle */
 
     public void dropContents() {
+        super.dropContents();
+
         ItemStack[] augments = getAugmentSlots();
         if ( augments != null ) {
             for (ItemStack augment : augments)
                 CoreUtils.dropItemStackIntoWorldWithVelocity(augment, world, pos);
         }
-
-        if ( itemStackHandler != null ) {
-            int length = itemStackHandler.getSlots();
-            for (int i = 0; i < length; i++)
-                CoreUtils.dropItemStackIntoWorldWithVelocity(itemStackHandler.getStackInSlot(i), world, pos);
-        }
     }
 
-    @Override
-    public void blockBroken() {
-        if ( world != null && pos != null && !wasDismantled )
-            dropContents();
-
-        super.blockBroken();
-    }
-
-    @Override
-    public void blockDismantled() {
-        wasDismantled = true;
-        super.blockDismantled();
-    }
 
     /* ITileInfoProvider */
 
@@ -727,19 +600,6 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
     }
 
     @Override
-    public void readExtraFromNBT(NBTTagCompound tag) {
-        super.readExtraFromNBT(tag);
-        readInventoryFromNBT(tag);
-    }
-
-    @Override
-    public NBTTagCompound writeExtraToNBT(NBTTagCompound tag) {
-        tag = super.writeExtraToNBT(tag);
-        writeInventoryToNBT(tag);
-        return tag;
-    }
-
-    @Override
     public boolean hasGui() {
         return true;
     }
@@ -817,7 +677,7 @@ public abstract class TileEntityBaseMachine extends TileEntityBaseArea implement
         System.out.println("Level: " + level.toInt() + ": " + level.getName());
         System.out.println("Active: " + isActive);
         System.out.println("Owner: " + owner.getName() + "#" + owner.getId());
-        System.out.println("Comparator: " + comparatorState);
+        System.out.println("Comparator: " + getComparatorInputOverride());
         System.out.println("Dismantled: " + wasDismantled);
         System.out.println("Inactive Ticks: " + inactiveTicks);
 

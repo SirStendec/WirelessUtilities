@@ -1,6 +1,7 @@
 package com.lordmau5.wirelessutils.proxy;
 
 import com.lordmau5.wirelessutils.WirelessUtils;
+import com.lordmau5.wirelessutils.block.base.ISneakActivatedBlock;
 import com.lordmau5.wirelessutils.commands.ProfileCommand;
 import com.lordmau5.wirelessutils.item.module.ItemSlaughterModule;
 import com.lordmau5.wirelessutils.item.module.ItemTheoreticalSlaughterModule;
@@ -8,6 +9,8 @@ import com.lordmau5.wirelessutils.tile.vaporizer.TileBaseVaporizer;
 import com.lordmau5.wirelessutils.utils.EventDispatcher;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -20,6 +23,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -28,6 +33,7 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LootingLevelEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.ItemFishedEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -81,6 +87,23 @@ public class ServerProxy extends CommonProxy {
         if ( event.getWorld().isRemote )
             return;
         EventDispatcher.CHUNK_UNLOAD.dispatchEvent(event);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        EntityPlayer player = event.getEntityPlayer();
+        if ( player == null || !player.isSneaking() )
+            return;
+
+        World world = event.getWorld();
+        BlockPos pos = event.getPos();
+        IBlockState state = world.getBlockState(pos);
+        Block block = state.getBlock();
+
+        if ( block instanceof ISneakActivatedBlock ) {
+            if ( ((ISneakActivatedBlock) block).onBlockSneakActivated(world, pos, state, player, event.getHand(), event.getFace(), event.getHitVec()) )
+                event.setCanceled(true);
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

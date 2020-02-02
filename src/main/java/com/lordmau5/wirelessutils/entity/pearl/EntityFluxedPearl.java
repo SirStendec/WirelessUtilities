@@ -1,7 +1,7 @@
 package com.lordmau5.wirelessutils.entity.pearl;
 
 import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
-import com.lordmau5.wirelessutils.render.RenderPearl;
+import com.lordmau5.wirelessutils.render.RenderAsItem;
 import com.lordmau5.wirelessutils.utils.constants.Properties;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModBlocks;
@@ -294,7 +294,7 @@ public class EntityFluxedPearl extends EntityBaseThrowable {
     public static class Factory implements IRenderFactory<EntityFluxedPearl> {
         @Override
         public Render<? super EntityFluxedPearl> createRenderFor(RenderManager manager) {
-            return new RenderPearl<EntityFluxedPearl>(manager, ModItems.itemFluxedPearl, Minecraft.getMinecraft().getRenderItem());
+            return new RenderAsItem<EntityFluxedPearl>(manager, ModItems.itemFluxedPearl, Minecraft.getMinecraft().getRenderItem());
         }
     }
 }

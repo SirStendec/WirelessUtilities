@@ -1,7 +1,7 @@
 package com.lordmau5.wirelessutils.entity.pearl;
 
 import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
-import com.lordmau5.wirelessutils.render.RenderPearl;
+import com.lordmau5.wirelessutils.render.RenderAsItem;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
 import net.minecraft.block.Block;
@@ -188,7 +188,7 @@ public class EntityQuenchedPearl extends EntityBaseThrowable {
     public static class Factory implements IRenderFactory<EntityQuenchedPearl> {
         @Override
         public Render<? super EntityQuenchedPearl> createRenderFor(RenderManager manager) {
-            return new RenderPearl<EntityQuenchedPearl>(manager, ModItems.itemQuenchedPearl, Minecraft.getMinecraft().getRenderItem());
+            return new RenderAsItem<EntityQuenchedPearl>(manager, ModItems.itemQuenchedPearl, Minecraft.getMinecraft().getRenderItem());
         }
     }
 }

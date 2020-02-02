@@ -23,6 +23,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundEvent;
@@ -32,6 +35,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -43,7 +47,9 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         NONE,
         BOUNCE,
         IGNORE,
-        SPEED
+        SPEED,
+        GLOW,
+        SLIDE;
     }
 
     public static final Map<Block, HitReaction> REACTIONS = new Object2ObjectOpenHashMap<>();
@@ -52,6 +58,9 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         REACTIONS.put(Blocks.TRIPWIRE, HitReaction.IGNORE);
         REACTIONS.put(Blocks.WEB, HitReaction.SLOW);
         REACTIONS.put(Blocks.SLIME_BLOCK, HitReaction.BOUNCE);
+        REACTIONS.put(Blocks.ICE, HitReaction.SLIDE);
+        REACTIONS.put(Blocks.PACKED_ICE, HitReaction.SLIDE);
+        REACTIONS.put(Blocks.GLOWSTONE, HitReaction.GLOW);
     }
 
     public static void addReaction(Block block, HitReactionType type) {
@@ -93,19 +102,32 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         public static final HitReaction FAST = new HitReaction(HitReactionType.SPEED, 1.2);
         public static final HitReaction NONE = new HitReaction(HitReactionType.NONE);
         public static final HitReaction BOUNCE = new HitReaction(HitReactionType.BOUNCE, 0.8);
+        public static final HitReaction SLIDE = new HitReaction(HitReactionType.SLIDE, 0);
+        public static final HitReaction GLOW = new HitReaction(HitReactionType.GLOW, 200);
+        //public static final HitReaction SLIDE_FAST = new HitReaction(HitReactionType.SLIDE, 0.92);
     }
 
 
     /* Class */
 
-    private BlockPos slowedBy;
-    private ItemStack stack = ItemStack.EMPTY;
+    private static final DataParameter<ItemStack> STACK = EntityDataManager.createKey(EntityBaseThrowable.class, DataSerializers.ITEM_STACK);
+    private static final DataParameter<Boolean> DRAGLESS = EntityDataManager.createKey(EntityBaseThrowable.class, DataSerializers.BOOLEAN);
+
+    private BlockPos speedModPos;
+    private Predicate<? super Entity> entityPredicate;
+    private Predicate<? super Entity> oldPredicate;
+
+    private EnumFacing slideFace;
+    private BlockPos slidePos;
+    private float slideFactor;
 
     private boolean triggeredRoundabout = false;
     private boolean triggeredDistance = false;
     private boolean triggeredBounce = false;
     private short bounces = 0;
     private double distance = 0;
+
+    private short glowTicks = 0;
 
     private boolean started = false;
     private double startX;
@@ -120,7 +142,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
 
     public EntityBaseThrowable(World world, ItemStack stack) {
         super(world);
-        this.stack = stack.copy();
+        setStack(stack);
     }
 
     public EntityBaseThrowable(World world, EntityLivingBase thrower) {
@@ -130,7 +152,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
 
     public EntityBaseThrowable(World world, EntityLivingBase thrower, ItemStack stack) {
         super(world, thrower);
-        this.stack = stack.copy();
+        setStack(stack);
     }
 
     public EntityBaseThrowable(World world, double x, double y, double z) {
@@ -139,15 +161,48 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
 
     public EntityBaseThrowable(World world, double x, double y, double z, ItemStack stack) {
         super(world, x, y, z);
-        this.stack = stack.copy();
+        setStack(stack);
     }
 
+    public void shootAngle(float rotationPitch, float rotationYaw, float pitchOffset, float velocity, float inaccuracy) {
+        final float x = -MathHelper.sin(rotationYaw * 0.017453292F) * MathHelper.cos(rotationPitch * 0.017453292F);
+        final float y = -MathHelper.sin((rotationPitch + pitchOffset) * 0.017453292F);
+        final float z = MathHelper.cos(rotationYaw * 0.017453292F) * MathHelper.cos(rotationPitch * 0.017453292F);
+        this.shoot((double) x, (double) y, (double) z, velocity, inaccuracy);
+    }
+
+    @Override
+    protected void entityInit() {
+        super.entityInit();
+        getDataManager().register(STACK, ItemStack.EMPTY);
+        getDataManager().register(DRAGLESS, false);
+    }
+
+    public boolean isDragless() {
+        return getDataManager().get(DRAGLESS);
+    }
+
+    public void setDragless(boolean dragless) {
+        if ( dragless == isDragless() )
+            return;
+
+        getDataManager().set(DRAGLESS, dragless);
+        getDataManager().setDirty(DRAGLESS);
+    }
+
+    @Nonnull
     public ItemStack getStack() {
-        return stack;
+        return getDataManager().get(STACK);
+    }
+
+    @Nonnull
+    public ItemStack getRenderStack() {
+        return getStack();
     }
 
     public void setStack(@Nonnull ItemStack stack) {
-        this.stack = stack;
+        getDataManager().set(STACK, stack);
+        getDataManager().setDirty(STACK);
     }
 
     public void dropThis() {
@@ -155,12 +210,19 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
     }
 
     public void dropItemStack(@Nonnull ItemStack stack) {
+        dropItemStack(stack, false);
+    }
+
+    public void dropItemStack(@Nonnull ItemStack stack, boolean suppressVelocity) {
         EntityItem entity;
         Item item = stack.getItem();
         if ( item instanceof IEnhancedItem )
             entity = new EntityItemEnhanced(world, posX, posY, posZ, stack);
         else
             entity = new EntityItem(world, posX, posY, posZ, stack);
+
+        if ( suppressVelocity )
+            entity.motionX = entity.motionY = entity.motionZ = 0;
 
         EntityLivingBase thrower = getThrower();
         if ( thrower instanceof EntityPlayer )
@@ -171,6 +233,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
     }
 
     public void dropItemWithMeta(Item item, int count) {
+        ItemStack stack = getStack();
         dropItemStack(new ItemStack(item, count, stack.isEmpty() ? 0 : stack.getMetadata()));
     }
 
@@ -213,23 +276,28 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
     @Nullable
     protected RayTraceResult findEntityOnPath(@Nonnull Vec3d start, @Nonnull Vec3d end) {
         Predicate<? super Entity> predicate = getEntityPredicate();
-        if ( predicate == null )
+        if ( predicate == null ) {
+            entityPredicate = oldPredicate = null;
             return null;
+        }
 
-        Predicate<? super Entity> realPred = entity -> {
-            if ( entity == this )
-                return false;
+        if ( entityPredicate == null || predicate != oldPredicate ) {
+            oldPredicate = predicate;
+            entityPredicate = entity -> {
+                if ( entity == this )
+                    return false;
 
-            if ( !predicate.apply(entity) )
-                return false;
+                if ( !predicate.apply(entity) )
+                    return false;
 
-            if ( thrower != null && ticksExisted < 2 && ignoreEntity == null )
-                ignoreEntity = entity;
+                if ( thrower != null && ticksExisted < 2 && ignoreEntity == null )
+                    ignoreEntity = entity;
 
-            return entity != ignoreEntity || ticksExisted >= 5;
-        };
+                return entity != ignoreEntity || ticksExisted >= 5;
+            };
+        }
 
-        return RayTracing.findEntityOnPath(world, start, end, realPred);
+        return RayTracing.findEntityOnPath(world, start, end, entityPredicate);
     }
 
     public void renderTrail() {
@@ -249,6 +317,12 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         lastTickPosY = posY;
         lastTickPosZ = posZ;
 
+        if ( glowTicks > 0 ) {
+            glowTicks--;
+            if ( glowTicks == 0 )
+                setGlowing(false);
+        }
+
         // From Entity, to avoid super.onUpdate()
         if ( !world.isRemote )
             setFlag(6, isGlowing());
@@ -263,6 +337,8 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         double remainingY = motionY;
         double remainingZ = motionZ;
 
+        onGround = false;
+
         int steps = 0;
 
         boolean isSlowed = false;
@@ -270,6 +346,9 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
         while ( steps < 10 && !isDead ) {
             Vec3d currentPos = new Vec3d(posX, posY, posZ);
             Vec3d targetPos = new Vec3d(posX + remainingX, posY + remainingY, posZ + remainingZ);
+
+            if ( remainingY > 0 )
+                onGround = false;
 
             RayTraceResult ray = world.rayTraceBlocks(currentPos, targetPos, shouldHitLiquids(), false, false);
 
@@ -288,7 +367,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
 
                     onImpact(entityHit);
 
-                    if ( remainingX > 0 || remainingY > 0 || remainingZ > 0 ) {
+                    if ( remainingX != 0 || remainingY != 0 || remainingZ != 0 ) {
                         ++steps;
                         continue;
                     }
@@ -297,6 +376,9 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
 
             if ( ray != null && ray.typeOfHit == RayTraceResult.Type.BLOCK ) {
                 IBlockState blockState = world.getBlockState(ray.getBlockPos());
+                if ( remainingY <= 0 )
+                    onGround = ray.sideHit == EnumFacing.UP;
+
                 Block block = blockState.getBlock();
                 if ( block == Blocks.PORTAL ) {
                     setPortal(ray.getBlockPos());
@@ -337,13 +419,29 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
                                     ModAdvancements.REPULSION.trigger((EntityPlayerMP) thrower);
                             }
 
-                            if ( remainingX > 0 || remainingY > 0 || remainingZ > 0 ) {
+                            if ( remainingX != 0 || remainingY != 0 || remainingZ != 0 ) {
                                 ++steps;
                                 continue;
                             }
                         }
-                    } else if ( !net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, ray) )
+                    } else if ( !net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, ray) ) {
+                        posX = result.hitPos.x;
+                        posY = result.hitPos.y;
+                        posZ = result.hitPos.z;
+
+                        AxisAlignedBB box = getEntityBoundingBox();
+                        EnumFacing.Axis axis = ray.sideHit.getAxis();
+                        int direction = ray.sideHit.getAxisDirection().getOffset();
+
+                        if ( axis == EnumFacing.Axis.X )
+                            posX += direction * (box.maxX - box.minX);
+                        else if ( axis == EnumFacing.Axis.Y )
+                            posY += direction * (box.maxY - box.minY);
+                        else
+                            posZ += direction * (box.maxZ - box.minZ);
+
                         onImpact(ray);
+                    }
 
                 } else {
                     HitReaction reaction = hitBlock(blockState, ray);
@@ -352,8 +450,8 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
 
                     isSlowed = reaction.type == HitReactionType.SPEED;
                     if ( isSlowed ) {
-                        if ( slowedBy == null || !slowedBy.equals(ray.getBlockPos()) ) {
-                            slowedBy = ray.getBlockPos();
+                        if ( speedModPos == null || !speedModPos.equals(ray.getBlockPos()) ) {
+                            speedModPos = ray.getBlockPos();
                             remainingX *= reaction.scale;
                             motionX *= reaction.scale;
                             remainingY *= reaction.scale;
@@ -362,7 +460,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
                             motionZ *= reaction.scale;
                         }
                     } else {
-                        slowedBy = null;
+                        speedModPos = null;
                     }
 
                     if ( reaction.type == HitReactionType.BOUNCE ) {
@@ -370,9 +468,98 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
                         double velocity = Math.abs(motionX) + Math.abs(motionY) + Math.abs(motionZ);
                         if ( velocity < 0.2D && motionY <= 0 )
                             reaction = HitReaction.NONE;
+                    } else if ( reaction.type == HitReactionType.SLIDE ) {
+                        // Slightly different minimum velocity for sliding.
+                        EnumFacing.Axis axis = ray.sideHit.getAxis();
+                        double velocity;
+                        switch (axis) {
+                            case X:
+                                velocity = Math.abs(motionY) + Math.abs(motionZ);
+                                break;
+                            case Y:
+                                velocity = Math.abs(motionX) + Math.abs(motionZ);
+                                break;
+                            default:
+                                velocity = Math.abs(motionX) + Math.abs(motionY);
+                        }
+
+                        if ( velocity < 0.1D )
+                            reaction = HitReaction.NONE;
                     }
 
-                    if ( reaction.type == HitReactionType.BOUNCE ) {
+                    // If we aren't sliding, clear sliding state.
+                    if ( reaction.type != HitReactionType.SLIDE ) {
+                        slidePos = null;
+                        slideFace = null;
+                        slideFactor = 1;
+                    }
+
+                    if ( reaction.type == HitReactionType.SLIDE ) {
+                        slideFactor = (float) reaction.scale;
+                        if ( slideFactor == 0 )
+                            slideFactor = blockState.getBlock().getSlipperiness(blockState, world, ray.getBlockPos(), this);
+
+                        double offsetX = 0;
+                        double offsetY = 0;
+                        double offsetZ = 0;
+
+                        double travelX = ray.hitVec.x - posX;
+                        double travelY = ray.hitVec.y - posY;
+                        double travelZ = ray.hitVec.z - posZ;
+
+                        distance += new Vec3d(travelX, travelY, travelZ).length();
+
+                        remainingX -= travelX;
+                        remainingY -= travelY;
+                        remainingZ -= travelZ;
+
+                        AxisAlignedBB box = getEntityBoundingBox();
+                        EnumFacing.Axis axis = ray.sideHit.getAxis();
+                        int direction = ray.sideHit.getAxisDirection().getOffset();
+
+                        if ( axis == EnumFacing.Axis.X ) {
+                            offsetX = direction * (box.maxX - box.minX);
+                            remainingX = motionY = 0;
+                        } else if ( axis == EnumFacing.Axis.Y ) {
+                            offsetY = direction * (box.maxY - box.minY);
+                            remainingY = motionY = 0;
+                            if ( ray.sideHit == EnumFacing.UP )
+                                onGround = true;
+
+                        } else {
+                            offsetZ = direction * (box.maxZ - box.minZ);
+                            remainingZ = motionZ = 0;
+                        }
+
+                        posX = ray.hitVec.x + offsetX;
+                        posY = ray.hitVec.y + offsetY;
+                        posZ = ray.hitVec.z + offsetZ;
+
+                        if ( axis == EnumFacing.Axis.Y ) {
+                            EnumFacing face = ray.sideHit.getOpposite();
+                            final BlockPos bp = new BlockPos(posX, posY, posZ);
+                            if ( !bp.equals(slidePos) || slideFace != face ) {
+                                slidePos = bp;
+                                slideFace = face;
+
+                                if ( slideFactor != 1 ) {
+                                    remainingX *= slideFactor;
+                                    remainingY *= slideFactor;
+                                    remainingZ *= slideFactor;
+                                    motionX *= slideFactor;
+                                    motionY *= slideFactor;
+                                    motionZ *= slideFactor;
+                                }
+                            }
+                        }
+
+                        if ( remainingX != 0 || remainingY != 0 || remainingZ != 0 ) {
+                            ++steps;
+                            continue;
+                        }
+
+
+                    } else if ( reaction.type == HitReactionType.BOUNCE ) {
 
                         double offsetX = 0;
                         double offsetY = 0;
@@ -414,7 +601,7 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
                                 ModAdvancements.REPULSION.trigger((EntityPlayerMP) thrower);
                         }
 
-                        if ( remainingX > 0 || remainingY > 0 || remainingZ > 0 ) {
+                        if ( remainingX != 0 || remainingY != 0 || remainingZ != 0 ) {
                             ++steps;
                             continue;
                         }
@@ -430,30 +617,52 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
                         posY = ray.hitVec.y;
                         posZ = ray.hitVec.z;
 
-                        if ( remainingX > 0 || remainingY > 0 || remainingZ > 0 ) {
+                        if ( remainingX != 0 || remainingY != 0 || remainingZ != 0 ) {
                             ++steps;
                             continue;
                         }
 
-                    } else if ( reaction == HitReaction.IGNORE ) {
+                    } else if ( reaction.type == HitReactionType.GLOW ) {
+                        glowTicks = (short) Math.floor(reaction.scale);
+                        setGlowing(glowTicks > 0);
+
+                    } else if ( reaction.type == HitReactionType.IGNORE ) {
                         /* ~ Nothing ~ */
 
-                    } else if ( !net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, ray) )
+                    } else if ( !net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, ray) ) {
+                        posX = ray.hitVec.x;
+                        posY = ray.hitVec.y;
+                        posZ = ray.hitVec.z;
+
+                        AxisAlignedBB box = getEntityBoundingBox();
+                        EnumFacing.Axis axis = ray.sideHit.getAxis();
+                        int direction = ray.sideHit.getAxisDirection().getOffset();
+
+                        if ( axis == EnumFacing.Axis.X )
+                            posX += direction * (box.maxX - box.minX);
+                        else if ( axis == EnumFacing.Axis.Y )
+                            posY += direction * (box.maxY - box.minY);
+                        else
+                            posZ += direction * (box.maxZ - box.minZ);
+
                         onImpact(ray);
+                    }
                 }
             }
 
             break;
         }
 
-        if ( steps > 0 )
-            markVelocityChanged();
+        if ( !isDead ) {
+            if ( steps > 0 )
+                markVelocityChanged();
 
-        distance += new Vec3d(remainingX, 0, remainingZ).length();
+            distance += new Vec3d(remainingX, 0, remainingZ).length();
 
-        posX += remainingX;
-        posY += remainingY;
-        posZ += remainingZ;
+            posX += remainingX;
+            posY += remainingY;
+            posZ += remainingZ;
+        }
 
         if ( !world.isRemote ) {
             if ( !triggeredDistance && distance >= 300 ) {
@@ -478,62 +687,104 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
             }
         }
 
-        float f = MathHelper.sqrt(motionX * motionX + motionZ * motionZ);
-        rotationYaw = (float) (MathHelper.atan2(motionX, motionZ) * (180D / Math.PI));
+        if ( !isDead ) {
+            float f = MathHelper.sqrt(motionX * motionX + motionZ * motionZ);
+            rotationYaw = (float) (MathHelper.atan2(motionX, motionZ) * (180D / Math.PI));
 
-        for (
-                rotationPitch = (float) (MathHelper.atan2(motionY, (double) f) * (180D / Math.PI));
-                rotationPitch - prevRotationPitch < -180F;
-                prevRotationPitch -= 360F
-        ) {
-        }
-
-        while ( rotationPitch - prevRotationPitch >= 180F )
-            prevRotationPitch += 360F;
-
-        while ( rotationYaw - prevRotationYaw < -180F )
-            prevRotationYaw -= 360F;
-
-        while ( rotationYaw - prevRotationYaw >= 180F )
-            prevRotationYaw += 360F;
-
-        rotationPitch = prevRotationPitch + (rotationPitch - prevRotationPitch) * 0.2F;
-        rotationYaw = prevRotationYaw + (rotationYaw - prevRotationYaw) * 0.2F;
-
-        float f1 = 0.99F;
-        float f2 = getGravityVelocity();
-
-        if ( isInWater() ) {
-            for (int j = 0; j < 4; ++j) {
-                float f3 = 0.25F;
-                world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, posX - motionX * 0.25D, posY - motionY * 0.25D, posZ - motionZ * 0.25D, motionX, motionY, motionZ);
+            for (
+                    rotationPitch = (float) (MathHelper.atan2(motionY, (double) f) * (180D / Math.PI));
+                    rotationPitch - prevRotationPitch < -180F;
+                    prevRotationPitch -= 360F
+            ) {
             }
 
-            f1 = 0.8F;
-        }
+            while ( rotationPitch - prevRotationPitch >= 180F )
+                prevRotationPitch += 360F;
 
-        motionX *= (double) f1;
-        motionY *= (double) f1;
-        motionZ *= (double) f1;
+            while ( rotationYaw - prevRotationYaw < -180F )
+                prevRotationYaw -= 360F;
 
-        if ( !hasNoGravity() ) {
-            if ( isSlowed )
-                f2 *= 0.5D;
+            while ( rotationYaw - prevRotationYaw >= 180F )
+                prevRotationYaw += 360F;
 
-            motionY -= (double) f2;
-        }
+            rotationPitch = prevRotationPitch + (rotationPitch - prevRotationPitch) * 0.2F;
+            rotationYaw = prevRotationYaw + (rotationYaw - prevRotationYaw) * 0.2F;
 
-        setPosition(posX, posY, posZ);
+            final float drag;
 
-        if ( world.isRemote && !isDead ) {
-            int setting = Minecraft.getMinecraft().gameSettings.particleSetting;
-            if ( setting != 2 ) {
-                final byte skip = setting == 0 ? (byte) 0 : (byte) 2;
-                if ( skippedTrailFrames >= skip ) {
-                    renderTrail();
-                    skippedTrailFrames = 0;
-                } else
-                    skippedTrailFrames++;
+            if ( slideFace != null ) {
+                double velocity = Math.abs(motionX) + Math.abs(motionZ);
+                if ( velocity < 0.1D ) {
+                    slideFace = null;
+                    slidePos = null;
+                    slideFactor = 1;
+                } else {
+                    final BlockPos bp = new BlockPos(posX, posY, posZ);
+                    if ( !bp.equals(slidePos) ) {
+                        BlockPos ps = bp.offset(slideFace);
+                        IBlockState bs = world.getBlockState(ps);
+                        HitReaction reaction = hitBlock(bs, null);
+                        if ( reaction == null || reaction.type != HitReactionType.SLIDE ) {
+                            slideFace = null;
+                            slidePos = null;
+                            slideFactor = 1;
+                        } else {
+                            slidePos = bp;
+                            slideFactor = (float) reaction.scale;
+                            if ( slideFactor == 0 )
+                                slideFactor = bs.getBlock().getSlipperiness(bs, world, ps, this);
+
+                            motionZ *= slideFactor;
+                            motionY *= slideFactor;
+                            motionX *= slideFactor;
+                        }
+                    }
+
+                    if ( slideFace != null && motionY <= 0 )
+                        onGround = true;
+                }
+            }
+
+            if ( isInWater() ) {
+                for (int j = 0; j < 4; ++j) {
+                    float f3 = 0.25F;
+                    world.spawnParticle(EnumParticleTypes.WATER_BUBBLE, posX - motionX * 0.25D, posY - motionY * 0.25D, posZ - motionZ * 0.25D, motionX, motionY, motionZ);
+                }
+
+                drag = 0.8F;
+            } else if ( slideFace != null )
+                drag = 1F;
+            else
+                drag = 1F; //0.99F; // TODO: Turn drag back on!
+
+            if ( drag != 1 && !isDragless() ) {
+                motionX *= (double) drag;
+                motionY *= (double) drag;
+                motionZ *= (double) drag;
+            }
+
+            if ( !onGround && !hasNoGravity() ) {
+                float gravity = getGravityVelocity();
+                if ( isSlowed )
+                    gravity *= 0.5D;
+                if ( slideFace != null )
+                    gravity *= 1D - slideFactor;
+
+                motionY -= (double) gravity;
+            }
+
+            setPosition(posX, posY, posZ);
+
+            if ( world.isRemote ) {
+                int setting = Minecraft.getMinecraft().gameSettings.particleSetting;
+                if ( setting != 2 ) {
+                    final byte skip = setting == 0 ? (byte) 0 : (byte) 2;
+                    if ( skippedTrailFrames >= skip ) {
+                        renderTrail();
+                        skippedTrailFrames = 0;
+                    } else
+                        skippedTrailFrames++;
+                }
             }
         }
     }
@@ -548,22 +799,52 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
             compound.setDouble("startZ", startZ);
         }
 
+        compound.setBoolean("Dragless", isDragless());
         compound.setShort("bounces", bounces);
         compound.setDouble("distance", distance);
 
-        if ( slowedBy != null )
-            compound.setLong("slowedBy", slowedBy.toLong());
+        if ( speedModPos != null )
+            compound.setLong("slowedBy", speedModPos.toLong());
 
-        if ( !stack.isEmpty() ) {
-            NBTTagCompound item = new NBTTagCompound();
-            stack.writeToNBT(item);
-            compound.setTag("item", item);
-        }
+        if ( slideFace != null )
+            compound.setByte("SlideFace", (byte) slideFace.ordinal());
+
+        if ( slidePos != null )
+            compound.setLong("SlidePos", slidePos.toLong());
+
+        if ( glowTicks != 0 )
+            compound.setShort("Glow", glowTicks);
+
+        ItemStack stack = getStack();
+        if ( !stack.isEmpty() )
+            compound.setTag("Item", stack.serializeNBT());
+
+        compound.setFloat("SlideFactor", slideFactor);
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
+
+        if ( compound.hasKey("SlideFace", Constants.NBT.TAG_BYTE) )
+            slideFace = EnumFacing.byIndex(compound.getByte("SlideFace"));
+        else
+            slideFace = null;
+
+        if ( compound.hasKey("SlidePos", Constants.NBT.TAG_LONG) )
+            slidePos = BlockPos.fromLong(compound.getLong("SlidePos"));
+        else
+            slidePos = null;
+
+        if ( compound.hasKey("SlideFactor", Constants.NBT.TAG_FLOAT) )
+            slideFactor = compound.getFloat("SlideFactor");
+        else
+            slideFactor = 1;
+
+        glowTicks = compound.getShort("Glow");
+        setGlowing(glowTicks > 0);
+
+        setDragless(compound.getBoolean("Dragless"));
 
         distance = compound.getDouble("distance");
         bounces = compound.getShort("bounces");
@@ -572,12 +853,19 @@ public abstract class EntityBaseThrowable extends EntityThrowable {
             startX = compound.getDouble("startX");
             startY = compound.getDouble("startY");
             startZ = compound.getDouble("startZ");
+        } else {
+            started = false;
+            startX = startY = startZ = 0;
         }
 
-        if ( compound.hasKey("item") )
-            stack = new ItemStack(compound.getCompoundTag("item"));
+        if ( compound.hasKey("Item", Constants.NBT.TAG_COMPOUND) )
+            setStack(new ItemStack(compound.getCompoundTag("Item")));
+        else
+            setStack(ItemStack.EMPTY);
 
         if ( compound.hasKey("slowedBy") )
-            slowedBy = BlockPos.fromLong(compound.getLong("slowedBy"));
+            speedModPos = BlockPos.fromLong(compound.getLong("slowedBy"));
+        else
+            speedModPos = null;
     }
 }

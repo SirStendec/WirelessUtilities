@@ -10,9 +10,9 @@ import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nonnull;
 
-public class RenderPearl<T> extends RenderSnowball {
+public class RenderAsItem<T> extends RenderSnowball {
 
-    public RenderPearl(RenderManager manager, Item item, RenderItem renderItem) {
+    public RenderAsItem(RenderManager manager, Item item, RenderItem renderItem) {
         super(manager, item, renderItem);
     }
 
@@ -20,7 +20,7 @@ public class RenderPearl<T> extends RenderSnowball {
     @Nonnull
     public ItemStack getStackToRender(Entity entityIn) {
         if ( entityIn instanceof EntityBaseThrowable ) {
-            ItemStack stack = ((EntityBaseThrowable) entityIn).getStack();
+            ItemStack stack = ((EntityBaseThrowable) entityIn).getRenderStack();
             if ( !stack.isEmpty() )
                 return stack;
         }

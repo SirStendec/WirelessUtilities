@@ -3,7 +3,7 @@ package com.lordmau5.wirelessutils.entity.pearl;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.lordmau5.wirelessutils.entity.base.EntityBaseThrowable;
-import com.lordmau5.wirelessutils.render.RenderPearl;
+import com.lordmau5.wirelessutils.render.RenderAsItem;
 import com.lordmau5.wirelessutils.utils.mod.ModAdvancements;
 import com.lordmau5.wirelessutils.utils.mod.ModConfig;
 import com.lordmau5.wirelessutils.utils.mod.ModItems;
@@ -164,7 +164,7 @@ public class EntityVoidPearl extends EntityBaseThrowable {
     public static class Factory implements IRenderFactory<EntityVoidPearl> {
         @Override
         public Render<? super EntityVoidPearl> createRenderFor(RenderManager manager) {
-            return new RenderPearl<EntityVoidPearl>(manager, ModItems.itemVoidPearl, Minecraft.getMinecraft().getRenderItem());
+            return new RenderAsItem<EntityVoidPearl>(manager, ModItems.itemVoidPearl, Minecraft.getMinecraft().getRenderItem());
         }
     }
 }

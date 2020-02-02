@@ -10,6 +10,7 @@ import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -93,6 +94,18 @@ public class BlockAngledSlime extends BlockBase {
     @Override
     public boolean isFullCube(IBlockState state) {
         return false;
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face) {
+        state = getActualState(state, worldIn, pos);
+        EnumOmniFacing facing = state.getValue(ATTACHED);
+
+        if ( facing.facing == face )
+            return BlockFaceShape.SOLID;
+
+        return BlockFaceShape.UNDEFINED;
     }
 
     @Override

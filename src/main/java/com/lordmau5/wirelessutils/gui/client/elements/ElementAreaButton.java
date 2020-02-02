@@ -4,7 +4,7 @@ import cofh.core.gui.GuiContainerCore;
 import cofh.core.gui.element.ElementButtonManaged;
 import com.lordmau5.wirelessutils.WirelessUtils;
 import com.lordmau5.wirelessutils.render.RenderManager;
-import com.lordmau5.wirelessutils.tile.base.TileEntityBaseArea;
+import com.lordmau5.wirelessutils.tile.base.IAreaVisibilityControllable;
 import com.lordmau5.wirelessutils.utils.constants.TextHelpers;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
@@ -16,33 +16,33 @@ public class ElementAreaButton extends ElementButtonManaged {
 
     private final static ResourceLocation TEXTURE = new ResourceLocation(WirelessUtils.MODID, "textures/gui/button_area.png");
 
-    private final TileEntityBaseArea tile;
+    private final IAreaVisibilityControllable controllable;
 
     private boolean isActive;
 
-    public ElementAreaButton(GuiContainerCore gui, TileEntityBaseArea tile, int posX, int posY) {
+    public ElementAreaButton(GuiContainerCore gui, IAreaVisibilityControllable controllable, int posX, int posY) {
         super(gui, posX, posY, 16, 16, null);
-        this.tile = tile;
+        this.controllable = controllable;
 
         if ( !RenderManager.INSTANCE.isEnabled() ) {
             setVisible(false);
             setEnabled(false);
         }
 
-        isActive = tile.shouldRenderAreas();
+        isActive = controllable.shouldRenderAreas();
     }
 
     @Override
     public void addTooltip(List<String> list) {
         list.add(new TextComponentTranslation("btn." + WirelessUtils.MODID + (isActive ? ".hide_area" : ".show_area")).getFormattedText());
-        if ( isActive && tile.usesDefaultColor() )
+        if ( isActive && controllable.usesDefaultColor() )
             list.add(new TextComponentTranslation("btn." + WirelessUtils.MODID + ".area_scroll").setStyle(TextHelpers.GRAY).getFormattedText());
     }
 
     @Override
     public void onClick() {
-        tile.enableRenderAreas(!tile.shouldRenderAreas());
-        isActive = tile.shouldRenderAreas();
+        controllable.enableRenderAreas(!controllable.shouldRenderAreas());
+        isActive = controllable.shouldRenderAreas();
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ElementAreaButton extends ElementButtonManaged {
         if ( movement == 0 )
             return false;
 
-        tile.setDefaultColor(tile.getDefaultColor() + (movement > 0 ? 1 : -1));
+        controllable.setDefaultColor(controllable.getDefaultColor() + (movement > 0 ? 1 : -1));
         return true;
     }
 

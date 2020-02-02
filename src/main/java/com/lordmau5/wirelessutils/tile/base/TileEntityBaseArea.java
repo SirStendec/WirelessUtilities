@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public abstract class TileEntityBaseArea extends TileEntityBase implements IAreaProvider {
+public abstract class TileEntityBaseArea extends TileEntityBase implements IAreaProvider, IAreaVisibilityControllable {
     private Set<Integer> liveAreas = null;
     private List<BlockArea> renderedAreas = null;
 
