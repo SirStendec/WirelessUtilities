@@ -9,7 +9,6 @@ import com.raoulvdberge.refinedstorage.api.network.node.INetworkNode;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNodeManager;
 import com.raoulvdberge.refinedstorage.api.network.node.INetworkNodeProxy;
 import com.raoulvdberge.refinedstorage.api.util.Action;
-import com.raoulvdberge.refinedstorage.apiimpl.util.OneSixMigrationHelper;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -188,7 +187,6 @@ public abstract class TileRSNetworkBase<N extends NetworkNodeBase> extends TileE
             manager.markForSaving();
         }
 
-        OneSixMigrationHelper.removalHook();
         if ( directionToMigrate != null ) {
             ((N) node).setDirection(directionToMigrate);
 
