@@ -1,124 +1,238 @@
-buildscript {
-    repositories {
-        jcenter()
-        maven { url = "http://files.minecraftforge.net/maven" }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-    }
-}
-apply plugin: 'net.minecraftforge.gradle.forge'
+import org.jetbrains.gradle.ext.Gradle
 
-ext.buildnumber = System.getenv("BUILD_NUMBER") ?: "dev"
-
-version = "1.10." + buildnumber
-group = "com.lordmau5"
-archivesBaseName = "wirelessutils"
-
-sourceCompatibility = targetCompatibility = '1.8'
-compileJava {
-    sourceCompatibility = targetCompatibility = '1.8'
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id 'org.jetbrains.gradle.plugin.idea-ext' version '1.1.7'
+    id 'eclipse'
+    id 'com.gtnewhorizons.retrofuturagradle' version '1.3.16'
+    id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
-// Define properties file
-ext.configFile = file "build.properties"
+version = project.mod_version
+group = project.maven_group
+archivesBaseName = project.archives_base_name
 
-configFile.withReader {
-    // Load config. It shall from now be referenced as simply config or project.config
-    def prop = new Properties()
-    prop.load(it)
-    project.ext.config = new ConfigSlurper().parse prop
+// Set the toolchain version to decouple the Java we run Gradle with from the Java used to compile and run the mod
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+        // Azul covers the most platforms for Java 8 toolchains, crucially including MacOS arm64
+        vendor.set(org.gradle.jvm.toolchain.JvmVendorSpec.AZUL)
+    }
+    // Generate sources and javadocs jars when building and publishing
+    withSourcesJar()
+    // withJavadocJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+configurations {
+    embed
+    implementation.extendsFrom(embed)
+}
+
+minecraft {
+    mcVersion = '1.12.2'
+
+    // MCP Mappings
+    mcpMappingChannel = 'stable'
+    mcpMappingVersion = '39'
+    
+    // Set username here, the UUID will be looked up automatically
+    username = 'Developer'
+    
+    // Add any additional tweaker classes here
+    // extraTweakClasses.add('org.spongepowered.asm.launch.MixinTweaker')
+    
+    // Add various JVM arguments here for runtime
+    def args = ["-ea:${project.group}"]
+    if (project.use_coremod.toBoolean()) {
+        args << '-Dfml.coreMods.load=' + coremod_plugin_class_name
+    }
+    if (project.use_mixins.toBoolean()) {
+        args << '-Dmixin.hotSwap=true'
+        args << '-Dmixin.checks.interfaces=true'
+        args << '-Dmixin.debug.export=true'
+    }
+    extraRunJvmArguments.addAll(args)
+
+    // Include and use dependencies' Access Transformer files
+    useDependencyAccessTransformers = true
+    
+    // Add any properties you want to swap out for a dynamic value at build time here
+    // Any properties here will be added to a class at build time, the name can be configured below
+    // Example:
+    // injectedTags.put('VERSION', project.version)
+    // injectedTags.put('MOD_ID', project.archives_base_name)
+}
+
+// Generate a group.archives_base_name.Tags class
+tasks.injectTags.configure {
+    // Change Tags class' name here:
+    outputClassName.set("${project.group}.${project.archives_base_name}.Tags")
 }
 
 repositories {
     maven {
-        name = "Forge Maven"
-        url = "http://files.minecraftforge.net/maven"
+        name 'CleanroomMC Maven'
+        url 'https://maven.cleanroommc.com'
     }
     maven {
+        name 'SpongePowered Maven'
+        url 'https://repo.spongepowered.org/maven'
+    }
+    maven {
+        name 'CurseMaven'
+        url 'https://cursemaven.com'
+        content {
+            includeGroup 'curse.maven'
+        }
+    }
+	maven {
         name = "CoFH Maven"
-        url = "http://maven.covers1624.net"
+        url = "https://maven.covers1624.net"
     }
-    maven {
-        name = "JEI Maven"
-        url = "http://dvs1.progwml6.com/files/maven"
+	maven {
+        name = "mcjty"
+        url = "https://maven.k-4u.nl"
+    }
+	maven {
+        name = "tterrag Maven"
+        url = "https://maven.tterrag.com/"
     }
     maven {
         name = "CraftTweaker Maven"
         url = "https://maven.blamejared.com/"
     }
     maven {
-        name = "Raoulvdberge Maven"
-        url = "https://repo.raoulvdberge.com"
+        name = "OpenComputers"
+        url = "https://maven.cil.li/"
     }
-    maven {
-        name = "mcjty"
-        url = "http://maven.k-4u.nl"
-    }
-    maven {
-        name = "tterrag Maven"
-        url = "https://maven.tterrag.com/"
-    }
-    maven {
-        name = "tehnut"
-        url = "http://tehnut.info/maven"
-    }
-    maven {
-        name = "oc"
-        url = "http://maven.cil.li/"
-    }
-    maven {
-        name = "CodeChicken"
-        url = "http://chickenbones.net/maven"
-    }
+    mavenLocal() // Must be last for caching to work
 }
 
 dependencies {
-    deobfCompile "cofh:RedstoneFlux:${config.rf_mc_version}-${config.rf_version}:universal"
-    deobfCompile "cofh:CoFHCore:${config.mc_version}-${config.cofh_core_version}:universal"
-    deobfProvided "refinedstorage:refinedstorage:${config.rs_version}"
-    deobfCompile "appeng:appliedenergistics2:${config.ae2_version}"
-    provided "com.github.mcjty:mcjtylib:${config.mcjtylib_version}"
-    deobfCompile "mcjty.theoneprobe:TheOneProbe-1.12:${config.top_version}"
-    deobfProvided "CraftTweaker2:CraftTweaker2-API:${config.ct_api_version}"
-    runtime "CraftTweaker2:CraftTweaker2-MC1120-Main:${config.ct_version}"
-    deobfCompile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
-    deobfCompile "mcp.mobius.waila:Hwyla:${config.hwyla_version}"
-    deobfCompile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:universal"
+    if (project.use_assetmover.toBoolean()) {
+        implementation 'com.cleanroommc:assetmover:2.5'
+    }
+    if (project.use_mixins.toBoolean()) {
+        implementation 'zone.rong:mixinbooter:7.1'
+    }
+
+	implementation("cofh:RedstoneFlux:${project.rf_mc_version}-${project.rf_version}:universal")
+    implementation("cofh:CoFHCore:${project.mc_version}-${project.cofh_core_version}:universal")
+	implementation("curse.maven:morerefinedstorage-631058:3818846")
+    implementation("appeng:appliedenergistics2:${project.ae2_version}")
+    implementation("com.github.mcjty:mcjtylib:${project.mcjtylib_version}")
+    implementation("mcjty.theoneprobe:TheOneProbe-1.12:${project.top_version}")
+    implementation("curse.maven:crafttweaker-239197:4707234")
+    implementation("mezz.jei:jei_${project.mc_version}:${project.jei_version}")
+    implementation("curse.maven:hwyla-253449:2568751")
+    implementation("codechicken:CodeChickenLib:${project.mc_version}-${project.ccl_version}:universal")
+
+    // Example of deobfuscating a dependency
+    // implementation rfg.deobf('curse.maven:had-enough-items-557549:4543375')
+
+    if (project.use_mixins.toBoolean()) {
+        // Change your mixin refmap name here:
+        String mixin = modUtils.enableMixins('org.spongepowered:mixin:0.8.3', "mixins.${project.archives_base_name}.refmap.json")
+        api (mixin) {
+            transitive = false
+        }
+        annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
+        annotationProcessor 'com.google.guava:guava:24.1.1-jre'
+        annotationProcessor 'com.google.code.gson:gson:2.8.6'
+        annotationProcessor (mixin) {
+            transitive = false
+        }
+    }
+
 }
 
-minecraft {
-    version = config.mc_version + "-" + config.forge_version
-    runDir = "run"
-    mappings = config.mappings
+// Adds Access Transformer files to tasks
+if (project.use_access_transformer.toBoolean()) {
+    for (File at : sourceSets.getByName("main").resources.files) {
+        if (at.name.toLowerCase().endsWith("_at.cfg")) {
+            tasks.deobfuscateMergedJarToSrg.accessTransformerFiles.from(at)
+            tasks.srgifyBinpatchedJar.accessTransformerFiles.from(at)
+        }
+    }
 }
 
 processResources {
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-
-        expand 'version': project.version, 'mcversion': project.minecraft.version
+    // This will ensure that this task is redone when the versions change
+    inputs.property 'version', project.version
+    inputs.property 'mcversion', project.minecraft.version
+    
+    // Replace various properties in mcmod.info and pack.mcmeta if applicable
+    filesMatching(['mcmod.info', 'pack.mcmeta']) { fcd ->
+        // Replace version and mcversion
+        fcd.expand (
+                'version': project.version,
+                'mcversion': project.minecraft.version
+        )
     }
-    rename '(.+_at.cfg)', 'META-INF/$1'
+    
+    if (project.use_access_transformer.toBoolean()) {
+        rename '(.+_at.cfg)', 'META-INF/$1' // Make sure Access Transformer files are in META-INF folder
+    }
 }
-
-version = "${project.minecraft.version}-${project.version}"
 
 jar {
-    classifier = 'universal'
     manifest {
-        attributes 'FMLAT': 'wirelessutils_at.cfg'
+        def attribute_map = [:]
+        if (project.use_coremod.toBoolean()) {
+            attribute_map['FMLCorePlugin'] = project.coremod_plugin_class_name
+            if (project.include_mod.toBoolean()) {
+                attribute_map['FMLCorePluginContainsFMLMod'] = true
+                attribute_map['ForceLoadAsMod'] = project.gradle.startParameter.taskNames[0] == "build"
+            }
+        }
+        if (project.use_access_transformer.toBoolean()) {
+            attribute_map['FMLAT'] = project.archives_base_name + '_at.cfg'
+        }
+        attributes(attribute_map)
+    }
+    // Add all embedded dependencies into the jar
+    from(provider{ configurations.embed.collect {it.isDirectory() ? it : zipTree(it)} })
+}
+
+idea {
+    module {
+        inheritOutputDirs = true
+    }
+    project {
+        settings {
+            runConfigurations {
+                "1. Run Client"(Gradle) {
+                    taskNames = ["runClient"]
+                }
+                "2. Run Server"(Gradle) {
+                    taskNames = ["runServer"]
+                }
+                "3. Run Obfuscated Client"(Gradle) {
+                    taskNames = ["runObfClient"]
+                }
+                "4. Run Obfuscated Server"(Gradle) {
+                    taskNames = ["runObfServer"]
+                }
+            }
+            compiler.javac {
+                afterEvaluate {
+                    javacAdditionalOptions = "-encoding utf8"
+                    moduleJavacAdditionalOptions = [
+                            (project.name + ".main"): tasks.compileJava.options.compilerArgs.collect { '"' + it + '"' }.join(' ')
+                    ]
+                }
+            }
+        }
     }
 }
 
-task srcJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier = 'sources'
-}
-
-artifacts {
-    archives srcJar
+tasks.named("processIdeaSettings").configure {
+    dependsOn("injectTags")
 }
