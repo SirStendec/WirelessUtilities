@@ -123,23 +123,25 @@ public class RefinedStoragePlugin implements IPlugin {
     public void initColors(ItemColors itemColors) {
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(blockDirectionalRSNetwork));
         itemColors.registerItemColorHandler(ColorHandler.Machine.handleItemColor, Item.getItemFromBlock(blockPositionalRSNetwork));
-        itemColors.registerItemColorHandler(handleRSBusColor, itemRSBusAugment);
+        itemColors.registerItemColorHandler(Client.handleRSBusColor, itemRSBusAugment);
     }
 
-    @SideOnly(Side.CLIENT)
-    public static final IItemColor handleRSBusColor = (ItemStack stack, int tintIndex) -> {
-        NBTTagCompound tag = stack.getTagCompound();
-        if ( tag != null && tag.hasKey("WUTint:" + tintIndex, Constants.NBT.TAG_INT) )
-            return tag.getInteger("WUTint:" + tintIndex);
+    static class Client {
+        @SideOnly(Side.CLIENT)
+        public static final IItemColor handleRSBusColor = (ItemStack stack, int tintIndex) -> {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("WUTint:" + tintIndex, Constants.NBT.TAG_INT) )
+                return tag.getInteger("WUTint:" + tintIndex);
 
-        if ( tintIndex == 1 ) {
-            Level level = Level.getMinLevel();
-            if ( !stack.isEmpty() )
-                level = Level.fromItemStack(stack);
+            if ( tintIndex == 1 ) {
+                Level level = Level.getMinLevel();
+                if ( !stack.isEmpty() )
+                    level = Level.fromItemStack(stack);
 
-            return level.color;
-        }
+                return level.color;
+            }
 
-        return 0xFFFFFF;
-    };
+            return 0xFFFFFF;
+        };
+    }
 }

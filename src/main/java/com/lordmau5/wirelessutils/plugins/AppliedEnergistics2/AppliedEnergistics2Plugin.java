@@ -93,72 +93,74 @@ public class AppliedEnergistics2Plugin implements IPlugin {
 
     @Override
     public void initColors(BlockColors blockColors) {
-        blockColors.registerBlockColorHandler(handleBlockColor, blockDirectionalAENetwork);
-        blockColors.registerBlockColorHandler(handleBlockColor, blockPositionalAENetwork);
+        blockColors.registerBlockColorHandler(Client.handleBlockColor, blockDirectionalAENetwork);
+        blockColors.registerBlockColorHandler(Client.handleBlockColor, blockPositionalAENetwork);
     }
 
     @Override
     public void initColors(ItemColors itemColors) {
-        itemColors.registerItemColorHandler(handleItemColor, Item.getItemFromBlock(blockDirectionalAENetwork));
-        itemColors.registerItemColorHandler(handleItemColor, Item.getItemFromBlock(blockPositionalAENetwork));
-        itemColors.registerItemColorHandler(handleAEBusColor, itemAEBusAugment);
+        itemColors.registerItemColorHandler(Client.handleItemColor, Item.getItemFromBlock(blockDirectionalAENetwork));
+        itemColors.registerItemColorHandler(Client.handleItemColor, Item.getItemFromBlock(blockPositionalAENetwork));
+        itemColors.registerItemColorHandler(Client.handleAEBusColor, itemAEBusAugment);
     }
 
-    @SideOnly(Side.CLIENT)
-    public static final IBlockColor handleBlockColor = (IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex) -> {
-        if ( worldIn != null && pos != null ) {
-            TileEntity tile = worldIn.getTileEntity(pos);
-            if ( tile instanceof TileAENetworkBase ) {
-                TileAENetworkBase base = (TileAENetworkBase) tile;
+    static class Client {
+        @SideOnly(Side.CLIENT)
+        public static final IBlockColor handleBlockColor = (IBlockState state, @Nullable IBlockAccess worldIn, @Nullable BlockPos pos, int tintIndex) -> {
+            if ( worldIn != null && pos != null ) {
+                TileEntity tile = worldIn.getTileEntity(pos);
+                if ( tile instanceof TileAENetworkBase ) {
+                    TileAENetworkBase base = (TileAENetworkBase) tile;
 
-                if ( tintIndex == 2 )
-                    return base.getLevel().color;
+                    if ( tintIndex == 2 )
+                        return base.getLevel().color;
 
-                if ( tintIndex == 1 ) {
-                    AEColor color = base.getAEColor();
-                    return color.getVariantByTintIndex(AEColor.TINTINDEX_MEDIUM);
+                    if ( tintIndex == 1 ) {
+                        AEColor color = base.getAEColor();
+                        return color.getVariantByTintIndex(AEColor.TINTINDEX_MEDIUM);
+                    }
                 }
             }
-        }
 
-        return 0xFFFFFF;
-    };
+            return 0xFFFFFF;
+        };
 
-    @SideOnly(Side.CLIENT)
-    public static final IItemColor handleAEBusColor = (ItemStack stack, int tintIndex) -> {
-        NBTTagCompound tag = stack.getTagCompound();
-        if ( tag != null && tag.hasKey("WUTint:" + tintIndex, Constants.NBT.TAG_INT) )
-            return tag.getInteger("WUTint:" + tintIndex);
+        @SideOnly(Side.CLIENT)
+        public static final IItemColor handleAEBusColor = (ItemStack stack, int tintIndex) -> {
+            NBTTagCompound tag = stack.getTagCompound();
+            if ( tag != null && tag.hasKey("WUTint:" + tintIndex, Constants.NBT.TAG_INT) )
+                return tag.getInteger("WUTint:" + tintIndex);
 
-        if ( tintIndex == 1 ) {
-            Level level = Level.getMinLevel();
-            if ( !stack.isEmpty() )
-                level = Level.fromItemStack(stack);
+            if ( tintIndex == 1 ) {
+                Level level = Level.getMinLevel();
+                if ( !stack.isEmpty() )
+                    level = Level.fromItemStack(stack);
 
-            return level.color;
-        }
+                return level.color;
+            }
 
-        return 0xFFFFFF;
-    };
+            return 0xFFFFFF;
+        };
 
-    @SideOnly(Side.CLIENT)
-    public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
-        if ( tintIndex == 2 ) {
-            Level level = Level.getMinLevel();
-            if ( !stack.isEmpty() )
-                level = Level.fromItemStack(stack);
+        @SideOnly(Side.CLIENT)
+        public static final IItemColor handleItemColor = (ItemStack stack, int tintIndex) -> {
+            if ( tintIndex == 2 ) {
+                Level level = Level.getMinLevel();
+                if ( !stack.isEmpty() )
+                    level = Level.fromItemStack(stack);
 
-            return level.color;
-        }
+                return level.color;
+            }
 
-        if ( tintIndex == 1 ) {
-            AEColor color = AEColor.TRANSPARENT;
-            if ( ModConfig.plugins.appliedEnergistics.enableColor )
-                color = AEColorHelpers.fromItemStack(stack);
+            if ( tintIndex == 1 ) {
+                AEColor color = AEColor.TRANSPARENT;
+                if ( ModConfig.plugins.appliedEnergistics.enableColor )
+                    color = AEColorHelpers.fromItemStack(stack);
 
-            return color.getVariantByTintIndex(AEColor.TINTINDEX_MEDIUM);
-        }
+                return color.getVariantByTintIndex(AEColor.TINTINDEX_MEDIUM);
+            }
 
-        return 0xFFFFFF;
-    };
+            return 0xFFFFFF;
+        };
+    }
 }
